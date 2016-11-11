@@ -19,8 +19,9 @@ inlets = 1;
 
 function bang() {
     var clp = new Clip();
-    clp.selectAllNotes();
-    var notes: Note[] = clp.getSelectedNotes();
+    // clp.selectAllNotes();
+    // var notes: Note[] = clp.getSelectedNotes();
+    var notes: Note[] = clp.getNotes();
     for (let note of notes) {
         post(note.toString());
     }

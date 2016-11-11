@@ -964,8 +964,9 @@ outlets = 1;
 inlets = 1;
 function bang() {
     var clp = new Clip();
-    clp.selectAllNotes();
-    var notes = clp.getSelectedNotes();
+    // clp.selectAllNotes();
+    // var notes: Note[] = clp.getSelectedNotes();
+    var notes = clp.getNotes();
     for (var _i = 0, notes_1 = notes; _i < notes_1.length; _i++) {
         var note = notes_1[_i];
         post(note.toString());
