@@ -1,0 +1,18 @@
+{
+  "name": "live-clip-processor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/big.js": "0.0.31",
+    "@types/node": "^6.0.46",
+    "@types/systemjs": "^0.19.31",
+    "big.js": "^3.1.3",
+    "system": "^1.1.1"
+  }
+}

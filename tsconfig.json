@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "none",
+    "target": "es5",
+    "noImplicitAny": false,
+    "sourceMap": false,
+    "outFile": "index-built.js",
+    "allowJs": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules/**"
+  ]
+}
