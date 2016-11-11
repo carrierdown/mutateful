@@ -39,6 +39,14 @@ class Note {
         return this.start.toFixed(4);
     }
 
+    public getStartAsBig(): IBig {
+        return this.start;
+    }
+
+    public getDurationAsBig(): IBig {
+        return this.duration;
+    }
+
     public getDuration(): string {
         if (this.duration.lt(Note.MIN_DURATION)) return Note.MIN_DURATION.toFixed(4);
         return this.duration.toFixed(4);

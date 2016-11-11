@@ -952,14 +952,11 @@ var Clip = (function () {
 }());
 ///<reference path="big-def.ts"/>
 ///<reference path="Clip.ts"/>
-/*
-var a: IBig = BigFactory.create(1.5);
-var b: IBig = BigFactory.create(0.7);
-
+var a = BigFactory.create(0.03);
+var b = BigFactory.create(0.7);
 console.log(a.toFixed(4));
 console.log(b.lt(a));
 console.log(a.lt(b));
-*/
 outlets = 1;
 inlets = 1;
 function bang() {

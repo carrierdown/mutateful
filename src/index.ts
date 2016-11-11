@@ -5,8 +5,9 @@ declare function post(msg: string);
 declare var outlets: number;
 declare var inlets: number;
 
+
 /*
-var a: IBig = BigFactory.create(1.5);
+var a: IBig = BigFactory.create(0.03);
 var b: IBig = BigFactory.create(0.7);
 
 console.log(a.toFixed(4));
@@ -17,6 +18,9 @@ console.log(a.lt(b));
 outlets = 1;
 inlets = 1;
 
+var sourceClip: Clip,
+    targetClip: Clip;
+
 function bang() {
     var clp = new Clip();
     // clp.selectAllNotes();
@@ -25,4 +29,38 @@ function bang() {
     for (let note of notes) {
         post(note.toString());
     }
+}
+
+function setSource(): void {
+    sourceClip = new Clip();
+}
+
+function setTarget(): void {
+    targetClip = new Clip();
+}
+
+function findNearestNoteStartInSet(needle: Note, haystack: Note[]): Note {
+    var nearestIndex = 0;
+    for (let i = 0; i < haystack.length; i++) {
+/*
+        if (needle.getStartAsBig().lt(haystack[nearestIndex].getStartAsBig())) {
+            nearestIndex = i;
+        }
+*/
+    }
+}
+
+function doConstrainStart(source: Clip, target: Clip, options: any = {}): Clip {
+    if (!sourceClip || !targetClip) return;
+
+    var sourceNotes: Note[] = source.getNotes();
+    var targetNotes: Note[] = target.getNotes();
+
+    if (sourceNotes.length === 0 || targetNotes.length === 0) return;
+
+    for (let note of targetNotes) {
+
+    }
+
+    return target;
 }
