@@ -2,7 +2,6 @@
 ///<reference path="big-def.ts"/>
 ///<reference path="Note.ts"/>
 
-
 declare var LiveAPI: any;
 
 const enum NoteDataMap {

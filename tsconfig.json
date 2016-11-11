@@ -4,7 +4,7 @@
     "target": "es5",
     "noImplicitAny": false,
     "sourceMap": false,
-    "outFile": "index-built.js",
+    "outFile": "clip-processor.js",
     "allowJs": true
   },
   "include": [
