@@ -860,7 +860,7 @@ var Note = (function () {
         this.muted = muted;
     }
     Note.prototype.toString = function () {
-        return "\n        pitch: " + this.getPitch() + "\n        start: " + this.getStart() + "\n        duration: " + this.getDuration() + "\n        velocity: " + this.getVelocity() + "\n        muted: " + this.getMuted();
+        return "\n        pitch: " + this.getPitch() + "\n        start: " + this.getStartAsString() + "\n        duration: " + this.getDurationAsString() + "\n        velocity: " + this.getVelocity() + "\n        muted: " + this.getMuted();
     };
     Note.prototype.getPitch = function () {
         if (this.pitch < 0)
@@ -871,7 +871,7 @@ var Note = (function () {
     };
     Note.prototype.getStartAsString = function () {
         // if (this.start.lt(BigFactory.create(0))) return "0.0";
-        return this.start.toFixed(4);
+        return this.start.toFixed(4).toString();
     };
     Note.prototype.setStart = function (start) {
         this.start = start;
@@ -885,7 +885,7 @@ var Note = (function () {
     Note.prototype.getDurationAsString = function () {
         if (this.duration.lt(Note.MIN_DURATION))
             return Note.MIN_DURATION.toFixed(4);
-        return this.duration.toFixed(4);
+        return this.duration.toFixed(4).toString();
     };
     Note.prototype.getVelocity = function () {
         if (this.velocity < 0)
@@ -1014,5 +1014,5 @@ function doConstrainStart(source, target, options) {
         var note = targetNotes_1[_i];
         note.setStart(findNearestNoteStartInSet(note, sourceNotes).getStart());
     }
-    return target;
+    return targetNotes;
 }

@@ -22,8 +22,8 @@ class Note {
     public toString(): string {
         return `
         pitch: ${this.getPitch()}
-        start: ${this.getStart()}
-        duration: ${this.getDuration()}
+        start: ${this.getStartAsString()}
+        duration: ${this.getDurationAsString()}
         velocity: ${this.getVelocity()}
         muted: ${this.getMuted()}`;
     }
@@ -36,7 +36,7 @@ class Note {
 
     public getStartAsString(): string {
         // if (this.start.lt(BigFactory.create(0))) return "0.0";
-        return this.start.toFixed(4);
+        return this.start.toFixed(4).toString();
     }
 
     public setStart(start: IBig): void {
@@ -53,7 +53,7 @@ class Note {
 
     public getDurationAsString(): string {
         if (this.duration.lt(Note.MIN_DURATION)) return Note.MIN_DURATION.toFixed(4);
-        return this.duration.toFixed(4);
+        return this.duration.toFixed(4).toString();
     }
 
     public getVelocity(): number {

@@ -55,7 +55,7 @@ function findNearestNoteStartInSet(needle: Note, haystack: Note[]): Note {
     return haystack[nearestIndex];
 }
 
-function doConstrainStart(source: Clip, target: Clip, options: any = {}): Clip {
+function doConstrainStart(source: Clip, target: Clip, options: any = {}): Note[] {
     if (!sourceClip || !targetClip) return;
 
     var sourceNotes: Note[] = source.getNotes();
@@ -67,5 +67,5 @@ function doConstrainStart(source: Clip, target: Clip, options: any = {}): Clip {
         note.setStart(findNearestNoteStartInSet(note, sourceNotes).getStart());
     }
 
-    return target;
+    return targetNotes;
 }
