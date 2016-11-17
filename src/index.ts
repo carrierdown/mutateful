@@ -40,14 +40,19 @@ function setTarget(): void {
 }
 
 function findNearestNoteStartInSet(needle: Note, haystack: Note[]): Note {
-    var nearestIndex = 0;
+    var nearestIndex: number = 0,
+        nearestDelta: IBig;
     for (let i = 0; i < haystack.length; i++) {
-/*
-        if (needle.getStartAsBig().lt(haystack[nearestIndex].getStartAsBig())) {
+        if (nearestDelta === undefined) {
+            nearestDelta = needle.getStart().minus(haystack[i].getStart()).abs();
+        }
+        let currentDelta: IBig = needle.getStart().minus(haystack[i].getStart()).abs();
+        if (currentDelta.lt(nearestDelta)) {
+            nearestDelta = currentDelta;
             nearestIndex = i;
         }
-*/
     }
+    return haystack[nearestIndex];
 }
 
 function doConstrainStart(source: Clip, target: Clip, options: any = {}): Clip {
@@ -59,7 +64,7 @@ function doConstrainStart(source: Clip, target: Clip, options: any = {}): Clip {
     if (sourceNotes.length === 0 || targetNotes.length === 0) return;
 
     for (let note of targetNotes) {
-
+        note.setStart(findNearestNoteStartInSet(note, sourceNotes).getStart());
     }
 
     return target;

@@ -4,7 +4,18 @@ declare var Big: any;
 
 interface IBig {
     toFixed(precision: number): string;
-    lt(target: IBig): boolean;
+    lt(t: IBig): boolean;
+    lte(t: IBig): boolean;
+    eq(t: IBig): boolean;
+    gt(t: IBig): boolean;
+    gte(t: IBig): boolean;
+    abs(): IBig;
+    cmp(b: IBig): number;
+    div(y: IBig): IBig;
+    mul(y: IBig): IBig;
+    minus(o: IBig): IBig;
+    plus(o: IBig): IBig;
+    mod(o: IBig): IBig;
 }
 
 class BigFactory {

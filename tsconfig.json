@@ -7,10 +7,6 @@
     "outFile": "clip-processor.js",
     "allowJs": true
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules/**"
-  ]
+  "exclude": ["node_modules/**/*", "compiled/**/*",
+    "src/index.spec.js", "clip-processor.js"]
 }

@@ -869,11 +869,20 @@ var Note = (function () {
             return 127;
         return this.pitch;
     };
-    Note.prototype.getStart = function () {
+    Note.prototype.getStartAsString = function () {
         // if (this.start.lt(BigFactory.create(0))) return "0.0";
         return this.start.toFixed(4);
     };
+    Note.prototype.setStart = function (start) {
+        this.start = start;
+    };
+    Note.prototype.getStart = function () {
+        return this.start;
+    };
     Note.prototype.getDuration = function () {
+        return this.duration;
+    };
+    Note.prototype.getDurationAsString = function () {
         if (this.duration.lt(Note.MIN_DURATION))
             return Note.MIN_DURATION.toFixed(4);
         return this.duration.toFixed(4);
@@ -952,13 +961,17 @@ var Clip = (function () {
 }());
 ///<reference path="big-def.ts"/>
 ///<reference path="Clip.ts"/>
-var a = BigFactory.create(0.03);
-var b = BigFactory.create(0.7);
+/*
+var a: IBig = BigFactory.create(0.03);
+var b: IBig = BigFactory.create(0.7);
+
 console.log(a.toFixed(4));
 console.log(b.lt(a));
 console.log(a.lt(b));
+*/
 outlets = 1;
 inlets = 1;
+var sourceClip, targetClip;
 function bang() {
     var clp = new Clip();
     // clp.selectAllNotes();
@@ -968,4 +981,38 @@ function bang() {
         var note = notes_1[_i];
         post(note.toString());
     }
+}
+function setSource() {
+    sourceClip = new Clip();
+}
+function setTarget() {
+    targetClip = new Clip();
+}
+function findNearestNoteStartInSet(needle, haystack) {
+    var nearestIndex = 0, nearestDelta;
+    for (var i = 0; i < haystack.length; i++) {
+        if (nearestDelta === undefined) {
+            nearestDelta = needle.getStart().minus(haystack[i].getStart()).abs();
+        }
+        var currentDelta = needle.getStart().minus(haystack[i].getStart()).abs();
+        if (currentDelta.lt(nearestDelta)) {
+            nearestDelta = currentDelta;
+            nearestIndex = i;
+        }
+    }
+    return haystack[nearestIndex];
+}
+function doConstrainStart(source, target, options) {
+    if (options === void 0) { options = {}; }
+    if (!sourceClip || !targetClip)
+        return;
+    var sourceNotes = source.getNotes();
+    var targetNotes = target.getNotes();
+    if (sourceNotes.length === 0 || targetNotes.length === 0)
+        return;
+    for (var _i = 0, targetNotes_1 = targetNotes; _i < targetNotes_1.length; _i++) {
+        var note = targetNotes_1[_i];
+        note.setStart(findNearestNoteStartInSet(note, sourceNotes).getStart());
+    }
+    return target;
 }

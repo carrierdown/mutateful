@@ -34,20 +34,24 @@ class Note {
         return this.pitch;
     }
 
-    public getStart(): string {
+    public getStartAsString(): string {
         // if (this.start.lt(BigFactory.create(0))) return "0.0";
         return this.start.toFixed(4);
     }
 
-    public getStartAsBig(): IBig {
+    public setStart(start: IBig): void {
+        this.start = start;
+    }
+
+    public getStart(): IBig {
         return this.start;
     }
 
-    public getDurationAsBig(): IBig {
+    public getDuration(): IBig {
         return this.duration;
     }
 
-    public getDuration(): string {
+    public getDurationAsString(): string {
         if (this.duration.lt(Note.MIN_DURATION)) return Note.MIN_DURATION.toFixed(4);
         return this.duration.toFixed(4);
     }
