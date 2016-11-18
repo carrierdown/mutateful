@@ -1004,15 +1004,17 @@ function findNearestNoteStartInSet(needle, haystack) {
 }
 function doConstrainStart(source, target, options) {
     if (options === void 0) { options = {}; }
-    if (!sourceClip || !targetClip)
+    if (!source || !target)
         return;
     var sourceNotes = source.getNotes();
     var targetNotes = target.getNotes();
+    var result = [];
     if (sourceNotes.length === 0 || targetNotes.length === 0)
         return;
-    for (var _i = 0, targetNotes_1 = targetNotes; _i < targetNotes_1.length; _i++) {
-        var note = targetNotes_1[_i];
-        note.setStart(findNearestNoteStartInSet(note, sourceNotes).getStart());
+    for (var _i = 0, sourceNotes_1 = sourceNotes; _i < sourceNotes_1.length; _i++) {
+        var note = sourceNotes_1[_i];
+        console.log("note", note.getStartAsString(), "nearest target", findNearestNoteStartInSet(note, targetNotes).getStartAsString());
+        result.push(findNearestNoteStartInSet(note, targetNotes));
     }
-    return targetNotes;
+    return result;
 }
