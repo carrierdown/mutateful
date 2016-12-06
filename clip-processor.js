@@ -863,10 +863,12 @@ var Note = (function () {
         return "\n        pitch: " + this.getPitch() + "\n        start: " + this.getStartAsString() + "\n        duration: " + this.getDurationAsString() + "\n        velocity: " + this.getVelocity() + "\n        muted: " + this.getMuted();
     };
     Note.prototype.getPitch = function () {
-        if (this.pitch < 0)
+        if (this.pitch < 0) {
             return 0;
-        if (this.pitch > 127)
+        }
+        if (this.pitch > 127) {
             return 127;
+        }
         return this.pitch;
     };
     Note.prototype.getStartAsString = function () {
@@ -875,6 +877,15 @@ var Note = (function () {
     };
     Note.prototype.setStart = function (start) {
         this.start = start;
+    };
+    Note.prototype.setPitch = function (pitch) {
+        if (pitch > 127) {
+            pitch = 127;
+        }
+        if (pitch < 0) {
+            pitch = 0;
+        }
+        this.pitch = pitch;
     };
     Note.prototype.getStart = function () {
         return this.start;
@@ -1000,21 +1011,47 @@ function findNearestNoteStartInSet(needle, haystack) {
             nearestIndex = i;
         }
     }
-    return haystack[nearestIndex];
+    return haystack[nearestIndex].getStart();
 }
-function doConstrainStart(source, target, options) {
-    if (options === void 0) { options = {}; }
-    if (!source || !target)
+function findNearestNotePitchInSet(needle, haystack) {
+    var nearestIndex = 0, nearestDelta;
+    for (var i = 0; i < haystack.length; i++) {
+        if (nearestDelta === undefined) {
+            nearestDelta = Math.abs(needle.getPitch() - haystack[i].getPitch());
+        }
+        var currentDelta = Math.abs(needle.getPitch() - haystack[i].getPitch());
+        if (currentDelta < nearestDelta) {
+            nearestDelta = currentDelta;
+            nearestIndex = i;
+        }
+    }
+    return haystack[nearestIndex].getPitch();
+}
+function applyConstrainNoteStart(source, dest) {
+    return applyConstrain(source, dest, { constrainNoteStart: true, constrainNotePitch: false });
+}
+function applyConstrainNotePitch(source, dest) {
+    return applyConstrain(source, dest, { constrainNoteStart: false, constrainNotePitch: true });
+}
+function applyConstrain(source, dest, options) {
+    if (options === void 0) { options = { constrainNoteStart: true, constrainNotePitch: true }; }
+    if (!source || !dest)
         return;
     var sourceNotes = source.getNotes();
-    var targetNotes = target.getNotes();
-    var result = [];
-    if (sourceNotes.length === 0 || targetNotes.length === 0)
+    var destNotes = dest.getNotes();
+    var results = [];
+    if (sourceNotes.length === 0 || destNotes.length === 0)
         return;
     for (var _i = 0, sourceNotes_1 = sourceNotes; _i < sourceNotes_1.length; _i++) {
         var note = sourceNotes_1[_i];
-        console.log("note", note.getStartAsString(), "nearest target", findNearestNoteStartInSet(note, targetNotes).getStartAsString());
-        result.push(findNearestNoteStartInSet(note, targetNotes));
+        var result = note;
+        if (options.constrainNotePitch) {
+            result.setPitch(findNearestNotePitchInSet(note, destNotes));
+        }
+        if (options.constrainNoteStart) {
+            result.setStart(findNearestNoteStartInSet(note, destNotes));
+        }
+        results.push(result);
     }
-    return result;
+    return results;
 }

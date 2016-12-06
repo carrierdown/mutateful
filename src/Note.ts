@@ -29,8 +29,8 @@ class Note {
     }
 
     public getPitch(): number {
-        if(this.pitch < 0) return 0;
-        if(this.pitch > 127) return 127;
+        if(this.pitch < 0) { return 0; }
+        if(this.pitch > 127) { return 127; }
         return this.pitch;
     }
 
@@ -41,6 +41,12 @@ class Note {
 
     public setStart(start: IBig): void {
         this.start = start;
+    }
+
+    public setPitch(pitch: number): void {
+        if (pitch > 127) { pitch = 127; }
+        if (pitch < 0) { pitch = 0; }
+        this.pitch = pitch;
     }
 
     public getStart(): IBig {

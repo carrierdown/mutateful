@@ -39,7 +39,7 @@ function setTarget(): void {
     targetClip = new Clip();
 }
 
-function findNearestNoteStartInSet(needle: Note, haystack: Note[]): Note {
+function findNearestNoteStartInSet(needle: Note, haystack: Note[]): IBig {
     var nearestIndex: number = 0,
         nearestDelta: IBig;
     for (let i = 0; i < haystack.length; i++) {
@@ -52,22 +52,52 @@ function findNearestNoteStartInSet(needle: Note, haystack: Note[]): Note {
             nearestIndex = i;
         }
     }
-    return haystack[nearestIndex];
+    return haystack[nearestIndex].getStart();
 }
 
-function doConstrainStart(source: Clip, target: Clip, options: any = {}): Note[] {
-    if (!source || !target) return;
+function findNearestNotePitchInSet(needle: Note, haystack: Note[]): number {
+    var nearestIndex: number = 0,
+        nearestDelta: number;
+    for (let i = 0; i < haystack.length; i++) {
+        if (nearestDelta === undefined) {
+            nearestDelta = Math.abs(needle.getPitch() - haystack[i].getPitch());
+        }
+        let currentDelta: number = Math.abs(needle.getPitch() - haystack[i].getPitch());
+        if (currentDelta < nearestDelta) {
+            nearestDelta = currentDelta;
+            nearestIndex = i;
+        }
+    }
+    return haystack[nearestIndex].getPitch();
+}
+
+function applyConstrainNoteStart(source: Clip, dest: Clip): Note[] {
+    return applyConstrain(source, dest, {constrainNoteStart: true, constrainNotePitch: false});
+}
+
+function applyConstrainNotePitch(source: Clip, dest: Clip): Note[] {
+    return applyConstrain(source, dest, {constrainNoteStart: false, constrainNotePitch: true});
+}
+
+function applyConstrain(source: Clip, dest: Clip, options: any = {constrainNoteStart: true, constrainNotePitch: true}): Note[] {
+    if (!source || !dest) return;
 
     var sourceNotes: Note[] = source.getNotes();
-    var targetNotes: Note[] = target.getNotes();
-    var result: Note[] = [];
+    var destNotes: Note[] = dest.getNotes();
+    var results: Note[] = [];
 
-    if (sourceNotes.length === 0 || targetNotes.length === 0) return;
+    if (sourceNotes.length === 0 || destNotes.length === 0) return;
 
     for (let note of sourceNotes) {
-        // console.log("note", note.getStartAsString(), "nearest target", findNearestNoteStartInSet(note, targetNotes).getStartAsString());
-        result.push(findNearestNoteStartInSet(note, targetNotes));
+        let result = note;
+        if (options.constrainNotePitch) {
+            result.setPitch(findNearestNotePitchInSet(note, destNotes));
+        }
+        if (options.constrainNoteStart) {
+            result.setStart(findNearestNoteStartInSet(note, destNotes));
+        }
+        results.push(result);
     }
 
-    return result;
+    return results;
 }
