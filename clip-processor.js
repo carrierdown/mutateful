@@ -970,19 +970,95 @@ var Clip = (function () {
     };
     return Clip;
 }());
+var ClipActions = (function () {
+    function ClipActions() {
+    }
+    ClipActions.findNearestNoteStartInSet = function (needle, haystack) {
+        var nearestIndex = 0, nearestDelta;
+        for (var i = 0; i < haystack.length; i++) {
+            if (nearestDelta === undefined) {
+                nearestDelta = needle.getStart().minus(haystack[i].getStart()).abs();
+            }
+            var currentDelta = needle.getStart().minus(haystack[i].getStart()).abs();
+            if (currentDelta.lt(nearestDelta)) {
+                nearestDelta = currentDelta;
+                nearestIndex = i;
+            }
+        }
+        return haystack[nearestIndex].getStart();
+    };
+    ClipActions.findNearestNotePitchInSet = function (needle, haystack) {
+        var nearestIndex = 0, nearestDelta;
+        for (var i = 0; i < haystack.length; i++) {
+            if (nearestDelta === undefined) {
+                nearestDelta = Math.abs(needle.getPitch() - haystack[i].getPitch());
+            }
+            var currentDelta = Math.abs(needle.getPitch() - haystack[i].getPitch());
+            if (currentDelta < nearestDelta) {
+                nearestDelta = currentDelta;
+                nearestIndex = i;
+            }
+        }
+        return haystack[nearestIndex].getPitch();
+    };
+    ClipActions.applyConstrain = function (sourceNotes, destNotes, options) {
+        if (options === void 0) { options = {
+            constrainNoteStart: true,
+            constrainNotePitch: true
+        }; }
+        var results = [];
+        for (var _i = 0, sourceNotes_1 = sourceNotes; _i < sourceNotes_1.length; _i++) {
+            var note = sourceNotes_1[_i];
+            var result = note;
+            if (options.constrainNotePitch) {
+                result.setPitch(ClipActions.findNearestNotePitchInSet(note, destNotes));
+            }
+            if (options.constrainNoteStart) {
+                result.setStart(ClipActions.findNearestNoteStartInSet(note, destNotes));
+            }
+            results.push(result);
+        }
+        return results;
+    };
+    return ClipActions;
+}());
+var Action;
+(function (Action) {
+    Action[Action["Constrain"] = 0] = "Constrain";
+    Action[Action["Transpose"] = 1] = "Transpose";
+})(Action || (Action = {}));
+var ClipProcessor = (function () {
+    function ClipProcessor() {
+        this.actions = [];
+        this.actions[Action.Constrain] = ClipActions.applyConstrain;
+    }
+    ClipProcessor.prototype.setSource = function (sourceClip) {
+        if (sourceClip === void 0) { sourceClip = new Clip(); }
+        this.sourceClip = sourceClip;
+    };
+    ClipProcessor.prototype.setTarget = function (destClip) {
+        if (destClip === void 0) { destClip = new Clip(); }
+        this.destClip = destClip;
+    };
+    ClipProcessor.prototype.processClip = function (action, options) {
+        if (options === void 0) { options = {}; }
+        if (!this.sourceClip || !this.destClip)
+            return;
+        var sourceNotes = this.sourceClip.getNotes();
+        var destNotes = this.destClip.getNotes();
+        var results = [];
+        if (sourceNotes.length === 0 || destNotes.length === 0)
+            return;
+        // todo: selection logic goes here...
+        return this.actions[action](sourceNotes, destNotes, options);
+    };
+    return ClipProcessor;
+}());
 ///<reference path="big-def.ts"/>
 ///<reference path="Clip.ts"/>
-/*
-var a: IBig = BigFactory.create(0.03);
-var b: IBig = BigFactory.create(0.7);
-
-console.log(a.toFixed(4));
-console.log(b.lt(a));
-console.log(a.lt(b));
-*/
 outlets = 1;
 inlets = 1;
-var sourceClip, targetClip;
+var clipProcessor = new ClipProcessor();
 function bang() {
     var clp = new Clip();
     // clp.selectAllNotes();
@@ -994,64 +1070,14 @@ function bang() {
     }
 }
 function setSource() {
-    sourceClip = new Clip();
+    clipProcessor.setSource();
 }
 function setTarget() {
-    targetClip = new Clip();
-}
-function findNearestNoteStartInSet(needle, haystack) {
-    var nearestIndex = 0, nearestDelta;
-    for (var i = 0; i < haystack.length; i++) {
-        if (nearestDelta === undefined) {
-            nearestDelta = needle.getStart().minus(haystack[i].getStart()).abs();
-        }
-        var currentDelta = needle.getStart().minus(haystack[i].getStart()).abs();
-        if (currentDelta.lt(nearestDelta)) {
-            nearestDelta = currentDelta;
-            nearestIndex = i;
-        }
-    }
-    return haystack[nearestIndex].getStart();
-}
-function findNearestNotePitchInSet(needle, haystack) {
-    var nearestIndex = 0, nearestDelta;
-    for (var i = 0; i < haystack.length; i++) {
-        if (nearestDelta === undefined) {
-            nearestDelta = Math.abs(needle.getPitch() - haystack[i].getPitch());
-        }
-        var currentDelta = Math.abs(needle.getPitch() - haystack[i].getPitch());
-        if (currentDelta < nearestDelta) {
-            nearestDelta = currentDelta;
-            nearestIndex = i;
-        }
-    }
-    return haystack[nearestIndex].getPitch();
+    clipProcessor.setTarget();
 }
 function applyConstrainNoteStart(source, dest) {
-    return applyConstrain(source, dest, { constrainNoteStart: true, constrainNotePitch: false });
+    return clipProcessor.processClip(Action.Constrain, { constrainNoteStart: true, constrainNotePitch: false });
 }
 function applyConstrainNotePitch(source, dest) {
-    return applyConstrain(source, dest, { constrainNoteStart: false, constrainNotePitch: true });
-}
-function applyConstrain(source, dest, options) {
-    if (options === void 0) { options = { constrainNoteStart: true, constrainNotePitch: true }; }
-    if (!source || !dest)
-        return;
-    var sourceNotes = source.getNotes();
-    var destNotes = dest.getNotes();
-    var results = [];
-    if (sourceNotes.length === 0 || destNotes.length === 0)
-        return;
-    for (var _i = 0, sourceNotes_1 = sourceNotes; _i < sourceNotes_1.length; _i++) {
-        var note = sourceNotes_1[_i];
-        var result = note;
-        if (options.constrainNotePitch) {
-            result.setPitch(findNearestNotePitchInSet(note, destNotes));
-        }
-        if (options.constrainNoteStart) {
-            result.setStart(findNearestNoteStartInSet(note, destNotes));
-        }
-        results.push(result);
-    }
-    return results;
+    return clipProcessor.processClip(Action.Constrain, { constrainNoteStart: true, constrainNotePitch: false });
 }

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "test": "tsc -p tsconfig-test.json && cat clip-processor.js compiled/index.spec.js > compiled/tests.js && tape compiled/tests.js | tap-spec"
+    "test": "tsc && tsc -p tsconfig-test.json && cat clip-processor.js compiled/index.spec.js > compiled/tests.js && tape compiled/tests.js | tap-spec"
   },
   "author": "",
   "license": "ISC",
