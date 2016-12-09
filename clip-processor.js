@@ -970,9 +970,39 @@ var Clip = (function () {
     };
     return Clip;
 }());
+var Action;
+(function (Action) {
+    Action[Action["Constrain"] = 0] = "Constrain";
+    Action[Action["Transpose"] = 1] = "Transpose";
+    Action[Action["Monophonize"] = 2] = "Monophonize";
+})(Action || (Action = {}));
 var ClipActions = (function () {
     function ClipActions() {
+        this.actions = [];
+        this.actions[Action.Constrain] = function (sourceNotes, destNotes, options) {
+            if (options === void 0) { options = {
+                constrainNoteStart: true,
+                constrainNotePitch: true
+            }; }
+            var results = [];
+            for (var _i = 0, sourceNotes_1 = sourceNotes; _i < sourceNotes_1.length; _i++) {
+                var note = sourceNotes_1[_i];
+                var result = note;
+                if (options.constrainNotePitch) {
+                    result.setPitch(ClipActions.findNearestNotePitchInSet(note, destNotes));
+                }
+                if (options.constrainNoteStart) {
+                    result.setStart(ClipActions.findNearestNoteStartInSet(note, destNotes));
+                }
+                results.push(result);
+            }
+            return results;
+        };
     }
+    ClipActions.prototype.apply = function (action, sourceNotes, destNotes, options) {
+        if (options === void 0) { options = {}; }
+        return this.actions[action](sourceNotes, destNotes, options);
+    };
     ClipActions.findNearestNoteStartInSet = function (needle, haystack) {
         var nearestIndex = 0, nearestDelta;
         for (var i = 0; i < haystack.length; i++) {
@@ -1001,36 +1031,11 @@ var ClipActions = (function () {
         }
         return haystack[nearestIndex].getPitch();
     };
-    ClipActions.applyConstrain = function (sourceNotes, destNotes, options) {
-        if (options === void 0) { options = {
-            constrainNoteStart: true,
-            constrainNotePitch: true
-        }; }
-        var results = [];
-        for (var _i = 0, sourceNotes_1 = sourceNotes; _i < sourceNotes_1.length; _i++) {
-            var note = sourceNotes_1[_i];
-            var result = note;
-            if (options.constrainNotePitch) {
-                result.setPitch(ClipActions.findNearestNotePitchInSet(note, destNotes));
-            }
-            if (options.constrainNoteStart) {
-                result.setStart(ClipActions.findNearestNoteStartInSet(note, destNotes));
-            }
-            results.push(result);
-        }
-        return results;
-    };
     return ClipActions;
 }());
-var Action;
-(function (Action) {
-    Action[Action["Constrain"] = 0] = "Constrain";
-    Action[Action["Transpose"] = 1] = "Transpose";
-})(Action || (Action = {}));
 var ClipProcessor = (function () {
     function ClipProcessor() {
-        this.actions = [];
-        this.actions[Action.Constrain] = ClipActions.applyConstrain;
+        this.clipActions = new ClipActions();
     }
     ClipProcessor.prototype.setSource = function (sourceClip) {
         if (sourceClip === void 0) { sourceClip = new Clip(); }
@@ -1046,11 +1051,10 @@ var ClipProcessor = (function () {
             return;
         var sourceNotes = this.sourceClip.getNotes();
         var destNotes = this.destClip.getNotes();
-        var results = [];
         if (sourceNotes.length === 0 || destNotes.length === 0)
             return;
         // todo: selection logic goes here...
-        return this.actions[action](sourceNotes, destNotes, options);
+        return this.clipActions.apply(action, sourceNotes, destNotes);
     };
     return ClipProcessor;
 }());

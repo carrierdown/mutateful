@@ -1,26 +1,11 @@
-enum Action {
-    Constrain,
-    Transpose
-}
-
-interface IActionMap {
-    [index: number]: (src: Note[], dst: Note[], options?: IActionOptions) => Note[];
-}
-
-interface IActionOptions {
-    constrainNoteStart?: boolean;
-    constrainNotePitch?: boolean;
-}
-
 class ClipProcessor {
 
     public sourceClip: Clip;
     public destClip: Clip;
-    public actions: IActionMap;
+    public clipActions: ClipActions;
 
     constructor() {
-        this.actions = [];
-        this.actions[Action.Constrain] = ClipActions.applyConstrain;
+        this.clipActions = new ClipActions();
     }
 
     public setSource(sourceClip = new Clip()): void {
@@ -36,12 +21,11 @@ class ClipProcessor {
 
         var sourceNotes: Note[] = this.sourceClip.getNotes();
         var destNotes: Note[] = this.destClip.getNotes();
-        var results: Note[] = [];
 
         if (sourceNotes.length === 0 || destNotes.length === 0) return;
 
         // todo: selection logic goes here...
 
-        return this.actions[action](sourceNotes, destNotes, options);
+        return this.clipActions.apply(action, sourceNotes, destNotes);
     }
 }
