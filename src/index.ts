@@ -1,5 +1,7 @@
 ///<reference path="big-def.ts"/>
 ///<reference path="Clip.ts"/>
+///<reference path="ClipProcessor.ts"/>
+
 
 declare function post(msg: string);
 declare var outlets: number;

@@ -970,6 +970,7 @@ var Clip = (function () {
     };
     return Clip;
 }());
+///<reference path="Note.ts"/>
 var Action;
 (function (Action) {
     Action[Action["Constrain"] = 0] = "Constrain";
@@ -1000,7 +1001,7 @@ var ClipActions = (function () {
         };
     }
     ClipActions.prototype.apply = function (action, sourceNotes, destNotes, options) {
-        if (options === void 0) { options = {}; }
+        // console.log("applying", action, sourceNotes, destNotes, options);
         return this.actions[action](sourceNotes, destNotes, options);
     };
     ClipActions.findNearestNoteStartInSet = function (needle, haystack) {
@@ -1033,6 +1034,8 @@ var ClipActions = (function () {
     };
     return ClipActions;
 }());
+///<reference path="ClipActions.ts"/>
+///<reference path="Clip.ts"/>
 var ClipProcessor = (function () {
     function ClipProcessor() {
         this.clipActions = new ClipActions();
@@ -1054,12 +1057,14 @@ var ClipProcessor = (function () {
         if (sourceNotes.length === 0 || destNotes.length === 0)
             return;
         // todo: selection logic goes here...
-        return this.clipActions.apply(action, sourceNotes, destNotes);
+        // console.log("processClip");
+        return this.clipActions.apply(action, sourceNotes, destNotes, options);
     };
     return ClipProcessor;
 }());
 ///<reference path="big-def.ts"/>
 ///<reference path="Clip.ts"/>
+///<reference path="ClipProcessor.ts"/>
 outlets = 1;
 inlets = 1;
 var clipProcessor = new ClipProcessor();

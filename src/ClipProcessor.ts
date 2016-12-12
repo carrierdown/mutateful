@@ -1,3 +1,6 @@
+///<reference path="ClipActions.ts"/>
+///<reference path="Clip.ts"/>
+
 class ClipProcessor {
 
     public sourceClip: Clip;
@@ -25,7 +28,8 @@ class ClipProcessor {
         if (sourceNotes.length === 0 || destNotes.length === 0) return;
 
         // todo: selection logic goes here...
+        // console.log("processClip");
 
-        return this.clipActions.apply(action, sourceNotes, destNotes);
+        return this.clipActions.apply(action, sourceNotes, destNotes, options);
     }
 }

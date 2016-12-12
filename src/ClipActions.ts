@@ -1,3 +1,5 @@
+///<reference path="Note.ts"/>
+
 enum Action {
     Constrain,
     Transpose,
@@ -5,7 +7,7 @@ enum Action {
 }
 
 interface IAction {
-    (sourceNotes: Note[], destNotes: Note[]): Note[];
+    (sourceNotes: Note[], destNotes: Note[], options: IActionOptions): Note[];
 }
 
 interface IActionMap {
@@ -32,6 +34,7 @@ class ClipActions {
 
             for (let note of sourceNotes) {
                 let result = note;
+
                 if (options.constrainNotePitch) {
                     result.setPitch(ClipActions.findNearestNotePitchInSet(note, destNotes));
                 }
@@ -44,7 +47,7 @@ class ClipActions {
         };
     }
 
-    public apply(action: Action, sourceNotes: Note[], destNotes: Note[], options: IActionOptions = {}): Note[] {
+    public apply(action: Action, sourceNotes: Note[], destNotes: Note[], options: IActionOptions): Note[] {
         return this.actions[action](sourceNotes, destNotes, options);
     }
 
