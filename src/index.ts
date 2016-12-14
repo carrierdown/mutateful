@@ -22,14 +22,30 @@ function bang() {
     }
 }
 
-function setSource(): void {
+function setClipToMutate(): void {
     clipProcessor.setClipToMutate();
 }
 
-function setTarget(): void {
+function setClipToSourceFrom(): void {
     clipProcessor.setClipToSourceFrom();
 }
 
+function setAction(action: string): void {
+    var ix = Action[action];
+    if (ix !== void 0) {
+        clipProcessor.setAction(ix);
+    }
+}
+
+function setOptions(options: IActionOptions) {
+    this.options = options;
+}
+
+function process() {
+    clipProcessor.processClip();
+}
+
+/*
 function applyConstrainNoteStart(source: Clip, dest: Clip) {
     clipProcessor.processClip(Action.Constrain, {constrainNoteStart: true, constrainNotePitch: false});
 }
@@ -37,3 +53,4 @@ function applyConstrainNoteStart(source: Clip, dest: Clip) {
 function applyConstrainNotePitch(source: Clip, dest: Clip) {
     clipProcessor.processClip(Action.Constrain, {constrainNoteStart: true, constrainNotePitch: false});
 }
+*/

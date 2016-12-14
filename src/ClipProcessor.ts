@@ -6,6 +6,8 @@ class ClipProcessor {
     public clipToMutate: Clip;
     public clipToSourceFrom: Clip;
     public clipActions: ClipActions;
+    public action: Action;
+    public options: IActionOptions;
 
     constructor() {
         this.clipActions = new ClipActions();
@@ -19,7 +21,15 @@ class ClipProcessor {
         this.clipToSourceFrom = clip;
     }
 
-    public processClip(action: Action, options: IActionOptions = {}) {
+    public setAction(action: Action): void {
+        this.action = action;
+    }
+
+    public setOption(optionName: string, value: any) {
+
+    }
+
+    public processClip(options: IActionOptions = {}) {
         if (!this.clipToMutate || !this.clipToSourceFrom) return;
 
         var notesToMutate: Note[] = this.clipToMutate.getNotes();
@@ -30,7 +40,7 @@ class ClipProcessor {
         // todo: selection logic goes here...
         // console.log("processClip");
 
-        var mutatedNotes: Note[] = this.clipActions.apply(action, notesToMutate, notesToSourceFrom, options);
+        var mutatedNotes: Note[] = this.clipActions.apply(this.action, notesToMutate, notesToSourceFrom, options);
         this.clipToMutate.setNotes(mutatedNotes);
     }
 }
