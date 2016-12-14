@@ -3,11 +3,14 @@
 enum Action {
     Constrain,
     Transpose,
-    Monophonize
+    Monophonize,
+    Fractalize,
+    Mix,
+    Interleave
 }
 
 interface IAction {
-    (sourceNotes: Note[], destNotes: Note[], options: IActionOptions): Note[];
+    (notesToMutate: Note[], notesToSourceFrom: Note[], options: IActionOptions): Note[];
 }
 
 interface IActionMap {
@@ -26,20 +29,20 @@ class ClipActions {
     constructor() {
         this.actions = [];
 
-        this.actions[Action.Constrain] = (sourceNotes: Note[], destNotes: Note[], options: IActionOptions = {
+        this.actions[Action.Constrain] = (notesToMutate: Note[], notesToSourceFrom: Note[], options: IActionOptions = {
             constrainNoteStart: true,
             constrainNotePitch: true
         }) => {
             var results: Note[] = [];
 
-            for (let note of sourceNotes) {
+            for (let note of notesToMutate) {
                 let result = note;
 
                 if (options.constrainNotePitch) {
-                    result.setPitch(ClipActions.findNearestNotePitchInSet(note, destNotes));
+                    result.setPitch(ClipActions.findNearestNotePitchInSet(note, notesToSourceFrom));
                 }
                 if (options.constrainNoteStart) {
-                    result.setStart(ClipActions.findNearestNoteStartInSet(note, destNotes));
+                    result.setStart(ClipActions.findNearestNoteStartInSet(note, notesToSourceFrom));
                 }
                 results.push(result);
             }
@@ -47,8 +50,8 @@ class ClipActions {
         };
     }
 
-    public apply(action: Action, sourceNotes: Note[], destNotes: Note[], options: IActionOptions): Note[] {
-        return this.actions[action](sourceNotes, destNotes, options);
+    public apply(action: Action, notesToMutate: Note[], notesToSourceFrom: Note[], options: IActionOptions): Note[] {
+        return this.actions[action](notesToMutate, notesToSourceFrom, options);
     }
 
     public static findNearestNoteStartInSet(needle: Note, haystack: Note[]): IBig {

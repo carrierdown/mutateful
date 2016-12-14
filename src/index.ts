@@ -23,17 +23,17 @@ function bang() {
 }
 
 function setSource(): void {
-    clipProcessor.setSource();
+    clipProcessor.setClipToMutate();
 }
 
 function setTarget(): void {
-    clipProcessor.setTarget();
+    clipProcessor.setClipToSourceFrom();
 }
 
-function applyConstrainNoteStart(source: Clip, dest: Clip): Note[] {
-    return clipProcessor.processClip(Action.Constrain, {constrainNoteStart: true, constrainNotePitch: false});
+function applyConstrainNoteStart(source: Clip, dest: Clip) {
+    clipProcessor.processClip(Action.Constrain, {constrainNoteStart: true, constrainNotePitch: false});
 }
 
-function applyConstrainNotePitch(source: Clip, dest: Clip): Note[] {
-    return clipProcessor.processClip(Action.Constrain, {constrainNoteStart: true, constrainNotePitch: false});
+function applyConstrainNotePitch(source: Clip, dest: Clip) {
+    clipProcessor.processClip(Action.Constrain, {constrainNoteStart: true, constrainNotePitch: false});
 }

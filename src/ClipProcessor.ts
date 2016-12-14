@@ -3,33 +3,34 @@
 
 class ClipProcessor {
 
-    public sourceClip: Clip;
-    public destClip: Clip;
+    public clipToMutate: Clip;
+    public clipToSourceFrom: Clip;
     public clipActions: ClipActions;
 
     constructor() {
         this.clipActions = new ClipActions();
     }
 
-    public setSource(sourceClip = new Clip()): void {
-        this.sourceClip = sourceClip;
+    public setClipToMutate(clip = new Clip()): void {
+        this.clipToMutate = clip;
     }
 
-    public setTarget(destClip = new Clip()): void {
-        this.destClip = destClip;
+    public setClipToSourceFrom(clip = new Clip()): void {
+        this.clipToSourceFrom = clip;
     }
 
-    public processClip(action: Action, options: IActionOptions = {}): Note[] {
-        if (!this.sourceClip || !this.destClip) return;
+    public processClip(action: Action, options: IActionOptions = {}) {
+        if (!this.clipToMutate || !this.clipToSourceFrom) return;
 
-        var sourceNotes: Note[] = this.sourceClip.getNotes();
-        var destNotes: Note[] = this.destClip.getNotes();
+        var notesToMutate: Note[] = this.clipToMutate.getNotes();
+        var notesToSourceFrom: Note[] = this.clipToSourceFrom.getNotes();
 
-        if (sourceNotes.length === 0 || destNotes.length === 0) return;
+        if (notesToMutate.length === 0 || notesToSourceFrom.length === 0) return;
 
         // todo: selection logic goes here...
         // console.log("processClip");
 
-        return this.clipActions.apply(action, sourceNotes, destNotes, options);
+        var mutatedNotes: Note[] = this.clipActions.apply(action, notesToMutate, notesToSourceFrom, options);
+        this.clipToMutate.setNotes(mutatedNotes);
     }
 }

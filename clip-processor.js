@@ -976,33 +976,35 @@ var Action;
     Action[Action["Constrain"] = 0] = "Constrain";
     Action[Action["Transpose"] = 1] = "Transpose";
     Action[Action["Monophonize"] = 2] = "Monophonize";
+    Action[Action["Fractalize"] = 3] = "Fractalize";
+    Action[Action["Mix"] = 4] = "Mix";
+    Action[Action["Interleave"] = 5] = "Interleave";
 })(Action || (Action = {}));
 var ClipActions = (function () {
     function ClipActions() {
         this.actions = [];
-        this.actions[Action.Constrain] = function (sourceNotes, destNotes, options) {
+        this.actions[Action.Constrain] = function (notesToMutate, notesToSourceFrom, options) {
             if (options === void 0) { options = {
                 constrainNoteStart: true,
                 constrainNotePitch: true
             }; }
             var results = [];
-            for (var _i = 0, sourceNotes_1 = sourceNotes; _i < sourceNotes_1.length; _i++) {
-                var note = sourceNotes_1[_i];
+            for (var _i = 0, notesToMutate_1 = notesToMutate; _i < notesToMutate_1.length; _i++) {
+                var note = notesToMutate_1[_i];
                 var result = note;
                 if (options.constrainNotePitch) {
-                    result.setPitch(ClipActions.findNearestNotePitchInSet(note, destNotes));
+                    result.setPitch(ClipActions.findNearestNotePitchInSet(note, notesToSourceFrom));
                 }
                 if (options.constrainNoteStart) {
-                    result.setStart(ClipActions.findNearestNoteStartInSet(note, destNotes));
+                    result.setStart(ClipActions.findNearestNoteStartInSet(note, notesToSourceFrom));
                 }
                 results.push(result);
             }
             return results;
         };
     }
-    ClipActions.prototype.apply = function (action, sourceNotes, destNotes, options) {
-        // console.log("applying", action, sourceNotes, destNotes, options);
-        return this.actions[action](sourceNotes, destNotes, options);
+    ClipActions.prototype.apply = function (action, notesToMutate, notesToSourceFrom, options) {
+        return this.actions[action](notesToMutate, notesToSourceFrom, options);
     };
     ClipActions.findNearestNoteStartInSet = function (needle, haystack) {
         var nearestIndex = 0, nearestDelta;
@@ -1040,25 +1042,26 @@ var ClipProcessor = (function () {
     function ClipProcessor() {
         this.clipActions = new ClipActions();
     }
-    ClipProcessor.prototype.setSource = function (sourceClip) {
-        if (sourceClip === void 0) { sourceClip = new Clip(); }
-        this.sourceClip = sourceClip;
+    ClipProcessor.prototype.setClipToMutate = function (clip) {
+        if (clip === void 0) { clip = new Clip(); }
+        this.clipToMutate = clip;
     };
-    ClipProcessor.prototype.setTarget = function (destClip) {
-        if (destClip === void 0) { destClip = new Clip(); }
-        this.destClip = destClip;
+    ClipProcessor.prototype.setClipToSourceFrom = function (clip) {
+        if (clip === void 0) { clip = new Clip(); }
+        this.clipToSourceFrom = clip;
     };
     ClipProcessor.prototype.processClip = function (action, options) {
         if (options === void 0) { options = {}; }
-        if (!this.sourceClip || !this.destClip)
+        if (!this.clipToMutate || !this.clipToSourceFrom)
             return;
-        var sourceNotes = this.sourceClip.getNotes();
-        var destNotes = this.destClip.getNotes();
-        if (sourceNotes.length === 0 || destNotes.length === 0)
+        var notesToMutate = this.clipToMutate.getNotes();
+        var notesToSourceFrom = this.clipToSourceFrom.getNotes();
+        if (notesToMutate.length === 0 || notesToSourceFrom.length === 0)
             return;
         // todo: selection logic goes here...
         // console.log("processClip");
-        return this.clipActions.apply(action, sourceNotes, destNotes, options);
+        var mutatedNotes = this.clipActions.apply(action, notesToMutate, notesToSourceFrom, options);
+        this.clipToMutate.setNotes(mutatedNotes);
     };
     return ClipProcessor;
 }());
@@ -1079,14 +1082,14 @@ function bang() {
     }
 }
 function setSource() {
-    clipProcessor.setSource();
+    clipProcessor.setClipToMutate();
 }
 function setTarget() {
-    clipProcessor.setTarget();
+    clipProcessor.setClipToSourceFrom();
 }
 function applyConstrainNoteStart(source, dest) {
-    return clipProcessor.processClip(Action.Constrain, { constrainNoteStart: true, constrainNotePitch: false });
+    clipProcessor.processClip(Action.Constrain, { constrainNoteStart: true, constrainNotePitch: false });
 }
 function applyConstrainNotePitch(source, dest) {
-    return clipProcessor.processClip(Action.Constrain, { constrainNoteStart: true, constrainNotePitch: false });
+    clipProcessor.processClip(Action.Constrain, { constrainNoteStart: true, constrainNotePitch: false });
 }
