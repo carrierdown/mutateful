@@ -15,7 +15,7 @@ tape('Constrain Note Start', (test) => {
     ];
 
     var clipActions = new ClipActions();
-    var results = clipActions.apply(Action.Constrain, notesToMutate, notesToSourceFrom, {
+    var results = clipActions.process(Action.Constrain, notesToMutate, notesToSourceFrom, {
         constrainNoteStart: true,
         constrainNotePitch: false
     });
@@ -43,7 +43,7 @@ tape('Constrain Note Pitch', (test) => {
     ];
 
     var clipActions = new ClipActions();
-    var results = clipActions.apply(Action.Constrain, notesToMutate, notesToSourceFrom, {
+    var results = clipActions.process(Action.Constrain, notesToMutate, notesToSourceFrom, {
         constrainNoteStart: false,
         constrainNotePitch: true
     });

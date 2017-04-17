@@ -11,6 +11,12 @@ class ClipProcessor {
 
     constructor() {
         this.clipActions = new ClipActions();
+
+        // defaults - should probably be stored with patch and updated in GUI
+        this.options = {
+            constrainNotePitch: true,
+            constrainNoteStart: false
+        };
     }
 
     public setClipToMutate(clip = new Clip()): void {
@@ -25,11 +31,14 @@ class ClipProcessor {
         this.action = action;
     }
 
-    public setOption(optionName: string, value: any) {
-
+    // Sets option. 1 = true, 0 = false
+    public setOption(optionName: string, value: number) {
+        if (this.options[optionName]) {
+            this.options[optionName] = value === 1;
+        }
     }
 
-    public processClip(options: IActionOptions = {}) {
+    public processClip() {
         if (!this.clipToMutate || !this.clipToSourceFrom) return;
 
         var notesToMutate: Note[] = this.clipToMutate.getNotes();
@@ -40,7 +49,7 @@ class ClipProcessor {
         // todo: selection logic goes here...
         // console.log("processClip");
 
-        var mutatedNotes: Note[] = this.clipActions.apply(this.action, notesToMutate, notesToSourceFrom, options);
+        var mutatedNotes: Note[] = this.clipActions.process(this.action, notesToMutate, notesToSourceFrom, this.options);
         this.clipToMutate.setNotes(mutatedNotes);
     }
 }

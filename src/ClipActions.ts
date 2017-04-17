@@ -29,10 +29,7 @@ class ClipActions {
     constructor() {
         this.actions = [];
 
-        this.actions[Action.Constrain] = (notesToMutate: Note[], notesToSourceFrom: Note[], options: IActionOptions = {
-            constrainNoteStart: true,
-            constrainNotePitch: true
-        }) => {
+        this.actions[Action.Constrain] = (notesToMutate: Note[], notesToSourceFrom: Note[], options: IActionOptions) => {
             var results: Note[] = [];
 
             for (let note of notesToMutate) {
@@ -50,7 +47,7 @@ class ClipActions {
         };
     }
 
-    public apply(action: Action, notesToMutate: Note[], notesToSourceFrom: Note[], options: IActionOptions): Note[] {
+    public process(action: Action, notesToMutate: Note[], notesToSourceFrom: Note[], options: IActionOptions): Note[] {
         return this.actions[action](notesToMutate, notesToSourceFrom, options);
     }
 

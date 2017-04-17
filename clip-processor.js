@@ -949,7 +949,7 @@ var Clip = (function () {
         var liveObject = this.liveObject;
         liveObject.call("notes", notes.length);
         notes.forEach(function (note) {
-            liveObject.call("note", note.getPitch(), note.getStart(), note.getDuration(), note.getVelocity(), note.getMuted());
+            liveObject.call("note", note.getPitch(), note.getStartAsString(), note.getDurationAsString(), note.getVelocity(), note.getMuted());
         });
         liveObject.call('done');
     };
@@ -980,21 +980,10 @@ var Action;
     Action[Action["Mix"] = 4] = "Mix";
     Action[Action["Interleave"] = 5] = "Interleave";
 })(Action || (Action = {}));
-function getActionFromString(action) {
-    var ix = Action[action];
-    if (ix !== void 0) {
-        return ix;
-    }
-    return Action.Constrain;
-}
 var ClipActions = (function () {
     function ClipActions() {
         this.actions = [];
         this.actions[Action.Constrain] = function (notesToMutate, notesToSourceFrom, options) {
-            if (options === void 0) { options = {
-                constrainNoteStart: true,
-                constrainNotePitch: true
-            }; }
             var results = [];
             for (var _i = 0, notesToMutate_1 = notesToMutate; _i < notesToMutate_1.length; _i++) {
                 var note = notesToMutate_1[_i];
@@ -1010,7 +999,7 @@ var ClipActions = (function () {
             return results;
         };
     }
-    ClipActions.prototype.apply = function (action, notesToMutate, notesToSourceFrom, options) {
+    ClipActions.prototype.process = function (action, notesToMutate, notesToSourceFrom, options) {
         return this.actions[action](notesToMutate, notesToSourceFrom, options);
     };
     ClipActions.findNearestNoteStartInSet = function (needle, haystack) {
@@ -1048,6 +1037,11 @@ var ClipActions = (function () {
 var ClipProcessor = (function () {
     function ClipProcessor() {
         this.clipActions = new ClipActions();
+        // defaults - should probably be stored with patch and updated in GUI
+        this.options = {
+            constrainNotePitch: true,
+            constrainNoteStart: false
+        };
     }
     ClipProcessor.prototype.setClipToMutate = function (clip) {
         if (clip === void 0) { clip = new Clip(); }
@@ -1057,8 +1051,16 @@ var ClipProcessor = (function () {
         if (clip === void 0) { clip = new Clip(); }
         this.clipToSourceFrom = clip;
     };
-    ClipProcessor.prototype.processClip = function (action, options) {
-        if (options === void 0) { options = {}; }
+    ClipProcessor.prototype.setAction = function (action) {
+        this.action = action;
+    };
+    // Sets option. 1 = true, 0 = false
+    ClipProcessor.prototype.setOption = function (optionName, value) {
+        if (this.options[optionName]) {
+            this.options[optionName] = value === 1;
+        }
+    };
+    ClipProcessor.prototype.processClip = function () {
         if (!this.clipToMutate || !this.clipToSourceFrom)
             return;
         var notesToMutate = this.clipToMutate.getNotes();
@@ -1067,7 +1069,7 @@ var ClipProcessor = (function () {
             return;
         // todo: selection logic goes here...
         // console.log("processClip");
-        var mutatedNotes = this.clipActions.apply(action, notesToMutate, notesToSourceFrom, options);
+        var mutatedNotes = this.clipActions.process(this.action, notesToMutate, notesToSourceFrom, this.options);
         this.clipToMutate.setNotes(mutatedNotes);
     };
     return ClipProcessor;
@@ -1094,10 +1096,24 @@ function setClipToMutate() {
 function setClipToSourceFrom() {
     clipProcessor.setClipToSourceFrom();
 }
-//function setAction()
-function applyConstrainNoteStart(source, dest) {
-    clipProcessor.processClip(Action.Constrain, { constrainNoteStart: true, constrainNotePitch: false });
+function setAction(action) {
+    var ix = Action[action];
+    if (ix !== void 0) {
+        clipProcessor.setAction(ix);
+    }
 }
-function applyConstrainNotePitch(source, dest) {
-    clipProcessor.processClip(Action.Constrain, { constrainNoteStart: true, constrainNotePitch: false });
+function setOptions(options) {
+    this.options = options;
 }
+function process() {
+    clipProcessor.processClip();
+}
+/*
+function applyConstrainNoteStart(source: Clip, dest: Clip) {
+    clipProcessor.processClip(Action.Constrain, {constrainNoteStart: true, constrainNotePitch: false});
+}
+
+function applyConstrainNotePitch(source: Clip, dest: Clip) {
+    clipProcessor.processClip(Action.Constrain, {constrainNoteStart: true, constrainNotePitch: false});
+}
+*/

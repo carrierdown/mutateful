@@ -49,7 +49,7 @@ class Clip {
         liveObject.call("notes", notes.length);
         notes.forEach(function (note) {
             liveObject.call("note", note.getPitch(),
-                note.getStart(), note.getDuration(),
+                note.getStartAsString(), note.getDurationAsString(),
                 note.getVelocity(), note.getMuted());
         });
         liveObject.call('done');
