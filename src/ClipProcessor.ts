@@ -8,15 +8,22 @@ class ClipProcessor {
     public clipActions: ClipActions;
     public action: Action;
     public options: IActionOptions;
+    public defaultOptions: IActionOptions = {
+        constrainNotePitch: true,
+        constrainNoteStart: false
+    };
 
     constructor() {
         this.clipActions = new ClipActions();
+        this.options = this.getDefaultOptions();
+    }
 
-        // defaults - should probably be stored with patch and updated in GUI
-        this.options = {
-            constrainNotePitch: true,
-            constrainNoteStart: false
-        };
+    public getDefaultOptions() {
+        var options: IActionOptions = {};
+        for (let option of Object.keys(this.defaultOptions)) {
+            options[option] = this.defaultOptions[option];
+        }
+        return options;
     }
 
     public setClipToMutate(clip = new Clip()): void {
@@ -33,8 +40,8 @@ class ClipProcessor {
 
     // Sets option. 1 = true, 0 = false
     public setOption(optionName: string, value: number) {
-        if (this.options[optionName]) {
-            this.options[optionName] = value === 1;
+        if (this.options[optionName] !== undefined) {
+            this.options[optionName] = (value === 1);
         }
     }
 

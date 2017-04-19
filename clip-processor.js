@@ -1036,13 +1036,21 @@ var ClipActions = (function () {
 ///<reference path="Clip.ts"/>
 var ClipProcessor = (function () {
     function ClipProcessor() {
-        this.clipActions = new ClipActions();
-        // defaults - should probably be stored with patch and updated in GUI
-        this.options = {
+        this.defaultOptions = {
             constrainNotePitch: true,
             constrainNoteStart: false
         };
+        this.clipActions = new ClipActions();
+        this.options = this.getDefaultOptions();
     }
+    ClipProcessor.prototype.getDefaultOptions = function () {
+        var options = {};
+        for (var _i = 0, _a = Object.keys(this.defaultOptions); _i < _a.length; _i++) {
+            var option = _a[_i];
+            options[option] = this.defaultOptions[option];
+        }
+        return options;
+    };
     ClipProcessor.prototype.setClipToMutate = function (clip) {
         if (clip === void 0) { clip = new Clip(); }
         this.clipToMutate = clip;
@@ -1056,8 +1064,8 @@ var ClipProcessor = (function () {
     };
     // Sets option. 1 = true, 0 = false
     ClipProcessor.prototype.setOption = function (optionName, value) {
-        if (this.options[optionName]) {
-            this.options[optionName] = value === 1;
+        if (this.options[optionName] !== undefined) {
+            this.options[optionName] = (value === 1);
         }
     };
     ClipProcessor.prototype.processClip = function () {
@@ -1090,6 +1098,21 @@ function bang() {
         post(note.toString());
     }
 }
+function getvalueof() {
+    return JSON.stringify(clipProcessor.options);
+}
+function setvalueof(data) {
+    if (data === 0) {
+        clipProcessor.options = clipProcessor.getDefaultOptions();
+    }
+    else {
+        clipProcessor.options = JSON.parse(data);
+    }
+    for (var _i = 0, _a = Object.keys(clipProcessor.options); _i < _a.length; _i++) {
+        var option = _a[_i];
+        outlet(0, [option, clipProcessor.options[option]]);
+    }
+}
 function setClipToMutate() {
     clipProcessor.setClipToMutate();
 }
@@ -1099,11 +1122,13 @@ function setClipToSourceFrom() {
 function setAction(action) {
     var ix = Action[action];
     if (ix !== void 0) {
+		post("Setting action to " + action + " (index " + Action[action] + ")");
         clipProcessor.setAction(ix);
     }
 }
-function setOptions(options) {
-    this.options = options;
+function setOption(key, value) {
+    clipProcessor.setOption(key, value);
+    notifyclients();
 }
 function process() {
     clipProcessor.processClip();

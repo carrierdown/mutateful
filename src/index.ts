@@ -4,6 +4,8 @@
 
 
 declare function post(msg: string);
+declare function outlet(index: number, data: any);
+declare function notifyclients();
 declare var outlets: number;
 declare var inlets: number;
 
@@ -22,6 +24,21 @@ function bang() {
     }
 }
 
+function getvalueof() {
+    return JSON.stringify(clipProcessor.options);
+}
+
+function setvalueof(data) {
+    if (data === 0) {
+        clipProcessor.options = clipProcessor.getDefaultOptions();
+    } else {
+        clipProcessor.options = JSON.parse(data);
+    }
+    for (let option of Object.keys(clipProcessor.options)) {
+        outlet(0, [option, clipProcessor.options[option]]);
+    }
+}
+
 function setClipToMutate(): void {
     clipProcessor.setClipToMutate();
 }
@@ -37,8 +54,9 @@ function setAction(action: string): void {
     }
 }
 
-function setOptions(options: IActionOptions) {
-    this.options = options;
+function setOption(key:string, value:number) {
+    clipProcessor.setOption(key, value);
+    notifyclients();
 }
 
 function process() {
