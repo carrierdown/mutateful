@@ -873,7 +873,7 @@ var Note = (function () {
     };
     Note.prototype.getStartAsString = function () {
         // if (this.start.lt(BigFactory.create(0))) return "0.0";
-        return this.start.toFixed(4).toString();
+        return this.start.toFixed(4);
     };
     Note.prototype.setStart = function (start) {
         this.start = start;
@@ -896,7 +896,7 @@ var Note = (function () {
     Note.prototype.getDurationAsString = function () {
         if (this.duration.lt(Note.MIN_DURATION))
             return Note.MIN_DURATION.toFixed(4);
-        return this.duration.toFixed(4).toString();
+        return this.duration.toFixed(4);
     };
     Note.prototype.getVelocity = function () {
         if (this.velocity < 0)
@@ -980,8 +980,21 @@ var Action;
     Action[Action["Mix"] = 4] = "Mix";
     Action[Action["Interleave"] = 5] = "Interleave";
 })(Action || (Action = {}));
+var InterleaveMode;
+(function (InterleaveMode) {
+    InterleaveMode[InterleaveMode["EventCount"] = 0] = "EventCount";
+    InterleaveMode[InterleaveMode["TimeRange"] = 1] = "TimeRange"; // e.g. interleave 1/4 from A for every 1/8 from B
+})(InterleaveMode || (InterleaveMode = {}));
 var ClipActions = (function () {
     function ClipActions() {
+        this.noteDurations = {};
+        var barLength = new Big(4);
+        this.noteDurations["1"] = barLength;
+        this.noteDurations["1/2"] = barLength.div(new Big(2));
+        this.noteDurations["1/4"] = barLength.div(new Big(4));
+        this.noteDurations["1/8"] = barLength.div(new Big(8));
+        this.noteDurations["1/16"] = barLength.div(new Big(16));
+        this.noteDurations["1/32"] = barLength.div(new Big(32));
         this.actions = [];
         this.actions[Action.Constrain] = function (notesToMutate, notesToSourceFrom, options) {
             var results = [];
@@ -995,6 +1008,38 @@ var ClipActions = (function () {
                     result.setStart(ClipActions.findNearestNoteStartInSet(note, notesToSourceFrom));
                 }
                 results.push(result);
+            }
+            return results;
+        };
+        this.actions[Action.Interleave] = function (a, b, options) {
+            var results = [];
+            ClipActions.sortNotes(a);
+            ClipActions.sortNotes(b);
+            var position = new Big(0);
+            if (options.interleaveMode === InterleaveMode.EventCount) {
+                var i = 0;
+                while (i < b.length || i < a.length) {
+                    var ca = a[i % a.length], cb = b[i % b.length];
+                    // if i = 0 for a, update pos
+                    // add a at pos
+                    // update pos with next a
+                    // if i = 0 for next a, calculate distance from start of event to end of clip and add to pos
+                    // add b at pos
+                    // update pos with next b
+                    // if i = 0 for next b, calculate distance from start of event to end of clip and add to pos
+                    if (i % a.length === 0) {
+                        position = position.plus(ca.getStart());
+                    }
+                    //console.log(i % a.length, a[(i + 1) % a.length].getStartAsString(), position.toFixed(4), ca.getStartAsString());
+                    ca.setStart(position);
+                    results.push(ca);
+                    position = position.plus(a[(i + 1) % a.length].getStart()).minus(ca.getStart());
+                    // todo: if ((i + 1) % a.length === 0) {
+                    cb.setStart(position);
+                    results.push(cb);
+                    position = position.plus(b[(i + 1) % b.length].getStart()).minus(cb.getStart());
+                    i++;
+                }
             }
             return results;
         };
@@ -1030,6 +1075,29 @@ var ClipActions = (function () {
         }
         return haystack[nearestIndex].getPitch();
     };
+    // sorts notes according to position
+    ClipActions.sortNotes = function (notes) {
+        notes = notes.sort(function (a, b) {
+            if (a.getStart().lt(b.getStart())) {
+                return -1;
+            }
+            if (a.getStart().gt(b.getStart())) {
+                return 1;
+            }
+            return 0;
+        });
+        /*
+                notes = notes.sort((a: Note, b: Note) => {
+                    if (a.getPitch() < b.getPitch()) {
+                        return -1;
+                    }
+                    if (a.getPitch() > b.getPitch()) {
+                        return 1;
+                    }
+                    return 0;
+                });
+        */
+    };
     return ClipActions;
 }());
 ///<reference path="ClipActions.ts"/>
@@ -1038,7 +1106,12 @@ var ClipProcessor = (function () {
     function ClipProcessor() {
         this.defaultOptions = {
             constrainNotePitch: true,
-            constrainNoteStart: false
+            constrainNoteStart: false,
+            interleaveMode: InterleaveMode.EventCount,
+            interleaveEventCountA: 1,
+            interleaveEventCountB: 1,
+            interleaveEventRangeA: new Big(1),
+            interleaveEventRangeB: new Big(1)
         };
         this.clipActions = new ClipActions();
         this.options = this.getDefaultOptions();
@@ -1122,7 +1195,6 @@ function setClipToSourceFrom() {
 function setAction(action) {
     var ix = Action[action];
     if (ix !== void 0) {
-		post("Setting action to " + action + " (index " + Action[action] + ")");
         clipProcessor.setAction(ix);
     }
 }

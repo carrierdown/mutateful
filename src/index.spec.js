@@ -55,3 +55,41 @@ tape('Constrain Note Pitch', (test) => {
 
     test.end();
 });
+
+tape('Interleave notes', (test) => {
+    var notesToMutate = [
+        new Note(35, "0.25", "0.25", 100, 0),
+        new Note(38, "1", "0.5", 100, 0),
+        new Note(30, "3.5", "0.25", 100, 0),
+        new Note(41, "4", "0.25", 100, 0)
+    ];
+    var notesToSourceFrom = [
+        new Note(36, "0.5", "0.25", 100, 0),
+        new Note(40, "3", "0.5", 100, 0),
+        new Note(34, "4", "0.25", 100, 0),
+        new Note(39, "5", "0.25", 100, 0)
+    ];
+
+    var clipActions = new ClipActions();
+    var results = clipActions.process(Action.Interleave, notesToMutate, notesToSourceFrom, {
+        interleaveMode: InterleaveMode.EventCount,
+        interleaveEventCountA: 1,
+        interleaveEventCountB: 1,
+        interleaveEventRangeA: new Big(1),
+        interleaveEventRangeB: new Big(1)
+    });
+
+    for (var i = 0; i < results.length; i++) {
+        console.log(results[i].getStartAsString(), results[i].getPitch());
+    }
+/*
+    test.equal(results[1].getStartAsString(), "0");
+    test.equal(results[2].getStartAsString(), "0");
+    test.equal(results[3].getStartAsString(), "0");
+    test.equal(results[4].getStartAsString(), "0", "");
+    test.equal(results[5].getStartAsString(), "0", "");
+    test.equal(results[6].getStartAsString(), "0", "");
+*/
+
+    test.end();
+});

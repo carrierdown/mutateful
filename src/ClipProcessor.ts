@@ -10,7 +10,12 @@ class ClipProcessor {
     public options: IActionOptions;
     public defaultOptions: IActionOptions = {
         constrainNotePitch: true,
-        constrainNoteStart: false
+        constrainNoteStart: false,
+        interleaveMode: InterleaveMode.EventCount,
+        interleaveEventCountA: 1,
+        interleaveEventCountB: 1,
+        interleaveEventRangeA: new Big(1),
+        interleaveEventRangeB: new Big(1)
     };
 
     constructor() {
@@ -45,7 +50,7 @@ class ClipProcessor {
         }
     }
 
-    public processClip() {
+    public processClip(/* Set destination strategy here, i.e. new clip, destination clip, selected clip */) {
         if (!this.clipToMutate || !this.clipToSourceFrom) return;
 
         var notesToMutate: Note[] = this.clipToMutate.getNotes();
