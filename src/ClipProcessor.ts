@@ -12,8 +12,8 @@ class ClipProcessor {
         constrainNotePitch: true,
         constrainNoteStart: false,
         interleaveMode: InterleaveMode.EventCount,
-        interleaveEventCountA: 1,
-        interleaveEventCountB: 1,
+        interleaveCountA: 1,
+        interleaveCountB: 1,
         interleaveEventRangeA: new Big(1),
         interleaveEventRangeB: new Big(1)
     };
@@ -52,16 +52,13 @@ class ClipProcessor {
 
     public processClip(/* Set destination strategy here, i.e. new clip, destination clip, selected clip */) {
         if (!this.clipToMutate || !this.clipToSourceFrom) return;
-
-        var notesToMutate: Note[] = this.clipToMutate.getNotes();
-        var notesToSourceFrom: Note[] = this.clipToSourceFrom.getNotes();
-
-        if (notesToMutate.length === 0 || notesToSourceFrom.length === 0) return;
+        if (this.clipToMutate.getNotes().length === 0 || this.clipToSourceFrom.getNotes().length === 0) return;
 
         // todo: selection logic goes here...
         // console.log("processClip");
 
-        var mutatedNotes: Note[] = this.clipActions.process(this.action, notesToMutate, notesToSourceFrom, this.options);
-        this.clipToMutate.setNotes(mutatedNotes);
+        var resultClip: GhostClip = this.clipActions.process(this.action, this.clipToMutate, this.clipToSourceFrom, this.options);
+        this.clipToMutate.setNotes(resultClip.notes);
+        // todo: set clip length
     }
 }

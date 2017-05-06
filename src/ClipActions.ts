@@ -14,8 +14,13 @@ enum InterleaveMode {
     TimeRange   // e.g. interleave 1/4 from A for every 1/8 from B
 }
 
+interface GhostClip {
+    notes: Note[];
+    length: IBig;
+}
+
 interface IAction {
-    (notesToMutate: Note[], notesToSourceFrom: Note[], options: IActionOptions): Note[];
+    (notesToMutate: Clip, notesToSourceFrom: Clip, options: IActionOptions): GhostClip;
 }
 
 interface IActionMap {
@@ -30,8 +35,8 @@ interface IActionOptions {
     constrainNoteStart?: boolean;
     constrainNotePitch?: boolean;
     interleaveMode?: InterleaveMode;
-    interleaveEventCountA?: number;
-    interleaveEventCountB?: number;
+    interleaveCountA?: number;
+    interleaveCountB?: number;
     interleaveEventRangeA?: IBig;
     interleaveEventRangeB?: IBig;
 }
@@ -54,8 +59,10 @@ class ClipActions {
 
         this.actions = [];
 
-        this.actions[Action.Constrain] = (notesToMutate: Note[], notesToSourceFrom: Note[], options: IActionOptions) => {
-            var results: Note[] = [];
+        this.actions[Action.Constrain] = (clipToMutate: Clip, clipToSourceFrom: Clip, options: IActionOptions) => {
+            var notesToMutate: Note[] = clipToMutate.getNotes(),
+                notesToSourceFrom: Note[] = clipToSourceFrom.getNotes(),
+                resultClip: GhostClip = ClipActions.newGhostClip();
 
             for (let note of notesToMutate) {
                 let result = note;
@@ -66,15 +73,19 @@ class ClipActions {
                 if (options.constrainNoteStart) {
                     result.setStart(ClipActions.findNearestNoteStartInSet(note, notesToSourceFrom));
                 }
-                results.push(result);
+                resultClip.notes.push(result);
             }
-            return results;
+            return resultClip;
         };
 
-        this.actions[Action.Interleave] = (a: Note[], b: Note[], options: IActionOptions) => {
-            var results: Note[] = [];
+        this.actions[Action.Interleave] = (clipToMutate: Clip, clipToSourceFrom: Clip, options: IActionOptions) => {
+            var a: Note[] = clipToMutate.getNotes(),
+                b: Note[] = clipToSourceFrom.getNotes(),
+                resultClip: GhostClip = ClipActions.newGhostClip();
+
             ClipActions.sortNotes(a);
             ClipActions.sortNotes(b);
+            resultClip.length = clipToMutate.getLength().plus(clipToSourceFrom.getLength());
 
             var position: IBig = new Big(0);
             if (options.interleaveMode === InterleaveMode.EventCount) {
@@ -97,22 +108,44 @@ class ClipActions {
                     }
                     //console.log(i % a.length, a[(i + 1) % a.length].getStartAsString(), position.toFixed(4), ca.getStartAsString());
                     ca.setStart(position);
-                    results.push(ca);
+                    resultClip.notes.push(ca);
                     position = position.plus(a[(i + 1) % a.length].getStart()).minus(ca.getStart());
                     // todo: if ((i + 1) % a.length === 0) {
                     cb.setStart(position);
-                    results.push(cb);
+                    resultClip.notes.push(cb);
                     position = position.plus(b[(i + 1) % b.length].getStart()).minus(cb.getStart());
 
                     i++;
                 }
+            } else if (options.interleaveMode === InterleaveMode.TimeRange) {
+                // split pass
+                let i = 0;
+                while (position.lte(clipToMutate.getLength())) {
+                    console.log("position", position.toFixed(4), "interleave", options.interleaveEventRangeA.toFixed(4), "clipLength", clipToMutate.getLength().toFixed(4));
+                    while (i < a.length) {
+                        let note = a[i];
+                        if (note.getStart().gt(position)) break;
+                        if (note.getStart().lt(position) && note.getStart().plus(note.getDuration()).gt(position)) {
+                            // note runs across range boundary - split it
+                            let rightSplitDuration: IBig;
+                            rightSplitDuration = note.getStart().plus(note.getDuration()).minus(position);
+                            note.setDuration(position.minus(note.getStart()));
+                            let newNote = new Note(note.getPitch(), position.toFixed(4), rightSplitDuration.toFixed(4), note.getVelocity(), note.getMuted());
+                            a.splice(i + 1, 0, newNote);
+                            i++;
+                        }
+                        i++;
+                    }
+                    position = position.plus(options.interleaveEventRangeA);
+                }
+                resultClip.notes = a;
             }
-            return results;
+            return resultClip;
         };
     }
 
-    public process(action: Action, notesToMutate: Note[], notesToSourceFrom: Note[], options: IActionOptions): Note[] {
-        return this.actions[action](notesToMutate, notesToSourceFrom, options);
+    public process(action: Action, clipToMutate: Clip, clipToSourceFrom: Clip, options: IActionOptions): GhostClip {
+        return this.actions[action](clipToMutate, clipToSourceFrom, options);
     }
 
     public static findNearestNoteStartInSet(needle: Note, haystack: Note[]): IBig {
@@ -129,6 +162,13 @@ class ClipActions {
             }
         }
         return haystack[nearestIndex].getStart();
+    }
+
+    private static newGhostClip(): GhostClip {
+        return {
+            notes: [],
+            length: new Big(4)
+        } as GhostClip;
     }
 
     public static findNearestNotePitchInSet(needle: Note, haystack: Note[]): number {

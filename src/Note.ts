@@ -57,6 +57,10 @@ class Note {
         return this.duration;
     }
 
+    public setDuration(duration: IBig): void {
+        this.duration = duration;
+    }
+
     public getDurationAsString(): string {
         if (this.duration.lt(Note.MIN_DURATION)) return Note.MIN_DURATION.toFixed(4);
         return this.duration.toFixed(4);

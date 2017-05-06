@@ -893,6 +893,9 @@ var Note = (function () {
     Note.prototype.getDuration = function () {
         return this.duration;
     };
+    Note.prototype.setDuration = function (duration) {
+        this.duration = duration;
+    };
     Note.prototype.getDurationAsString = function () {
         if (this.duration.lt(Note.MIN_DURATION))
             return Note.MIN_DURATION.toFixed(4);
@@ -996,8 +999,8 @@ var ClipActions = (function () {
         this.noteDurations["1/16"] = barLength.div(new Big(16));
         this.noteDurations["1/32"] = barLength.div(new Big(32));
         this.actions = [];
-        this.actions[Action.Constrain] = function (notesToMutate, notesToSourceFrom, options) {
-            var results = [];
+        this.actions[Action.Constrain] = function (clipToMutate, clipToSourceFrom, options) {
+            var notesToMutate = clipToMutate.getNotes(), notesToSourceFrom = clipToSourceFrom.getNotes(), resultClip = ClipActions.newGhostClip();
             for (var _i = 0, notesToMutate_1 = notesToMutate; _i < notesToMutate_1.length; _i++) {
                 var note = notesToMutate_1[_i];
                 var result = note;
@@ -1007,14 +1010,15 @@ var ClipActions = (function () {
                 if (options.constrainNoteStart) {
                     result.setStart(ClipActions.findNearestNoteStartInSet(note, notesToSourceFrom));
                 }
-                results.push(result);
+                resultClip.notes.push(result);
             }
-            return results;
+            return resultClip;
         };
-        this.actions[Action.Interleave] = function (a, b, options) {
-            var results = [];
+        this.actions[Action.Interleave] = function (clipToMutate, clipToSourceFrom, options) {
+            var a = clipToMutate.getNotes(), b = clipToSourceFrom.getNotes(), resultClip = ClipActions.newGhostClip();
             ClipActions.sortNotes(a);
             ClipActions.sortNotes(b);
+            resultClip.length = clipToMutate.getLength().plus(clipToSourceFrom.getLength());
             var position = new Big(0);
             if (options.interleaveMode === InterleaveMode.EventCount) {
                 var i = 0;
@@ -1032,20 +1036,44 @@ var ClipActions = (function () {
                     }
                     //console.log(i % a.length, a[(i + 1) % a.length].getStartAsString(), position.toFixed(4), ca.getStartAsString());
                     ca.setStart(position);
-                    results.push(ca);
+                    resultClip.notes.push(ca);
                     position = position.plus(a[(i + 1) % a.length].getStart()).minus(ca.getStart());
                     // todo: if ((i + 1) % a.length === 0) {
                     cb.setStart(position);
-                    results.push(cb);
+                    resultClip.notes.push(cb);
                     position = position.plus(b[(i + 1) % b.length].getStart()).minus(cb.getStart());
                     i++;
                 }
             }
-            return results;
+            else if (options.interleaveMode === InterleaveMode.TimeRange) {
+                // split pass
+                var i = 0;
+                while (position.lte(clipToMutate.getLength())) {
+                    console.log("position", position.toFixed(4), "interleave", options.interleaveEventRangeA.toFixed(4), "clipLength", clipToMutate.getLength().toFixed(4));
+                    while (i < a.length) {
+                        var note = a[i];
+                        if (note.getStart().gt(position))
+                            break;
+                        if (note.getStart().lt(position) && note.getStart().plus(note.getDuration()).gt(position)) {
+                            // note runs across range boundary - split it
+                            var rightSplitDuration = void 0;
+                            rightSplitDuration = note.getStart().plus(note.getDuration()).minus(position);
+                            note.setDuration(position.minus(note.getStart()));
+                            var newNote = new Note(note.getPitch(), position.toFixed(4), rightSplitDuration.toFixed(4), note.getVelocity(), note.getMuted());
+                            a.splice(i + 1, 0, newNote);
+                            i++;
+                        }
+                        i++;
+                    }
+                    position = position.plus(options.interleaveEventRangeA);
+                }
+                resultClip.notes = a;
+            }
+            return resultClip;
         };
     }
-    ClipActions.prototype.process = function (action, notesToMutate, notesToSourceFrom, options) {
-        return this.actions[action](notesToMutate, notesToSourceFrom, options);
+    ClipActions.prototype.process = function (action, clipToMutate, clipToSourceFrom, options) {
+        return this.actions[action](clipToMutate, clipToSourceFrom, options);
     };
     ClipActions.findNearestNoteStartInSet = function (needle, haystack) {
         var nearestIndex = 0, nearestDelta;
@@ -1060,6 +1088,12 @@ var ClipActions = (function () {
             }
         }
         return haystack[nearestIndex].getStart();
+    };
+    ClipActions.newGhostClip = function () {
+        return {
+            notes: [],
+            length: new Big(4)
+        };
     };
     ClipActions.findNearestNotePitchInSet = function (needle, haystack) {
         var nearestIndex = 0, nearestDelta;
@@ -1108,8 +1142,8 @@ var ClipProcessor = (function () {
             constrainNotePitch: true,
             constrainNoteStart: false,
             interleaveMode: InterleaveMode.EventCount,
-            interleaveEventCountA: 1,
-            interleaveEventCountB: 1,
+            interleaveCountA: 1,
+            interleaveCountB: 1,
             interleaveEventRangeA: new Big(1),
             interleaveEventRangeB: new Big(1)
         };
@@ -1144,14 +1178,13 @@ var ClipProcessor = (function () {
     ClipProcessor.prototype.processClip = function () {
         if (!this.clipToMutate || !this.clipToSourceFrom)
             return;
-        var notesToMutate = this.clipToMutate.getNotes();
-        var notesToSourceFrom = this.clipToSourceFrom.getNotes();
-        if (notesToMutate.length === 0 || notesToSourceFrom.length === 0)
+        if (this.clipToMutate.getNotes().length === 0 || this.clipToSourceFrom.getNotes().length === 0)
             return;
         // todo: selection logic goes here...
         // console.log("processClip");
-        var mutatedNotes = this.clipActions.process(this.action, notesToMutate, notesToSourceFrom, this.options);
-        this.clipToMutate.setNotes(mutatedNotes);
+        var resultClip = this.clipActions.process(this.action, this.clipToMutate, this.clipToSourceFrom, this.options);
+        this.clipToMutate.setNotes(resultClip.notes);
+        // todo: set clip length
     };
     return ClipProcessor;
 }());

@@ -1,5 +1,6 @@
 const tape = require('tape');
 
+/*
 tape('Constrain Note Start', (test) => {
     var notesToMutate = [
         new Note(36, "0.25", "0.25", 100, 0),
@@ -55,32 +56,42 @@ tape('Constrain Note Pitch', (test) => {
 
     test.end();
 });
+*/
 
 tape('Interleave notes', (test) => {
-    var notesToMutate = [
-        new Note(35, "0.25", "0.25", 100, 0),
-        new Note(38, "1", "0.5", 100, 0),
-        new Note(30, "3.5", "0.25", 100, 0),
-        new Note(41, "4", "0.25", 100, 0)
-    ];
-    var notesToSourceFrom = [
-        new Note(36, "0.5", "0.25", 100, 0),
-        new Note(40, "3", "0.5", 100, 0),
-        new Note(34, "4", "0.25", 100, 0),
-        new Note(39, "5", "0.25", 100, 0)
-    ];
-
+    var src = {
+        getNotes: () => {
+            return [
+                new Note(36, "0.5", "1", 100, 0),
+                new Note(38, "2", "1", 100, 0)
+            ];
+        },
+        getLength: () => {
+            return new Big(4);
+        }
+    };
+    var dst = {
+        getNotes: () => {
+            return [
+                new Note(37, "0.5", "0.25", 100, 0)
+            ];
+        },
+        getLength: () => {
+            return new Big(4);
+        }
+    };
     var clipActions = new ClipActions();
-    var results = clipActions.process(Action.Interleave, notesToMutate, notesToSourceFrom, {
-        interleaveMode: InterleaveMode.EventCount,
-        interleaveEventCountA: 1,
-        interleaveEventCountB: 1,
+    var resultClip = clipActions.process(Action.Interleave, src, dst, {
+        interleaveMode: InterleaveMode.TimeRange,
+        interleaveCountA: 1,
+        interleaveCountB: 1,
         interleaveEventRangeA: new Big(1),
         interleaveEventRangeB: new Big(1)
     });
+    var results = resultClip.notes;
 
     for (var i = 0; i < results.length; i++) {
-        console.log(results[i].getStartAsString(), results[i].getPitch());
+        console.log("start", results[i].getStartAsString(), "dur", results[i].getDurationAsString(), results[i].getPitch());
     }
 /*
     test.equal(results[1].getStartAsString(), "0");
