@@ -1046,34 +1046,72 @@ var ClipActions = (function () {
                 }
             }
             else if (options.interleaveMode === InterleaveMode.TimeRange) {
+                var finalLength = clipToSourceFrom.getLength().plus(clipToMutate.getLength()); // works as long as multiple repeats aren't allowed
                 // split pass
-                var i = 0;
-                while (position.lte(clipToMutate.getLength())) {
-                    console.log("position", position.toFixed(4), "interleave", options.interleaveEventRangeA.toFixed(4), "clipLength", clipToMutate.getLength().toFixed(4));
-                    while (i < a.length) {
-                        var note = a[i];
-                        if (note.getStart().gt(position))
-                            break;
-                        if (note.getStart().lt(position) && note.getStart().plus(note.getDuration()).gt(position)) {
-                            // note runs across range boundary - split it
-                            var rightSplitDuration = void 0;
-                            rightSplitDuration = note.getStart().plus(note.getDuration()).minus(position);
-                            note.setDuration(position.minus(note.getStart()));
-                            var newNote = new Note(note.getPitch(), position.toFixed(4), rightSplitDuration.toFixed(4), note.getVelocity(), note.getMuted());
-                            a.splice(i + 1, 0, newNote);
-                            i++;
-                        }
-                        i++;
+                a = ClipActions.splitNotesAtEvery(a, options.interleaveEventRangeA, clipToSourceFrom.getLength());
+                b = ClipActions.splitNotesAtEvery(b, options.interleaveEventRangeB, clipToMutate.getLength());
+                var srcPositionA = new Big(0), srcPositionB = new Big(0);
+                while (position.lt(finalLength)) {
+                    var notesFromRange = ClipActions.getNotesInRange(srcPositionA, srcPositionA.plus(options.interleaveEventRangeA), clipToSourceFrom.getNotes());
+                    for (var _i = 0, notesFromRange_1 = notesFromRange; _i < notesFromRange_1.length; _i++) {
+                        var note = notesFromRange_1[_i];
+                        note.setStart(note.getStart().plus(position));
                     }
+                    resultClip.notes = resultClip.notes.concat(notesFromRange);
                     position = position.plus(options.interleaveEventRangeA);
+                    srcPositionA = srcPositionA.plus(options.interleaveEventRangeA);
+                    notesFromRange = ClipActions.getNotesInRange(srcPositionB, srcPositionB.plus(options.interleaveEventRangeB), clipToMutate.getNotes());
+                    for (var _a = 0, notesFromRange_2 = notesFromRange; _a < notesFromRange_2.length; _a++) {
+                        var note = notesFromRange_2[_a];
+                        note.setStart(note.getStart().plus(position));
+                    }
+                    resultClip.notes = resultClip.notes.concat(notesFromRange);
+                    position = position.plus(options.interleaveEventRangeB);
+                    srcPositionB = srcPositionB.plus(options.interleaveEventRangeB);
                 }
-                resultClip.notes = a;
+                resultClip.length = finalLength;
             }
             return resultClip;
         };
     }
     ClipActions.prototype.process = function (action, clipToMutate, clipToSourceFrom, options) {
         return this.actions[action](clipToMutate, clipToSourceFrom, options);
+    };
+    ClipActions.splitNotesAtEvery = function (notes, position, length) {
+        var i = 0, currentPosition = new Big(0);
+        while (currentPosition.lte(length)) {
+            console.log("position", currentPosition.toFixed(4), "interleave", position.toFixed(4), "clipLength", length.toFixed(4));
+            while (i < notes.length) {
+                var note = notes[i];
+                if (note.getStart().gt(currentPosition))
+                    break;
+                if (note.getStart().lt(currentPosition) && note.getStart().plus(note.getDuration()).gt(currentPosition)) {
+                    // note runs across range boundary - split it
+                    var rightSplitDuration = void 0;
+                    rightSplitDuration = note.getStart().plus(note.getDuration()).minus(currentPosition);
+                    note.setDuration(currentPosition.minus(note.getStart()));
+                    var newNote = new Note(note.getPitch(), currentPosition.toFixed(4), rightSplitDuration.toFixed(4), note.getVelocity(), note.getMuted());
+                    notes = notes.splice(i + 1, 0, newNote);
+                    i++;
+                }
+                i++;
+            }
+            currentPosition = currentPosition.plus(position);
+        }
+        return notes;
+    };
+    ClipActions.getNotesInRange = function (start, end, notes) {
+        var results = [];
+        for (var _i = 0, notes_1 = notes; _i < notes_1.length; _i++) {
+            var note = notes_1[_i];
+            if (note.getStart().gt(end)) {
+                break;
+            }
+            if (note.getStart().gt(start) && note.getStart().lt(end)) {
+                results.push(note);
+            }
+        }
+        return results;
     };
     ClipActions.findNearestNoteStartInSet = function (needle, haystack) {
         var nearestIndex = 0, nearestDelta;
@@ -1199,8 +1237,8 @@ function bang() {
     // clp.selectAllNotes();
     // var notes: Note[] = clp.getSelectedNotes();
     var notes = clp.getNotes();
-    for (var _i = 0, notes_1 = notes; _i < notes_1.length; _i++) {
-        var note = notes_1[_i];
+    for (var _i = 0, notes_2 = notes; _i < notes_2.length; _i++) {
+        var note = notes_2[_i];
         post(note.toString());
     }
 }

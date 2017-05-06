@@ -63,7 +63,8 @@ tape('Interleave notes', (test) => {
         getNotes: () => {
             return [
                 new Note(36, "0.5", "1", 100, 0),
-                new Note(38, "2", "1", 100, 0)
+                new Note(37, "1.5", "0.5", 100, 0),
+                new Note(38, "2.0", "1.0", 100, 0)
             ];
         },
         getLength: () => {
@@ -73,7 +74,9 @@ tape('Interleave notes', (test) => {
     var dst = {
         getNotes: () => {
             return [
-                new Note(37, "0.5", "0.25", 100, 0)
+                new Note(36, "0.5", "0.25", 100, 0),
+                new Note(37, "1.75", "0.5", 100, 0),
+                new Note(38, "2.5", "1.0", 100, 0)
             ];
         },
         getLength: () => {
@@ -81,7 +84,7 @@ tape('Interleave notes', (test) => {
         }
     };
     var clipActions = new ClipActions();
-    var resultClip = clipActions.process(Action.Interleave, src, dst, {
+    var resultClip = clipActions.process(Action.Interleave, dst, src, {
         interleaveMode: InterleaveMode.TimeRange,
         interleaveCountA: 1,
         interleaveCountB: 1,
