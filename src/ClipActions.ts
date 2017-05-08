@@ -85,55 +85,65 @@ class ClipActions {
 
             ClipActions.sortNotes(a);
             ClipActions.sortNotes(b);
-            resultClip.length = clipToMutate.getLength().plus(clipToSourceFrom.getLength());
+            resultClip.length = clipToMutate.getLength().plus(clipToSourceFrom.getLength()); // works as long as multiple repeats aren't allowed
 
             var position: IBig = new Big(0);
-            if (options.interleaveMode === InterleaveMode.EventCount) {
-                let i = 0;
+            switch (options.interleaveMode) {
+                case InterleaveMode.EventCount:
+                    let i = 0;
+                    while (i < b.length || i < a.length) {
+                        let ca = new Note(a[i % a.length].getPitch(), a[i % a.length].getStart(), a[i % a.length].getDuration(), a[i % a.length].getVelocity(), a[i % a.length].getMuted()),
+                            cb = new Note(b[i % b.length].getPitch(), b[i % b.length].getStart(), b[i % b.length].getDuration(), b[i % b.length].getVelocity(), b[i % b.length].getMuted());
 
-                while (i < b.length || i < a.length) {
-                    let ca = a[i % a.length],
-                        cb = b[i % b.length];
+                        // if i = 0 for a, update pos
+                        // add a at pos
+                        // update pos with next a
+                        // if i = 0 for next a, calculate distance from start of event to end of clip and add to pos
+                        // add b at pos
+                        // update pos with next b
+                        // if i = 0 for next b, calculate distance from start of event to end of clip and add to pos
 
-                    // if i = 0 for a, update pos
-                    // add a at pos
-                    // update pos with next a
-                    // if i = 0 for next a, calculate distance from start of event to end of clip and add to pos
-                    // add b at pos
-                    // update pos with next b
-                    // if i = 0 for next b, calculate distance from start of event to end of clip and add to pos
+                        if (i === 0) {
+                            position = position.plus(ca.getStart());
+                        }
+                        console.log(i % a.length, a[(i + 1) % a.length].getStartAsString(), position.toFixed(4), ca.getStartAsString());
+                        ca.setStart(position);
+                        console.log(`Set start ${position.toFixed(4)}`);
+                        resultClip.notes.push(ca);
+                        // console.dir(resultClip.notes);
+                        position = position.plus(a[(i + 1) % a.length].getStart()).minus(ca.getStart());
+                        console.log(`Update position ${position.toFixed(4)}`);
+                        if ((i + 1) % a.length === 0 && i > 0) {
+                            position = position.plus(clipToMutate.getLength().minus(ca.getStart()));
+                            console.log(`Update position at boundary ${position.toFixed(4)}`);
+                        }
 
-                    if (i % a.length === 0) {
-                        position = position.plus(ca.getStart());
+                        cb.setStart(position);
+                        resultClip.notes.push(cb);
+                        position = position.plus(b[(i + 1) % b.length].getStart()).minus(cb.getStart());
+                        if ((i + 1) % b.length === 0 && i > 0) {
+                            position = position.plus(clipToSourceFrom.getLength().minus(cb.getStart()));
+                        }
+
+                        i++;
                     }
-                    //console.log(i % a.length, a[(i + 1) % a.length].getStartAsString(), position.toFixed(4), ca.getStartAsString());
-                    ca.setStart(position);
-                    resultClip.notes.push(ca);
-                    position = position.plus(a[(i + 1) % a.length].getStart()).minus(ca.getStart());
-                    // todo: if ((i + 1) % a.length === 0) {
-                    cb.setStart(position);
-                    resultClip.notes.push(cb);
-                    position = position.plus(b[(i + 1) % b.length].getStart()).minus(cb.getStart());
+                    break;
+                case InterleaveMode.TimeRange:
+                    let srcPositionA = new Big(0),
+                        srcPositionB = new Big(0);
+                    a = ClipActions.splitNotesAtEvery(a, options.interleaveEventRangeA, clipToSourceFrom.getLength());
+                    b = ClipActions.splitNotesAtEvery(b, options.interleaveEventRangeB, clipToMutate.getLength());
 
-                    i++;
-                }
-            } else if (options.interleaveMode === InterleaveMode.TimeRange) {
-                let finalLength = clipToSourceFrom.getLength().plus(clipToMutate.getLength()), // works as long as multiple repeats aren't allowed
-                    srcPositionA = new Big(0),
-                    srcPositionB = new Big(0);
-                a = ClipActions.splitNotesAtEvery(a, options.interleaveEventRangeA, clipToSourceFrom.getLength());
-                b = ClipActions.splitNotesAtEvery(b, options.interleaveEventRangeB, clipToMutate.getLength());
+                    while (position.lt(resultClip.length)) {
+                        resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionA, srcPositionA.plus(options.interleaveEventRangeA), a, position));
+                        position = position.plus(options.interleaveEventRangeA);
+                        srcPositionA = srcPositionA.plus(options.interleaveEventRangeA);
 
-                while (position.lt(finalLength)) {
-                    resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionA, srcPositionA.plus(options.interleaveEventRangeA), a, position));
-                    position = position.plus(options.interleaveEventRangeA);
-                    srcPositionA = srcPositionA.plus(options.interleaveEventRangeA);
-
-                    resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionB, srcPositionB.plus(options.interleaveEventRangeB), b, position));
-                    position = position.plus(options.interleaveEventRangeB);
-                    srcPositionB = srcPositionB.plus(options.interleaveEventRangeB);
-                }
-                resultClip.length = finalLength;
+                        resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionB, srcPositionB.plus(options.interleaveEventRangeB), b, position));
+                        position = position.plus(options.interleaveEventRangeB);
+                        srcPositionB = srcPositionB.plus(options.interleaveEventRangeB);
+                    }
+                    break;
             }
             return resultClip;
         };
