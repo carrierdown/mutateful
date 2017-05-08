@@ -911,10 +911,10 @@ var Note = (function () {
     Note.prototype.getMuted = function () {
         return this.muted;
     };
+    Note.NOTE_NAMES = ['C-2', 'C#-2', 'D-2', 'D#-2', 'E-2', 'F-2', 'F#-2', 'G-2', 'G#-2', 'A-2', 'A#-2', 'B-2', 'C-1', 'C#-1', 'D-1', 'D#-1', 'E-1', 'F-1', 'F#-1', 'G-1', 'G#-1', 'A-1', 'A#-1', 'B-1', 'C0', 'C#0', 'D0', 'D#0', 'E0', 'F0', 'F#0', 'G0', 'G#0', 'A0', 'A#0', 'B0', 'C1', 'C#1', 'D1', 'D#1', 'E1', 'F1', 'F#1', 'G1', 'G#1', 'A1', 'A#1', 'B1', 'C2', 'C#2', 'D2', 'D#2', 'E2', 'F2', 'F#2', 'G2', 'G#2', 'A2', 'A#2', 'B2', 'C3', 'C#3', 'D3', 'D#3', 'E3', 'F3', 'F#3', 'G3', 'G#3', 'A3', 'A#3', 'B3', 'C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4', 'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5', 'G5', 'G#5', 'A5', 'A#5', 'B5', 'C6', 'C#6', 'D6', 'D#6', 'E6', 'F6', 'F#6', 'G6', 'G#6', 'A6', 'A#6', 'B6', 'C7', 'C#7', 'D7', 'D#7', 'E7', 'F7', 'F#7', 'G7', 'G#7', 'A7', 'A#7', 'B7', 'C8', 'C#8', 'D8', 'D#8', 'E8', 'F8', 'F#8', 'G8'];
+    Note.MIN_DURATION = new Big(1 / 128);
     return Note;
 }());
-Note.NOTE_NAMES = ['C-2', 'C#-2', 'D-2', 'D#-2', 'E-2', 'F-2', 'F#-2', 'G-2', 'G#-2', 'A-2', 'A#-2', 'B-2', 'C-1', 'C#-1', 'D-1', 'D#-1', 'E-1', 'F-1', 'F#-1', 'G-1', 'G#-1', 'A-1', 'A#-1', 'B-1', 'C0', 'C#0', 'D0', 'D#0', 'E0', 'F0', 'F#0', 'G0', 'G#0', 'A0', 'A#0', 'B0', 'C1', 'C#1', 'D1', 'D#1', 'E1', 'F1', 'F#1', 'G1', 'G#1', 'A1', 'A#1', 'B1', 'C2', 'C#2', 'D2', 'D#2', 'E2', 'F2', 'F#2', 'G2', 'G#2', 'A2', 'A#2', 'B2', 'C3', 'C#3', 'D3', 'D#3', 'E3', 'F3', 'F#3', 'G3', 'G#3', 'A3', 'A#3', 'B3', 'C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4', 'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5', 'G5', 'G#5', 'A5', 'A#5', 'B5', 'C6', 'C#6', 'D6', 'D#6', 'E6', 'F6', 'F#6', 'G6', 'G#6', 'A6', 'A#6', 'B6', 'C7', 'C#7', 'D7', 'D#7', 'E7', 'F7', 'F#7', 'G7', 'G#7', 'A7', 'A#7', 'B7', 'C8', 'C#8', 'D8', 'D#8', 'E8', 'F8', 'F#8', 'G8'];
-Note.MIN_DURATION = new Big(1 / 128);
 ///<reference path="big.js"/>
 ///<reference path="big-def.ts"/>
 ///<reference path="Note.ts"/>
@@ -1046,26 +1046,15 @@ var ClipActions = (function () {
                 }
             }
             else if (options.interleaveMode === InterleaveMode.TimeRange) {
-                var finalLength = clipToSourceFrom.getLength().plus(clipToMutate.getLength()); // works as long as multiple repeats aren't allowed
-                // split pass
+                var finalLength = clipToSourceFrom.getLength().plus(clipToMutate.getLength()), // works as long as multiple repeats aren't allowed
+                srcPositionA = new Big(0), srcPositionB = new Big(0);
                 a = ClipActions.splitNotesAtEvery(a, options.interleaveEventRangeA, clipToSourceFrom.getLength());
                 b = ClipActions.splitNotesAtEvery(b, options.interleaveEventRangeB, clipToMutate.getLength());
-                var srcPositionA = new Big(0), srcPositionB = new Big(0);
                 while (position.lt(finalLength)) {
-                    var notesFromRange = ClipActions.getNotesInRange(srcPositionA, srcPositionA.plus(options.interleaveEventRangeA), clipToSourceFrom.getNotes());
-                    for (var _i = 0, notesFromRange_1 = notesFromRange; _i < notesFromRange_1.length; _i++) {
-                        var note = notesFromRange_1[_i];
-                        note.setStart(note.getStart().plus(position));
-                    }
-                    resultClip.notes = resultClip.notes.concat(notesFromRange);
+                    resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionA, srcPositionA.plus(options.interleaveEventRangeA), a, position));
                     position = position.plus(options.interleaveEventRangeA);
                     srcPositionA = srcPositionA.plus(options.interleaveEventRangeA);
-                    notesFromRange = ClipActions.getNotesInRange(srcPositionB, srcPositionB.plus(options.interleaveEventRangeB), clipToMutate.getNotes());
-                    for (var _a = 0, notesFromRange_2 = notesFromRange; _a < notesFromRange_2.length; _a++) {
-                        var note = notesFromRange_2[_a];
-                        note.setStart(note.getStart().plus(position));
-                    }
-                    resultClip.notes = resultClip.notes.concat(notesFromRange);
+                    resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionB, srcPositionB.plus(options.interleaveEventRangeB), b, position));
                     position = position.plus(options.interleaveEventRangeB);
                     srcPositionB = srcPositionB.plus(options.interleaveEventRangeB);
                 }
@@ -1080,9 +1069,10 @@ var ClipActions = (function () {
     ClipActions.splitNotesAtEvery = function (notes, position, length) {
         var i = 0, currentPosition = new Big(0);
         while (currentPosition.lte(length)) {
-            console.log("position", currentPosition.toFixed(4), "interleave", position.toFixed(4), "clipLength", length.toFixed(4));
+            // console.log("position", currentPosition.toFixed(4), "interleave", position.toFixed(4), "clipLength", length.toFixed(4));
             while (i < notes.length) {
                 var note = notes[i];
+                // console.log("start", note.getStartAsString(), "end", note.getStart().plus(note.getDuration()).toFixed(4));
                 if (note.getStart().gt(currentPosition))
                     break;
                 if (note.getStart().lt(currentPosition) && note.getStart().plus(note.getDuration()).gt(currentPosition)) {
@@ -1091,7 +1081,8 @@ var ClipActions = (function () {
                     rightSplitDuration = note.getStart().plus(note.getDuration()).minus(currentPosition);
                     note.setDuration(currentPosition.minus(note.getStart()));
                     var newNote = new Note(note.getPitch(), currentPosition.toFixed(4), rightSplitDuration.toFixed(4), note.getVelocity(), note.getMuted());
-                    notes = notes.splice(i + 1, 0, newNote);
+                    notes.splice(i + 1, 0, newNote);
+                    // console.log("new note: ", note.getPitch(), "pos", currentPosition.toFixed(4), "dur", rightSplitDuration.toFixed(4));
                     i++;
                 }
                 i++;
@@ -1100,6 +1091,18 @@ var ClipActions = (function () {
         }
         return notes;
     };
+    ClipActions.getNotesFromRangeAtPosition = function (start, end, notes, position) {
+        var results = [];
+        var notesFromRange = ClipActions.getNotesInRange(start, end, notes);
+        // console.log(`notes from range ${srcPositionA.toFixed(4)} - ${srcPositionA.plus(options.interleaveEventRangeA).toFixed(4)}`);
+        // console.dir(notesFromRange);
+        for (var _i = 0, notesFromRange_1 = notesFromRange; _i < notesFromRange_1.length; _i++) {
+            var note = notesFromRange_1[_i];
+            note.setStart(note.getStart().plus(position).minus(start));
+        }
+        results = results.concat(notesFromRange);
+        return results;
+    };
     ClipActions.getNotesInRange = function (start, end, notes) {
         var results = [];
         for (var _i = 0, notes_1 = notes; _i < notes_1.length; _i++) {
@@ -1107,8 +1110,8 @@ var ClipActions = (function () {
             if (note.getStart().gt(end)) {
                 break;
             }
-            if (note.getStart().gt(start) && note.getStart().lt(end)) {
-                results.push(note);
+            if (note.getStart().gte(start) && note.getStart().lt(end)) {
+                results.push(new Note(note.getPitch(), note.getStart(), note.getDuration(), note.getVelocity(), note.getMuted()));
             }
         }
         return results;

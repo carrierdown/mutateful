@@ -118,25 +118,18 @@ class ClipActions {
                     i++;
                 }
             } else if (options.interleaveMode === InterleaveMode.TimeRange) {
-                let finalLength = clipToSourceFrom.getLength().plus(clipToMutate.getLength()); // works as long as multiple repeats aren't allowed
-                // split pass
+                let finalLength = clipToSourceFrom.getLength().plus(clipToMutate.getLength()), // works as long as multiple repeats aren't allowed
+                    srcPositionA = new Big(0),
+                    srcPositionB = new Big(0);
                 a = ClipActions.splitNotesAtEvery(a, options.interleaveEventRangeA, clipToSourceFrom.getLength());
                 b = ClipActions.splitNotesAtEvery(b, options.interleaveEventRangeB, clipToMutate.getLength());
-                let srcPositionA = new Big(0), srcPositionB = new Big(0);
+
                 while (position.lt(finalLength)) {
-                    let notesFromRange: Note[] = ClipActions.getNotesInRange(srcPositionA, srcPositionA.plus(options.interleaveEventRangeA), clipToSourceFrom.getNotes());
-                    for (let note of notesFromRange) {
-                        note.setStart(note.getStart().plus(position));
-                    }
-                    resultClip.notes = resultClip.notes.concat(notesFromRange);
+                    resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionA, srcPositionA.plus(options.interleaveEventRangeA), a, position));
                     position = position.plus(options.interleaveEventRangeA);
                     srcPositionA = srcPositionA.plus(options.interleaveEventRangeA);
 
-                    notesFromRange = ClipActions.getNotesInRange(srcPositionB, srcPositionB.plus(options.interleaveEventRangeB), clipToMutate.getNotes());
-                    for (let note of notesFromRange) {
-                        note.setStart(note.getStart().plus(position));
-                    }
-                    resultClip.notes = resultClip.notes.concat(notesFromRange);
+                    resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionB, srcPositionB.plus(options.interleaveEventRangeB), b, position));
                     position = position.plus(options.interleaveEventRangeB);
                     srcPositionB = srcPositionB.plus(options.interleaveEventRangeB);
                 }
@@ -154,9 +147,10 @@ class ClipActions {
         let i = 0,
             currentPosition: IBig = new Big(0);
         while (currentPosition.lte(length)) {
-            console.log("position", currentPosition.toFixed(4), "interleave", position.toFixed(4), "clipLength", length.toFixed(4));
+            // console.log("position", currentPosition.toFixed(4), "interleave", position.toFixed(4), "clipLength", length.toFixed(4));
             while (i < notes.length) {
                 let note = notes[i];
+                // console.log("start", note.getStartAsString(), "end", note.getStart().plus(note.getDuration()).toFixed(4));
                 if (note.getStart().gt(currentPosition)) break;
                 if (note.getStart().lt(currentPosition) && note.getStart().plus(note.getDuration()).gt(currentPosition)) {
                     // note runs across range boundary - split it
@@ -164,7 +158,8 @@ class ClipActions {
                     rightSplitDuration = note.getStart().plus(note.getDuration()).minus(currentPosition);
                     note.setDuration(currentPosition.minus(note.getStart()));
                     let newNote = new Note(note.getPitch(), currentPosition.toFixed(4), rightSplitDuration.toFixed(4), note.getVelocity(), note.getMuted());
-                    notes = notes.splice(i + 1, 0, newNote);
+                    notes.splice(i + 1, 0, newNote);
+                    // console.log("new note: ", note.getPitch(), "pos", currentPosition.toFixed(4), "dur", rightSplitDuration.toFixed(4));
                     i++;
                 }
                 i++;
@@ -174,6 +169,18 @@ class ClipActions {
         return notes;
     }
 
+    private static getNotesFromRangeAtPosition(start: IBig, end: IBig, notes: Note[], position: IBig): Note[] {
+        var results: Note[] = [];
+        let notesFromRange: Note[] = ClipActions.getNotesInRange(start, end, notes);
+        // console.log(`notes from range ${srcPositionA.toFixed(4)} - ${srcPositionA.plus(options.interleaveEventRangeA).toFixed(4)}`);
+        // console.dir(notesFromRange);
+        for (let note of notesFromRange) {
+            note.setStart(note.getStart().plus(position).minus(start));
+        }
+        results = results.concat(notesFromRange);
+        return results;
+    }
+
     private static getNotesInRange(start: IBig, end: IBig, notes: Note[]): Note[] {
         var results: Note[] = [];
 
@@ -181,8 +188,8 @@ class ClipActions {
             if (note.getStart().gt(end)) {
                 break;
             }
-            if (note.getStart().gt(start) && note.getStart().lt(end)) {
-                results.push(note);
+            if (note.getStart().gte(start) && note.getStart().lt(end)) {
+                results.push(new Note(note.getPitch(), note.getStart(), note.getDuration(), note.getVelocity(), note.getMuted()));
             }
         }
         return results;

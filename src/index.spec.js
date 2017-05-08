@@ -59,24 +59,24 @@ tape('Constrain Note Pitch', (test) => {
 */
 
 tape('Interleave notes', (test) => {
-    var src = {
+    var dst = {
         getNotes: () => {
             return [
                 new Note(36, "0.5", "1", 100, 0),
-                new Note(37, "1.5", "0.5", 100, 0),
-                new Note(38, "2.0", "1.0", 100, 0)
+                new Note(38, "1.5", "0.5", 100, 0),
+                new Note(40, "2.0", "1.0", 100, 0)
             ];
         },
         getLength: () => {
             return new Big(4);
         }
     };
-    var dst = {
+    var src = {
         getNotes: () => {
             return [
-                new Note(36, "0.5", "0.25", 100, 0),
-                new Note(37, "1.75", "0.5", 100, 0),
-                new Note(38, "2.5", "1.0", 100, 0)
+                new Note(37, "0.5", "0.25", 100, 0),
+                new Note(39, "1.75", "0.5", 100, 0),
+                new Note(41, "2.5", "1.0", 100, 0)
             ];
         },
         getLength: () => {
@@ -93,17 +93,15 @@ tape('Interleave notes', (test) => {
     });
     var results = resultClip.notes;
 
-    for (var i = 0; i < results.length; i++) {
-        console.log("start", results[i].getStartAsString(), "dur", results[i].getDurationAsString(), results[i].getPitch());
-    }
-/*
-    test.equal(results[1].getStartAsString(), "0");
-    test.equal(results[2].getStartAsString(), "0");
-    test.equal(results[3].getStartAsString(), "0");
-    test.equal(results[4].getStartAsString(), "0", "");
-    test.equal(results[5].getStartAsString(), "0", "");
-    test.equal(results[6].getStartAsString(), "0", "");
-*/
+    test.equal(results[0].getStartAsString(), "0.5000");
+    test.equal(results[1].getStartAsString(), "1.5000");
+    test.equal(results[2].getStartAsString(), "2.0000");
+    test.equal(results[3].getStartAsString(), "2.5000");
+    test.equal(results[4].getStartAsString(), "3.7500");
+    test.equal(results[5].getStartAsString(), "4.0000");
+    test.equal(results[6].getStartAsString(), "5.0000");
+    test.equal(results[7].getStartAsString(), "5.5000");
+    test.equal(results[8].getStartAsString(), "7.0000");
 
     test.end();
 });
