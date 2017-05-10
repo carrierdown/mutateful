@@ -110,8 +110,8 @@ tape('Interleave note events', (test) => {
     var dst = {
         getNotes: () => {
             return [
-                new Note(36, "0.5", "1", 100, 0),
-                new Note(38, "1.5", "0.5", 100, 0),
+                new Note(36, "1", "1.1", 100, 0),
+                new Note(38, "3", "1.3", 100, 0),
             ];
         },
         getLength: () => {
@@ -121,13 +121,13 @@ tape('Interleave note events', (test) => {
     var src = {
         getNotes: () => {
             return [
-                new Note(37, "0.5", "0.25", 100, 0),
-                new Note(39, "1.75", "0.5", 100, 0),
-                new Note(40, "2.5", "1.0", 100, 0)
+                new Note(37, "0.5", "1.2", 100, 0),
+                new Note(39, "4", "1.4", 100, 0),
+                new Note(40, "6", "1.6", 100, 0)
             ];
         },
         getLength: () => {
-            return new Big(4);
+            return new Big(8);
         }
     };
     var clipActions = new ClipActions();
@@ -144,12 +144,16 @@ tape('Interleave note events', (test) => {
         console.log("start", results[i].getStartAsString(), "dur", results[i].getDurationAsString(), results[i].getPitch());
     }
 
-    test.equal(results[0].getStartAsString(), "0.5000");
-    test.equal(results[0].getDurationAsString(), "1.0000");
-    test.equal(results[1].getStartAsString(), "1.5000");
-    test.equal(results[1].getDurationAsString(), "0.2500");
-    test.equal(results[2].getStartAsString(), "2.2500");
-    test.equal(results[2].getDurationAsString(), "0.5000");
+    test.equal(results[0].getStartAsString(), "1.0000");
+    test.equal(results[0].getDurationAsString(), "1.1000");
+    test.equal(results[1].getStartAsString(), "3.0000");
+    test.equal(results[1].getDurationAsString(), "1.2000");
+    test.equal(results[2].getStartAsString(), "6.5000");
+    test.equal(results[2].getDurationAsString(), "1.3000");
+    test.equal(results[3].getStartAsString(), "8.5000");
+    test.equal(results[3].getDurationAsString(), "1.4000");
+    test.equal(results[4].getStartAsString(), "10.5000");
+    test.equal(results[4].getDurationAsString(), "1.1000");
 /*
     test.equal(results[3].getStartAsString(), "2.5000");
     test.equal(results[4].getStartAsString(), "3.7500");

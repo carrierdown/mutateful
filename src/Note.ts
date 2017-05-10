@@ -39,14 +39,16 @@ class Note {
         return this.start.toFixed(4);
     }
 
-    public setStart(start: IBig): void {
+    public setStart(start: IBig): Note {
         this.start = start;
+        return this;
     }
 
-    public setPitch(pitch: number): void {
+    public setPitch(pitch: number): Note {
         if (pitch > 127) { pitch = 127; }
         if (pitch < 0) { pitch = 0; }
         this.pitch = pitch;
+        return this;
     }
 
     public getStart(): IBig {
@@ -57,8 +59,9 @@ class Note {
         return this.duration;
     }
 
-    public setDuration(duration: IBig): void {
+    public setDuration(duration: IBig): Note {
         this.duration = duration;
+        return this;
     }
 
     public getDurationAsString(): string {
@@ -74,5 +77,9 @@ class Note {
 
     public getMuted(): number {
         return this.muted;
+    }
+
+    public static clone(src: Note): Note {
+        return new Note(src.getPitch(), src.getStart(), src.getDuration(), src.getVelocity(), src.getMuted());
     }
 }

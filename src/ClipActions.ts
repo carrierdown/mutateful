@@ -90,10 +90,8 @@ class ClipActions {
             var position: IBig = new Big(0);
             switch (options.interleaveMode) {
                 case InterleaveMode.EventCount:
-                    let i = 0;
-                    while (i < b.length || i < a.length) {
-                        let ca = new Note(a[i % a.length].getPitch(), a[i % a.length].getStart(), a[i % a.length].getDuration(), a[i % a.length].getVelocity(), a[i % a.length].getMuted()),
-                            cb = new Note(b[i % b.length].getPitch(), b[i % b.length].getStart(), b[i % b.length].getDuration(), b[i % b.length].getVelocity(), b[i % b.length].getMuted());
+                    let i = 0, nix = 0;
+                    while (i < b.length + a.length) {
 
                         // if i = 0 for a, update pos
                         // add a at pos
@@ -103,29 +101,32 @@ class ClipActions {
                         // update pos with next b
                         // if i = 0 for next b, calculate distance from start of event to end of clip and add to pos
 
+                        var addNextNote = (noteSrc: Note[], position: IBig, ix: number) => {
+                            let pos = position;
+                            console.log(`Set start ${pos.toFixed(4)}`);
+                            resultClip.notes.push(Note.clone(noteSrc[ix % noteSrc.length]).setStart(pos));
+                            if ((ix + 1) % noteSrc.length === 0 && ix > 0) {
+                                pos = pos.plus(clipToMutate.getLength().minus(noteSrc[ix % noteSrc.length].getStart()));
+                                console.log(`Update pos at boundary ${pos.toFixed(4)}`);
+                                pos = pos.plus(noteSrc[(ix + 1) % noteSrc.length].getStart());
+                            } else {
+                                pos = pos.plus(noteSrc[(ix + 1) % noteSrc.length].getStart()).minus(noteSrc[ix % noteSrc.length].getStart());
+                            }
+                            console.log(`Update pos ${pos.toFixed(4)}`);
+                            return pos;
+                        };
+
                         if (i === 0) {
-                            position = position.plus(ca.getStart());
+                            position = position.plus(a[nix % a.length].getStart());
                         }
-                        console.log(i % a.length, a[(i + 1) % a.length].getStartAsString(), position.toFixed(4), ca.getStartAsString());
-                        ca.setStart(position);
-                        console.log(`Set start ${position.toFixed(4)}`);
-                        resultClip.notes.push(ca);
-                        // console.dir(resultClip.notes);
-                        position = position.plus(a[(i + 1) % a.length].getStart()).minus(ca.getStart());
-                        console.log(`Update position ${position.toFixed(4)}`);
-                        if ((i + 1) % a.length === 0 && i > 0) {
-                            position = position.plus(clipToMutate.getLength().minus(ca.getStart()));
-                            console.log(`Update position at boundary ${position.toFixed(4)}`);
+                        if (i % 2 === 0) {
+                            position = addNextNote(a, position, nix);
                         }
-
-                        cb.setStart(position);
-                        resultClip.notes.push(cb);
-                        position = position.plus(b[(i + 1) % b.length].getStart()).minus(cb.getStart());
-                        if ((i + 1) % b.length === 0 && i > 0) {
-                            position = position.plus(clipToSourceFrom.getLength().minus(cb.getStart()));
+                        if (i % 2 === 1) {
+                            position = addNextNote(b, position, nix);
                         }
-
                         i++;
+                        nix = Math.floor(i / 2);
                     }
                     break;
                 case InterleaveMode.TimeRange:

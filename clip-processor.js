@@ -877,6 +877,7 @@ var Note = (function () {
     };
     Note.prototype.setStart = function (start) {
         this.start = start;
+        return this;
     };
     Note.prototype.setPitch = function (pitch) {
         if (pitch > 127) {
@@ -886,6 +887,7 @@ var Note = (function () {
             pitch = 0;
         }
         this.pitch = pitch;
+        return this;
     };
     Note.prototype.getStart = function () {
         return this.start;
@@ -895,6 +897,7 @@ var Note = (function () {
     };
     Note.prototype.setDuration = function (duration) {
         this.duration = duration;
+        return this;
     };
     Note.prototype.getDurationAsString = function () {
         if (this.duration.lt(Note.MIN_DURATION))
@@ -911,10 +914,13 @@ var Note = (function () {
     Note.prototype.getMuted = function () {
         return this.muted;
     };
-    Note.NOTE_NAMES = ['C-2', 'C#-2', 'D-2', 'D#-2', 'E-2', 'F-2', 'F#-2', 'G-2', 'G#-2', 'A-2', 'A#-2', 'B-2', 'C-1', 'C#-1', 'D-1', 'D#-1', 'E-1', 'F-1', 'F#-1', 'G-1', 'G#-1', 'A-1', 'A#-1', 'B-1', 'C0', 'C#0', 'D0', 'D#0', 'E0', 'F0', 'F#0', 'G0', 'G#0', 'A0', 'A#0', 'B0', 'C1', 'C#1', 'D1', 'D#1', 'E1', 'F1', 'F#1', 'G1', 'G#1', 'A1', 'A#1', 'B1', 'C2', 'C#2', 'D2', 'D#2', 'E2', 'F2', 'F#2', 'G2', 'G#2', 'A2', 'A#2', 'B2', 'C3', 'C#3', 'D3', 'D#3', 'E3', 'F3', 'F#3', 'G3', 'G#3', 'A3', 'A#3', 'B3', 'C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4', 'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5', 'G5', 'G#5', 'A5', 'A#5', 'B5', 'C6', 'C#6', 'D6', 'D#6', 'E6', 'F6', 'F#6', 'G6', 'G#6', 'A6', 'A#6', 'B6', 'C7', 'C#7', 'D7', 'D#7', 'E7', 'F7', 'F#7', 'G7', 'G#7', 'A7', 'A#7', 'B7', 'C8', 'C#8', 'D8', 'D#8', 'E8', 'F8', 'F#8', 'G8'];
-    Note.MIN_DURATION = new Big(1 / 128);
+    Note.clone = function (src) {
+        return new Note(src.getPitch(), src.getStart(), src.getDuration(), src.getVelocity(), src.getMuted());
+    };
     return Note;
 }());
+Note.NOTE_NAMES = ['C-2', 'C#-2', 'D-2', 'D#-2', 'E-2', 'F-2', 'F#-2', 'G-2', 'G#-2', 'A-2', 'A#-2', 'B-2', 'C-1', 'C#-1', 'D-1', 'D#-1', 'E-1', 'F-1', 'F#-1', 'G-1', 'G#-1', 'A-1', 'A#-1', 'B-1', 'C0', 'C#0', 'D0', 'D#0', 'E0', 'F0', 'F#0', 'G0', 'G#0', 'A0', 'A#0', 'B0', 'C1', 'C#1', 'D1', 'D#1', 'E1', 'F1', 'F#1', 'G1', 'G#1', 'A1', 'A#1', 'B1', 'C2', 'C#2', 'D2', 'D#2', 'E2', 'F2', 'F#2', 'G2', 'G#2', 'A2', 'A#2', 'B2', 'C3', 'C#3', 'D3', 'D#3', 'E3', 'F3', 'F#3', 'G3', 'G#3', 'A3', 'A#3', 'B3', 'C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4', 'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5', 'G5', 'G#5', 'A5', 'A#5', 'B5', 'C6', 'C#6', 'D6', 'D#6', 'E6', 'F6', 'F#6', 'G6', 'G#6', 'A6', 'A#6', 'B6', 'C7', 'C#7', 'D7', 'D#7', 'E7', 'F7', 'F#7', 'G7', 'G#7', 'A7', 'A#7', 'B7', 'C8', 'C#8', 'D8', 'D#8', 'E8', 'F8', 'F#8', 'G8'];
+Note.MIN_DURATION = new Big(1 / 128);
 ///<reference path="big.js"/>
 ///<reference path="big-def.ts"/>
 ///<reference path="Note.ts"/>
@@ -1022,9 +1028,8 @@ var ClipActions = (function () {
             var position = new Big(0);
             switch (options.interleaveMode) {
                 case InterleaveMode.EventCount:
-                    var i = 0;
-                    while (i < b.length || i < a.length) {
-                        var ca = new Note(a[i % a.length].getPitch(), a[i % a.length].getStart(), a[i % a.length].getDuration(), a[i % a.length].getVelocity(), a[i % a.length].getMuted()), cb = new Note(b[i % b.length].getPitch(), b[i % b.length].getStart(), b[i % b.length].getDuration(), b[i % b.length].getVelocity(), b[i % b.length].getMuted());
+                    var i = 0, nix = 0;
+                    while (i < b.length + a.length) {
                         // if i = 0 for a, update pos
                         // add a at pos
                         // update pos with next a
@@ -1032,27 +1037,32 @@ var ClipActions = (function () {
                         // add b at pos
                         // update pos with next b
                         // if i = 0 for next b, calculate distance from start of event to end of clip and add to pos
+                        var addNextNote = function (noteSrc, position, ix) {
+                            var pos = position;
+                            console.log("Set start " + pos.toFixed(4));
+                            resultClip.notes.push(Note.clone(noteSrc[ix % noteSrc.length]).setStart(pos));
+                            if ((ix + 1) % noteSrc.length === 0 && ix > 0) {
+                                pos = pos.plus(clipToMutate.getLength().minus(noteSrc[ix % noteSrc.length].getStart()));
+                                console.log("Update pos at boundary " + pos.toFixed(4));
+                                pos = pos.plus(noteSrc[(ix + 1) % noteSrc.length].getStart());
+                            }
+                            else {
+                                pos = pos.plus(noteSrc[(ix + 1) % noteSrc.length].getStart()).minus(noteSrc[ix % noteSrc.length].getStart());
+                            }
+                            console.log("Update pos " + pos.toFixed(4));
+                            return pos;
+                        };
                         if (i === 0) {
-                            position = position.plus(ca.getStart());
+                            position = position.plus(a[nix % a.length].getStart());
                         }
-                        console.log(i % a.length, a[(i + 1) % a.length].getStartAsString(), position.toFixed(4), ca.getStartAsString());
-                        ca.setStart(position);
-                        console.log("Set start " + position.toFixed(4));
-                        resultClip.notes.push(ca);
-                        // console.dir(resultClip.notes);
-                        position = position.plus(a[(i + 1) % a.length].getStart()).minus(ca.getStart());
-                        console.log("Update position " + position.toFixed(4));
-                        if ((i + 1) % a.length === 0 && i > 0) {
-                            position = position.plus(clipToMutate.getLength().minus(ca.getStart()));
-                            console.log("Update position at boundary " + position.toFixed(4));
+                        if (i % 2 === 0) {
+                            position = addNextNote(a, position, nix);
                         }
-                        cb.setStart(position);
-                        resultClip.notes.push(cb);
-                        position = position.plus(b[(i + 1) % b.length].getStart()).minus(cb.getStart());
-                        if ((i + 1) % b.length === 0 && i > 0) {
-                            position = position.plus(clipToSourceFrom.getLength().minus(cb.getStart()));
+                        if (i % 2 === 1) {
+                            position = addNextNote(b, position, nix);
                         }
                         i++;
+                        nix = Math.floor(i / 2);
                     }
                     break;
                 case InterleaveMode.TimeRange:
