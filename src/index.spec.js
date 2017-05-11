@@ -1,6 +1,5 @@
 const tape = require('tape');
 
-/*
 tape('Constrain Note Start', (test) => {
     var notesToMutate = [
         new Note(36, "0.25", "0.25", 100, 0),
@@ -14,12 +13,15 @@ tape('Constrain Note Start', (test) => {
         new Note(36, "4", "0.25", 100, 0),
         new Note(36, "5", "0.25", 100, 0)
     ];
+    var dst = { getNotes: () => { return notesToMutate; }, getLength: () => { return new Big(4); } };
+    var src = { getNotes: () => { return notesToSourceFrom; }, getLength: () => { return new Big(4); } };
 
     var clipActions = new ClipActions();
-    var results = clipActions.process(Action.Constrain, notesToMutate, notesToSourceFrom, {
+    var resultClip = clipActions.process(Action.Constrain, dst, src, {
         constrainNoteStart: true,
         constrainNotePitch: false
     });
+    var results = resultClip.notes;
 
     test.equal(results[0].getStartAsString(), "0.5000", `Note start values should be equal. Actual: ${results[0].getStartAsString()} Expected: 0.5000`);
     test.equal(results[1].getStartAsString(), "0.5000", `Note start values should be equal. Actual: ${results[1].getStartAsString()} Expected: 0.5000`);
@@ -42,12 +44,15 @@ tape('Constrain Note Pitch', (test) => {
         new Note(34, "4", "0.25", 100, 0),
         new Note(39, "5", "0.25", 100, 0)
     ];
+    var dst = { getNotes: () => { return notesToMutate; }, getLength: () => { return new Big(4); } };
+    var src = { getNotes: () => { return notesToSourceFrom; }, getLength: () => { return new Big(4); } };
 
     var clipActions = new ClipActions();
-    var results = clipActions.process(Action.Constrain, notesToMutate, notesToSourceFrom, {
+    var resultClip = clipActions.process(Action.Constrain, dst, src, {
         constrainNoteStart: false,
         constrainNotePitch: true
     });
+    var results = resultClip.notes;
 
     test.equal(results[0].getPitch(), 36, `Pitch values should be equal. Actual: ${results[0].getPitch()} Expected: 36`);
     test.equal(results[1].getPitch(), 39, `Pitch values should be equal. Actual: ${results[1].getPitch()} Expected: 39`);
@@ -56,7 +61,7 @@ tape('Constrain Note Pitch', (test) => {
 
     test.end();
 });
-*/
+
 
 tape('Interleave note ranges', (test) => {
     var dst = {
@@ -154,14 +159,6 @@ tape('Interleave note events', (test) => {
     test.equal(results[3].getDurationAsString(), "1.4000");
     test.equal(results[4].getStartAsString(), "10.5000");
     test.equal(results[4].getDurationAsString(), "1.1000");
-/*
-    test.equal(results[3].getStartAsString(), "2.5000");
-    test.equal(results[4].getStartAsString(), "3.7500");
-    test.equal(results[5].getStartAsString(), "4.0000");
-    test.equal(results[6].getStartAsString(), "5.0000");
-    test.equal(results[7].getStartAsString(), "5.5000");
-    test.equal(results[8].getStartAsString(), "7.0000");
-*/
 
     test.end();
 });

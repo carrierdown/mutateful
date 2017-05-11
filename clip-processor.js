@@ -1005,85 +1005,81 @@ var ClipActions = (function () {
         this.noteDurations["1/16"] = barLength.div(new Big(16));
         this.noteDurations["1/32"] = barLength.div(new Big(32));
         this.actions = [];
-        this.actions[Action.Constrain] = function (clipToMutate, clipToSourceFrom, options) {
-            var notesToMutate = clipToMutate.getNotes(), notesToSourceFrom = clipToSourceFrom.getNotes(), resultClip = ClipActions.newGhostClip();
-            for (var _i = 0, notesToMutate_1 = notesToMutate; _i < notesToMutate_1.length; _i++) {
-                var note = notesToMutate_1[_i];
-                var result = note;
-                if (options.constrainNotePitch) {
-                    result.setPitch(ClipActions.findNearestNotePitchInSet(note, notesToSourceFrom));
-                }
-                if (options.constrainNoteStart) {
-                    result.setStart(ClipActions.findNearestNoteStartInSet(note, notesToSourceFrom));
-                }
-                resultClip.notes.push(result);
-            }
-            return resultClip;
-        };
-        this.actions[Action.Interleave] = function (clipToMutate, clipToSourceFrom, options) {
-            var a = clipToMutate.getNotes(), b = clipToSourceFrom.getNotes(), resultClip = ClipActions.newGhostClip();
-            ClipActions.sortNotes(a);
-            ClipActions.sortNotes(b);
-            resultClip.length = clipToMutate.getLength().plus(clipToSourceFrom.getLength()); // works as long as multiple repeats aren't allowed
-            var position = new Big(0);
-            switch (options.interleaveMode) {
-                case InterleaveMode.EventCount:
-                    var i = 0, nix = 0;
-                    while (i < b.length + a.length) {
-                        // if i = 0 for a, update pos
-                        // add a at pos
-                        // update pos with next a
-                        // if i = 0 for next a, calculate distance from start of event to end of clip and add to pos
-                        // add b at pos
-                        // update pos with next b
-                        // if i = 0 for next b, calculate distance from start of event to end of clip and add to pos
-                        var addNextNote = function (noteSrc, position, ix) {
-                            var pos = position;
-                            console.log("Set start " + pos.toFixed(4));
-                            resultClip.notes.push(Note.clone(noteSrc[ix % noteSrc.length]).setStart(pos));
-                            if ((ix + 1) % noteSrc.length === 0 && ix > 0) {
-                                pos = pos.plus(clipToMutate.getLength().minus(noteSrc[ix % noteSrc.length].getStart()));
-                                console.log("Update pos at boundary " + pos.toFixed(4));
-                                pos = pos.plus(noteSrc[(ix + 1) % noteSrc.length].getStart());
-                            }
-                            else {
-                                pos = pos.plus(noteSrc[(ix + 1) % noteSrc.length].getStart()).minus(noteSrc[ix % noteSrc.length].getStart());
-                            }
-                            console.log("Update pos " + pos.toFixed(4));
-                            return pos;
-                        };
-                        if (i === 0) {
-                            position = position.plus(a[nix % a.length].getStart());
-                        }
-                        if (i % 2 === 0) {
-                            position = addNextNote(a, position, nix);
-                        }
-                        if (i % 2 === 1) {
-                            position = addNextNote(b, position, nix);
-                        }
-                        i++;
-                        nix = Math.floor(i / 2);
-                    }
-                    break;
-                case InterleaveMode.TimeRange:
-                    var srcPositionA = new Big(0), srcPositionB = new Big(0);
-                    a = ClipActions.splitNotesAtEvery(a, options.interleaveEventRangeA, clipToSourceFrom.getLength());
-                    b = ClipActions.splitNotesAtEvery(b, options.interleaveEventRangeB, clipToMutate.getLength());
-                    while (position.lt(resultClip.length)) {
-                        resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionA, srcPositionA.plus(options.interleaveEventRangeA), a, position));
-                        position = position.plus(options.interleaveEventRangeA);
-                        srcPositionA = srcPositionA.plus(options.interleaveEventRangeA);
-                        resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionB, srcPositionB.plus(options.interleaveEventRangeB), b, position));
-                        position = position.plus(options.interleaveEventRangeB);
-                        srcPositionB = srcPositionB.plus(options.interleaveEventRangeB);
-                    }
-                    break;
-            }
-            return resultClip;
-        };
+        this.actions[Action.Constrain] = ClipActions.DoConstrain;
+        this.actions[Action.Interleave] = ClipActions.DoInterleave;
     }
     ClipActions.prototype.process = function (action, clipToMutate, clipToSourceFrom, options) {
         return this.actions[action](clipToMutate, clipToSourceFrom, options);
+    };
+    ClipActions.DoConstrain = function (clipToMutate, clipToSourceFrom, options) {
+        var notesToMutate = clipToMutate.getNotes(), notesToSourceFrom = clipToSourceFrom.getNotes(), resultClip = ClipActions.newGhostClip();
+        for (var _i = 0, notesToMutate_1 = notesToMutate; _i < notesToMutate_1.length; _i++) {
+            var note = notesToMutate_1[_i];
+            console.log(note.toString());
+            var result = Note.clone(note);
+            if (options.constrainNotePitch) {
+                result.setPitch(ClipActions.findNearestNotePitchInSet(note, notesToSourceFrom));
+            }
+            if (options.constrainNoteStart) {
+                result.setStart(ClipActions.findNearestNoteStartInSet(note, notesToSourceFrom));
+            }
+            resultClip.notes.push(result);
+        }
+        return resultClip;
+    };
+    ClipActions.DoInterleave = function (clipToMutate, clipToSourceFrom, options) {
+        var a = clipToMutate.getNotes(), b = clipToSourceFrom.getNotes(), resultClip = ClipActions.newGhostClip();
+        ClipActions.sortNotes(a);
+        ClipActions.sortNotes(b);
+        resultClip.length = clipToMutate.getLength().plus(clipToSourceFrom.getLength()); // works as long as multiple repeats aren't allowed
+        var position = new Big(0);
+        switch (options.interleaveMode) {
+            case InterleaveMode.EventCount:
+                var i = 0, nix = 0;
+                while (i < b.length + a.length) {
+                    var addNextNote = function (noteSrc, position, ix) {
+                        var pos = position;
+                        //console.log(`Set start ${pos.toFixed(4)}`);
+                        resultClip.notes.push(Note.clone(noteSrc[ix % noteSrc.length]).setStart(pos));
+                        if ((ix + 1) % noteSrc.length === 0 && ix > 0) {
+                            pos = pos.plus(clipToMutate.getLength().minus(noteSrc[ix % noteSrc.length].getStart()));
+                            //console.log(`Update pos at boundary ${pos.toFixed(4)}`);
+                            pos = pos.plus(noteSrc[(ix + 1) % noteSrc.length].getStart());
+                        }
+                        else {
+                            pos = pos.plus(noteSrc[(ix + 1) % noteSrc.length].getStart()).minus(noteSrc[ix % noteSrc.length].getStart());
+                        }
+                        //console.log(`Update pos ${pos.toFixed(4)}`);
+                        return pos;
+                    };
+                    if (i === 0) {
+                        position = position.plus(a[nix % a.length].getStart());
+                    }
+                    if (i % 2 === 0) {
+                        position = addNextNote(a, position, nix);
+                    }
+                    if (i % 2 === 1) {
+                        position = addNextNote(b, position, nix);
+                    }
+                    i++;
+                    nix = Math.floor(i / 2);
+                }
+                break;
+            case InterleaveMode.TimeRange:
+                var srcPositionA = new Big(0), srcPositionB = new Big(0);
+                a = ClipActions.splitNotesAtEvery(a, options.interleaveEventRangeA, clipToSourceFrom.getLength());
+                b = ClipActions.splitNotesAtEvery(b, options.interleaveEventRangeB, clipToMutate.getLength());
+                while (position.lt(resultClip.length)) {
+                    resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionA, srcPositionA.plus(options.interleaveEventRangeA), a, position));
+                    position = position.plus(options.interleaveEventRangeA);
+                    srcPositionA = srcPositionA.plus(options.interleaveEventRangeA);
+                    resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionB, srcPositionB.plus(options.interleaveEventRangeB), b, position));
+                    position = position.plus(options.interleaveEventRangeB);
+                    srcPositionB = srcPositionB.plus(options.interleaveEventRangeB);
+                }
+                break;
+        }
+        return resultClip;
     };
     ClipActions.splitNotesAtEvery = function (notes, position, length) {
         var i = 0, currentPosition = new Big(0);
