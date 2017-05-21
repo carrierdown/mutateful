@@ -8,17 +8,22 @@ namespace Mutate4l
 {
     public enum TokenType
     {
-        Backslash,
-        Plus,
-        Minus,
-        Multiply,
-        Period,
+        _CommandsBegin,
+        Interleave,
+        ConstrainStart,
+        ConstrainPitch,
+        Slice,
+        Explode,
+        _CommandsEnd,
+        _OptionsBegin,
+        Start,
+        Pitch,
+        Range,
+        Count,
+        _OptionsEnd,
         Colon,
-        Percent,
-        Pipe,
-        Exclamation,
         Destination,
-        None
+        ClipReference
     }
 
     public class Token
@@ -37,9 +42,8 @@ namespace Mutate4l
 
     public class Lexer
     {
-        private int Position = 0;
         private string Buffer;
-        private int BufferLength;
+        private int Position = 0;
 
         private Dictionary<char, TokenType> SingleOperators = new Dictionary<char, TokenType>
         {
@@ -51,16 +55,26 @@ namespace Mutate4l
             { "=>", TokenType.Destination }
         };
 
+        private Dictionary<string, TokenType> Commands = new Dictionary<string, TokenType>
+        {
+            { "interleave", TokenType.Interleave },
+            { "constrainstart", TokenType.ConstrainStart },
+            { "constrainpitch", TokenType.ConstrainPitch },
+            { "explode", TokenType.Explode }
+        };
+
+        private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
+        {
+            { "start", TokenType.Start },
+            { "pitch", TokenType.Pitch },
+            { "range", TokenType.Range },
+            { "count", TokenType.Count }
+        };
 
         public Lexer(string buffer)
         {
             Buffer = buffer;
         }
-        /*
-        public List<Token> GetTokens()
-        {
-
-        }*/
 
         private bool IsSingleOperator(int pos)
         {
@@ -77,59 +91,93 @@ namespace Mutate4l
             return false;
         }
 
-        public IEnumerable<Token> GetToken()
+        private bool IsClipReference(int pos)
         {
-            int pos = 0;
-            while (pos < Buffer.Length)
+            return (Buffer.Length > pos + 1) && IsAlpha(pos) && IsNumeric(pos + 1);
+        }
+
+        private bool IsAlpha(int pos)
+        {
+            char c = Buffer[pos];
+            return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+        }
+
+        private bool IsNumeric(int pos)
+        {
+            char c = Buffer[pos];
+            return c >= '0' && c <= '9';
+        }
+
+        private Token GetIdentifier(int pos, Dictionary<string, TokenType> validValues)
+        {
+            string identifier = "";
+            int initialPos = pos;
+
+            while (IsAlpha(pos))
             {
-                pos = SkipNonTokens(pos);
-                if (pos >= Buffer.Length)
-                {
-                    yield return null;
-                }
-
-                if (IsSingleOperator(pos))
-                {
-                    char value = Buffer[pos];
-                    yield return new Token(SingleOperators[value], value.ToString(), pos);
-                }
-
-                if (IsDoubleOperator(pos))
-                {
-                    string value = $"{Buffer[pos]}{Buffer[pos + 1]}";
-                    yield return new Token(DoubleOperators[value], value, pos);
-                }
-
-                /*                // The char at this.pos is part of a real token. Figure out which.
-                                var char = this.buffer.charAt(this.position);
-
-                                // '/' is treated specially, because it starts a comment if followed by
-                                // another '/'. If not followed by another '/', it's the DIVIDE
-                                // operator.
-                                var nextChar = this.buffer.charAt(this.position + 1);
-
-                                if (char === '/' && nextChar === '/')
-                                {
-                                    return this.processComment();
-                                }
-                                if (char === '/')
-                                {
-                                    return { type: TokenType.DIVIDE, value: '/', pos: this.position++};
-                                }
-                                if (char === ';' && nextChar === ';')
-                                {
-                                    return { type: TokenType.DOUBLE_SEMI, value: ';;', pos: this.position += 2};
-                                }
-                                if (char === '.' && nextChar === '.')
-                                {
-                                    return { type: TokenType.DOUBLE_PERIOD, value: '..', pos: this.position += 2};
-                                }
-                                if (char === '_' && nextChar === '*')
-                                {
-                                    return { type: TokenType.FILL, value: '_*', pos: this.position += 2};
-                                }*/
-                pos++;
+                identifier += Buffer[pos++].ToString();
             }
+            if (identifier.Length > 0 && validValues.Any(v => v.Key == identifier))
+            {
+                return new Token(validValues.First(v => v.Key == identifier).Value, identifier, initialPos);
+            }
+            return null;
+        }
+
+        public List<Token> GetTokens()
+        {
+            var tokens = new List<Token>();
+            Token token;
+            while ((token = GetNextToken()) != null)
+            {
+                tokens.Add(token);
+            }
+            return tokens;
+        }
+
+        public Token GetNextToken()
+        {
+            while (Position < Buffer.Length)
+            {
+                Token token = null;
+                if (IsSingleOperator(Position))
+                {
+                    char value = Buffer[Position];
+                    token = new Token(SingleOperators[value], value.ToString(), Position);
+                }
+                else if (IsDoubleOperator(Position))
+                {
+                    string value = $"{Buffer[Position]}{Buffer[Position + 1]}";
+                    token = new Token(DoubleOperators[value], value, Position);
+                }
+                else if (IsClipReference(Position))
+                {
+                    //todo: only 1 digit supported for now
+                    string value = $"{Buffer[Position]}{Buffer[Position + 1]}";
+                    token = new Token(TokenType.ClipReference, value, Position);
+                }
+                else if (IsAlpha(Position))
+                {
+                    Token identifierToken = GetIdentifier(Position, Commands);
+                    if (identifierToken != null)
+                    {
+                        token = identifierToken;
+                    }
+
+                    identifierToken = GetIdentifier(Position, Options);
+                    if (identifierToken != null)
+                    {
+                        token = identifierToken;
+                    }
+                }
+                if (token != null)
+                {
+                    Position += token.Value.Length;
+                    return token;
+                }
+                Position = SkipNonTokens(Position);
+            }
+            return null;
         }
 
         private int SkipNonTokens(int position)
