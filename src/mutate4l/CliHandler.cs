@@ -16,7 +16,7 @@ namespace Mutate4l
                 {
                     Console.WriteLine("Help text coming here");
                 }
-                Console.WriteLine("Mutate4L: Enter command, or h[elp] / q[uit]");
+                Console.WriteLine("Mutate4L: Enter command, or [l]ist commands | [h]elp | [q]uit");
                 Console.Write("> ");
                 command = Console.ReadLine();
             }

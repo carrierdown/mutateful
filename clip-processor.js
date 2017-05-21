@@ -1197,7 +1197,7 @@ var ClipProcessor = (function () {
         this.defaultOptions = {
             constrainNotePitch: true,
             constrainNoteStart: false,
-            interleaveMode: InterleaveMode.EventCount,
+            interleaveMode: InterleaveMode.TimeRange,
             interleaveCountA: 1,
             interleaveCountB: 1,
             interleaveEventRangeA: new Big(1),
@@ -1239,7 +1239,7 @@ var ClipProcessor = (function () {
         // todo: selection logic goes here...
         // console.log("processClip");
         var resultClip = this.clipActions.process(this.action, this.clipToMutate, this.clipToSourceFrom, this.options);
-        this.clipToMutate.setNotes(resultClip.notes);
+        this.clipToMutate.replaceAllNotes(resultClip.notes);
         // todo: set clip length
     };
     return ClipProcessor;

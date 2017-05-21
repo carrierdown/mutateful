@@ -4,6 +4,7 @@
 
 &#10003; Constrain note start positions<br>
 &#10003; Constrain note values<br>
+&#10003; Interleave clips<br>
 &#9675; Fractalize clip<br>
 &#9675; Transpose from clip<br>
 &#9675; Retrigger from clip<br>
