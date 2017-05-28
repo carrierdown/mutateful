@@ -1,7 +1,6 @@
 outlets = 1;
 inlets = 1;
 function getClip(trackNo, clipNo) {
-	post("track " + trackNo + " clip " + clipNo);
     var liveObject = new LiveAPI("live_set tracks " + trackNo + " clip_slots " + clipNo + " clip"), result = "";
     if (!liveObject) {
         post('Invalid liveObject, exiting...');
@@ -10,12 +9,12 @@ function getClip(trackNo, clipNo) {
     liveObject.call("select_all_notes");
     var data = liveObject.call('get_selected_notes');
     for (var i = 2, len = data.length - 1; i < len; i += 6) {
-        // and each note starts with "note" (which we ignore) and is 6 items in the list
-        result += data[i + 1 /* pitch */] + " " + data[i + 2 /* start */] + " " + data[i + 3 /* duration */] + " " + data[i + 4 /* velocity */] + " " + data[i + 5 /* muted */];
+        if (data[i + 5 /* muted */] === 1) {
+            continue;
+        }
+        result += data[i + 1 /* pitch */] + " " + data[i + 2 /* start */] + " " + data[i + 3 /* duration */] + " " + data[i + 4 /* velocity */] + " ";
     }
-//	post(result);
-	outlet(1, ['/mu4l/clip/get', result]);
-//    return "/mu4l/clip/set " + result;
+    outlet(0, ['/mu4l/clip/get', result.slice(0, result.length - 1)]);
 }
 function setClip(trackNo, clipNo, data) {
     var liveObject = new LiveAPI("live_set tracks " + trackNo + " clip_slots " + clipNo + " clip");

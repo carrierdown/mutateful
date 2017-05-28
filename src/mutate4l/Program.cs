@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -11,27 +12,26 @@ namespace Mutate4l
 
         static void Main(string[] args)
         {
-            bool done = false;
-
             UdpClient listener = new UdpClient(8008);
             UdpClient sender = new UdpClient();
             IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, 8008);
 
             try
             {
-                sender.Connect("localhost", 8009);
-				Byte[] sendBytes = Encoding.ASCII.GetBytes("/p\0\0,s\0\0heisann\0");
+                byte[] message = CreateOscMessage("/mu4l/clip/get", 1, 3);
+                sender.Send(message, message.Length, "localhost", 8009);
+                Console.WriteLine("Waiting for broadcast");
+                byte[] bytes = listener.Receive(ref groupEP);
+                string data = Encoding.ASCII.GetString(bytes);
+                Console.WriteLine($"[{Program.GetOscStringKey(data)}] : [{Program.GetOscStringValue(data)}]");
 
-				sender.Send(sendBytes, sendBytes.Length);
-
-                while (!done)
+                string[] noteData = Program.GetOscStringValue(data).Split(' ');
+                List<Note> notes = new List<Note>(noteData.Length / 4);
+                for (var i = 0; i < noteData.Length; i += 4)
                 {
-                    Console.WriteLine("Waiting for broadcast");
-                    byte[] bytes = listener.Receive(ref groupEP);
-                    string data = Encoding.ASCII.GetString(bytes);
-                    Console.WriteLine($"{Program.GetOscStringKey(data)} : {Program.GetOscStringValue(data)}");
+                    notes.Add(new Note(byte.Parse(noteData[i]), decimal.Parse(noteData[i + 1]), decimal.Parse(noteData[i + 2]), byte.Parse(noteData[i + 3])));
                 }
-
+                Console.ReadLine();
             }
             catch (Exception e)
             {
@@ -41,31 +41,6 @@ namespace Mutate4l
             {
                 listener.Close();
             }
-
-
-            /*
-            UdpClient udpClient = new UdpClient();
-            try
-            {
-                udpClient.Connect("localhost", 8008);
-
-                // Sends a message to the host to which you have connected.
-                Byte[] sendBytes = Encoding.ASCII.GetBytes("/p\0\0,s\0\0heisann\0");
-
-                udpClient.Send(sendBytes, sendBytes.Length);
-
-                IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 8009);
-
-                // Blocks until a message returns on this socket from a remote host.
-                Byte[] receiveBytes = udpClient.Receive(ref RemoteIpEndPoint);
-                string returnData = Encoding.ASCII.GetString(receiveBytes);
-                Console.WriteLine(returnData);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.StackTrace);
-            }*/
-            //CliHandler.Start();
         }
 
         public static string GetOscStringKey(string input)
@@ -80,6 +55,30 @@ namespace Mutate4l
             if (!input.Contains(",s")) return "";
             string value = input.Substring(input.IndexOf(",s") + 4);
             return value.TrimEnd('\0');
+        }
+
+        public static Byte[] CreateOscMessage(string route, Int32 arg1, Int32 arg2)
+        {
+            if (string.IsNullOrEmpty(route)) return new Byte[0];
+
+            route = FourPadString(route) + ",ii\0";
+            List<byte> bytes = new List<byte>(route.Length + 8);
+            bytes.AddRange(Encoding.ASCII.GetBytes(route));
+            bytes.AddRange(Int32ToBytes(arg1));
+            bytes.AddRange(Int32ToBytes(arg2));
+            return bytes.ToArray();
+        }
+
+        public static string FourPadString(string input)
+        {
+            return input.PadRight(((input.Length / 4) + 1) * 4, '\0');
+        }
+
+        public static byte[] Int32ToBytes(Int32 val)
+        {
+            byte[] result = BitConverter.GetBytes(val);
+            if (BitConverter.IsLittleEndian) { Array.Reverse(result); }
+            return result;
         }
 
     }

@@ -18,7 +18,7 @@ const enum NoteDataMap {
     muted,
 }
 
-function getClip(trackNo: number, clipNo: number): string {
+function getClip(trackNo: number, clipNo: number): void {
     var liveObject = new LiveAPI(`live_set tracks ${trackNo} clip_slots ${clipNo} clip`),
         result: string = "";
 
@@ -26,14 +26,15 @@ function getClip(trackNo: number, clipNo: number): string {
         post('Invalid liveObject, exiting...');
         return;
     }
-
-    liveObject.call("select_all_notes");
+    liveObject.call("select_all_notes"); // todo: should probably get notes that start between start_marker and end_marker instead
     var data: any[] = liveObject.call('get_selected_notes');
     for (let i = 2, len = data.length - 1; i < len; i += 6) {
-        // and each note starts with "note" (which we ignore) and is 6 items in the list
-        result += `${data[i + NoteDataMap.pitch]} ${data[i + NoteDataMap.start]} ${data[i + NoteDataMap.duration]} ${data[i + NoteDataMap.velocity]} ${data[i + NoteDataMap.muted]}`;
+        if (data[i + NoteDataMap.muted] === 1) { // skip muted notes
+            continue;
+        }
+        result += `${data[i + NoteDataMap.pitch]} ${data[i + NoteDataMap.start]} ${data[i + NoteDataMap.duration]} ${data[i + NoteDataMap.velocity]} `;
     }
-    return result;
+    outlet(0, ['/mu4l/clip/get', result.slice(0, result.length - 1)]);
 }
 
 function setClip(trackNo: number, clipNo: number, data: string): void {
