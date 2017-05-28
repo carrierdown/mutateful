@@ -7,15 +7,23 @@ namespace Mutate4l
 {
     class Program
     {
+        
+
         static void Main(string[] args)
         {
             bool done = false;
 
-            UdpClient listener = new UdpClient(8009);
-            IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, 8009);
+            UdpClient listener = new UdpClient(8008);
+            UdpClient sender = new UdpClient();
+            IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, 8008);
 
             try
             {
+                sender.Connect("localhost", 8009);
+				Byte[] sendBytes = Encoding.ASCII.GetBytes("/p\0\0,s\0\0heisann\0");
+
+				sender.Send(sendBytes, sendBytes.Length);
+
                 while (!done)
                 {
                     Console.WriteLine("Waiting for broadcast");
