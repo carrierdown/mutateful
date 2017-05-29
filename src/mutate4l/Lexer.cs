@@ -23,7 +23,11 @@ namespace Mutate4l
         _OptionsEnd,
         Colon,
         Destination,
-        ClipReference
+        _ValuesBegin,
+        ClipReference,
+        Number,
+        MusicalDivision,
+        _ValuesEnd
     }
 
     public class Token

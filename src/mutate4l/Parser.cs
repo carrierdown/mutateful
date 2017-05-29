@@ -26,8 +26,24 @@ namespace Mutate4l
         public static Command ParseTokensToCommand(IEnumerable<Token> tokens)
         {
             var command = new Command();
-            command.Id = tokens.First().Type;
+            
             List<Token> tokensAsList = tokens.ToList();
+            command.Id = tokensAsList[0].Type;
+            var i = 1;
+            while (i < tokensAsList.Count)
+            {
+                var token = tokensAsList[i++];
+                if (token.Type > TokenType._OptionsBegin && token.Type < TokenType._OptionsEnd)
+                {
+                    var type = token.Type;
+                    var values = new List<string>();
+
+                    while (tokensAsList[i + 1].Type > TokenType._ValuesBegin && tokensAsList[i + 1].Type < TokenType._ValuesEnd)
+                    {
+                        values.Add(tokensAsList[++i].Value);
+                    }
+                }
+            }
 
             /*                if (token.Type > TokenType._CommandsBegin && token.Type < TokenType._CommandsEnd)
                             {
