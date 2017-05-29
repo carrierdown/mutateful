@@ -42,8 +42,7 @@ namespace Mutate4l
 
     public class Lexer
     {
-        private string Buffer;
-        private int Position = 0;
+        private readonly string Buffer;
 
         private Dictionary<char, TokenType> SingleOperators = new Dictionary<char, TokenType>
         {
@@ -99,13 +98,21 @@ namespace Mutate4l
 
         private bool IsAlpha(int pos)
         {
-            char c = Buffer[pos];
+            return IsAlpha(Buffer[pos]);
+        }
+
+        public static bool IsAlpha(char c)
+        {
             return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
         }
 
         private bool IsNumeric(int pos)
         {
-            char c = Buffer[pos];
+            return IsNumeric(Buffer[pos]);
+        }
+
+        public static bool IsNumeric(char c)
+        {
             return c >= '0' && c <= '9';
         }
 
@@ -127,39 +134,40 @@ namespace Mutate4l
 
         public IEnumerable<Token> GetTokens()
         {
-            while (Position < Buffer.Length)
+            int position = 0;
+            while (position < Buffer.Length)
             {
                 Token token = null;
-                if (IsSingleOperator(Position))
+                if (IsSingleOperator(position))
                 {
-                    char value = Buffer[Position];
-                    token = new Token(SingleOperators[value], value.ToString(), Position);
+                    char value = Buffer[position];
+                    token = new Token(SingleOperators[value], value.ToString(), position);
                 }
-                else if (IsDoubleOperator(Position))
+                else if (IsDoubleOperator(position))
                 {
-                    string value = $"{Buffer[Position]}{Buffer[Position + 1]}";
-                    token = new Token(DoubleOperators[value], value, Position);
+                    string value = $"{Buffer[position]}{Buffer[position + 1]}";
+                    token = new Token(DoubleOperators[value], value, position);
                 }
-                else if (IsClipReference(Position))
+                else if (IsClipReference(position))
                 {
-                    string value = $"{Buffer[Position]}{Buffer[Position + 1]}";
+                    string value = $"{Buffer[position]}{Buffer[position + 1]}";
                     int pos = 2;
-                    while (Position + pos < Buffer.Length && IsNumeric(Position + pos))
+                    while (position + pos < Buffer.Length && IsNumeric(position + pos))
                     {
-                        value += Buffer[Position + pos++].ToString();
+                        value += Buffer[position + pos++].ToString();
                     }
 
-                    token = new Token(TokenType.ClipReference, value, Position);
+                    token = new Token(TokenType.ClipReference, value, position);
                 }
-                else if (IsAlpha(Position))
+                else if (IsAlpha(position))
                 {
-                    Token identifierToken = GetIdentifier(Position, Commands);
+                    Token identifierToken = GetIdentifier(position, Commands);
                     if (identifierToken != null)
                     {
                         token = identifierToken;
                     }
 
-                    identifierToken = GetIdentifier(Position, Options);
+                    identifierToken = GetIdentifier(position, Options);
                     if (identifierToken != null)
                     {
                         token = identifierToken;
@@ -167,10 +175,10 @@ namespace Mutate4l
                 }
                 if (token != null)
                 {
-                    Position += token.Value.Length;
+                    position += token.Value.Length;
                     yield return token;
                 }
-                Position = SkipNonTokens(Position);
+                position = SkipNonTokens(position);
             }
             yield break;
         }

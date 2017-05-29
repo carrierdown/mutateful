@@ -8,8 +8,6 @@ namespace Mutate4l
 {
     class Program
     {
-        
-
         static void Main(string[] args)
         {
             UdpClient listener = new UdpClient(8008);
