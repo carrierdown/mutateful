@@ -16,5 +16,13 @@ namespace Mutate4lTests
             Assert.AreEqual(result.Item1, 1);
             Assert.AreEqual(result.Item2, 3);
         }
+
+        [TestMethod]
+        public void TestParseTokensToCommand()
+        {
+            Lexer lexer = new Lexer("interleave A1 C4 range A1 count => A2");
+            var command = Parser.ParseTokensToCommand(lexer.GetTokens());
+
+        }
     }
 }

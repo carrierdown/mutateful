@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Mutate4l
 {
@@ -20,6 +21,20 @@ namespace Mutate4l
             x = Encoding.ASCII.GetBytes(channel.ToLower())[0] - Encoding.ASCII.GetBytes("a")[0];
             y = int.Parse(clip) - 1; // indexes into Live are 0-based
             return new Tuple<int, int>(x, y);
+        }
+
+        public static Command ParseTokensToCommand(IEnumerable<Token> tokens)
+        {
+            var command = new Command();
+            command.Id = tokens.First().Type;
+            List<Token> tokensAsList = tokens.ToList();
+
+            /*                if (token.Type > TokenType._CommandsBegin && token.Type < TokenType._CommandsEnd)
+                            {
+                                command.Id = token.Type;
+                            }
+            */
+            return command;
         }
     }
 }
