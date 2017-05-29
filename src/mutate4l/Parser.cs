@@ -32,24 +32,30 @@ namespace Mutate4l
             var i = 1;
             while (i < tokensAsList.Count)
             {
-                var token = tokensAsList[i++];
-                if (token.Type > TokenType._OptionsBegin && token.Type < TokenType._OptionsEnd)
+                while (i < tokensAsList.Count && tokensAsList[i].Type == TokenType.ClipReference)
                 {
-                    var type = token.Type;
-                    var values = new List<string>();
+                    command.SourceClips.Add(ResolveClipReference(tokensAsList[i++].Value));
+                }
 
-                    while (tokensAsList[i + 1].Type > TokenType._ValuesBegin && tokensAsList[i + 1].Type < TokenType._ValuesEnd)
+                if (tokensAsList[i].Type > TokenType._OptionsBegin && tokensAsList[i].Type < TokenType._OptionsEnd)
+                {
+                    var type = tokensAsList[i].Type;
+                    var values = new List<string>();
+                    i++;
+                    while (i < tokensAsList.Count && tokensAsList[i].Type > TokenType._ValuesBegin && tokensAsList[i].Type < TokenType._ValuesEnd)
                     {
-                        values.Add(tokensAsList[++i].Value);
+                        values.Add(tokensAsList[i++].Value);
+                    }
+                    command.Options.Add(type, values);
+                } else if (tokensAsList[i].Type == TokenType.Destination)
+                {
+                    i++;
+                    while (i < tokensAsList.Count && tokensAsList[i].Type == TokenType.ClipReference)
+                    {
+                        command.TargetClips.Add(ResolveClipReference(tokensAsList[i++].Value));
                     }
                 }
             }
-
-            /*                if (token.Type > TokenType._CommandsBegin && token.Type < TokenType._CommandsEnd)
-                            {
-                                command.Id = token.Type;
-                            }
-            */
             return command;
         }
     }
