@@ -1,49 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Mutate4l
+namespace Mutate4l.Cli
 {
-    public enum TokenType
-    {
-        _CommandsBegin,
-        Interleave,
-        ConstrainStart,
-        ConstrainPitch,
-        Slice,
-        Explode,
-        _CommandsEnd,
-        _OptionsBegin,
-        Start,
-        Pitch,
-        Range,
-        Count,
-        _OptionsEnd,
-        Colon,
-        Destination,
-        _ValuesBegin,
-        ClipReference,
-        Number,
-        MusicalDivision,
-        _ValuesEnd
-    }
-
-    public class Token
-    {
-        public TokenType Type { get; set; }
-        public string Value { get; set; }
-        public int Position { get; set; }
-
-        public Token(TokenType type, string value, int position)
-        {
-            Type = type;
-            Value = value;
-            Position = position;
-        }
-    }
-
     public class Lexer
     {
         private readonly string Buffer;

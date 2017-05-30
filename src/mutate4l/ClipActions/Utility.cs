@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Mutate4l.Dto;
+using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Mutate4l.ClipActions
 {
@@ -27,7 +27,7 @@ namespace Mutate4l.ClipActions
                     }
                     i++;
                 }
-                currentPosition = currentPosition.plus(position);
+                currentPosition = currentPosition + position;
             }
             return notes;
         }
@@ -84,33 +84,25 @@ namespace Mutate4l.ClipActions
             return haystack[nearestIndex].Start;
         }
 
-        public static findNearestNotePitchInSet(needle: Note, haystack: Note[]): number {
-        var nearestIndex: number = 0,
-            nearestDelta: number;
-        for (let i = 0; i<haystack.length; i++) {
-            if (nearestDelta === undefined) {
-                nearestDelta = Math.abs(needle.getPitch() - haystack[i].getPitch());
-            }
-            let currentDelta: number = Math.abs(needle.getPitch() - haystack[i].getPitch());
-            if (currentDelta<nearestDelta) {
-                nearestDelta = currentDelta;
-                nearestIndex = i;
-            }
-        }
-        return haystack[nearestIndex].getPitch();
-    }
+        public static byte FindNearestNotePitchInSet(Note needle, List<Note> haystack)
+        {
+            int nearestIndex = 0;
+            byte? nearestDelta = null;
 
-    // sorts notes according to position
-    public static sortNotes(notes: Note[]): void {
-        notes = notes.sort((a: Note, b: Note) => {
-            if (a.getStart().lt(b.getStart())) {
-                return -1;
+            for (int i = 0; i < haystack.Count; i++)
+            {
+                if (nearestDelta == null)
+                {
+                    nearestDelta = (byte)Math.Abs(needle.Pitch - haystack[i].Pitch);
+                }
+                byte currentDelta = (byte)Math.Abs(needle.Pitch - haystack[i].Pitch);
+                if (currentDelta < nearestDelta)
+                {
+                    nearestDelta = currentDelta;
+                    nearestIndex = i;
+                }
             }
-            if (a.getStart().gt(b.getStart())) {
-                return 1;
-            }
-            return 0;
-        });
-    }
+            return haystack[nearestIndex].Pitch;
+        }
     }
 }

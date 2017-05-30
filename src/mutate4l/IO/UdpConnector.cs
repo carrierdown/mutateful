@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Mutate4l.Dto;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Mutate4l
+namespace Mutate4l.IO
 {
     public class UdpConnector
     {

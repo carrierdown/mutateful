@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Mutate4l
+namespace Mutate4l.IO
 {
     public class OscHandler
     {

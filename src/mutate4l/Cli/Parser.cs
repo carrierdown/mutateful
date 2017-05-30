@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Mutate4l.Dto;
 
-namespace Mutate4l
+namespace Mutate4l.Cli
 {
     public class Parser
     {
