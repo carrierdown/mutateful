@@ -1,5 +1,8 @@
 # `mutate4l`
 
+## Status
+I'm in the process of porting all code for this project to C# using the .NET Core platform. The first version of this tool will be a cross-platform command line application, though a GUI-version might follow at a later date.
+
 `mutate4l` is a swiss army knife for offline processing of MIDI clips in Ableton Live. It can be used for tasks like aligning the notes of one clip rhythmically with another, using one clip as a transpose track for another clip, recursively applying the contents of a clip on itself (fractalize!), and a ton of other uses. Below is a list of the functions I'd like to support for version 1.0:
 
 &#10003; Constrain note start positions<br>
