@@ -13,8 +13,7 @@ namespace Mutate4l.ClipActions
 
     public class Interleave
     {
-
-        public static InterleaveMode Mode { get; set; }
+        public static InterleaveMode Mode { get; set; } = TimeRange;
         public static List<int> EventCounts { get; set; }
         public static decimal EventRangeA { get; set; } // todo: support list of any number of ranges instead
         public static decimal EventRangeB { get; set; } // todo: support list of any number of ranges instead
@@ -39,48 +38,54 @@ namespace Mutate4l.ClipActions
         public static Clip Apply(Clip a, Clip b) // todo: Expand to interleave any list of two clips or more
         {
 
-        a.Notes.Sort();
-        b.Notes.Sort();
-            Clip resultClip = new Clip(0, true);
+            a.Notes.Sort();
+            b.Notes.Sort();
+            Clip resultClip = new Clip(a.Length + b.Length, true);
             //resultClip.length = a.getLength().plus(b.getLength()); // todo: update length as we go
-
             decimal position = 0;
-        switch (Mode) {
-            case EventCount:
-                int i = 0, nix = 0;
-                while (i < b.Notes.Count + a.Notes.Count) {
-                    
-                    if (i === 0) {
-                        position = position.plus(a[nix % a.length].getStart());
-                    }
-                    if (i % 2 === 0) {
-                        position = addNextNote(a, position, nix);
-                    }
-                    if (i % 2 === 1) {
-                        position = addNextNote(b, position, nix);
-                    }
-                    i++;
-                    nix = Math.floor(i / 2);
-                }
-                break;
-            case TimeRange:
-                let srcPositionA = new Big(0),
-                    srcPositionB = new Big(0);
-a = ClipActions.splitNotesAtEvery(a, options.interleaveEventRangeA, b.getLength());
-                b = ClipActions.splitNotesAtEvery(b, options.interleaveEventRangeB, a.getLength());
 
-                while (position.lt(resultClip.length)) {
-                    resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionA, srcPositionA.plus(options.interleaveEventRangeA), a, position));
-                    position = position.plus(options.interleaveEventRangeA);
-                    srcPositionA = srcPositionA.plus(options.interleaveEventRangeA);
+            switch (Mode)
+            {
+                case EventCount:
+                    int i = 0, nix = 0;
+                    while (i < b.Notes.Count + a.Notes.Count)
+                    {
 
-                    resultClip.notes = resultClip.notes.concat(ClipActions.getNotesFromRangeAtPosition(srcPositionB, srcPositionB.plus(options.interleaveEventRangeB), b, position));
-                    position = position.plus(options.interleaveEventRangeB);
-                    srcPositionB = srcPositionB.plus(options.interleaveEventRangeB);
-                }
-                break;
+                        if (i == 0)
+                        {
+                            position = position + a.Notes[nix % a.Notes.Count].Start;
+                        }
+                        if (i % 2 == 0)
+                        {
+                            position = AddNextNote(a.Notes, position, nix, a, b, resultClip);
+                        }
+                        if (i % 2 == 1)
+                        {
+                            position = AddNextNote(b.Notes, position, nix, a, b, resultClip);
+                        }
+                        i++;
+                        nix = i / 2;
+                    }
+                    break;
+                case TimeRange:
+                    decimal srcPositionA = 0,
+                        srcPositionB = 0;
+                    a.Notes = Utility.SplitNotesAtEvery(a.Notes, EventRangeA, b.Length);
+                    b.Notes = Utility.SplitNotesAtEvery(b.Notes, EventRangeB, a.Length);
+
+                    while (position < resultClip.Length)
+                    {
+                        resultClip.Notes.AddRange(Utility.GetNotesInRangeAtPosition(srcPositionA, srcPositionA + EventRangeA, a.Notes, position));
+                        position = position + EventRangeA;
+                        srcPositionA = srcPositionA + EventRangeA;
+
+                        resultClip.Notes.AddRange(Utility.GetNotesInRangeAtPosition(srcPositionB, srcPositionB + EventRangeB, b.Notes, position));
+                        position = position + EventRangeB;
+                        srcPositionB = srcPositionB + EventRangeB;
+                    }
+                    break;
+            }
+            return resultClip;
         }
-        return resultClip;
-    }
     }
 }

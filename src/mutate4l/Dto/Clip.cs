@@ -12,6 +12,7 @@ namespace Mutate4l.Dto
 
         public Clip(decimal length, bool isLooping)
         {
+            Notes = new List<Note>();
             IsLooping = isLooping;
             Length = length;
         }

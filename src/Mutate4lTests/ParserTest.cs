@@ -1,8 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mutate4l;
+using Mutate4l.Cli;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Mutate4lTests
 {

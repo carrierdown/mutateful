@@ -16,7 +16,8 @@ namespace Mutate4l.ClipActions
                 {
                     Note note = notes[i];
                     if (note.Start > currentPosition) break;
-                    if (note.Start < currentPosition && (note.Start + note.Duration) > currentPosition)
+                    // todo: figure out correct strategy here
+                    if (note.Start <= currentPosition && (note.Start + note.Duration) > currentPosition + position)
                     {
                         // note runs across range boundary - split it
                         decimal rightSplitDuration = note.Start + note.Duration - currentPosition;
