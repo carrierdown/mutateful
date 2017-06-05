@@ -8,16 +8,15 @@ namespace Mutate4l.ClipActions
     {
         public static List<Note> SplitNotesAtEvery(List<Note> notes, decimal position, decimal length)
         {
-            int i = 0;
             decimal currentPosition = 0;
             while (currentPosition < length)
             {
+                int i = 0;
                 while (i < notes.Count)
                 {
                     Note note = notes[i];
                     if (note.Start > currentPosition) break;
-                    // todo: figure out correct strategy here
-                    if (note.Start <= currentPosition && (note.Start + note.Duration) > currentPosition + position)
+                    if (note.Start < currentPosition && (note.Start + note.Duration) > currentPosition)
                     {
                         // note runs across range boundary - split it
                         decimal rightSplitDuration = note.Start + note.Duration - currentPosition;
@@ -40,7 +39,7 @@ namespace Mutate4l.ClipActions
 
             foreach (var note in notesFromRange)
             {
-                note.Start = note.Start + position - start;
+                note.Start = position;
             }
             results.AddRange(notesFromRange);
             return results;

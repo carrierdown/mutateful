@@ -15,11 +15,12 @@ namespace Mutate4l.ClipActions
     {
         public static InterleaveMode Mode { get; set; } = TimeRange;
         public static List<int> EventCounts { get; set; }
-        public static decimal EventRangeA { get; set; } // todo: support list of any number of ranges instead
-        public static decimal EventRangeB { get; set; } // todo: support list of any number of ranges instead
+        public static decimal EventRangeA { get; set; } = 1; // todo: support list of any number of ranges instead
+        public static decimal EventRangeB { get; set; } = 1; // todo: support list of any number of ranges instead
 
         private static decimal AddNextNote(List<Note> noteSrc, decimal position, int ix, Clip a, Clip b, Clip resultClip)
         {
+            // todo: fix
             decimal pos = position;
             noteSrc[ix % noteSrc.Count].Start = pos;
             resultClip.Notes.Add(noteSrc[ix % noteSrc.Count]);
@@ -76,12 +77,12 @@ namespace Mutate4l.ClipActions
                     while (position < resultClip.Length)
                     {
                         resultClip.Notes.AddRange(Utility.GetNotesInRangeAtPosition(srcPositionA, srcPositionA + EventRangeA, a.Notes, position));
-                        position = position + EventRangeA;
-                        srcPositionA = srcPositionA + EventRangeA;
+                        position += EventRangeA;
+                        srcPositionA += EventRangeA;
 
                         resultClip.Notes.AddRange(Utility.GetNotesInRangeAtPosition(srcPositionB, srcPositionB + EventRangeB, b.Notes, position));
-                        position = position + EventRangeB;
-                        srcPositionB = srcPositionB + EventRangeB;
+                        position += EventRangeB;
+                        srcPositionB += EventRangeB;
                     }
                     break;
             }
