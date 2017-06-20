@@ -22,16 +22,19 @@ namespace Mutate4l.ClipActions
         {
             // todo: fix
             decimal pos = position;
-            noteSrc[ix % noteSrc.Count].Start = pos;
-            resultClip.Notes.Add(noteSrc[ix % noteSrc.Count]);
-            if ((ix + 1) % noteSrc.Count == 0 && ix > 0)
+            var noteToAdd = new Note(noteSrc[ix % noteSrc.Count]);
+            noteToAdd.Start = pos;
+            resultClip.Notes.Add(noteToAdd);
+            var noteSrcIx = ix % noteSrc.Count;
+            var nextNoteSrcIx = (ix + 1) % noteSrc.Count;
+            if (nextNoteSrcIx == 0 && ix > 0)
             {
-                pos = pos + a.Length - noteSrc[ix % noteSrc.Count].Start;
-                pos = pos + noteSrc[(ix + 1) % noteSrc.Count].Start;
+                pos = pos + a.Length - noteSrc[noteSrcIx].Start;
+                pos = pos + noteSrc[nextNoteSrcIx].Start;
             }
             else
             {
-                pos = pos + noteSrc[(ix + 1) % noteSrc.Count].Start - noteSrc[ix % noteSrc.Count].Start;
+                pos = pos + noteSrc[nextNoteSrcIx].Start - noteSrc[noteSrcIx].Start;
             }
             return pos;
         }

@@ -33,6 +33,7 @@ namespace Mutate4lTests.ClipActions
 
             for (var i = 0; i < 8; i++)
             {
+                Console.WriteLine($"{result.Notes[i].Start} {result.Notes[i].Pitch}");
                 Assert.AreEqual(result.Notes[i].Pitch, i % 2 == 0 ? 60 : 62);
                 Assert.AreEqual(result.Notes[i].Start, i);
                 Assert.AreEqual(result.Notes[0].Duration, 1);
@@ -69,6 +70,7 @@ namespace Mutate4lTests.ClipActions
 
             for (var i = 0; i < 8; i++)
             {
+                Console.WriteLine($"{result.Notes[i].Start} {result.Notes[i].Pitch}");
                 Assert.AreEqual(result.Notes[i].Pitch, i % 2 == 0 ? 60 : 62);
                 Assert.AreEqual(result.Notes[i].Start, i);
                 Assert.AreEqual(result.Notes[0].Duration, 1);

@@ -19,6 +19,14 @@ namespace Mutate4l.Dto
             Velocity = velocity;
         }
 
+        public Note(Note note)
+        {
+            Pitch = note.Pitch;
+            Start = note.Start;
+            Duration = note.Duration;
+            Velocity = note.Velocity;
+        }
+
         public int CompareTo(Note b)
         {
             if (Start < b.Start)
