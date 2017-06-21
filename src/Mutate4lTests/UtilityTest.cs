@@ -40,7 +40,25 @@ namespace Mutate4lTests
                 }
             };
             Utility.NormalizeClipLengths(clip1, clip2, clip3);
-            Console.WriteLine();
+            Assert.AreEqual(clip1.Notes[0].Start, 0);
+            Assert.AreEqual(clip1.Notes[1].Start, .4m);
+            Assert.AreEqual(clip1.Notes[2].Start, 1);
+            Assert.AreEqual(clip1.Notes[3].Start, 1.4m);
+            Assert.AreEqual(clip1.Notes[4].Start, 2);
+            Assert.AreEqual(clip1.Notes[5].Start, 2.4m);
+            Assert.AreEqual(clip1.Notes[6].Start, 3);
+            Assert.AreEqual(clip1.Notes[7].Start, 3.4m);
+            Assert.AreEqual(clip1.Notes.Count, 8);
+            Assert.AreEqual(clip2.Notes[0].Start, 0);
+            Assert.AreEqual(clip2.Notes[1].Start, 1);
+            Assert.AreEqual(clip2.Notes[2].Start, 2);
+            Assert.AreEqual(clip2.Notes[3].Start, 3);
+            Assert.AreEqual(clip2.Notes.Count, 4);
+            Assert.AreEqual(clip3.Notes[0].Start, .5m);
+            Assert.AreEqual(clip3.Notes[1].Start, 1.5m);
+            Assert.AreEqual(clip3.Notes[2].Start, 2.5m);
+            Assert.AreEqual(clip3.Notes[3].Start, 3.5m);
+            Assert.AreEqual(clip3.Notes.Count, 4);
         }
     }
 }
