@@ -20,32 +20,29 @@ namespace Mutate4l.ClipActions
 
         private static decimal AddNextNote(List<Note> noteSrc, decimal position, int ix, Clip a, Clip b, Clip resultClip)
         {
-            // todo: fix
             decimal pos = position;
-            var noteToAdd = new Note(noteSrc[ix % noteSrc.Count]);
-            noteToAdd.Start = pos;
-            resultClip.Notes.Add(noteToAdd);
-            var noteSrcIx = ix % noteSrc.Count;
-            var nextNoteSrcIx = (ix + 1) % noteSrc.Count;
-            if (nextNoteSrcIx == 0 && ix > 0)
+            var noteToAdd = new Note(noteSrc[ix % noteSrc.Count])
             {
-                pos = pos + a.Length - noteSrc[noteSrcIx].Start;
-                pos = pos + noteSrc[nextNoteSrcIx].Start;
+                Start = pos
+            };
+            resultClip.Notes.Add(noteToAdd);
+            var note = noteSrc[ix % noteSrc.Count];
+            var nextNote = noteSrc[(ix + 1) % noteSrc.Count];
+            if ((ix + 1) % noteSrc.Count == 0 && ix > 0)
+            {
+                pos = pos + a.Length - note.Start;
+                pos = pos + nextNote.Start;
             }
             else
             {
-                pos = pos + noteSrc[nextNoteSrcIx].Start - noteSrc[noteSrcIx].Start;
+                pos = pos + nextNote.Start - note.Start;
             }
             return pos;
         }
 
         public static Clip Apply(Clip a, Clip b) // todo: Expand to interleave any list of two clips or more
         {
-
-            a.Notes.Sort();
-            b.Notes.Sort();
             Clip resultClip = new Clip(a.Length + b.Length, true);
-            //resultClip.length = a.getLength().plus(b.getLength()); // todo: update length as we go
             decimal position = 0;
 
             switch (Mode)

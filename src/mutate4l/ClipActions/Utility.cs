@@ -1,6 +1,7 @@
 ﻿using Mutate4l.Dto;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Mutate4l.ClipActions
 {
@@ -103,6 +104,39 @@ namespace Mutate4l.ClipActions
                 }
             }
             return haystack[nearestIndex].Pitch;
+        }
+
+        public static void NormalizeClipLengths(params Clip[] clips)
+        {
+            decimal maxLength = clips.Max().Length;
+            foreach (var clip in clips)
+            {
+                if (clip.Length < maxLength)
+                {
+                    decimal loopLength = clip.Length;
+                    decimal currentLength = loopLength;
+
+                    var notesToAdd = new List<Note>();
+                    while (currentLength < maxLength)
+                    {
+                        foreach (var note in clip.Notes)
+                        {
+                            if (note.Start + currentLength < maxLength)
+                            {
+                                notesToAdd.Add(new Note(note)
+                                {
+                                    Start = note.Start + currentLength
+                                });
+                            } else {
+                                break;
+                            }
+                        }
+                        currentLength += loopLength;
+                    }
+                    clip.Length = maxLength;
+                    clip.Notes.AddRange(notesToAdd);
+                }
+            }
         }
     }
 }
