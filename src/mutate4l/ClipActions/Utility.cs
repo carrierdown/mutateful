@@ -1,4 +1,5 @@
-﻿using Mutate4l.Dto;
+﻿using Mutate4l.Core;
+using Mutate4l.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ namespace Mutate4l.ClipActions
 {
     public class Utility
     {
-        public static List<Note> SplitNotesAtEvery(List<Note> notes, decimal position, decimal length)
+        public static SortedList<Note> SplitNotesAtEvery(SortedList<Note> notes, decimal position, decimal length)
         {
             decimal currentPosition = 0;
             while (currentPosition < length)
@@ -22,9 +23,11 @@ namespace Mutate4l.ClipActions
                         // note runs across range boundary - split it
                         decimal rightSplitDuration = note.Start + note.Duration - currentPosition;
                         note.Duration = currentPosition - note.Start;
-                        Note newNote = new Note(note.Pitch, currentPosition, rightSplitDuration, note.Velocity);
-                        notes.Insert(i + 1, newNote);
-                        i++;
+                        notes.Add(new Note(note.Pitch, currentPosition, rightSplitDuration, note.Velocity));
+                        // For regular list: (though possible bug if split note spans more than one range unit)
+                        //Note newNote = new Note(note.Pitch, currentPosition, rightSplitDuration, note.Velocity);
+                        //notes.Insert(i + 1, newNote);
+                        //i++;
                     }
                     i++;
                 }
@@ -33,7 +36,7 @@ namespace Mutate4l.ClipActions
             return notes;
         }
 
-        public static List<Note> GetNotesInRangeAtPosition(decimal start, decimal end, List<Note> notes, decimal position)
+        public static List<Note> GetNotesInRangeAtPosition(decimal start, decimal end, SortedList<Note> notes, decimal position)
         {
             var results = new List<Note>();
             var notesFromRange = GetNotesInRange(start, end, notes);
@@ -46,7 +49,7 @@ namespace Mutate4l.ClipActions
             return results;
         }
 
-        public static List<Note> GetNotesInRange(decimal start, decimal end, List<Note> notes)
+        public static List<Note> GetNotesInRange(decimal start, decimal end, SortedList<Note> notes)
         {
             var results = new List<Note>();
 
@@ -64,7 +67,7 @@ namespace Mutate4l.ClipActions
             return results;
         }
 
-        public static decimal FindNearestNoteStartInSet(Note needle, List<Note> haystack)
+        public static decimal FindNearestNoteStartInSet(Note needle, SortedList<Note> haystack)
         {
             var nearestIndex = 0;
             decimal? nearestDelta = null;
@@ -85,7 +88,7 @@ namespace Mutate4l.ClipActions
             return haystack[nearestIndex].Start;
         }
 
-        public static byte FindNearestNotePitchInSet(Note needle, List<Note> haystack)
+        public static byte FindNearestNotePitchInSet(Note needle, SortedList<Note> haystack)
         {
             int nearestIndex = 0;
             byte? nearestDelta = null;

@@ -48,7 +48,8 @@ namespace Mutate4l.Cli
                         values.Add(tokensAsList[i++].Value);
                     }
                     command.Options.Add(type, values);
-                } else if (tokensAsList[i].Type == TokenType.Destination)
+                }
+                else if (tokensAsList[i].Type == TokenType.Destination)
                 {
                     i++;
                     while (i < tokensAsList.Count && tokensAsList[i].Type == TokenType.ClipReference)

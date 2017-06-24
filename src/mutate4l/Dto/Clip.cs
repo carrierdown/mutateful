@@ -1,27 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Mutate4l.Core;
+using System;
 
 namespace Mutate4l.Dto
 {
     public class Clip : IComparable<Clip>
     {
-        private List<Note> _notes;
-        public List<Note> Notes {
-            get { return _notes; }
-            set { _notes = value; _notes.Sort(); }
-        } // todo: optimization potential
+        public SortedList<Note> Notes { get; set; }
         public decimal Length { get; set; }
         public bool IsLooping { get; set; }
         public decimal EndDelta
         {
-            get { return Length - Notes.Max().Start; }
+            get { return Length - Notes[Notes.Count - 1].Start; }
         }
 
         public Clip(decimal length, bool isLooping)
         {
-            _notes = new List<Note>();
+            Notes = new SortedList<Note>();
             IsLooping = isLooping;
             Length = length;
         }

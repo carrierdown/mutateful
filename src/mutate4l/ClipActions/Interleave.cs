@@ -1,4 +1,5 @@
-﻿using Mutate4l.Dto;
+﻿using Mutate4l.Core;
+using Mutate4l.Dto;
 using System;
 using System.Collections.Generic;
 using static Mutate4l.ClipActions.InterleaveMode;
@@ -11,6 +12,23 @@ namespace Mutate4l.ClipActions
         TimeRange
     }
 
+    /// <summary>
+    /// Interleaves the contents of one clip with another (FR: Interleave contents of x clips).
+    /// 
+    /// <list type="table">
+    ///     <listheader>
+    ///         <term>Options</term>
+    ///         <description>description</description>
+    ///     </listheader>
+    ///     <item>
+    ///         <term>mode</term>
+    ///         <description>
+    ///         <para>eventcount: Interleaved clip is created by counting events in each clip and intertwining them, such that resulting clip will contain first note of first clip + distance to next note, followed by first note of second clip + distance to next note, and so on.</para>
+    ///         <para>timerange: Interleaved clip is created by first splitting both clips at given lengths, like 1/8 or 1/16 (splitting any notes that cross these boundaries). The resulting chunks are then placed into the interleaved clip in an interleaved fashion.</para>
+    ///         </description>
+    ///     </item>
+    /// </list>
+    /// </summary>
     public class Interleave
     {
         public static InterleaveMode Mode { get; set; } = TimeRange;
@@ -18,7 +36,7 @@ namespace Mutate4l.ClipActions
         public static decimal EventRangeA { get; set; } = 1; // todo: support list of any number of ranges instead
         public static decimal EventRangeB { get; set; } = 1; // todo: support list of any number of ranges instead
 
-        private static decimal AddNextNote(List<Note> noteSrc, decimal position, int ix, Clip a, Clip b, Clip resultClip)
+        private static decimal AddNextNote(SortedList<Note> noteSrc, decimal position, int ix, Clip a, Clip b, Clip resultClip)
         {
             decimal pos = position;
             var noteToAdd = new Note(noteSrc[ix % noteSrc.Count])

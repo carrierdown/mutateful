@@ -6,4 +6,8 @@
     <RuntimeFrameworkVersion>2.0.0-preview1-002111-00</RuntimeFrameworkVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
+  </PropertyGroup>
+
 </Project>

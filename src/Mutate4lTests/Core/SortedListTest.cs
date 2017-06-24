@@ -1,9 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mutate4l.Core;
 using Mutate4l.Dto;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Mutate4l.Core;
 
 namespace Mutate4lTests.Core
 {
@@ -13,7 +10,7 @@ namespace Mutate4lTests.Core
         [TestMethod]
         public void TestSortedList()
         {
-            var sortedList = new SortedList<Note>(null);
+            var sortedList = new SortedList<Note>();
             sortedList.Add(new Note(64, 1, 1, 100));
             sortedList.Add(new Note(60, 0, 1, 100));
             sortedList.Add(new Note(60, .5m, 1, 100));

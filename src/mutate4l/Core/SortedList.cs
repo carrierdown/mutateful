@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Mutate4l.Core
 {
-    public class SortedList<T>
+    public class SortedList<T> : IEnumerable<T>
     {
         private readonly List<T> _list;
         private readonly IComparer<T> _comparer;
@@ -16,16 +16,26 @@ namespace Mutate4l.Core
 
         public T this[int index] { get => _list[index]; }
 
-        public SortedList(IComparer<T> comparer)
+        public SortedList(IComparer<T> comparer = null)
         {
             _comparer = comparer ?? Comparer<T>.Default;
             _list = new List<T>();
+        }
+
+        public SortedList(List<T> items) : this(comparer: null)
+        {
+            AddRange(items);
         }
 
         public void Add(T item)
         {
             var index = _list.BinarySearch(item);
             _list.Insert(index < 0 ? ~index : index, item);
+        }
+
+        public void AddRange(List<T> items)
+        {
+            items.ForEach(x => Add(x));
         }
 
         public int IndexOf(T item)
@@ -61,6 +71,11 @@ namespace Mutate4l.Core
         public IEnumerator<T> GetEnumerator()
         {
             return ((IList<T>)_list).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<T>)_list).GetEnumerator();
         }
     }
 }

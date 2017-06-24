@@ -9,30 +9,26 @@ namespace Mutate4l.ClipActions
     {
         public static bool ConstrainPitch;
         public static bool ConstrainStart;
-
-        /*public static Clip Apply(Clip a, Clip b)
+        
+        public static Clip Apply(Clip a, Clip b)
         {
-            // normaliser lengde på a og b (finn lengste og loop korteste til å få samme lengde) - kan være en funksjon i Utility: NormalizeClipLengths(List<Clip> clips)
-        }*/
+            Utility.NormalizeClipLengths(a, b);
+            Clip constrainedClip = new Clip(b, b.IsLooping);
 
-        /*        var notesToMutate:Note[] = clipToMutate.getNotes(),
-            notesToSourceFrom:Note[] = clipToSourceFrom.getNotes(),
-            resultClip:GhostClip = ClipActions.newGhostClip();
-
-        for (let note of notesToMutate) {
-            console.log(note.toString());
-            let result = Note.clone(note);
-
-            if (options.constrainNotePitch) {
-                result.setPitch(ClipActions.findNearestNotePitchInSet(note, notesToSourceFrom));
+            foreach (var note in b)
+            {
+                var constrainedNote = new Note(note);
+                if (ConstrainPitch)
+                {
+                    constrainedNote.Pitch = Utility.FindNearestNotePitchInSet(note, a);
+                }
+                if (ConstrainStart)
+                {
+                    constrainedNote.Start = Utility.FindNearestNoteStartInSet(note, a);
+                }
+                constrainedClip.Notes.Add(constrainedNote);
             }
-            if (options.constrainNoteStart) {
-                result.setStart(ClipActions.findNearestNoteStartInSet(note, notesToSourceFrom));
-            }
-            resultClip.notes.push(result);
+            return constrainedClip;
         }
-        return resultClip;*/
-
-
     }
 }

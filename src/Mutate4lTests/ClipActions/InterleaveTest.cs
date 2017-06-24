@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.ClipActions;
+using Mutate4l.Core;
 using Mutate4l.Dto;
 using System;
 using System.Collections.Generic;
@@ -14,14 +15,14 @@ namespace Mutate4lTests.ClipActions
         {
             var clip1 = new Clip(4, true)
             {
-                Notes = new List<Note>()
+                Notes = new SortedList<Note>()
                 {
                    new Note(60, 0, 4, 100)
                 }
             };
             var clip2 = new Clip(4, true)
             {
-                Notes = new List<Note>()
+                Notes = new SortedList<Note>()
                 {
                    new Note(62, 0, 4, 100)
                 }
@@ -45,7 +46,7 @@ namespace Mutate4lTests.ClipActions
         {
             var clip1 = new Clip(4, true)
             {
-                Notes = new List<Note>()
+                Notes = new SortedList<Note>()
                 {
                    new Note(60, 0, 1, 100),
                    new Note(60, 1, 1, 100),
@@ -55,7 +56,7 @@ namespace Mutate4lTests.ClipActions
             };
             var clip2 = new Clip(4, true)
             {
-                Notes = new List<Note>()
+                Notes = new SortedList<Note>()
                 {
                    new Note(62, 0, 1, 100),
                    new Note(62, 1, 1, 100),

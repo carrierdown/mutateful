@@ -1,4 +1,5 @@
-﻿using Mutate4l.Dto;
+﻿using Mutate4l.Core;
+using Mutate4l.Dto;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -28,7 +29,7 @@ namespace Mutate4l.IO
 
         public Clip GetClip(int channel, int clip)
         {
-            List<Note> notes = new List<Note>();
+            var notes = new SortedList<Note>();
             try
             {
                 byte[] message = OscHandler.CreateOscMessage("/mu4l/clip/get", channel, clip);
