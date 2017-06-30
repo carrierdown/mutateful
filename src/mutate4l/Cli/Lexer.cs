@@ -20,8 +20,7 @@ namespace Mutate4l.Cli
         private Dictionary<string, TokenType> Commands = new Dictionary<string, TokenType>
         {
             { "interleave", TokenType.Interleave },
-            { "constrainstart", TokenType.ConstrainStart },
-            { "constrainpitch", TokenType.ConstrainPitch },
+            { "constrain", TokenType.Constrain },
             { "explode", TokenType.Explode }
         };
 

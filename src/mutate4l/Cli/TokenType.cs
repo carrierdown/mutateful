@@ -4,8 +4,7 @@
     {
         _CommandsBegin,
         Interleave,
-        ConstrainStart,
-        ConstrainPitch,
+        Constrain,
         Slice,
         Explode,
         _CommandsEnd,

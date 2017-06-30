@@ -1,4 +1,5 @@
-﻿using Mutate4l.Core;
+﻿using Mutate4l.Cli;
+using Mutate4l.Core;
 using Mutate4l.Dto;
 using System;
 using System.Collections.Generic;
@@ -29,12 +30,12 @@ namespace Mutate4l.ClipActions
     ///     </item>
     /// </list>
     /// </summary>
-    public class Interleave
+    public class Interleave : IClipAction
     {
-        public static InterleaveMode Mode { get; set; } = TimeRange;
-        public static List<int> EventCounts { get; set; }
-        public static decimal EventRangeA { get; set; } = 1; // todo: support list of any number of ranges instead
-        public static decimal EventRangeB { get; set; } = 1; // todo: support list of any number of ranges instead
+        public InterleaveMode Mode { get; set; } = TimeRange;
+        public List<int> EventCounts { get; set; }
+        public decimal EventRangeA { get; set; } = 1; // todo: support list of any number of ranges instead
+        public decimal EventRangeB { get; set; } = 1; // todo: support list of any number of ranges instead
 
         private static decimal AddNextNote(SortedList<Note> noteSrc, decimal position, int ix, Clip a, Clip b, Clip resultClip)
         {
@@ -58,7 +59,7 @@ namespace Mutate4l.ClipActions
             return pos;
         }
 
-        public static Clip Apply(Clip a, Clip b) // todo: Expand to interleave any list of two clips or more
+        public Clip Apply(Clip a, Clip b) // todo: Expand to interleave any list of two clips or more
         {
             Clip resultClip = new Clip(a.Length + b.Length, true);
             decimal position = 0;
@@ -105,6 +106,12 @@ namespace Mutate4l.ClipActions
                     break;
             }
             return resultClip;
+        }
+
+        public void Initialize(Dictionary<TokenType, List<string>> options)
+        {
+
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Mutate4l.Core;
+﻿using Mutate4l.Cli;
+using Mutate4l.Core;
 using Mutate4l.Dto;
 using System;
 using System.Collections.Generic;
@@ -140,6 +141,19 @@ namespace Mutate4l.ClipActions
                     clip.Notes.AddRange(notesToAdd);
                 }
             }
+        }
+
+        public static Dictionary<TokenType, List<string>> GetValidOptions(Dictionary<TokenType, List<string>> options, TokenType[] validOptions)
+        {
+            var cleanedOptions = new Dictionary<TokenType, List<string>>();
+            foreach (var key in options.Keys)
+            {
+                if (validOptions.Contains(key))
+                {
+                    cleanedOptions.Add(key, options[key]);
+                }
+            }
+            return cleanedOptions;
         }
     }
 }
