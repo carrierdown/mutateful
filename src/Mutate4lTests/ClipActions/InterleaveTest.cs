@@ -27,10 +27,11 @@ namespace Mutate4lTests.ClipActions
                    new Note(62, 0, 4, 100)
                 }
             };
-            Interleave.EventRangeA = 1;
-            Interleave.EventRangeB = 1;
-            Interleave.Mode = InterleaveMode.TimeRange;
-            var result = Interleave.Apply(clip1, clip2);
+            var interleave = new Interleave();
+            interleave.EventRangeA = 1;
+            interleave.EventRangeB = 1;
+            interleave.Mode = InterleaveMode.TimeRange;
+            var result = interleave.Apply(clip1, clip2);
 
             for (var i = 0; i < 8; i++)
             {
@@ -64,10 +65,11 @@ namespace Mutate4lTests.ClipActions
                    new Note(62, 3, 1, 100)
                 }
             };
-            Interleave.EventRangeA = 1;
-            Interleave.EventRangeB = 1;
-            Interleave.Mode = InterleaveMode.EventCount;
-            var result = Interleave.Apply(clip1, clip2);
+            var interleave = new Interleave();
+            interleave.EventRangeA = 1;
+            interleave.EventRangeB = 1;
+            interleave.Mode = InterleaveMode.EventCount;
+            var result = interleave.Apply(clip1, clip2);
 
             for (var i = 0; i < 8; i++)
             {
