@@ -30,6 +30,8 @@ namespace Mutate4l.IO
         public Clip GetClip(int channel, int clip)
         {
             var notes = new SortedList<Note>();
+            decimal clipLength = 1;
+            bool isLooping = false;
             try
             {
                 byte[] message = OscHandler.CreateOscMessage("/mu4l/clip/get", channel, clip);
@@ -40,7 +42,13 @@ namespace Mutate4l.IO
 //                Console.WriteLine($"[{OscHandler.GetOscStringKey(data)}] : [{OscHandler.GetOscStringValue(data)}]");
 
                 string[] noteData = OscHandler.GetOscStringValue(data).Split(' ');
-                for (var i = 0; i < noteData.Length; i += 4)
+                if (noteData.Length < 2)
+                {
+                    return null;
+                }
+                clipLength = decimal.Parse(noteData[0]);
+                isLooping = noteData[1] == "1";
+                for (var i = 2; i < noteData.Length; i += 4)
                 {
                     notes.Add(new Note(byte.Parse(noteData[i]), decimal.Parse(noteData[i + 1]), decimal.Parse(noteData[i + 2]), byte.Parse(noteData[i + 3])));
                 }
@@ -50,7 +58,7 @@ namespace Mutate4l.IO
             {
                 Console.WriteLine(e.ToString());
             }
-            return new Clip(2.0m, true)
+            return new Clip(clipLength, isLooping)
             {
                 Notes = notes
             };

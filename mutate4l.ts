@@ -26,15 +26,21 @@ function getClip(trackNo: number, clipNo: number): void {
         post('Invalid liveObject, exiting...');
         return;
     }
-    liveObject.call("select_all_notes"); // todo: should probably get notes that start between start_marker and end_marker instead
-    var data: any[] = liveObject.call('get_selected_notes');
+    //liveObject.call("select_all_notes"); // todo: should probably get notes that start between start_marker and end_marker instead
+    //var data: any[] = liveObject.call('get_selected_notes');
+    var loopStart = liveObject.get('loop_start');
+    //var loopEnd = liveObject.get('loop_end');
+    var clipLength = liveObject.get('length');
+    var looping = liveObject.get('looping');
+    var data: any[] = liveObject.call("get_notes", loopStart, 0, clipLength, 128);
+    result += `${clipLength} ${looping} `;
     for (let i = 2, len = data.length - 1; i < len; i += 6) {
         if (data[i + NoteDataMap.muted] === 1) { // skip muted notes
             continue;
         }
         result += `${data[i + NoteDataMap.pitch]} ${data[i + NoteDataMap.start]} ${data[i + NoteDataMap.duration]} ${data[i + NoteDataMap.velocity]} `;
     }
-    outlet(0, ['/mu4l/clip/get', result.slice(0, result.length - 1)]);
+    outlet(0, ['/mu4l/clip/get', result.slice(0, result.length - 1 /* remove last space */)]);
 }
 
 function setClip(trackNo: number, clipNo: number, data: string): void {

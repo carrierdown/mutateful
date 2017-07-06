@@ -6,15 +6,21 @@ function getClip(trackNo, clipNo) {
         post('Invalid liveObject, exiting...');
         return;
     }
-    liveObject.call("select_all_notes");
-    var data = liveObject.call('get_selected_notes');
+    //liveObject.call("select_all_notes"); // todo: should probably get notes that start between start_marker and end_marker instead
+    //var data: any[] = liveObject.call('get_selected_notes');
+    var loopStart = liveObject.get('loop_start');
+    //var loopEnd = liveObject.get('loop_end');
+    var clipLength = liveObject.get('length');
+    var looping = liveObject.get('looping');
+    var data = liveObject.call("get_notes", loopStart, 0, clipLength, 128);
+    result += clipLength + " " + looping + " ";
     for (var i = 2, len = data.length - 1; i < len; i += 6) {
         if (data[i + 5 /* muted */] === 1) {
             continue;
         }
         result += data[i + 1 /* pitch */] + " " + data[i + 2 /* start */] + " " + data[i + 3 /* duration */] + " " + data[i + 4 /* velocity */] + " ";
     }
-    outlet(0, ['/mu4l/clip/get', result.slice(0, result.length - 1)]);
+    outlet(0, ['/mu4l/clip/get', result.slice(0, result.length - 1 /* remove last space */)]);
 }
 function setClip(trackNo, clipNo, data) {
     var liveObject = new LiveAPI("live_set tracks " + trackNo + " clip_slots " + clipNo + " clip");
