@@ -59,8 +59,15 @@ namespace Mutate4l.ClipActions
             return pos;
         }
 
-        public Clip Apply(Clip a, Clip b) // todo: Expand to interleave any list of two clips or more
+        public ProcessResult Apply(params Clip[] clips) // todo: Expand to interleave any list of two clips or more
         {
+            if (clips.Length < 2)
+            {
+                return new ProcessResult("Error: Less than two clips were specified.");
+            }
+            // TODO: Add support for more than two clips
+            Clip a = clips[0];
+            Clip b = clips[1];
             Clip resultClip = new Clip(a.Length + b.Length, true);
             decimal position = 0;
 
@@ -105,7 +112,7 @@ namespace Mutate4l.ClipActions
                     }
                     break;
             }
-            return resultClip;
+            return new ProcessResult(new Clip[] { resultClip });
         }
 
         public void Initialize(Dictionary<TokenType, List<string>> options)

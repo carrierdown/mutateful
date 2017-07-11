@@ -26,10 +26,7 @@ function getClip(trackNo: number, clipNo: number): void {
         post('Invalid liveObject, exiting...');
         return;
     }
-    //liveObject.call("select_all_notes"); // todo: should probably get notes that start between start_marker and end_marker instead
-    //var data: any[] = liveObject.call('get_selected_notes');
     var loopStart = liveObject.get('loop_start');
-    //var loopEnd = liveObject.get('loop_end');
     var clipLength = liveObject.get('length');
     var looping = liveObject.get('looping');
     var data: any[] = liveObject.call("get_notes", loopStart, 0, clipLength, 128);
@@ -44,8 +41,20 @@ function getClip(trackNo: number, clipNo: number): void {
 }
 
 function setClip(trackNo: number, clipNo: number, data: string): void {
+    if (data.length < 3) return;
     var liveObject = new LiveAPI(`live_set tracks ${trackNo} clip_slots ${clipNo} clip`);
 
+}
+
+function createSceneAndSetClip(trackNo: number, clipNo: number, data: string): void {
+    var liveObject = new LiveAPI(`live_set`);
+    var numScenes = liveObject.get('scenes').length / 2; // output is of the form id 1, id 2, id 3 and so on, so we divide by 2 to get length
+    var index = clipNo;
+    if (clipNo >= numScenes) {
+        index = -1; // add to end
+    }
+    liveObject.call('create_scene', index);
+    setClip(trackNo, index, data);
 }
 
 /*

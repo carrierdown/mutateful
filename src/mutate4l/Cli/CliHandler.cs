@@ -8,8 +8,7 @@ namespace Mutate4l.Cli
         public static void Start()
         {
             var command = "";
-            Lexer lexer;
-            ClipProcessor clipProcessor = new ClipProcessor();
+            var clipProcessor = new ClipProcessor();
 
             while (command != "q" && command != "quit")
             {
@@ -20,9 +19,9 @@ namespace Mutate4l.Cli
                 Console.WriteLine("Mutate4L: Enter command, or [l]ist commands | [h]elp | [q]uit");
                 Console.Write("> ");
                 command = Console.ReadLine();
-                lexer = new Lexer(command);
+                var lexer = new Lexer(command);
                 Command structuredCommand = Parser.ParseTokensToCommand(lexer.GetTokens());
-                clipProcessor.ProcessCommand(structuredCommand);
+                var result = clipProcessor.ProcessCommand(structuredCommand);
             }
         }
     }

@@ -33,11 +33,6 @@ namespace Mutate4l.Cli
             var i = 1;
             while (i < tokensAsList.Count)
             {
-                while (i < tokensAsList.Count && tokensAsList[i].Type == TokenType.ClipReference)
-                {
-                    command.SourceClips.Add(ResolveClipReference(tokensAsList[i++].Value));
-                }
-
                 if (tokensAsList[i].Type > TokenType._OptionsBegin && tokensAsList[i].Type < TokenType._OptionsEnd)
                 {
                     var type = tokensAsList[i].Type;
@@ -56,6 +51,10 @@ namespace Mutate4l.Cli
                     {
                         command.TargetClips.Add(ResolveClipReference(tokensAsList[i++].Value));
                     }
+                }
+                while (i < tokensAsList.Count && tokensAsList[i].Type == TokenType.ClipReference)
+                {
+                    command.SourceClips.Add(ResolveClipReference(tokensAsList[i++].Value));
                 }
             }
             return command;

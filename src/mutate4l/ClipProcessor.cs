@@ -23,7 +23,7 @@ namespace Mutate4l
             }
         }
 
-        public void ProcessCommand(Command command)
+        public ProcessResult ProcessCommand(Command command)
         {
             List<Clip> sourceClips = new List<Clip>();
             List<Clip> targetClips = new List<Clip>();
@@ -33,23 +33,41 @@ namespace Mutate4l
             {
                 sourceClips.Add(UdpConnector.GetClip(clipReference.Item1, clipReference.Item2));
             }
+            if (sourceClips.Count < 2)
+            {
+                throw new Exception("Less than two source clips specified");
+            }
             // find correct Action class to call and pass in options and data
             IClipAction clipAction;
             switch (command.Id)
             {
                 case TokenType.Interleave:
-                    clipAction = new Interleave();
+                    clipAction = new Interleave(); 
                     break;
                 case TokenType.Constrain:
-                    clipAction = new Constrain(command.Options);
+                    clipAction = new Constrain(command.Options); // throw exception if invalid options, translate to error status
                     break;
                 default:
                     // todo: error here
-                    return;
+                    return new ProcessResult($"Unsupported command {command.Id}");
             }
             // todo: catch InvalidOptionException
             //clipAction.Initialize(command.Options);
+
+            var result = clipAction.Apply(sourceClips[0], sourceClips[1]);
+            if (command.TargetClips.Count > 0)
+            {
+//                UdpConnector.SetClip(result, command.TargetClips[0].Item1, command.TargetClips[0].Item2);
+            }
+            else
+            {
+                var lastSourceClip = command.SourceClips.Count - 1;
+//                UdpConnector.SetClip(result, command.SourceClips[command.SourceClips.Count - 1].Item1, command.SourceClips[0].Item2);
+            }
+
+            // destination clip: if destination is specified, replace dest with created clip. If destination is not specified, created clips are added in new scenes after last specified source clip.
             // call out to OSC-layer with resulting data
+            return result;
         }
     }
 }

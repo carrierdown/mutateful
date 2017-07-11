@@ -31,7 +31,10 @@ namespace Mutate4lTests.ClipActions
             interleave.EventRangeA = 1;
             interleave.EventRangeB = 1;
             interleave.Mode = InterleaveMode.TimeRange;
-            var result = interleave.Apply(clip1, clip2);
+            var resultObj = interleave.Apply(clip1, clip2);
+            Assert.IsTrue(resultObj.Success);
+            Assert.IsTrue(resultObj.Result.Length == 1);
+            var result = resultObj.Result[0];
 
             for (var i = 0; i < 8; i++)
             {
@@ -69,7 +72,10 @@ namespace Mutate4lTests.ClipActions
             interleave.EventRangeA = 1;
             interleave.EventRangeB = 1;
             interleave.Mode = InterleaveMode.EventCount;
-            var result = interleave.Apply(clip1, clip2);
+            var resultObj = interleave.Apply(clip1, clip2);
+            Assert.IsTrue(resultObj.Success);
+            Assert.IsTrue(resultObj.Result.Length == 1);
+            var result = resultObj.Result[0];
 
             for (var i = 0; i < 8; i++)
             {

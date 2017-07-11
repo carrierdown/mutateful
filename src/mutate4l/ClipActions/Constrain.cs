@@ -16,6 +16,7 @@ namespace Mutate4l.ClipActions
 
         public Constrain(Dictionary<TokenType, List<string>> options)
         {
+            // todo: maybe generalize this logic more - maybe using a map with a specific structure, option types, and a function to parse and validate against it.
             var validTokens = new TokenType[] { Start, Pitch };
             var validOptions = Utility.GetValidOptions(options, validTokens);
 
@@ -34,8 +35,15 @@ namespace Mutate4l.ClipActions
             }
         }
 
-        public Clip Apply(Clip a, Clip b)
+        public ProcessResult Apply(params Clip[] clips)
         {
+            if (clips.Length < 2)
+            {
+                return new ProcessResult("Error: Less than two clips were specified.");
+            }
+            // TODO: Add support for more than two clips
+            Clip a = clips[0];
+            Clip b = clips[1];
             Utility.NormalizeClipLengths(a, b);
             Clip constrainedClip = new Clip(b.Length, b.IsLooping);
 
@@ -52,7 +60,7 @@ namespace Mutate4l.ClipActions
                 }
                 constrainedClip.Notes.Add(constrainedNote);
             }
-            return constrainedClip;
+            return new ProcessResult(new Clip[] { constrainedClip });
         }
     }
 }

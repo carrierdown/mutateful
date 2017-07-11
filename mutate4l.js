@@ -6,10 +6,7 @@ function getClip(trackNo, clipNo) {
         post('Invalid liveObject, exiting...');
         return;
     }
-    //liveObject.call("select_all_notes"); // todo: should probably get notes that start between start_marker and end_marker instead
-    //var data: any[] = liveObject.call('get_selected_notes');
     var loopStart = liveObject.get('loop_start');
-    //var loopEnd = liveObject.get('loop_end');
     var clipLength = liveObject.get('length');
     var looping = liveObject.get('looping');
     var data = liveObject.call("get_notes", loopStart, 0, clipLength, 128);
@@ -24,6 +21,16 @@ function getClip(trackNo, clipNo) {
 }
 function setClip(trackNo, clipNo, data) {
     var liveObject = new LiveAPI("live_set tracks " + trackNo + " clip_slots " + clipNo + " clip");
+    // if clipNo is invalid (i.e. outside range), add clip to created scene at end instead.
+}
+function createSceneAndSetClip(trackNo, clipNo, data) {
+    var liveObject = new LiveAPI("live_set");
+    var numScenes = liveObject.get('scenes').length / 2;
+    var index = clipNo;
+    if (clipNo >= numScenes) {
+        index = -1;
+    }
+    liveObject.call('create_scene', index);
 }
 /*
 

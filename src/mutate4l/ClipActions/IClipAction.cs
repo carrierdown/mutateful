@@ -9,6 +9,6 @@ namespace Mutate4l.ClipActions
 {
     interface IClipAction
     {
-        Clip Apply(Clip a, Clip b);
+        ProcessResult Apply(params Clip[] clips);
     }
 }
