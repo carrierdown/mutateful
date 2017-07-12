@@ -17,6 +17,8 @@ namespace Mutate4l.ClipActions
         public Constrain(Dictionary<TokenType, List<string>> options)
         {
             // todo: maybe generalize this logic more - maybe using a map with a specific structure, option types, and a function to parse and validate against it.
+            // e.g. OptionMap -> OptionGroup -> Option
+            // Apply function then checks Option object directly instead of having to maintain/check class fields.
             var validTokens = new TokenType[] { Start, Pitch };
             var validOptions = Utility.GetValidOptions(options, validTokens);
 

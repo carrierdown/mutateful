@@ -64,5 +64,26 @@ namespace Mutate4l.IO
             };
         }
 
+        public void SetClips(int trackNo, int startingClipNo, Clip[] clips)
+        {
+            var i = 0;
+            foreach (var clip in clips)
+            {
+                SetClip(trackNo, startingClipNo + i++, clip);
+            }
+        }
+
+        public void SetClip(int trackNo, int clipNo, Clip clip)
+        {
+            string data = $"{clip.Length} {clip.IsLooping}";
+            for (var i = 0; i < clip.Notes.Count; i++)
+            {
+                var note = clip.Notes[i];
+                data = string.Join(' ', data, note.Pitch, note.Start.ToString("F4"), note.Duration.ToString("F4"), note.Velocity);
+            }
+            byte[] message = OscHandler.CreateOscMessage("/mu4l/clip/set", trackNo, clipNo, data);
+            Sender.Send(message, message.Length, "localhost", 8009);
+        }
+
     }
 }

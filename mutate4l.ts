@@ -40,10 +40,39 @@ function getClip(trackNo: number, clipNo: number): void {
     outlet(0, ['/mu4l/clip/get', result.slice(0, result.length - 1 /* remove last space */)]);
 }
 
-function setClip(trackNo: number, clipNo: number, data: string): void {
-    if (data.length < 3) return;
-    var liveObject = new LiveAPI(`live_set tracks ${trackNo} clip_slots ${clipNo} clip`);
+// todo: robustify handling of clip references. Track should refer to midi tracks only, filtering out audio tracks. Clip numbers must be checked for overflow wrt number of scenes available.
 
+function setClip(trackNo: number, clipNo: number, dataString: string): void {
+    var data = dataString.split(' ');
+    if (data.length < 3) return;
+
+    var pathCurrentTrack = `live_set tracks ${trackNo}`;
+    var pathCurrentClipHolder = `${pathCurrentTrack} clip_slots ${clipNo}`;
+    var pathCurrentClip = `${pathCurrentClipHolder} clip`;
+
+    var liveObject = new LiveAPI(pathCurrentTrack);
+    if (liveObject.get('has_audio_input') > 0 && liveObject.get('has_midi_input') < 1) {
+        post('Not a midi track!');
+    }
+    var clipLength = data[0];
+    var looping = data[1];
+
+    liveObject.goto(pathCurrentClipHolder);
+    if (liveObject.get('has_clip') < 1) {
+        liveObject.call('create_clip', clipLength);
+    }
+    liveObject.goto(pathCurrentClip);
+    liveObject.set('loop_start', '0');
+    liveObject.set('loop_end', clipLength);
+
+    liveObject.call('select_all_notes');
+    liveObject.call('replace_selected_notes');
+    liveObject.call('notes', (data.length - 2) / 4);
+    for (var c = 2; c < data.length; c += 4) {
+        liveObject.call('note', data[c], data[c+1], data[c+2], data[c+3], 0);
+    }
+    liveObject.call('done');
+    liveObject.set('looping', looping);
 }
 
 function createSceneAndSetClip(trackNo: number, clipNo: number, data: string): void {
@@ -52,56 +81,8 @@ function createSceneAndSetClip(trackNo: number, clipNo: number, data: string): v
     var index = clipNo;
     if (clipNo >= numScenes) {
         index = -1; // add to end
+        clipNo = numScenes;
     }
     liveObject.call('create_scene', index);
-    setClip(trackNo, index, data);
+    setClip(trackNo, clipNo, data);
 }
-
-/*
-
- basePath = "live_set view selected_track";
- // clip_slot: has_clip, create_clip
- // clip: is_midi_clip, length  -  select_all_notes,
-
- liveObject = new LiveAPI(basePath);
-
- if (!liveObject) {
- post('Invalid liveObject, exiting...');
- return;
- }
-
- // the liveAPI seems to have some weird issues with comparing directly with 1 and 0, so we use < and > instead
- if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0) {
- post('track type is valid');
-
- for (var i = 0; i < input.length; i++) {
- var notes = input[i].notes,
- loopLength = input[i].loopLength;
-
- liveObject.goto(basePath + ' clip_slots ' + i);
-
- if (liveObject.get('has_clip') < 1) {
- liveObject.call('create_clip', '4.0');
- } else {
- post('no clip to create');
- }
-
- liveObject.goto(basePath + ' clip_slots ' + i + ' clip');
- liveObject.call('select_all_notes');
- liveObject.call('replace_selected_notes');
-
- liveObject.call('notes', notes.length);
- for (var c = 0; c < notes.length; c++) {
- liveObject.call('note', convertPitch(notes[c].pitch),
- convertStart(notes[c].start), convertDuration(notes[c].duration),
- convertVelocity(notes[c].velocity), convertMuted(false));
- }
- liveObject.call('done');
- liveObject.set('looping', 1);
- liveObject.set('loop_end', loopLength);
- }
- } else {
- post('not a midi track!');
- }
-
- */

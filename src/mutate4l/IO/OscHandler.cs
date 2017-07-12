@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Mutate4l.IO
 {
@@ -30,6 +31,11 @@ namespace Mutate4l.IO
             bytes.AddRange(Int32ToBytes(arg1));
             bytes.AddRange(Int32ToBytes(arg2));
             return bytes.ToArray();
+        }
+
+        public static Byte[] CreateOscMessage(string route, Int32 arg1, Int32 arg2, string arg3)
+        {
+            return CreateOscMessage(route, arg1, arg2).Concat(Encoding.ASCII.GetBytes(FourPadString(arg3))).ToArray();
         }
 
         public static string FourPadString(string input)
