@@ -8,8 +8,14 @@ using System.Linq;
 
 namespace Mutate4l.ClipActions
 {
+    public class ConstrainOptions
+    {
+        public bool Pitch { get; set; }
+        public bool Start { get; set; }
+    }
+
     // constrain = constrain pitch:true start:true, constrain pitch = constrain pitch:true start:false, similarly for constrain start
-    public class Constrain : IClipAction
+    public class Constrain : IClipAction // todo: interface not really needed
     {
         public bool ConstrainPitch;
         public bool ConstrainStart;

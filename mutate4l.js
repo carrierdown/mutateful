@@ -21,6 +21,7 @@ function getClip(trackNo, clipNo) {
 }
 // todo: robustify handling of clip references. Track should refer to midi tracks only, filtering out audio tracks. Clip numbers must be checked for overflow wrt number of scenes available.
 function setClip(trackNo, clipNo, dataString) {
+    post("setClip");
     var data = dataString.split(' ');
     if (data.length < 3)
         return;

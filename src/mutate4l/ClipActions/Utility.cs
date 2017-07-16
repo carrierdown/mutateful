@@ -77,9 +77,9 @@ namespace Mutate4l.ClipActions
             {
                 if (nearestDelta == null)
                 {
-                    nearestDelta = needle.Start - Math.Abs(haystack[i].Start);
+                    nearestDelta = Math.Abs(needle.Start - haystack[i].Start);
                 }
-                decimal currentDelta = needle.Start - Math.Abs(haystack[i].Start);
+                decimal currentDelta = Math.Abs(needle.Start - haystack[i].Start);
                 if (currentDelta < nearestDelta)
                 {
                     nearestDelta = currentDelta;

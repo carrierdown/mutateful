@@ -54,20 +54,22 @@ namespace Mutate4l
             // todo: catch InvalidOptionException
             //clipAction.Initialize(command.Options);
 
-            var result = clipAction.Apply(sourceClips[0], sourceClips[1]);
+            var resultContainer = clipAction.Apply(sourceClips[0], sourceClips[1]);
+            if (!resultContainer.Success)
+            {
+                return resultContainer;
+            }
+            // destination clip: if destination is specified, replace dest with created clip. If destination is not specified, created clips are added in new scenes after last specified source clip.
             if (command.TargetClips.Count > 0)
             {
-//                UdpConnector.SetClip(result, command.TargetClips[0].Item1, command.TargetClips[0].Item2);
+                UdpConnector.SetClips(command.TargetClips[0].Item1, command.TargetClips[0].Item2, resultContainer.Result);
             }
             else
             {
-                var lastSourceClip = command.SourceClips.Count - 1;
-//                UdpConnector.SetClip(result, command.SourceClips[command.SourceClips.Count - 1].Item1, command.SourceClips[0].Item2);
+                var lastSourceClip = command.SourceClips[command.SourceClips.Count - 1];
+                UdpConnector.SetClips(lastSourceClip.Item1, lastSourceClip.Item2, resultContainer.Result);
             }
-
-            // destination clip: if destination is specified, replace dest with created clip. If destination is not specified, created clips are added in new scenes after last specified source clip.
-            // call out to OSC-layer with resulting data
-            return result;
+            return resultContainer;
         }
     }
 }

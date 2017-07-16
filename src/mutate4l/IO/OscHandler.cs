@@ -25,7 +25,7 @@ namespace Mutate4l.IO
         {
             if (string.IsNullOrEmpty(route)) return new Byte[0];
 
-            route = FourPadString(route) + ",ii\0";
+            route = FourPadString(route) + FourPadString(",ii");
             List<byte> bytes = new List<byte>(route.Length + 8);
             bytes.AddRange(Encoding.ASCII.GetBytes(route));
             bytes.AddRange(Int32ToBytes(arg1));
@@ -35,7 +35,15 @@ namespace Mutate4l.IO
 
         public static Byte[] CreateOscMessage(string route, Int32 arg1, Int32 arg2, string arg3)
         {
-            return CreateOscMessage(route, arg1, arg2).Concat(Encoding.ASCII.GetBytes(FourPadString(arg3))).ToArray();
+            if (string.IsNullOrEmpty(route)) return new Byte[0];
+
+            route = FourPadString(route) + FourPadString(",iis");
+            List<byte> bytes = new List<byte>(route.Length + 8 /* size of two Int32s */ + arg3.Length);
+            bytes.AddRange(Encoding.ASCII.GetBytes(route));
+            bytes.AddRange(Int32ToBytes(arg1));
+            bytes.AddRange(Int32ToBytes(arg2));
+            bytes.AddRange(Encoding.ASCII.GetBytes(FourPadString(arg3)));
+            return bytes.ToArray();
         }
 
         public static string FourPadString(string input)
