@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Mutate4l.Cli
@@ -28,8 +29,8 @@ namespace Mutate4l.Cli
         {
             { "start", TokenType.Start },
             { "pitch", TokenType.Pitch },
-            { "range", TokenType.Range },
-            { "count", TokenType.Count }
+            { "ranges", TokenType.Ranges },
+            { "counts", TokenType.Counts }
         };
 
         public Lexer(string buffer)
@@ -133,6 +134,10 @@ namespace Mutate4l.Cli
                     if (identifierToken != null)
                     {
                         token = identifierToken;
+                    }
+                    if (token == null)
+                    {
+                        throw new Exception($"Unknown token encountered at position {position}");
                     }
                 }
                 if (token != null)

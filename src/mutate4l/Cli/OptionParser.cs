@@ -15,16 +15,9 @@ namespace Mutate4l.Dto
                 switch (optionGroup.Type)
                 {
                     case OptionGroupType.InverseToggle:
-                        var allOptionsInGroup = new TokenType[optionGroup.Options.Length];
-                        var i = 0;
+                        var specifiedOptions = Utility.GetValidOptions(options, optionGroup.Options);
+                        bool noneOrAllSpecified = specifiedOptions.Keys.Count == 0 || specifiedOptions.Keys.Count == optionGroup.Options.Length;
                         foreach (var option in optionGroup.Options)
-                        {
-                            allOptionsInGroup[i++] = option.Name;
-                        }
-
-                        var specifiedOptions = Utility.GetValidOptions(options, allOptionsInGroup);
-                        bool noneOrAllSpecified = specifiedOptions.Keys.Count == 0 || specifiedOptions.Keys.Count == allOptionsInGroup.Length;
-                        foreach (var option in allOptionsInGroup)
                         {
                             if (noneOrAllSpecified || specifiedOptions.ContainsKey(option))
                             {

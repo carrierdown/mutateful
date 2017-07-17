@@ -9,7 +9,7 @@ namespace Mutate4lTests
     public class OptionsTest
     {
         [TestMethod]
-        public void MyTestMethod()
+        public void TestInverseToggleGroup()
         {
             var constrainOptions = new ConstrainOptions();
             var optionSet = new OptionsDefinition()
@@ -17,9 +17,9 @@ namespace Mutate4lTests
                 OptionGroups = new OptionGroup[] {
                     new OptionGroup() {
                         Type = OptionGroupType.InverseToggle,
-                        Options = new Option[] {
-                            new Option(TokenType.Pitch),
-                            new Option(TokenType.Start)
+                        Options = new TokenType[] {
+                            TokenType.Pitch,
+                            TokenType.Start
                         }
                     }
                 }
@@ -42,6 +42,27 @@ namespace Mutate4lTests
             parsedOptions = OptionParser.ParseOptions<ConstrainOptions>(command.Options, optionSet);
             Assert.IsTrue(parsedOptions.Pitch);
             Assert.IsTrue(parsedOptions.Start);
+        }
+
+        [TestMethod]
+        public void TestValueGroup()
+        {
+            // todo: complete
+            var interleaveOptions = new InterleaveOptions();
+            var optionSet = new OptionsDefinition()
+            {
+                OptionGroups = new OptionGroup[]
+                {
+                    new OptionGroup()
+                    {
+                        Type = OptionGroupType.Value,
+                        Options = new TokenType[]
+                        {
+                            TokenType.Mode
+                        }
+                    }
+                }
+            };
         }
     }
 }

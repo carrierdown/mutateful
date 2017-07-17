@@ -16,20 +16,6 @@ namespace Mutate4l.Dto
     public class OptionGroup
     {
         public OptionGroupType Type;
-        public Option[] Options;
-    }
-
-    public class Option
-    {
-        public TokenType Name { get; }
-        public dynamic[] Values { get; }
-
-        public Option(TokenType name, dynamic[] values)
-        {
-            Name = name;
-            Values = values;
-        }
-
-        public Option(TokenType name) : this(name, new dynamic[0]) { }
+        public TokenType[] Options;
     }
 }
