@@ -1,16 +1,30 @@
 ﻿using Mutate4l.Cli;
 using Mutate4l.ClipActions;
+using Mutate4l.Core;
+using System;
 using System.Collections.Generic;
 
 namespace Mutate4l.Dto
 {
     public class OptionParser
     {
-        public static T ParseOptions<T>(Dictionary<TokenType, List<string>> options, OptionsDefinition optionsDefinition) where T : new()
+        public static T ParseOptions<T>(Dictionary<TokenType, List<string>> options) where T : new()
         {
             T result = new T();
+            System.Reflection.MemberInfo info = typeof(T);
+            var props = result.GetType().GetProperties();
+            foreach (var property in props)
+            {
+                var attributes = property.GetCustomAttributes(false);
+                foreach (var attrib in attributes)
+                {
+                    OptionInfo attribInfo = (OptionInfo)attrib;
+                    Console.WriteLine(attribInfo.GroupId);
+                    Console.WriteLine(attribInfo.Type);
+                }
+            }
 
-            foreach (var optionGroup in optionsDefinition.OptionGroups)
+/*            foreach (var optionGroup in optionsDefinition.OptionGroups)
             {
                 switch (optionGroup.Type)
                 {
@@ -28,7 +42,7 @@ namespace Mutate4l.Dto
                     case OptionGroupType.Value:
                         break;
                 }
-            }
+            }*/
             return result;
         }
     }

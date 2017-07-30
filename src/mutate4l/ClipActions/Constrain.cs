@@ -5,12 +5,16 @@ using System.Text;
 using Mutate4l.Cli;
 using static Mutate4l.Cli.TokenType;
 using System.Linq;
+using Mutate4l.Core;
 
 namespace Mutate4l.ClipActions
 {
     public class ConstrainOptions
     {
+        [OptionInfo(type: OptionType.InverseToggle)]
         public bool Pitch { get; set; }
+
+        [OptionInfo(type: OptionType.InverseToggle)]
         public bool Start { get; set; }
     }
 
