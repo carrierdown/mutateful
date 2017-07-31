@@ -21,6 +21,7 @@
         GroupTwoToggleOne,
         GroupTwoToggleTwo,
         DecimalValue,
+        IntValue,
         _TestOptionsEnd,
         Colon,
         Destination,

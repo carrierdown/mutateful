@@ -64,19 +64,43 @@ namespace Mutate4l.Dto
                             {
                                 property.SetMethod?.Invoke(result, new object[] { Utility.MusicalDivisionToDecimal(typedTokens[0].Value) });
                             }
+                            else if (type == TokenType.Number && property.PropertyType == typeof(Int32))
+                            {
+                                property.SetMethod?.Invoke(result, new object[] { int.Parse(typedTokens[0].Value) });
+                            }
+                            else
+                            {
+                                throw new Exception($"Invalid combination. Token of type {type.ToString()} and property of type {property.PropertyType.Name} are not compatible.");
+                            }
                         }
                         else if (typedTokens.Count > 1)
                         {
                             // handle list
+                            if (type == TokenType.MusicalDivision && property.PropertyType == typeof(decimal[]))
+                            {
+                                decimal[] values = new decimal[typedTokens.Count];
+                                var i = 0;
+                                foreach (var token in typedTokens)
+                                {
+                                    values[i++] = Utility.MusicalDivisionToDecimal(token.Value);
+                                }
+                                property.SetMethod?.Invoke(result, new object[] { values });
+                            }
+                            else if (type == TokenType.Number && property.PropertyType == typeof(int[]))
+                            {
+                                int[] values = new int[typedTokens.Count];
+                                var i = 0;
+                                foreach (var token in typedTokens)
+                                {
+                                    values[i++] = int.Parse(token.Value);
+                                }
+                                property.SetMethod?.Invoke(result, new object[] { values });
+                            }
+                            else
+                            {
+                                throw new Exception($"Invalid combination. Token of type {type.ToString()} and property of type {property.PropertyType.Name} are not compatible.");
+                            }
                         }
-                        Console.WriteLine(property.GetType());
-                        /*                        tokens.Where(x => x.Type == type).
-
-                                                if (tokens.Count > 0)
-                                                {
-                                                    var type = tokens.First()
-                                                }
-                                                if (token.Type)*/
                     }
                 }
             }

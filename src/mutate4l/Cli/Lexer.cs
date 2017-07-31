@@ -128,13 +128,12 @@ namespace Mutate4l.Cli
                 }
                 else if (IsMusicalDivision(position))
                 {
-                    string value = Buffer.Substring(position, 3);
-                    int pos = 3;
-                    while (position + pos < Buffer.Length && IsNumeric(position + pos))
+                    int length = 3;
+                    while (position + length < Buffer.Length && IsNumeric(position + length))
                     {
-                        value += Buffer[position + pos++].ToString();
+                        length++;
                     }
-                    token = new Token(TokenType.MusicalDivision, value, position);
+                    token = new Token(TokenType.MusicalDivision, Buffer.Substring(position, length), position);
                 }
                 else if (IsNumeric(position))
                 {

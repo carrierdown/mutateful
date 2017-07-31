@@ -23,6 +23,15 @@ namespace Mutate4lTests
         public bool GroupTwoToggleTwo { get; set; }
 
         public decimal DecimalValue { get; set; }
+
+        public int IntValue { get; set; }
+    }
+
+    class OptionsClassTwo
+    {
+        public decimal[] DecimalValue { get; set; }
+
+        public int[] IntValue { get; set; }
     }
 
     [TestClass]
@@ -45,8 +54,21 @@ namespace Mutate4lTests
         {
             var options = new Dictionary<TokenType, List<Token>>();
             options[TokenType.DecimalValue] = new List<Token>() { new Token(TokenType.MusicalDivision, "1/8", 0) };
+            options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "14", 0) };
             var parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(options);
-            Console.WriteLine("");
+            Assert.AreEqual(14, parsedOptions.IntValue);
+            Assert.AreEqual(.5m, parsedOptions.DecimalValue);
+        }
+
+        [TestMethod]
+        public void TestListValues()
+        {
+            var options = new Dictionary<TokenType, List<Token>>();
+            options[TokenType.DecimalValue] = new List<Token>() { new Token(TokenType.MusicalDivision, "1/8", 0), new Token(TokenType.MusicalDivision, "1/16", 0) };
+            options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "14", 0), new Token(TokenType.Number, "2", 0), new Token(TokenType.Number, "900", 0) };
+            var parsedOptions = OptionParser.ParseOptions<OptionsClassTwo>(options);
+            Assert.AreEqual(2, parsedOptions.DecimalValue.Length);
+            Assert.AreEqual(3, parsedOptions.IntValue.Length);
         }
 
         [TestMethod]
