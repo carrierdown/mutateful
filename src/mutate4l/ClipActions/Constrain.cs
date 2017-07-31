@@ -19,35 +19,9 @@ namespace Mutate4l.ClipActions
     }
 
     // constrain = constrain pitch:true start:true, constrain pitch = constrain pitch:true start:false, similarly for constrain start
-    public class Constrain : IClipAction // todo: interface not really needed
+    public class Constrain
     {
-        public bool ConstrainPitch;
-        public bool ConstrainStart;
-
-        public Constrain(Dictionary<TokenType, List<string>> options)
-        {
-            // todo: maybe generalize this logic more - maybe using a map with a specific structure, option types, and a function to parse and validate against it.
-            // e.g. OptionMap -> OptionGroup -> Option
-            // Apply function then checks Option object directly instead of having to maintain/check class fields.
-            var validTokens = new TokenType[] { Start, Pitch };
-            var validOptions = Utility.GetValidOptions(options, validTokens);
-
-            if (validOptions.Keys.Count == 0 || options.Keys.Count == validTokens.Length)
-            {
-                ConstrainStart = true;
-                ConstrainPitch = true;
-            }
-            else
-            {
-                foreach (var option in validOptions.Keys)
-                {
-                    if (option == Start) ConstrainStart = true;
-                    if (option == Pitch) ConstrainPitch = true;
-                }
-            }
-        }
-
-        public ProcessResult Apply(params Clip[] clips)
+        public static ProcessResult Apply(ConstrainOptions options, params Clip[] clips)
         {
             if (clips.Length < 2)
             {
@@ -62,11 +36,11 @@ namespace Mutate4l.ClipActions
             foreach (var note in b.Notes)
             {
                 var constrainedNote = new Note(note);
-                if (ConstrainPitch)
+                if (options.Pitch)
                 {
                     constrainedNote.Pitch = Utility.FindNearestNotePitchInSet(note, a.Notes);
                 }
-                if (ConstrainStart)
+                if (options.Start)
                 {
                     constrainedNote.Start = Utility.FindNearestNoteStartInSet(note, a.Notes);
                 }

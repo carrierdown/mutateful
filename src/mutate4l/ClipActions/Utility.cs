@@ -143,9 +143,9 @@ namespace Mutate4l.ClipActions
             }
         }
 
-        public static Dictionary<TokenType, List<string>> GetValidOptions(Dictionary<TokenType, List<string>> options, TokenType[] validOptions)
+        public static Dictionary<TokenType, List<Token>> GetValidOptions(Dictionary<TokenType, List<Token>> options, TokenType[] validOptions)
         {
-            var cleanedOptions = new Dictionary<TokenType, List<string>>();
+            var cleanedOptions = new Dictionary<TokenType, List<Token>>();
             foreach (var key in options.Keys)
             {
                 if (validOptions.Contains(key))
@@ -154,6 +154,11 @@ namespace Mutate4l.ClipActions
                 }
             }
             return cleanedOptions;
+        }
+
+        public static decimal MusicalDivisionToDecimal(string value)
+        {
+            return 4m / int.Parse(value.Substring(value.IndexOf('/') + 1));
         }
     }
 }

@@ -38,13 +38,8 @@ namespace Mutate4l.ClipActions
     ///     </item>
     /// </list>
     /// </summary>
-    public class Interleave : IClipAction
+    public class Interleave
     {
-        public InterleaveMode Mode { get; set; } = TimeRange;
-        public List<int> EventCounts { get; set; }
-        public decimal EventRangeA { get; set; } = 1; // todo: support list of any number of ranges instead
-        public decimal EventRangeB { get; set; } = 1; // todo: support list of any number of ranges instead
-
         private static decimal AddNextNote(SortedList<Note> noteSrc, decimal position, int ix, Clip a, Clip b, Clip resultClip)
         {
             decimal pos = position;
@@ -67,7 +62,7 @@ namespace Mutate4l.ClipActions
             return pos;
         }
 
-        public ProcessResult Apply(params Clip[] clips) // todo: Expand to interleave any list of two clips or more
+        public static ProcessResult Apply(InterleaveOptions options, params Clip[] clips) // todo: Expand to interleave any list of two clips or more
         {
             if (clips.Length < 2)
             {
@@ -79,7 +74,7 @@ namespace Mutate4l.ClipActions
             Clip resultClip = new Clip(a.Length + b.Length, true);
             decimal position = 0;
 
-            switch (Mode)
+            switch (options.Mode)
             {
                 case EventCount:
                     int i = 0, nix = 0;
@@ -105,28 +100,22 @@ namespace Mutate4l.ClipActions
                 case TimeRange:
                     decimal srcPositionA = 0,
                         srcPositionB = 0;
-                    a.Notes = Utility.SplitNotesAtEvery(a.Notes, EventRangeA, b.Length);
-                    b.Notes = Utility.SplitNotesAtEvery(b.Notes, EventRangeB, a.Length);
+                    a.Notes = Utility.SplitNotesAtEvery(a.Notes, options.EventRangeA, b.Length);
+                    b.Notes = Utility.SplitNotesAtEvery(b.Notes, options.EventRangeB, a.Length);
 
                     while (position < resultClip.Length)
                     {
-                        resultClip.Notes.AddRange(Utility.GetNotesInRangeAtPosition(srcPositionA, srcPositionA + EventRangeA, a.Notes, position));
-                        position += EventRangeA;
-                        srcPositionA += EventRangeA;
+                        resultClip.Notes.AddRange(Utility.GetNotesInRangeAtPosition(srcPositionA, srcPositionA + options.EventRangeA, a.Notes, position));
+                        position += options.EventRangeA;
+                        srcPositionA += options.EventRangeA;
 
-                        resultClip.Notes.AddRange(Utility.GetNotesInRangeAtPosition(srcPositionB, srcPositionB + EventRangeB, b.Notes, position));
-                        position += EventRangeB;
-                        srcPositionB += EventRangeB;
+                        resultClip.Notes.AddRange(Utility.GetNotesInRangeAtPosition(srcPositionB, srcPositionB + options.EventRangeB, b.Notes, position));
+                        position += options.EventRangeB;
+                        srcPositionB += options.EventRangeB;
                     }
                     break;
             }
             return new ProcessResult(new Clip[] { resultClip });
-        }
-
-        public void Initialize(Dictionary<TokenType, List<string>> options)
-        {
-
-            throw new NotImplementedException();
         }
     }
 }

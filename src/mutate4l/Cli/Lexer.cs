@@ -55,8 +55,12 @@ namespace Mutate4l.Cli
 
         private bool IsClipReference(int pos)
         {
-
             return (Buffer.Length > pos + 1) && IsAlpha(pos) && IsNumeric(pos + 1);
+        }
+
+        private bool IsMusicalDivision(int pos)
+        {
+            return IsNumeric(pos) && Buffer[pos + 1] == '/' && IsNumeric(pos + 2);
         }
 
         private bool IsAlpha(int pos)
@@ -121,6 +125,26 @@ namespace Mutate4l.Cli
                     }
 
                     token = new Token(TokenType.ClipReference, value, position);
+                }
+                else if (IsMusicalDivision(position))
+                {
+                    string value = Buffer.Substring(position, 3);
+                    int pos = 3;
+                    while (position + pos < Buffer.Length && IsNumeric(position + pos))
+                    {
+                        value += Buffer[position + pos++].ToString();
+                    }
+                    token = new Token(TokenType.MusicalDivision, value, position);
+                }
+                else if (IsNumeric(position))
+                {
+                    string value = Buffer.Substring(position, 1);
+                    int pos = 1;
+                    while (position + pos < Buffer.Length && IsNumeric(position + pos))
+                    {
+                        value += Buffer[position + pos++].ToString();
+                    }
+                    token = new Token(TokenType.Number, value, position);
                 }
                 else if (IsAlpha(position))
                 {

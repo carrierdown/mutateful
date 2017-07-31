@@ -15,12 +15,20 @@
         Counts,
         Mode,
         _OptionsEnd,
+        _TestOptionsBegin,
+        GroupOneToggleOne,
+        GroupOneToggleTwo,
+        GroupTwoToggleOne,
+        GroupTwoToggleTwo,
+        DecimalValue,
+        _TestOptionsEnd,
         Colon,
         Destination,
         _ValuesBegin,
         ClipReference,
         Number,
         MusicalDivision,
-        _ValuesEnd
+        _ValuesEnd,
+        Unset
     }
 }

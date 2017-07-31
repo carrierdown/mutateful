@@ -37,15 +37,14 @@ namespace Mutate4l
             {
                 throw new Exception("Less than two source clips specified");
             }
-            // find correct Action class to call and pass in options and data
-            IClipAction clipAction;
+            ProcessResult resultContainer;
             switch (command.Id)
             {
                 case TokenType.Interleave:
-                    clipAction = new Interleave(); 
+                    resultContainer = Interleave.Apply(OptionParser.ParseOptions<InterleaveOptions>(command.Options), sourceClips.ToArray()); 
                     break;
                 case TokenType.Constrain:
-                    clipAction = new Constrain(command.Options); // throw exception if invalid options, translate to error status
+                    resultContainer = Constrain.Apply(OptionParser.ParseOptions<ConstrainOptions>(command.Options), sourceClips.ToArray());
                     break;
                 default:
                     // todo: error here
@@ -54,7 +53,7 @@ namespace Mutate4l
             // todo: catch InvalidOptionException
             //clipAction.Initialize(command.Options);
 
-            var resultContainer = clipAction.Apply(sourceClips[0], sourceClips[1]);
+//            var resultContainer = clipAction.Apply(sourceClips[0], sourceClips[1]);
             if (!resultContainer.Success)
             {
                 return resultContainer;

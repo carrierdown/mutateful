@@ -7,7 +7,7 @@ namespace Mutate4l.Dto
     public class Command
     {
         public TokenType Id { get; set; }
-        public Dictionary<TokenType, List<string>> Options { get; set; } = new Dictionary<TokenType, List<string>>();
+        public Dictionary<TokenType, List<Token>> Options { get; set; } = new Dictionary<TokenType, List<Token>>();
         public List<Tuple<int, int>> SourceClips { get; set; } = new List<Tuple<int, int>>();
         public List<Tuple<int, int>> TargetClips { get; set; } = new List<Tuple<int, int>>();
     }

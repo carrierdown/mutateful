@@ -10,7 +10,7 @@ namespace Mutate4lTests.ClipActions
     [TestClass]
     public class InterleaveTest
     {
-        [TestMethod]
+   /*     [TestMethod]
         public void TestInterleaveTimeRange()
         {
             var clip1 = new Clip(4, true)
@@ -84,6 +84,6 @@ namespace Mutate4lTests.ClipActions
                 Assert.AreEqual(result.Notes[i].Start, i);
                 Assert.AreEqual(result.Notes[0].Duration, 1);
             }
-        }
+        }*/
     }
 }

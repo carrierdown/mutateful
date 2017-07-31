@@ -36,11 +36,11 @@ namespace Mutate4l.Cli
                 if (tokensAsList[i].Type > TokenType._OptionsBegin && tokensAsList[i].Type < TokenType._OptionsEnd)
                 {
                     var type = tokensAsList[i].Type;
-                    var values = new List<string>();
+                    var values = new List<Token>();
                     i++;
                     while (i < tokensAsList.Count && tokensAsList[i].Type > TokenType._ValuesBegin && tokensAsList[i].Type < TokenType._ValuesEnd)
                     {
-                        values.Add(tokensAsList[i++].Value);
+                        values.Add(tokensAsList[i++]);
                     }
                     command.Options.Add(type, values);
                 }
