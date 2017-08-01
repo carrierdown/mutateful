@@ -117,33 +117,15 @@ namespace Mutate4l.Cli
                 }
                 else if (IsClipReference(position))
                 {
-                    string value = $"{Buffer[position]}{Buffer[position + 1]}";
-                    int pos = 2;
-                    while (position + pos < Buffer.Length && IsNumeric(position + pos))
-                    {
-                        value += Buffer[position + pos++].ToString();
-                    }
-
-                    token = new Token(TokenType.ClipReference, value, position);
+                    token = new Token(TokenType.ClipReference, GetRemainingNumericToken(position, 2), position);
                 }
                 else if (IsMusicalDivision(position))
                 {
-                    int length = 3;
-                    while (position + length < Buffer.Length && IsNumeric(position + length))
-                    {
-                        length++;
-                    }
-                    token = new Token(TokenType.MusicalDivision, Buffer.Substring(position, length), position);
+                    token = new Token(TokenType.MusicalDivision, GetRemainingNumericToken(position, 3), position);
                 }
                 else if (IsNumeric(position))
                 {
-                    string value = Buffer.Substring(position, 1);
-                    int pos = 1;
-                    while (position + pos < Buffer.Length && IsNumeric(position + pos))
-                    {
-                        value += Buffer[position + pos++].ToString();
-                    }
-                    token = new Token(TokenType.Number, value, position);
+                    token = new Token(TokenType.Number, GetRemainingNumericToken(position, 1), position);
                 }
                 else if (IsAlpha(position))
                 {
@@ -171,6 +153,16 @@ namespace Mutate4l.Cli
                 position = SkipNonTokens(position);
             }
             yield break;
+        }
+
+        // Fetches the remainder of a token consisting of numeric digits, with an optional offset which can be used in the case of values like 1/32 where you know the first 3 digits to be valid
+        private string GetRemainingNumericToken(int position, int offset)
+        {
+            while (position + offset < Buffer.Length && IsNumeric(position + offset))
+            {
+                offset++;
+            }
+            return Buffer.Substring(position, offset);
         }
 
         private int SkipNonTokens(int position)

@@ -9,7 +9,6 @@ namespace Mutate4l
 {
     public class ClipProcessor
     {
-
         private static UdpConnector udpConnector;
         public static UdpConnector UdpConnector {
             get
@@ -50,10 +49,6 @@ namespace Mutate4l
                     // todo: error here
                     return new ProcessResult($"Unsupported command {command.Id}");
             }
-            // todo: catch InvalidOptionException
-            //clipAction.Initialize(command.Options);
-
-//            var resultContainer = clipAction.Apply(sourceClips[0], sourceClips[1]);
             if (!resultContainer.Success)
             {
                 return resultContainer;

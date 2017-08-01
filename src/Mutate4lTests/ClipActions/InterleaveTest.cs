@@ -10,7 +10,7 @@ namespace Mutate4lTests.ClipActions
     [TestClass]
     public class InterleaveTest
     {
-   /*     [TestMethod]
+        [TestMethod]
         public void TestInterleaveTimeRange()
         {
             var clip1 = new Clip(4, true)
@@ -27,11 +27,13 @@ namespace Mutate4lTests.ClipActions
                    new Note(62, 0, 4, 100)
                 }
             };
-            var interleave = new Interleave();
-            interleave.EventRangeA = 1;
-            interleave.EventRangeB = 1;
-            interleave.Mode = InterleaveMode.TimeRange;
-            var resultObj = interleave.Apply(clip1, clip2);
+            var options = new InterleaveOptions
+            {
+                EventRangeA = 1,
+                EventRangeB = 1,
+                Mode = InterleaveMode.TimeRange
+            };
+            var resultObj = Interleave.Apply(options, clip1, clip2);
             Assert.IsTrue(resultObj.Success);
             Assert.IsTrue(resultObj.Result.Length == 1);
             var result = resultObj.Result[0];
@@ -68,11 +70,13 @@ namespace Mutate4lTests.ClipActions
                    new Note(62, 3, 1, 100)
                 }
             };
-            var interleave = new Interleave();
-            interleave.EventRangeA = 1;
-            interleave.EventRangeB = 1;
-            interleave.Mode = InterleaveMode.EventCount;
-            var resultObj = interleave.Apply(clip1, clip2);
+            var options = new InterleaveOptions
+            {
+                EventRangeA = 1,
+                EventRangeB = 1,
+                Mode = InterleaveMode.EventCount
+            };
+            var resultObj = Interleave.Apply(options, clip1, clip2);
             Assert.IsTrue(resultObj.Success);
             Assert.IsTrue(resultObj.Result.Length == 1);
             var result = resultObj.Result[0];
@@ -84,6 +88,6 @@ namespace Mutate4lTests.ClipActions
                 Assert.AreEqual(result.Notes[i].Start, i);
                 Assert.AreEqual(result.Notes[0].Duration, 1);
             }
-        }*/
+        }
     }
 }

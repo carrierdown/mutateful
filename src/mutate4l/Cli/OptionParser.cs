@@ -15,7 +15,6 @@ namespace Mutate4l.Dto
             System.Reflection.MemberInfo info = typeof(T);
             var props = result.GetType().GetProperties();
             var togglesByGroupId = new Dictionary<int, List<TokenType>>();
-            //var valueProperties = new List<>
 
             foreach (var property in props)
             {
@@ -109,7 +108,6 @@ namespace Mutate4l.Dto
             foreach (var toggle in togglesByGroupId.Keys)
             {
                 var group = new OptionGroup();
-                group.Type = OptionGroupType.InverseToggle;
                 group.Options = togglesByGroupId[toggle].ToArray();
                 optionGroups.Add(group);
             }
@@ -117,21 +115,14 @@ namespace Mutate4l.Dto
 
             foreach (var optionGroup in optionsDefinition.OptionGroups)
             {
-                switch (optionGroup.Type)
+                var specifiedOptions = Utility.GetValidOptions(options, optionGroup.Options);
+                bool noneOrAllSpecified = specifiedOptions.Keys.Count == 0 || specifiedOptions.Keys.Count == optionGroup.Options.Length;
+                foreach (var option in optionGroup.Options)
                 {
-                    case OptionGroupType.InverseToggle:
-                        var specifiedOptions = Utility.GetValidOptions(options, optionGroup.Options);
-                        bool noneOrAllSpecified = specifiedOptions.Keys.Count == 0 || specifiedOptions.Keys.Count == optionGroup.Options.Length;
-                        foreach (var option in optionGroup.Options)
-                        {
-                            if (noneOrAllSpecified || specifiedOptions.ContainsKey(option))
-                            {
-                                result.GetType().GetProperty(option.ToString())?.SetMethod?.Invoke(result, new object[] { true });
-                            }
-                        }
-                        break;
-                    case OptionGroupType.Value:
-                        break;
+                    if (noneOrAllSpecified || specifiedOptions.ContainsKey(option))
+                    {
+                        result.GetType().GetProperty(option.ToString())?.SetMethod?.Invoke(result, new object[] { true });
+                    }
                 }
             }
             return result;

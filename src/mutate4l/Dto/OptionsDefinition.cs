@@ -2,12 +2,6 @@
 
 namespace Mutate4l.Dto
 {
-    public enum OptionGroupType
-    {
-        InverseToggle, // If none specified, all are active. Otherwise, only specified options are active.
-        Value // Option that takes one or more values.
-    }
-
     public class OptionsDefinition
     {
         public OptionGroup[] OptionGroups;
@@ -15,7 +9,6 @@ namespace Mutate4l.Dto
 
     public class OptionGroup
     {
-        public OptionGroupType Type;
         public TokenType[] Options;
     }
 }
