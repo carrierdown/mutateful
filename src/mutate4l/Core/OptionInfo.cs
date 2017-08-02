@@ -6,7 +6,7 @@ namespace Mutate4l.Core
 {
     public enum OptionType
     {
-        InverseToggle, // If none specified, all are active. Otherwise, only specified options are active.
+        AllOrSpecified, // If none specified, all are active. Otherwise, only specified options are active.
         Value // Option that takes one or more values.
     }
 
@@ -15,6 +15,8 @@ namespace Mutate4l.Core
     {
         public int GroupId { get; }
         public OptionType Type { get; }
+        public int MinNumberValue { get; }
+        public int MaxNumberValue { get; }
 
         public OptionInfo(int groupId, OptionType type)
         {
@@ -23,5 +25,11 @@ namespace Mutate4l.Core
         }
 
         public OptionInfo(OptionType type) : this(0, type) { }
+
+        public OptionInfo(int min, int max) : this(0, OptionType.Value)
+        {
+            MinNumberValue = min;
+            MaxNumberValue = max;
+        }
     }
 }

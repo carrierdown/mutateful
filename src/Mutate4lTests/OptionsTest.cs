@@ -10,16 +10,16 @@ namespace Mutate4lTests
 {
     class OptionsClassOne
     {
-        [OptionInfo(groupId: 1, type: OptionType.InverseToggle)]
+        [OptionInfo(groupId: 1, type: OptionType.AllOrSpecified)]
         public bool GroupOneToggleOne { get; set; }
 
-        [OptionInfo(groupId: 1, type: OptionType.InverseToggle)]
+        [OptionInfo(groupId: 1, type: OptionType.AllOrSpecified)]
         public bool GroupOneToggleTwo { get; set; }
 
-        [OptionInfo(groupId: 2, type: OptionType.InverseToggle)]
+        [OptionInfo(groupId: 2, type: OptionType.AllOrSpecified)]
         public bool GroupTwoToggleOne { get; set; }
 
-        [OptionInfo(groupId: 2, type: OptionType.InverseToggle)]
+        [OptionInfo(groupId: 2, type: OptionType.AllOrSpecified)]
         public bool GroupTwoToggleTwo { get; set; }
 
         public decimal DecimalValue { get; set; }

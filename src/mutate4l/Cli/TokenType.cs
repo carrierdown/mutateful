@@ -14,6 +14,7 @@
         Ranges,
         Counts,
         Mode,
+        Strength,
         _OptionsEnd,
         _TestOptionsBegin,
         GroupOneToggleOne,

@@ -11,11 +11,14 @@ namespace Mutate4l.ClipActions
 {
     public class ConstrainOptions
     {
-        [OptionInfo(type: OptionType.InverseToggle)]
+        [OptionInfo(type: OptionType.AllOrSpecified)]
         public bool Pitch { get; set; }
 
-        [OptionInfo(type: OptionType.InverseToggle)]
+        [OptionInfo(type: OptionType.AllOrSpecified)]
         public bool Start { get; set; }
+
+        [OptionInfo(min: 1, max: 100)]
+        public int Strength { get; set; }
     }
 
     // constrain = constrain pitch:true start:true, constrain pitch = constrain pitch:true start:false, similarly for constrain start

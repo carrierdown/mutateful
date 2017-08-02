@@ -158,7 +158,14 @@ namespace Mutate4l.ClipActions
 
         public static decimal MusicalDivisionToDecimal(string value)
         {
-            return 4m / int.Parse(value.Substring(value.IndexOf('/') + 1));
+            if (value.IndexOf('/') >= 0)
+            {
+                return 4m / int.Parse(value.Substring(value.IndexOf('/') + 1));
+            }
+            else
+            {
+                return int.Parse(value) * 4m;
+            }
         }
     }
 }
