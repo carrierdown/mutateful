@@ -30,6 +30,15 @@ namespace Mutate4l.Cli
             { "start", TokenType.Start },
             { "pitch", TokenType.Pitch },
             { "ranges", TokenType.Ranges },
+            { "counts", TokenType.Counts },
+            { "interleavemode", TokenType.InterleaveMode }
+        };
+
+        private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>
+        {
+            { "timerange", TokenType.TimeRange },
+            { "eventcount", TokenType.EventCount },
+            { "ranges", TokenType.Ranges },
             { "counts", TokenType.Counts }
         };
 
@@ -83,7 +92,7 @@ namespace Mutate4l.Cli
             return c >= '0' && c <= '9';
         }
 
-        private Token GetIdentifier(int pos, Dictionary<string, TokenType> validValues)
+        private Token GetIdentifier(int pos, params Dictionary<string, TokenType>[] validValues)
         {
             string identifier = "";
             int initialPos = pos;
@@ -92,9 +101,9 @@ namespace Mutate4l.Cli
             {
                 identifier += Buffer[pos++].ToString();
             }
-            if (identifier.Length > 0 && validValues.Any(v => v.Key == identifier))
+            if (identifier.Length > 0 && validValues.Any(va => va.Any(v => v.Key == identifier)))
             {
-                return new Token(validValues.First(v => v.Key == identifier).Value, identifier, initialPos);
+                return new Token(validValues.Where(va => va.Any(v => v.Key == identifier)).First()[identifier], identifier, initialPos);
             }
             return null;
         }
@@ -129,18 +138,12 @@ namespace Mutate4l.Cli
                 }
                 else if (IsAlpha(position))
                 {
-                    Token identifierToken = GetIdentifier(position, Commands);
+                    Token identifierToken = GetIdentifier(position, Commands, Options);
                     if (identifierToken != null)
                     {
                         token = identifierToken;
                     }
-
-                    identifierToken = GetIdentifier(position, Options);
-                    if (identifierToken != null)
-                    {
-                        token = identifierToken;
-                    }
-                    if (token == null)
+                    else
                     {
                         throw new Exception($"Unknown token encountered at position {position}");
                     }

@@ -31,30 +31,31 @@ namespace Mutate4l.Dto
                 {
                     throw new Exception($"No corresponding entity found for {property.Name}");
                 }
-                var attributes = property.GetCustomAttributes(false);
+                var attributes = property.GetCustomAttributes(false)
+                    .Select(a => (OptionInfo)a)
+                    .Where(a => a.Type == OptionType.AllOrSpecified)
+                    .ToArray(); //.GroupBy(p => p.GroupId).Select(g => new OptionGroup(g.S))
                 if (attributes.Length > 0)
                 {
+                    // handle properties with OptionType AllOrSpecified
                     foreach (var attrib in attributes)
                     {
-                        OptionInfo attribInfo = (OptionInfo)attrib;
-                        if (attribInfo.Type == OptionType.AllOrSpecified)
+                        List<TokenType> toggles;
+                        if (togglesByGroupId.ContainsKey(attrib.GroupId))
                         {
-                            List<TokenType> toggles;
-                            if (togglesByGroupId.ContainsKey(attribInfo.GroupId))
-                            {
-                                toggles = togglesByGroupId[attribInfo.GroupId];
-                            }
-                            else
-                            {
-                                toggles = new List<TokenType>();
-                                togglesByGroupId[attribInfo.GroupId] = toggles;
-                            }
-                            toggles.Add(option);
+                            toggles = togglesByGroupId[attrib.GroupId];
                         }
+                        else
+                        {
+                            toggles = new List<TokenType>();
+                            togglesByGroupId[attrib.GroupId] = toggles;
+                        }
+                        toggles.Add(option);
                     }
                 }
                 else
                 {
+                    // handle value properties
                     if (options.ContainsKey(option))
                     {
                         var tokens = options[option];
@@ -74,7 +75,7 @@ namespace Mutate4l.Dto
                             {
                                 property.SetMethod?.Invoke(result, new object[] { int.Parse(tokens[0].Value) });
                             }
-                            else
+                            else if (property.PropertyType.IsEnum)
                             {
                                 throw new Exception($"Invalid combination. Token of type {type.ToString()} and property of type {property.PropertyType.Name} are not compatible.");
                             }

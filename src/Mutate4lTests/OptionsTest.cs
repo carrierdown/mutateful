@@ -27,11 +27,19 @@ namespace Mutate4lTests
         public int IntValue { get; set; }
     }
 
+    enum TestEnum
+    {
+        EnumValue1,
+        EnumValue2
+    }
+
     class OptionsClassTwo
     {
         public decimal[] DecimalValue { get; set; }
 
         public int[] IntValue { get; set; }
+
+        public TestEnum EnumValue { get; set; }
     }
 
     [TestClass]
@@ -69,6 +77,14 @@ namespace Mutate4lTests
             var parsedOptions = OptionParser.ParseOptions<OptionsClassTwo>(options);
             Assert.AreEqual(2, parsedOptions.DecimalValue.Length);
             Assert.AreEqual(3, parsedOptions.IntValue.Length);
+        }
+
+        [TestMethod]
+        public void TestEnumValues()
+        {
+            var options = new Dictionary<TokenType, List<Token>>();
+            options[TokenType.EnumValue] = new List<Token>() { new Token(TokenType.EnumValue, "1/8", 0), new Token(TokenType.MusicalDivision, "1/16", 0) };
+            var parsedOptions = OptionParser.ParseOptions<OptionsClassTwo>(options);
         }
 
         [TestMethod]
