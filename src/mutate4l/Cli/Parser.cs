@@ -38,7 +38,8 @@ namespace Mutate4l.Cli
                     var type = tokensAsList[i].Type;
                     var values = new List<Token>();
                     i++;
-                    while (i < tokensAsList.Count && tokensAsList[i].Type > TokenType._ValuesBegin && tokensAsList[i].Type < TokenType._ValuesEnd)
+                    while (i < tokensAsList.Count && (tokensAsList[i].Type > TokenType._ValuesBegin && tokensAsList[i].Type < TokenType._ValuesEnd) 
+                        || (tokensAsList[i].Type > TokenType._EnumValuesBegin && tokensAsList[i].Type < TokenType._EnumValuesEnd))
                     {
                         values.Add(tokensAsList[i++]);
                     }

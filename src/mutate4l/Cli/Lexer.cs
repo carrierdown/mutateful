@@ -31,7 +31,9 @@ namespace Mutate4l.Cli
             { "pitch", TokenType.Pitch },
             { "ranges", TokenType.Ranges },
             { "counts", TokenType.Counts },
-            { "interleavemode", TokenType.InterleaveMode }
+            { "mode", TokenType.Mode },
+            { "eventrangea", TokenType.EventRangeA },
+            { "eventrangeb", TokenType.EventRangeB }
         };
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>
@@ -105,16 +107,12 @@ namespace Mutate4l.Cli
                 {
                     return new Token(validValues.Where(va => va.Any(v => v.Key.Equals(identifier, StringComparison.InvariantCultureIgnoreCase))).First()[identifier.ToLower()], identifier, initialPos);
                 }
-                catch (ArgumentNullException)
-                {
-                    throw new Exception($"Unknown token encountered at position {initialPos}");
-                }
-                catch (InvalidOperationException)
+                catch (Exception)
                 {
                     throw new Exception($"Unknown token encountered at position {initialPos}");
                 }
             }
-            return null;
+            throw new Exception($"Unknown token encountered at position {initialPos}");
         }
 
         public IEnumerable<Token> GetTokens()

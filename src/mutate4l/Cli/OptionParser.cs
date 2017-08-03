@@ -11,11 +11,13 @@ namespace Mutate4l.Dto
     {
         public static T ParseOptions<T>(Dictionary<TokenType, List<Token>> options) where T : new()
         {
+            // todo: This code can be cleaned up considerably. OptionDefinitions no longer needed, should be possible to do everything in one pass.
             T result = new T();
             System.Reflection.MemberInfo info = typeof(T);
             var props = result.GetType().GetProperties();
             var togglesByGroupId = new Dictionary<int, List<TokenType>>();
 
+            // todo: better checking for whether incoming options are valid for the current options class or not
             foreach (var property in props)
             {
                 TokenType option;

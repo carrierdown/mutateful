@@ -16,7 +16,8 @@
         Counts,
         Mode,
         Strength,
-        InterleaveMode,
+        EventRangeA,
+        EventRangeB, // will be removed in favour of a ranges with multiple values possible
         _OptionsEnd,
 
         _EnumValuesBegin,

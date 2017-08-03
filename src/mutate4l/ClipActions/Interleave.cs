@@ -16,7 +16,7 @@ namespace Mutate4l.ClipActions
     public class InterleaveOptions
     {
         public InterleaveMode Mode { get; set; } = TimeRange;
-        public List<int> EventCounts { get; set; }
+        public int[] Counts { get; set; }
         public decimal EventRangeA { get; set; } = 1; // todo: support list of any number of ranges instead
         public decimal EventRangeB { get; set; } = 1; // todo: support list of any number of ranges instead
     }
