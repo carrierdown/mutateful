@@ -20,8 +20,8 @@
         _OptionsEnd,
 
         _EnumValuesBegin,
-        eventcount,
-        timerange,
+        EventCount,
+        TimeRange,
         _EnumValuesEnd,
 
         _ValuesBegin,
@@ -45,8 +45,8 @@
         _TestOptionsEnd,
 
         _TestEnumValuesBegin,
-        enumvalue1,
-        enumvalue2,
+        EnumValue1,
+        EnumValue2,
         _TestEnumValuesEnd
     }
 }

@@ -92,7 +92,7 @@ namespace Mutate4l.Dto
                             {
                                 try
                                 {
-                                    property.SetMethod?.Invoke(result, new object[] { Enum.Parse(property.PropertyType, tokens[0].Value) });
+                                    property.SetMethod?.Invoke(result, new object[] { Enum.Parse(property.PropertyType, tokens[0].Value, ignoreCase: true) });
                                 }
                                 catch (ArgumentException)
                                 {

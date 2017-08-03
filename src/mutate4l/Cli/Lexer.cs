@@ -36,8 +36,8 @@ namespace Mutate4l.Cli
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>
         {
-            { "timerange", TokenType.timerange },
-            { "eventcount", TokenType.eventcount }
+            { "timerange", TokenType.TimeRange },
+            { "eventcount", TokenType.EventCount }
         };
 
         public Lexer(string buffer)
@@ -101,7 +101,18 @@ namespace Mutate4l.Cli
             }
             if (identifier.Length > 0 && validValues.Any(va => va.Any(v => v.Key == identifier)))
             {
-                return new Token(validValues.Where(va => va.Any(v => v.Key == identifier)).First()[identifier], identifier, initialPos);
+                try
+                {
+                    return new Token(validValues.Where(va => va.Any(v => v.Key.Equals(identifier, StringComparison.InvariantCultureIgnoreCase))).First()[identifier.ToLower()], identifier, initialPos);
+                }
+                catch (ArgumentNullException)
+                {
+                    throw new Exception($"Unknown token encountered at position {initialPos}");
+                }
+                catch (InvalidOperationException)
+                {
+                    throw new Exception($"Unknown token encountered at position {initialPos}");
+                }
             }
             return null;
         }
@@ -137,14 +148,7 @@ namespace Mutate4l.Cli
                 else if (IsAlpha(position))
                 {
                     Token identifierToken = GetIdentifier(position, Commands, Options, EnumValues);
-                    if (identifierToken != null)
-                    {
-                        token = identifierToken;
-                    }
-                    else
-                    {
-                        throw new Exception($"Unknown token encountered at position {position}");
-                    }
+                    token = identifierToken;
                 }
                 if (token != null)
                 {

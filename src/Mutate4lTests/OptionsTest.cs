@@ -30,8 +30,8 @@ namespace Mutate4lTests
 
     enum TestEnum
     {
-        enumvalue1,
-        enumvalue2
+        EnumValue1,
+        EnumValue2
     }
 
     class OptionsClassTwo
@@ -98,7 +98,7 @@ namespace Mutate4lTests
             var options = new Dictionary<TokenType, List<Token>>();
             options[TokenType.EnumValue] = new List<Token>() { new Token(TokenType.EnumValue, "enumvalue2", 0) };
             var parsedOptions = OptionParser.ParseOptions<OptionsClassTwo>(options);
-            Assert.AreEqual(TestEnum.enumvalue2, parsedOptions.EnumValue);
+            Assert.AreEqual(TestEnum.EnumValue2, parsedOptions.EnumValue);
         }
 
         [TestMethod]

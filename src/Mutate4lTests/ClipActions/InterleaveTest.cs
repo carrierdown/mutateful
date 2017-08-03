@@ -31,7 +31,7 @@ namespace Mutate4lTests.ClipActions
             {
                 EventRangeA = 1,
                 EventRangeB = 1,
-                Mode = InterleaveMode.timerange
+                Mode = InterleaveMode.TimeRange
             };
             var resultObj = Interleave.Apply(options, clip1, clip2);
             Assert.IsTrue(resultObj.Success);
@@ -74,7 +74,7 @@ namespace Mutate4lTests.ClipActions
             {
                 EventRangeA = 1,
                 EventRangeB = 1,
-                Mode = InterleaveMode.eventcount
+                Mode = InterleaveMode.EventCount
             };
             var resultObj = Interleave.Apply(options, clip1, clip2);
             Assert.IsTrue(resultObj.Success);
