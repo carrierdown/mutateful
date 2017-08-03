@@ -24,13 +24,14 @@ namespace Mutate4lTests
 
         public decimal DecimalValue { get; set; }
 
+        [OptionInfo(min: 1, max: 100)]
         public int IntValue { get; set; }
     }
 
     enum TestEnum
     {
-        EnumValue1,
-        EnumValue2
+        enumvalue1,
+        enumvalue2
     }
 
     class OptionsClassTwo
@@ -69,6 +70,18 @@ namespace Mutate4lTests
         }
 
         [TestMethod]
+        public void TestMinMaxValue()
+        {
+            var options = new Dictionary<TokenType, List<Token>>();
+            options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "1000", 0) };
+            var parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(options);
+            Assert.AreEqual(100, parsedOptions.IntValue);
+            options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "0", 0) };
+            parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(options);
+            Assert.AreEqual(1, parsedOptions.IntValue);
+        }
+
+        [TestMethod]
         public void TestListValues()
         {
             var options = new Dictionary<TokenType, List<Token>>();
@@ -83,8 +96,9 @@ namespace Mutate4lTests
         public void TestEnumValues()
         {
             var options = new Dictionary<TokenType, List<Token>>();
-            options[TokenType.EnumValue] = new List<Token>() { new Token(TokenType.EnumValue, "1/8", 0), new Token(TokenType.MusicalDivision, "1/16", 0) };
+            options[TokenType.EnumValue] = new List<Token>() { new Token(TokenType.EnumValue, "enumvalue2", 0) };
             var parsedOptions = OptionParser.ParseOptions<OptionsClassTwo>(options);
+            Assert.AreEqual(TestEnum.enumvalue2, parsedOptions.EnumValue);
         }
 
         [TestMethod]

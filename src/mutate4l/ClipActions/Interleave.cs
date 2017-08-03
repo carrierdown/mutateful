@@ -9,13 +9,13 @@ namespace Mutate4l.ClipActions
 {
     public enum InterleaveMode
     {
-        EventCount,
-        TimeRange
+        eventcount,
+        timerange
     }
 
     public class InterleaveOptions
     {
-        public InterleaveMode Mode { get; set; } = TimeRange;
+        public InterleaveMode Mode { get; set; } = timerange;
         public List<int> EventCounts { get; set; }
         public decimal EventRangeA { get; set; } = 1; // todo: support list of any number of ranges instead
         public decimal EventRangeB { get; set; } = 1; // todo: support list of any number of ranges instead
@@ -76,7 +76,7 @@ namespace Mutate4l.ClipActions
 
             switch (options.Mode)
             {
-                case EventCount:
+                case eventcount:
                     int i = 0, nix = 0;
                     while (i < b.Notes.Count + a.Notes.Count)
                     {
@@ -97,7 +97,7 @@ namespace Mutate4l.ClipActions
                         nix = i / 2;
                     }
                     break;
-                case TimeRange:
+                case timerange:
                     decimal srcPositionA = 0,
                         srcPositionB = 0;
                     a.Notes = Utility.SplitNotesAtEvery(a.Notes, options.EventRangeA, b.Length);

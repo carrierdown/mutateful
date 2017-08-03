@@ -36,10 +36,8 @@ namespace Mutate4l.Cli
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>
         {
-            { "timerange", TokenType.TimeRange },
-            { "eventcount", TokenType.EventCount },
-            { "ranges", TokenType.Ranges },
-            { "counts", TokenType.Counts }
+            { "timerange", TokenType.timerange },
+            { "eventcount", TokenType.eventcount }
         };
 
         public Lexer(string buffer)
@@ -138,7 +136,7 @@ namespace Mutate4l.Cli
                 }
                 else if (IsAlpha(position))
                 {
-                    Token identifierToken = GetIdentifier(position, Commands, Options);
+                    Token identifierToken = GetIdentifier(position, Commands, Options, EnumValues);
                     if (identifierToken != null)
                     {
                         token = identifierToken;

@@ -8,17 +8,32 @@
         Slice,
         Explode,
         _CommandsEnd,
+
         _OptionsBegin,
         Start,
         Pitch,
-        EventCount,
-        TimeRange,
         Ranges,
         Counts,
         Mode,
         Strength,
         InterleaveMode,
         _OptionsEnd,
+
+        _EnumValuesBegin,
+        eventcount,
+        timerange,
+        _EnumValuesEnd,
+
+        _ValuesBegin,
+        ClipReference,
+        Number,
+        MusicalDivision,
+        _ValuesEnd,
+
+        Colon,
+        Destination,
+        Unset,
+
         _TestOptionsBegin,
         GroupOneToggleOne,
         GroupOneToggleTwo,
@@ -27,16 +42,11 @@
         DecimalValue,
         IntValue,
         EnumValue,
-        EnumValue1,
-        EnumValue2,
         _TestOptionsEnd,
-        Colon,
-        Destination,
-        _ValuesBegin,
-        ClipReference,
-        Number,
-        MusicalDivision,
-        _ValuesEnd,
-        Unset
+
+        _TestEnumValuesBegin,
+        enumvalue1,
+        enumvalue2,
+        _TestEnumValuesEnd
     }
 }

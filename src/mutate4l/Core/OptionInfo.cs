@@ -15,8 +15,8 @@ namespace Mutate4l.Core
     {
         public int GroupId { get; }
         public OptionType Type { get; }
-        public int MinNumberValue { get; }
-        public int MaxNumberValue { get; }
+        public int? MinNumberValue { get; }
+        public int? MaxNumberValue { get; }
 
         public OptionInfo(int groupId, OptionType type)
         {

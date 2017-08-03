@@ -73,9 +73,33 @@ namespace Mutate4l.Dto
                             }
                             else if (type == TokenType.Number && property.PropertyType == typeof(Int32))
                             {
-                                property.SetMethod?.Invoke(result, new object[] { int.Parse(tokens[0].Value) });
+                                // todo: extract this logic so that it can be used in the list version below as well
+                                var rangeInfo = property.GetCustomAttributes(false)
+                                    .Select(a => (OptionInfo)a)
+                                    .Where(a => a.MaxNumberValue != null && a.MinNumberValue != null).FirstOrDefault();
+                                int value = int.Parse(tokens[0].Value);
+                                if (value > rangeInfo?.MaxNumberValue)
+                                {
+                                    value = (int)rangeInfo.MaxNumberValue;
+                                }
+                                if (value < rangeInfo?.MinNumberValue)
+                                {
+                                    value = (int)rangeInfo.MinNumberValue;
+                                }
+                                property.SetMethod?.Invoke(result, new object[] { value });
                             }
                             else if (property.PropertyType.IsEnum)
+                            {
+                                try
+                                {
+                                    property.SetMethod?.Invoke(result, new object[] { Enum.Parse(property.PropertyType, tokens[0].Value) });
+                                }
+                                catch (ArgumentException)
+                                {
+                                    throw new Exception($"Enum {property.Name} does not support value {tokens[0].Value}");
+                                }
+                            }
+                            else
                             {
                                 throw new Exception($"Invalid combination. Token of type {type.ToString()} and property of type {property.PropertyType.Name} are not compatible.");
                             }
@@ -92,6 +116,10 @@ namespace Mutate4l.Dto
                             {
                                 int[] values = tokens.Select(t => int.Parse(t.Value)).ToArray();
                                 property.SetMethod?.Invoke(result, new object[] { values });
+                            }
+                            else if (property.PropertyType.IsEnum)
+                            {
+                                throw new Exception("Only one value supported for enums");
                             }
                             else
                             {
