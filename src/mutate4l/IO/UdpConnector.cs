@@ -2,6 +2,7 @@
 using Mutate4l.Dto;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -50,7 +51,7 @@ namespace Mutate4l.IO
                 isLooping = noteData[1] == "1";
                 for (var i = 2; i < noteData.Length; i += 4)
                 {
-                    notes.Add(new Note(byte.Parse(noteData[i]), decimal.Parse(noteData[i + 1]), decimal.Parse(noteData[i + 2]), byte.Parse(noteData[i + 3])));
+                    notes.Add(new Note(byte.Parse(noteData[i]), decimal.Parse(noteData[i + 1], NumberStyles.Float), decimal.Parse(noteData[i + 2], NumberStyles.Float), byte.Parse(noteData[i + 3])));
                 }
 //                Console.ReadLine();
             }
