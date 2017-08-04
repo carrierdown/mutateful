@@ -110,10 +110,12 @@ namespace Mutate4l.ClipActions
                         resultClip.Notes.AddRange(Utility.GetNotesInRangeAtPosition(srcPositionA, srcPositionA + options.EventRangeA, a.Notes, position));
                         position += options.EventRangeA;
                         srcPositionA += options.EventRangeA;
+                        if (srcPositionA >= a.Length) srcPositionA = 0;
 
                         resultClip.Notes.AddRange(Utility.GetNotesInRangeAtPosition(srcPositionB, srcPositionB + options.EventRangeB, b.Notes, position));
                         position += options.EventRangeB;
                         srcPositionB += options.EventRangeB;
+                        if (srcPositionB >= b.Length) srcPositionB = 0;
                     }
                     break;
             }
