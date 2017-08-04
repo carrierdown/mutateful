@@ -51,7 +51,7 @@ namespace Mutate4l.IO
                 isLooping = noteData[1] == "1";
                 for (var i = 2; i < noteData.Length; i += 4)
                 {
-                    notes.Add(new Note(byte.Parse(noteData[i]), decimal.Parse(noteData[i + 1], NumberStyles.Float), decimal.Parse(noteData[i + 2], NumberStyles.Float), byte.Parse(noteData[i + 3])));
+                    notes.Add(new Note(byte.Parse(noteData[i]), decimal.Parse(noteData[i + 1], NumberStyles.Any), decimal.Parse(noteData[i + 2], NumberStyles.Any), byte.Parse(noteData[i + 3])));
                 }
 //                Console.ReadLine();
             }
