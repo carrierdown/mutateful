@@ -21,7 +21,7 @@
         _OptionsEnd,
 
         _EnumValuesBegin,
-        EventCount,
+        EventCount, // change to event / time. E.g.: event counts 1 1 or time ranges 1/8 1/8
         TimeRange,
         _EnumValuesEnd,
 

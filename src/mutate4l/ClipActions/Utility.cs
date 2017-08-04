@@ -44,7 +44,7 @@ namespace Mutate4l.ClipActions
 
             foreach (var note in notesFromRange)
             {
-                note.Start = position;
+                note.Start += position;
             }
             results.AddRange(notesFromRange);
             return results;

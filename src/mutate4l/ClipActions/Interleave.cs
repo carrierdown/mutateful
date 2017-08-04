@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using static Mutate4l.ClipActions.InterleaveMode;
 
+// interleave f3 f4 mode timerange eventrangea 1/8 eventrangeb 1/8 => f6
+
 namespace Mutate4l.ClipActions
 {
     public enum InterleaveMode
