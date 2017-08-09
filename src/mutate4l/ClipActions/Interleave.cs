@@ -3,6 +3,7 @@ using Mutate4l.Core;
 using Mutate4l.Dto;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static Mutate4l.ClipActions.InterleaveMode;
 
 // interleave f3 f4 mode timerange eventrangea 1/8 eventrangeb 1/8 => f6
@@ -42,62 +43,31 @@ namespace Mutate4l.ClipActions
     /// </summary>
     public class Interleave
     {
-        private static decimal AddNextNote(SortedList<Note> noteSrc, decimal position, int ix, Clip a, Clip b, Clip resultClip)
-        {
-            decimal pos = position;
-            var noteToAdd = new Note(noteSrc[ix % noteSrc.Count])
-            {
-                Start = pos
-            };
-            resultClip.Notes.Add(noteToAdd);
-            var note = noteSrc[ix % noteSrc.Count];
-            var nextNote = noteSrc[(ix + 1) % noteSrc.Count];
-            if ((ix + 1) % noteSrc.Count == 0 && ix > 0)
-            {
-                pos = pos + a.Length - note.Start;
-                pos = pos + nextNote.Start;
-            }
-            else
-            {
-                pos = pos + nextNote.Start - note.Start;
-            }
-            return pos;
-        }
-
         public static ProcessResult Apply(InterleaveOptions options, params Clip[] clips) // todo: Expand to interleave any list of two clips or more
         {
+            clips = clips.Where(c => c.Notes.Count > 0).ToArray();
             if (clips.Length < 2)
             {
-                return new ProcessResult("Error: Less than two clips were specified.");
+                return new ProcessResult("Error: Less than two clips with content were specified.");
             }
-            // TODO: Add support for more than two clips
-            Clip a = clips[0];
-            Clip b = clips[1];
-            Clip resultClip = new Clip(a.Length + b.Length, true);
-            decimal position = 0;
+            Clip resultClip = new Clip(clips.Sum(c => c.Length), true); // todo: will only work when counts are all set = 1
+            decimal position = clips[0].Notes[0].Start;
+            var a = clips[0];
+            var b = clips[1];
 
             switch (options.Mode)
             {
                 case EventCount:
-                    int i = 0, nix = 0;
-                    while (i < b.Notes.Count + a.Notes.Count)
+                    while (clips.Any(c => c.Retriggered == false))
                     {
-
-                        if (i == 0)
+                        foreach (var clip in clips)
                         {
-                            position = position + a.Notes[nix % a.Notes.Count].Start;
+                            var noteInfo = clip.GetNextNoteInfo();
+                            resultClip.Notes.Add(new Note(noteInfo.Pitch, position, noteInfo.Duration, noteInfo.Velocity));
+                            position += noteInfo.DurationUntilNextNote;
                         }
-                        if (i % 2 == 0)
-                        {
-                            position = AddNextNote(a.Notes, position, nix, a, b, resultClip);
-                        }
-                        if (i % 2 == 1)
-                        {
-                            position = AddNextNote(b.Notes, position, nix, a, b, resultClip);
-                        }
-                        i++;
-                        nix = i / 2;
                     }
+                    resultClip.Length = position; // need to do something similar for TimeRange
                     break;
                 case TimeRange:
                     decimal srcPositionA = 0,

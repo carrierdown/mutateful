@@ -79,14 +79,14 @@ namespace Mutate4lTests.ClipActions
             var resultObj = Interleave.Apply(options, clip1, clip2);
             Assert.IsTrue(resultObj.Success);
             Assert.IsTrue(resultObj.Result.Length == 1);
-            var result = resultObj.Result[0];
-
+            var clip = resultObj.Result[0];
+            Assert.AreEqual(8m, clip.Length);
             for (var i = 0; i < 8; i++)
             {
-                Console.WriteLine($"{result.Notes[i].Start} {result.Notes[i].Pitch}");
-                Assert.AreEqual(result.Notes[i].Pitch, i % 2 == 0 ? 60 : 62);
-                Assert.AreEqual(result.Notes[i].Start, i);
-                Assert.AreEqual(result.Notes[0].Duration, 1);
+                Console.WriteLine($"{clip.Notes[i].Start} {clip.Notes[i].Pitch}");
+                Assert.AreEqual(i % 2 == 0 ? 60 : 62, clip.Notes[i].Pitch);
+                Assert.AreEqual(i, clip.Notes[i].Start);
+                Assert.AreEqual(1, clip.Notes[0].Duration);
             }
         }
     }

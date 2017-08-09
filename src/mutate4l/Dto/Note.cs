@@ -4,6 +4,15 @@ using System.Text;
 
 namespace Mutate4l.Dto
 {
+    public class NoteInfo
+    {
+        public byte Pitch { get; set; }
+        public decimal Start { get; set; }
+        public decimal Duration { get; set; }
+        public byte Velocity { get; set; }
+        public decimal DurationUntilNextNote { get; set; }
+    }
+
     public class Note : IComparable<Note>
     {
         public byte Pitch { get; set; }
