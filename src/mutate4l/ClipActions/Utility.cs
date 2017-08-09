@@ -50,6 +50,33 @@ namespace Mutate4l.ClipActions
             return results;
         }
 
+        public static List<Note> GetSplitNotesInRangeAtPosition(decimal start, decimal end, SortedList<Note> notes, decimal position)
+        {
+            var notesToProcess = notes.Where(n => n.InsideInterval(start, end) || n.CoversInterval(start, end) || n.CrossesStartOfInterval(start, end) || n.CrossesEndOfInterval(start, end));
+            List<Note> results = new List<Note>();
+            foreach (var note in notes)
+            {
+                if ((note.Start + note.Duration) < start) continue;
+                if (note.Start > end) break;
+                if (note.InsideInterval(start, end))
+                {
+                    results.Add(new Note(note.Pitch, note.Start - start + position, note.Duration, note.Velocity));
+                }
+                else if (note.CoversInterval(start, end))
+                {
+                    results.Add(new Note(note.Pitch, position, position + (end - start), note.Velocity));
+                }
+                else if (note.CrossesStartOfInterval(start, end))
+                {
+                    results.Add(new Note(note.Pitch, position, (note.Start + note.Duration) - position, note.Velocity));
+                }
+                else if (note.CrossesEndOfInterval(start, end) {
+                    results.Add(new Note(note.Pitch, note.Start - start + position, end - note.Start, note.Velocity));
+                }
+            }
+            return results;
+        }
+
         public static List<Note> GetNotesInRange(decimal start, decimal end, SortedList<Note> notes)
         {
             var results = new List<Note>();
@@ -160,7 +187,7 @@ namespace Mutate4l.ClipActions
         {
             if (value.IndexOf('/') >= 0)
             {
-                return 4m / int.Parse(value.Substring(value.IndexOf('/') + 1));
+                return (4m / int.Parse(value.Substring(value.IndexOf('/') + 1))) * (int.Parse(value.Substring(0, value.IndexOf('/'))));
             }
             else
             {

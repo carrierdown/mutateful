@@ -56,5 +56,29 @@ namespace Mutate4l.Dto
             }
             return 0;
         }
+
+        //   [ ---    ]
+        public bool InsideInterval(decimal start, decimal end)
+        {
+            return Start >= start && Start + Duration <= end;
+        }
+
+        // --[--------]---
+        public bool CoversInterval(decimal start, decimal end)
+        {
+            return Start < start && Start + Duration > end;
+        }
+
+        // --[------  ]
+        public bool CrossesStartOfInterval(decimal start, decimal end)
+        {
+            return Start < start && (Start + Duration) > start && (Start + Duration) <= end;
+        }
+
+        //   [    ----]----
+        public bool CrossesEndOfInterval(decimal start, decimal end)
+        {
+            return Start >= start && (Start + Duration) > end;
+        }
     }
 }
