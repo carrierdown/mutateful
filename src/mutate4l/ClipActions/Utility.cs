@@ -77,6 +77,19 @@ namespace Mutate4l.ClipActions
             return results;
         }
 
+        public static List<Note> GetSplitNotesInRangeAtPosition(decimal start, decimal end, SortedList<Note> notes, decimal position)
+        {
+            var results = new List<Note>();
+            var notesFromRange = GetNotesInRange(start, end, notes);
+
+            foreach (var note in notesFromRange)
+            {
+                note.Start = note.Start - start + position;
+            }
+            results.AddRange(notesFromRange);
+            return results;
+        }
+
         public static List<Note> GetNotesInRange(decimal start, decimal end, SortedList<Note> notes)
         {
             var results = new List<Note>();

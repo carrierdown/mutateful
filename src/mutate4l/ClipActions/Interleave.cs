@@ -70,10 +70,13 @@ namespace Mutate4l.ClipActions
                     resultClip.Length = position; // need to do something similar for TimeRange
                     break;
                 case TimeRange:
-                    decimal srcPositionA = 0,
-                        srcPositionB = 0;
-                    a.Notes = Utility.SplitNotesAtEvery(a.Notes, options.EventRangeA, b.Length);
-                    b.Notes = Utility.SplitNotesAtEvery(b.Notes, options.EventRangeB, a.Length);
+                    var scrPositions = new decimal[clips.Length];
+                    var clipTraversedStatuses = new bool[clips.Length];
+                    
+                    //srcPositionA = 0,
+                    //    srcPositionB = 0;
+                    //a.Notes = Utility.SplitNotesAtEvery(a.Notes, options.EventRangeA, b.Length);
+                    //b.Notes = Utility.SplitNotesAtEvery(b.Notes, options.EventRangeB, a.Length);
 
                     while (position < resultClip.Length)
                     {
