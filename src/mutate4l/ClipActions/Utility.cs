@@ -52,7 +52,6 @@ namespace Mutate4l.ClipActions
 
         public static List<Note> GetSplitNotesInRangeAtPosition(decimal start, decimal end, SortedList<Note> notes, decimal position)
         {
-            var notesToProcess = notes.Where(n => n.InsideInterval(start, end) || n.CoversInterval(start, end) || n.CrossesStartOfInterval(start, end) || n.CrossesEndOfInterval(start, end));
             List<Note> results = new List<Note>();
             foreach (var note in notes)
             {
@@ -64,29 +63,16 @@ namespace Mutate4l.ClipActions
                 }
                 else if (note.CoversInterval(start, end))
                 {
-                    results.Add(new Note(note.Pitch, position, position + (end - start), note.Velocity));
+                    results.Add(new Note(note.Pitch, position, end - start, note.Velocity));
                 }
                 else if (note.CrossesStartOfInterval(start, end))
                 {
-                    results.Add(new Note(note.Pitch, position, (note.Start + note.Duration) - position, note.Velocity));
+                    results.Add(new Note(note.Pitch, position, (note.Start + note.Duration) - start, note.Velocity));
                 }
-                else if (note.CrossesEndOfInterval(start, end) {
+                else if (note.CrossesEndOfInterval(start, end)) {
                     results.Add(new Note(note.Pitch, note.Start - start + position, end - note.Start, note.Velocity));
                 }
             }
-            return results;
-        }
-
-        public static List<Note> GetSplitNotesInRangeAtPosition(decimal start, decimal end, SortedList<Note> notes, decimal position)
-        {
-            var results = new List<Note>();
-            var notesFromRange = GetNotesInRange(start, end, notes);
-
-            foreach (var note in notesFromRange)
-            {
-                note.Start = note.Start - start + position;
-            }
-            results.AddRange(notesFromRange);
             return results;
         }
 

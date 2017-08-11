@@ -43,21 +43,21 @@ namespace Mutate4l.ClipActions
     /// </summary>
     public class Interleave
     {
-        public static ProcessResult Apply(InterleaveOptions options, params Clip[] clips) // todo: Expand to interleave any list of two clips or more
+        public static ProcessResult Apply(InterleaveOptions options, params Clip[] clips)
         {
             clips = clips.Where(c => c.Notes.Count > 0).ToArray();
             if (clips.Length < 2)
             {
                 return new ProcessResult("Error: Less than two clips with content were specified.");
             }
-            Clip resultClip = new Clip(clips.Sum(c => c.Length), true); // todo: will only work when counts are all set = 1
-            decimal position = clips[0].Notes[0].Start;
-            var a = clips[0];
-            var b = clips[1];
+            decimal position = 0;
+            Clip resultClip = new Clip(4, true); // Actual length set below, according to operation
 
+            // todo: add counts
             switch (options.Mode)
             {
                 case EventCount:
+                    position = clips[0].Notes[0].Start;
                     while (clips.Any(c => c.Retriggered == false))
                     {
                         foreach (var clip in clips)
@@ -67,29 +67,38 @@ namespace Mutate4l.ClipActions
                             position += noteInfo.DurationUntilNextNote;
                         }
                     }
-                    resultClip.Length = position; // need to do something similar for TimeRange
+                    resultClip.Length = position;
                     break;
                 case TimeRange:
-                    var scrPositions = new decimal[clips.Length];
+                    var srcPositions = new decimal[clips.Length];
                     var clipTraversedStatuses = new bool[clips.Length];
+                    var timeRanges = new decimal[] { options.EventRangeA, options.EventRangeB };
+                    int timeRangeIndex = 0;
                     
-                    //srcPositionA = 0,
-                    //    srcPositionB = 0;
-                    //a.Notes = Utility.SplitNotesAtEvery(a.Notes, options.EventRangeA, b.Length);
-                    //b.Notes = Utility.SplitNotesAtEvery(b.Notes, options.EventRangeB, a.Length);
-
-                    while (position < resultClip.Length)
+                    while (clipTraversedStatuses.Any(c => c == false))
                     {
-                        resultClip.Notes.AddRange(Utility.GetNotesInRangeAtPosition(srcPositionA, srcPositionA + options.EventRangeA, a.Notes, position));
-                        position += options.EventRangeA;
-                        srcPositionA += options.EventRangeA;
-                        if (srcPositionA >= a.Length) srcPositionA = 0;
-
-                        resultClip.Notes.AddRange(Utility.GetNotesInRangeAtPosition(srcPositionB, srcPositionB + options.EventRangeB, b.Notes, position));
-                        position += options.EventRangeB;
-                        srcPositionB += options.EventRangeB;
-                        if (srcPositionB >= b.Length) srcPositionB = 0;
+                        for (var clipIndex = 0; clipIndex < clips.Length; clipIndex++)
+                        {
+                            var clip = clips[clipIndex];
+                            resultClip.Notes.AddRange(
+                                Utility.GetSplitNotesInRangeAtPosition(
+                                    srcPositions[clipIndex], 
+                                    srcPositions[clipIndex] + timeRanges[timeRangeIndex], 
+                                    clips[clipIndex].Notes, 
+                                    position
+                                )
+                            );
+                            position += timeRanges[timeRangeIndex];
+                            srcPositions[clipIndex] += timeRanges[timeRangeIndex];
+                            if (srcPositions[clipIndex] >= clips[clipIndex].Length)
+                            {
+                                srcPositions[clipIndex] = 0;
+                                clipTraversedStatuses[clipIndex] = true;
+                            }
+                            timeRangeIndex = (timeRangeIndex + 1) % timeRanges.Length;
+                        }
                     }
+                    resultClip.Length = position;
                     break;
             }
             return new ProcessResult(new Clip[] { resultClip });

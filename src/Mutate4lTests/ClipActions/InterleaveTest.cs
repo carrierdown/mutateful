@@ -48,6 +48,66 @@ namespace Mutate4lTests.ClipActions
         }
 
         [TestMethod]
+        public void TestInterleaveTime()
+        {
+            var clip1 = new Clip(4, true)
+            {
+                Notes = new SortedList<Note>()
+                {
+                   new Note(60, .4m, .8m, 100),
+                   new Note(60, 1.3m, 2, 100),
+                   new Note(60, 3.3m, .7m, 100)
+                }
+            };
+            var clip2 = new Clip(4, true)
+            {
+                Notes = new SortedList<Note>()
+                {
+                   new Note(62, 0, 4, 100)
+                }
+            };
+            var options = new InterleaveOptions
+            {
+                EventRangeA = 1,
+                EventRangeB = 1,
+                Mode = InterleaveMode.TimeRange
+            };
+            var resultObj = Interleave.Apply(options, clip1, clip2);
+            var result = resultObj.Result[0];
+            Assert.AreEqual(8, result.Length);
+            Assert.AreEqual(60, result.Notes[0].Pitch);
+            Assert.AreEqual(.4m, result.Notes[0].Start);
+            Assert.AreEqual(.6m, result.Notes[0].Duration);
+            Assert.AreEqual(62, result.Notes[1].Pitch);
+            Assert.AreEqual(1, result.Notes[1].Start);
+            Assert.AreEqual(1, result.Notes[1].Duration);
+            Assert.AreEqual(60, result.Notes[2].Pitch);
+            Assert.AreEqual(2, result.Notes[2].Start);
+            Assert.AreEqual(0.2m, result.Notes[2].Duration);
+            Assert.AreEqual(60, result.Notes[3].Pitch);
+            Assert.AreEqual(2.3m, result.Notes[3].Start);
+            Assert.AreEqual(0.7m, result.Notes[3].Duration);
+            Assert.AreEqual(62, result.Notes[4].Pitch);
+            Assert.AreEqual(3, result.Notes[4].Start);
+            Assert.AreEqual(1, result.Notes[4].Duration);
+            Assert.AreEqual(60, result.Notes[5].Pitch);
+            Assert.AreEqual(4, result.Notes[5].Start);
+            Assert.AreEqual(1, result.Notes[5].Duration);
+            Assert.AreEqual(62, result.Notes[6].Pitch);
+            Assert.AreEqual(5, result.Notes[6].Start);
+            Assert.AreEqual(1, result.Notes[6].Duration);
+            Assert.AreEqual(60, result.Notes[7].Pitch);
+            Assert.AreEqual(6, result.Notes[7].Start);
+            Assert.AreEqual(.3m, result.Notes[7].Duration);
+            Assert.AreEqual(60, result.Notes[8].Pitch);
+            Assert.AreEqual(6.3m, result.Notes[8].Start);
+            Assert.AreEqual(.7m, result.Notes[8].Duration);
+            Assert.AreEqual(62, result.Notes[9].Pitch);
+            Assert.AreEqual(7, result.Notes[9].Start);
+            Assert.AreEqual(1, result.Notes[9].Duration);
+        }
+
+        [TestMethod]
         public void TestInterleaveEventCount()
         {
             var clip1 = new Clip(4, true)
