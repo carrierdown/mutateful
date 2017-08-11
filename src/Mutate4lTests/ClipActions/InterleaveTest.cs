@@ -29,9 +29,8 @@ namespace Mutate4lTests.ClipActions
             };
             var options = new InterleaveOptions
             {
-                EventRangeA = 1,
-                EventRangeB = 1,
-                Mode = InterleaveMode.TimeRange
+                Ranges = new decimal[] { 1, 1 },
+                Mode = InterleaveMode.Time
             };
             var resultObj = Interleave.Apply(options, clip1, clip2);
             Assert.IsTrue(resultObj.Success);
@@ -68,9 +67,8 @@ namespace Mutate4lTests.ClipActions
             };
             var options = new InterleaveOptions
             {
-                EventRangeA = 1,
-                EventRangeB = 1,
-                Mode = InterleaveMode.TimeRange
+                Ranges = new decimal[] { 1, 1 },
+                Mode = InterleaveMode.Time
             };
             var resultObj = Interleave.Apply(options, clip1, clip2);
             var result = resultObj.Result[0];
@@ -132,9 +130,8 @@ namespace Mutate4lTests.ClipActions
             };
             var options = new InterleaveOptions
             {
-                EventRangeA = 1,
-                EventRangeB = 1,
-                Mode = InterleaveMode.EventCount
+                Ranges = new decimal[] { 1, 1 },
+                Mode = InterleaveMode.Event
             };
             var resultObj = Interleave.Apply(options, clip1, clip2);
             Assert.IsTrue(resultObj.Success);

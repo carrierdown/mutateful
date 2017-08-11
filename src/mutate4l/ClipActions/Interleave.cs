@@ -12,16 +12,15 @@ namespace Mutate4l.ClipActions
 {
     public enum InterleaveMode
     {
-        EventCount,
-        TimeRange
+        Event,
+        Time
     }
 
     public class InterleaveOptions
     {
-        public InterleaveMode Mode { get; set; } = TimeRange;
-        public int[] Counts { get; set; }
-        public decimal EventRangeA { get; set; } = 1; // todo: support list of any number of ranges instead
-        public decimal EventRangeB { get; set; } = 1; // todo: support list of any number of ranges instead
+        public InterleaveMode Mode { get; set; } = Time;
+        public int[] Counts { get; set; } = new int[] { 1 };
+        public decimal[] Ranges { get; set; } = new decimal[] { 1 };
     }
 
     /// <summary>
@@ -56,7 +55,7 @@ namespace Mutate4l.ClipActions
             // todo: add counts
             switch (options.Mode)
             {
-                case EventCount:
+                case Event:
                     position = clips[0].Notes[0].Start;
                     while (clips.Any(c => c.Retriggered == false))
                     {
@@ -69,10 +68,10 @@ namespace Mutate4l.ClipActions
                     }
                     resultClip.Length = position;
                     break;
-                case TimeRange:
+                case Time:
                     var srcPositions = new decimal[clips.Length];
                     var clipTraversedStatuses = new bool[clips.Length];
-                    var timeRanges = new decimal[] { options.EventRangeA, options.EventRangeB };
+                    var timeRanges = options.Ranges;
                     int timeRangeIndex = 0;
                     
                     while (clipTraversedStatuses.Any(c => c == false))

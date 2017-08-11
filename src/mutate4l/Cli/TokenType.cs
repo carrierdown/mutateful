@@ -16,13 +16,11 @@
         Counts,
         Mode,
         Strength,
-        EventRangeA,
-        EventRangeB, // will be removed in favour of a ranges with multiple values possible
         _OptionsEnd,
 
         _EnumValuesBegin,
-        EventCount, // change to event / time. E.g.: event counts 1 1 or time ranges 1/8 1/8
-        TimeRange,
+        Event,
+        Time,
         _EnumValuesEnd,
 
         _ValuesBegin,
