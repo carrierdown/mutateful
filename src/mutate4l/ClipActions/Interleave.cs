@@ -21,25 +21,9 @@ namespace Mutate4l.ClipActions
         public InterleaveMode Mode { get; set; } = Time;
         public int[] Counts { get; set; } = new int[] { 1 };
         public decimal[] Ranges { get; set; } = new decimal[] { 1 };
+        public bool AdvanceAll { get; set; } = false; // todo: b
     }
 
-    /// <summary>
-    /// Interleaves the contents of one clip with another (FR: Interleave contents of x clips).
-    /// 
-    /// <list type="table">
-    ///     <listheader>
-    ///         <term>Options</term>
-    ///         <description>description</description>
-    ///     </listheader>
-    ///     <item>
-    ///         <term>mode</term>
-    ///         <description>
-    ///         <para>eventcount: Interleaved clip is created by counting events in each clip and intertwining them, such that resulting clip will contain first note of first clip + distance to next note, followed by first note of second clip + distance to next note, and so on.</para>
-    ///         <para>timerange: Interleaved clip is created by first splitting both clips at given lengths, like 1/8 or 1/16 (splitting any notes that cross these boundaries). The resulting chunks are then placed into the interleaved clip in an interleaved fashion.</para>
-    ///         </description>
-    ///     </item>
-    /// </list>
-    /// </summary>
     public class Interleave
     {
         public static ProcessResult Apply(InterleaveOptions options, params Clip[] clips)
@@ -50,28 +34,44 @@ namespace Mutate4l.ClipActions
                 return new ProcessResult("Error: Less than two clips with content were specified.");
             }
             decimal position = 0;
+            int countIndex = 0;
             Clip resultClip = new Clip(4, true); // Actual length set below, according to operation
+            var clipTraversedStatuses = new bool[clips.Length];
 
-            // todo: add counts
             switch (options.Mode)
             {
                 case Event:
+                    var currentNoteIndexes = new int[clips.Length];
                     position = clips[0].Notes[0].Start;
-                    while (clips.Any(c => c.Retriggered == false))
+
+                    while (clipTraversedStatuses.Any(c => c == false))
                     {
-                        foreach (var clip in clips)
+                        for (var clipIndex = 0; clipIndex < clips.Length; clipIndex++)
                         {
-                            var noteInfo = clip.GetNextNoteInfo();
-                            resultClip.Notes.Add(new Note(noteInfo.Pitch, position, noteInfo.Duration, noteInfo.Velocity));
-                            position += noteInfo.DurationUntilNextNote;
+                            var clip = clips[clipIndex];
+                            for (var repeats = 0; repeats < options.Counts[countIndex % options.Counts.Length]; repeats++)
+                            {
+                                var note = clip.Notes[currentNoteIndexes[clipIndex]];
+                                resultClip.Notes.Add(new Note(note.Pitch, position, note.Duration, note.Velocity));
+                                decimal durationUntilNextNote;
+                                if (currentNoteIndexes[clipIndex] == clip.Notes.Count - 1)
+                                {
+                                    durationUntilNextNote = clip.EndDelta;
+                                    currentNoteIndexes[clipIndex] = 0;
+                                    clipTraversedStatuses[clipIndex] = true;
+                                } else
+                                {
+                                    durationUntilNextNote = clip.Notes[currentNoteIndexes[clipIndex] + 1].Start - clip.Notes[currentNoteIndexes[clipIndex]].Start;
+                                }
+                                position += durationUntilNextNote;
+                            }
+                            currentNoteIndexes[clipIndex]++;
                         }
                     }
                     resultClip.Length = position;
                     break;
                 case Time:
                     var srcPositions = new decimal[clips.Length];
-                    var clipTraversedStatuses = new bool[clips.Length];
-                    var timeRanges = options.Ranges;
                     int timeRangeIndex = 0;
                     
                     while (clipTraversedStatuses.Any(c => c == false))
@@ -79,22 +79,26 @@ namespace Mutate4l.ClipActions
                         for (var clipIndex = 0; clipIndex < clips.Length; clipIndex++)
                         {
                             var clip = clips[clipIndex];
-                            resultClip.Notes.AddRange(
-                                Utility.GetSplitNotesInRangeAtPosition(
-                                    srcPositions[clipIndex], 
-                                    srcPositions[clipIndex] + timeRanges[timeRangeIndex], 
-                                    clips[clipIndex].Notes, 
-                                    position
-                                )
-                            );
-                            position += timeRanges[timeRangeIndex];
-                            srcPositions[clipIndex] += timeRanges[timeRangeIndex];
+                            for (var repeats = 0; repeats < options.Counts[countIndex % options.Counts.Length]; repeats++) 
+                            {
+                                resultClip.Notes.AddRange(
+                                    Utility.GetSplitNotesInRangeAtPosition(
+                                        srcPositions[clipIndex],
+                                        srcPositions[clipIndex] + options.Ranges[timeRangeIndex],
+                                        clips[clipIndex].Notes,
+                                        position
+                                    )
+                                );
+                                position += options.Ranges[timeRangeIndex];
+                            }
+                            srcPositions[clipIndex] += options.Ranges[timeRangeIndex];
                             if (srcPositions[clipIndex] >= clips[clipIndex].Length)
                             {
                                 srcPositions[clipIndex] = 0;
                                 clipTraversedStatuses[clipIndex] = true;
                             }
-                            timeRangeIndex = (timeRangeIndex + 1) % timeRanges.Length;
+                            countIndex++;
+                            timeRangeIndex = (timeRangeIndex + 1) % options.Ranges.Length; // this means that you cannot use the Counts parameter to have varying time ranges for each repeat
                         }
                     }
                     resultClip.Length = position;

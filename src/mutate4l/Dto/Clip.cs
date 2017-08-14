@@ -12,16 +12,12 @@ namespace Mutate4l.Dto
         {
             get { return Length - Notes[Notes.Count - 1].Start + Notes[0].Start; }
         }
-        public bool Retriggered { get; private set; } = false;
-
-        private int Index;
 
         public Clip(decimal length, bool isLooping)
         {
             Notes = new SortedList<Note>();
             IsLooping = isLooping;
             Length = length;
-            Index = 0;
         }
 
         public int CompareTo(Clip b)
@@ -37,7 +33,7 @@ namespace Mutate4l.Dto
             return 0;
         }
 
-        public NoteInfo GetNextNoteInfo()
+/*        public NoteInfo GetNextNoteInfo()
         {
             Note note;
             if (Index == Notes.Count - 1)
@@ -51,6 +47,6 @@ namespace Mutate4l.Dto
             var result = new NoteInfo { Start = note.Start, Duration = note.Duration, Pitch = note.Pitch, Velocity = note.Velocity, DurationUntilNextNote = Notes[Index + 1].Start - Notes[Index].Start };
             Index++;
             return result;
-        }
+        }*/
     }
 }

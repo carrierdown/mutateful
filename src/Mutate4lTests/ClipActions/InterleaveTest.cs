@@ -47,7 +47,51 @@ namespace Mutate4lTests.ClipActions
         }
 
         [TestMethod]
-        public void TestInterleaveTime()
+        public void TestInterleaveTimeRangesAndCounts()
+        {
+            var clip1 = new Clip(4, true)
+            {
+                Notes = new SortedList<Note>()
+                {
+                   new Note(60, 0, 4, 100)
+                }
+            };
+            var clip2 = new Clip(4, true)
+            {
+                Notes = new SortedList<Note>()
+                {
+                   new Note(62, 0, 4, 100)
+                }
+            };
+            var options = new InterleaveOptions
+            {
+                Ranges = new decimal[] { 2, 1 },
+                Counts = new int[] { 1, 2 },
+                Mode = InterleaveMode.Time
+            };
+
+            var resultObj = Interleave.Apply(options, clip1, clip2);
+            Assert.IsTrue(resultObj.Success);
+            Assert.IsTrue(resultObj.Result.Length == 1);
+            var result = resultObj.Result[0];
+            Assert.AreEqual(16, result.Length);
+            Assert.AreEqual(12, result.Notes.Count);
+            Assert.AreEqual(60, result.Notes[0].Pitch);
+            Assert.AreEqual(2, result.Notes[0].Duration);
+            Assert.AreEqual(62, result.Notes[1].Pitch);
+            Assert.AreEqual(1, result.Notes[1].Duration);
+            Assert.AreEqual(62, result.Notes[2].Pitch);
+            Assert.AreEqual(1, result.Notes[2].Duration);
+            Assert.AreEqual(60, result.Notes[3].Pitch);
+            Assert.AreEqual(2, result.Notes[3].Duration);
+            Assert.AreEqual(62, result.Notes[4].Pitch);
+            Assert.AreEqual(1, result.Notes[4].Duration);
+            Assert.AreEqual(62, result.Notes[5].Pitch);
+            Assert.AreEqual(1, result.Notes[5].Duration);
+        }
+
+        [TestMethod]
+        public void TestInterleaveTimeRange2()
         {
             var clip1 = new Clip(4, true)
             {
@@ -130,7 +174,6 @@ namespace Mutate4lTests.ClipActions
             };
             var options = new InterleaveOptions
             {
-                Ranges = new decimal[] { 1, 1 },
                 Mode = InterleaveMode.Event
             };
             var resultObj = Interleave.Apply(options, clip1, clip2);
