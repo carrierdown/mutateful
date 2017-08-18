@@ -80,7 +80,7 @@ namespace Mutate4l.ClipActions
                             for (var repeats = 0; repeats < options.Repeats[repeatsIndex % options.Repeats.Length]; repeats++) 
                             {
                                 resultClip.Notes.AddRange(
-                                    Utility.GetSplitNotesInRangeAtPosition(
+                                    ClipUtilities.GetSplitNotesInRangeAtPosition(
                                         srcPositions[clipIndex].Value,
                                         srcPositions[clipIndex].Value + currentTimeRange,
                                         clips[clipIndex].Notes,

@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Mutate4l.ClipActions
 {
-    public class Utility
+    public class ClipUtilities
     {
         public static SortedList<Note> SplitNotesAtEvery(SortedList<Note> notes, decimal position, decimal length)
         {

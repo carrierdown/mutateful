@@ -1,8 +1,8 @@
-﻿using Mutate4l.Core;
+﻿using Mutate4l.ClipActions;
+using Mutate4l.Core;
 using Mutate4l.Dto;
+using Mutate4l.Utility;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -31,8 +31,7 @@ namespace Mutate4l.IO
         public Clip GetClip(int channel, int clip)
         {
             var notes = new SortedList<Note>();
-            decimal clipLength = 1;
-            bool isLooping = false;
+            string noteData = "";
             try
             {
                 byte[] message = OscHandler.CreateOscMessage("/mu4l/clip/get", channel, clip);
@@ -42,27 +41,13 @@ namespace Mutate4l.IO
                 string data = Encoding.ASCII.GetString(bytes);
 //                Console.WriteLine($"[{OscHandler.GetOscStringKey(data)}] : [{OscHandler.GetOscStringValue(data)}]");
 
-                string[] noteData = OscHandler.GetOscStringValue(data).Split(' ');
-                if (noteData.Length < 2)
-                {
-                    return null;
-                }
-                clipLength = decimal.Parse(noteData[0]);
-                isLooping = noteData[1] == "1";
-                for (var i = 2; i < noteData.Length; i += 4)
-                {
-                    notes.Add(new Note(byte.Parse(noteData[i]), decimal.Parse(noteData[i + 1], NumberStyles.Any), decimal.Parse(noteData[i + 2], NumberStyles.Any), byte.Parse(noteData[i + 3])));
-                }
-//                Console.ReadLine();
+                noteData = OscHandler.GetOscStringValue(data);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
             }
-            return new Clip(clipLength, isLooping)
-            {
-                Notes = notes
-            };
+            return IOUtilities.StringToClip(noteData);
         }
 
         public void SetClips(int trackNo, int startingClipNo, Clip[] clips)
@@ -76,12 +61,7 @@ namespace Mutate4l.IO
 
         public void SetClip(int trackNo, int clipNo, Clip clip)
         {
-            string data = $"{clip.Length} {clip.IsLooping}";
-            for (var i = 0; i < clip.Notes.Count; i++)
-            {
-                var note = clip.Notes[i];
-                data = string.Join(' ', data, note.Pitch, note.Start.ToString("F4"), note.Duration.ToString("F4"), note.Velocity);
-            }
+            string data = IOUtilities.ClipToString(clip);
             byte[] message = OscHandler.CreateOscMessage("/mu4l/clip/set", trackNo, clipNo, data);
             Sender.Send(message, message.Length, "localhost", 8009);
         }

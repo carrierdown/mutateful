@@ -30,7 +30,7 @@ namespace Mutate4l.ClipActions
             }
             Clip masterClip = clips[0];
             Clip[] slaveClips = clips.Skip(1).ToArray();
-            Utility.NormalizeClipLengths(clips);
+            ClipUtilities.NormalizeClipLengths(clips);
             Clip[] processedClips = slaveClips.Select(c => new Clip(c.Length, c.IsLooping)).ToArray();
 
             for (var i = 0; i < slaveClips.Length; i++)
@@ -41,11 +41,11 @@ namespace Mutate4l.ClipActions
                     var constrainedNote = new Note(note);
                     if (options.Pitch)
                     {
-                        constrainedNote.Pitch = Utility.FindNearestNotePitchInSet(note, masterClip.Notes);
+                        constrainedNote.Pitch = ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes);
                     }
                     if (options.Start)
                     {
-                        var newStart = Utility.FindNearestNoteStartInSet(note, masterClip.Notes);
+                        var newStart = ClipUtilities.FindNearestNoteStartInSet(note, masterClip.Notes);
                         constrainedNote.Start += (newStart - constrainedNote.Start) * (options.Strength / 100);
                     }
                     slaveClip.Notes.Add(constrainedNote);
