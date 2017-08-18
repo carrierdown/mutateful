@@ -18,11 +18,11 @@ namespace Mutate4lTests
         [TestMethod]
         public void TestParseTokensToCommand()
         {
-            Lexer lexer = new Lexer("interleave A1 C4 ranges A1 counts => A2");
+            Lexer lexer = new Lexer("interleave A1 C4 ranges A1 repeats => A2");
             var command = Parser.ParseTokensToCommand(lexer.GetTokens());
             Assert.AreEqual(command.Id, TokenType.Interleave);
             Assert.AreEqual(command.Options[TokenType.Ranges].Count, 1);
-            Assert.AreEqual(command.Options[TokenType.Counts].Count, 0);
+            Assert.AreEqual(command.Options[TokenType.Repeats].Count, 0);
             Assert.AreEqual(command.SourceClips.Count, 2);
             Assert.AreEqual(command.TargetClips.Count, 1);
         }

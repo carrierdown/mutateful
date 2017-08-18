@@ -31,7 +31,7 @@ namespace Mutate4l.Cli
             { "start", TokenType.Start },
             { "pitch", TokenType.Pitch },
             { "ranges", TokenType.Ranges },
-            { "counts", TokenType.Counts },
+            { "repeats", TokenType.Repeats },
             { "mode", TokenType.Mode },
             { "mask", TokenType.Mask },
             { "strength", TokenType.Strength }

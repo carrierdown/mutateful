@@ -13,7 +13,7 @@
         Start,
         Pitch,
         Ranges,
-        Counts,
+        Repeats,
         Mode,
         Strength,
         Mask,

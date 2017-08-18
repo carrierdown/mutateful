@@ -66,7 +66,7 @@ namespace Mutate4lTests.ClipActions
             var options = new InterleaveOptions
             {
                 Ranges = new decimal[] { 2, 1 },
-                Counts = new int[] { 1, 2 },
+                Repeats = new int[] { 1, 2 },
                 Mode = InterleaveMode.Time
             };
 

@@ -22,6 +22,7 @@ namespace Mutate4l
             }
         }
 
+        // todo: Add support for chaining? Would need a syntax change to make sense, e.g. a1 explode pitch interleave mode time repeats 1 2 counts 1/4 1/8 1/16 => a2
         public ProcessResult ProcessCommand(Command command)
         {
             List<Clip> sourceClips = new List<Clip>();

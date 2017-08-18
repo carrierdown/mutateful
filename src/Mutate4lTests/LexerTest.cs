@@ -10,8 +10,8 @@ namespace Mutate4lTests
         [TestMethod]
         public void TestLexer()
         {
-            Lexer lexer = new Lexer("interleave A1:C4 ranges 1/16 counts 2 10  => A2");
-            var expected = new TokenType[] { Interleave, ClipReference, Colon, ClipReference, Ranges, MusicalDivision, Counts, Number, Number, Destination, ClipReference };
+            Lexer lexer = new Lexer("interleave A1:C4 ranges 1/16 repeats 2 10  => A2");
+            var expected = new TokenType[] { Interleave, ClipReference, Colon, ClipReference, Ranges, MusicalDivision, Repeats, Number, Number, Destination, ClipReference };
             var i = 0;
 
             foreach (var token in lexer.GetTokens())
