@@ -16,6 +16,7 @@
         Counts,
         Mode,
         Strength,
+        Mask,
         _OptionsEnd,
 
         _EnumValuesBegin,
@@ -31,6 +32,7 @@
 
         Colon,
         Destination,
+        AddToDestination,
         Unset,
 
         _TestOptionsBegin,
@@ -41,6 +43,7 @@
         DecimalValue,
         IntValue,
         EnumValue,
+        SimpleBoolFlag,
         _TestOptionsEnd,
 
         _TestEnumValuesBegin,

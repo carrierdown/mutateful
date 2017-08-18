@@ -1,12 +1,7 @@
-﻿using Mutate4l.Cli;
-using Mutate4l.Core;
+﻿using Mutate4l.Core;
 using Mutate4l.Dto;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using static Mutate4l.ClipActions.InterleaveMode;
-
-// interleave f3 f4 mode timerange eventrangea 1/8 eventrangeb 1/8 => f6
 
 namespace Mutate4l.ClipActions
 {
@@ -21,7 +16,7 @@ namespace Mutate4l.ClipActions
         public InterleaveMode Mode { get; set; } = Time;
         public int[] Counts { get; set; } = new int[] { 1 };
         public decimal[] Ranges { get; set; } = new decimal[] { 1 };
-        public bool AdvanceAll { get; set; } = false; // todo: b
+        public bool Mask { get; set; } = false; // Instead of vvv xxx=vxvxvx, the current input "masks" the corresponding location of other inputs, producing vxv instead.
     }
 
     public class Interleave
@@ -41,31 +36,33 @@ namespace Mutate4l.ClipActions
             switch (options.Mode)
             {
                 case Event:
-                    var currentNoteIndexes = new int[clips.Length];
+                    var noteCounters = clips.Select(c => new IntCounter(c.Notes.Count)).ToArray();
                     position = clips[0].Notes[0].Start;
 
-                    while (clipTraversedStatuses.Any(c => c == false))
+                    while (noteCounters.Any(nc => nc.Overflow == false))
                     {
                         for (var clipIndex = 0; clipIndex < clips.Length; clipIndex++)
                         {
                             var clip = clips[clipIndex];
+                            var currentNoteIndex = noteCounters[clipIndex].Value;
+
                             for (var repeats = 0; repeats < options.Counts[countIndex % options.Counts.Length]; repeats++)
                             {
-                                var note = clip.Notes[currentNoteIndexes[clipIndex]];
+                                var note = clip.Notes[currentNoteIndex];
                                 resultClip.Notes.Add(new Note(note.Pitch, position, note.Duration, note.Velocity));
-                                decimal durationUntilNextNote;
-                                if (currentNoteIndexes[clipIndex] == clip.Notes.Count - 1)
-                                {
-                                    durationUntilNextNote = clip.EndDelta;
-                                    currentNoteIndexes[clipIndex] = 0;
-                                    clipTraversedStatuses[clipIndex] = true;
-                                } else
-                                {
-                                    durationUntilNextNote = clip.Notes[currentNoteIndexes[clipIndex] + 1].Start - clip.Notes[currentNoteIndexes[clipIndex]].Start;
-                                }
-                                position += durationUntilNextNote;
+                                position += clip.DurationUntilNextNote(currentNoteIndex);
                             }
-                            currentNoteIndexes[clipIndex]++;
+                            if (options.Mask)
+                            {
+                                foreach (var noteCounter in noteCounters)
+                                {
+                                    noteCounter.Inc();
+                                }
+                            }
+                            else
+                            {
+                                noteCounters[clipIndex].Inc();
+                            }
                         }
                     }
                     resultClip.Length = position;

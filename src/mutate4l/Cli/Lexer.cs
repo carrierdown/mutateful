@@ -15,7 +15,8 @@ namespace Mutate4l.Cli
 
         private Dictionary<string, TokenType> DoubleOperators = new Dictionary<string, TokenType>
         {
-            { "=>", TokenType.Destination } // maybe add +> xx or similar meaning destination new scene at xx
+            { "=>", TokenType.Destination },
+            { "+>", TokenType.AddToDestination }
         };
 
         private Dictionary<string, TokenType> Commands = new Dictionary<string, TokenType>
@@ -31,7 +32,9 @@ namespace Mutate4l.Cli
             { "pitch", TokenType.Pitch },
             { "ranges", TokenType.Ranges },
             { "counts", TokenType.Counts },
-            { "mode", TokenType.Mode }
+            { "mode", TokenType.Mode },
+            { "mask", TokenType.Mask },
+            { "strength", TokenType.Strength }
         };
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>

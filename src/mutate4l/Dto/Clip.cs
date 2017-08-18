@@ -33,20 +33,29 @@ namespace Mutate4l.Dto
             return 0;
         }
 
-/*        public NoteInfo GetNextNoteInfo()
+        public decimal DurationUntilNextNote(int index)
         {
-            Note note;
-            if (Index == Notes.Count - 1)
-            {
-                note = Notes[Index];
-                Index = 0;
-                Retriggered = true;
-                return new NoteInfo { Start = note.Start, Duration = note.Duration, Pitch = note.Pitch, Velocity = note.Velocity, DurationUntilNextNote = EndDelta };
-            }
-            note = Notes[Index];
-            var result = new NoteInfo { Start = note.Start, Duration = note.Duration, Pitch = note.Pitch, Velocity = note.Velocity, DurationUntilNextNote = Notes[Index + 1].Start - Notes[Index].Start };
-            Index++;
-            return result;
-        }*/
+            // todo: warn if index > Notes.Count - 1
+            if (index >= Notes.Count - 1)
+                return EndDelta;
+            else
+                return Notes[index + 1].Start - Notes[index].Start;
+        }
+
+        /*        public NoteInfo GetNextNoteInfo()
+                {
+                    Note note;
+                    if (Index == Notes.Count - 1)
+                    {
+                        note = Notes[Index];
+                        Index = 0;
+                        Retriggered = true;
+                        return new NoteInfo { Start = note.Start, Duration = note.Duration, Pitch = note.Pitch, Velocity = note.Velocity, DurationUntilNextNote = EndDelta };
+                    }
+                    note = Notes[Index];
+                    var result = new NoteInfo { Start = note.Start, Duration = note.Duration, Pitch = note.Pitch, Velocity = note.Velocity, DurationUntilNextNote = Notes[Index + 1].Start - Notes[Index].Start };
+                    Index++;
+                    return result;
+                }*/
     }
 }

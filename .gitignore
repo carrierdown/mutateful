@@ -1,0 +1,26 @@
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+[Xx]64/
+[Xx]86/
+*/[Bb]uild/
+bld/
+[Bb]in/
+[Oo]bj/
+
+.idea/
+compiled/
+mu4l-test Project/
+node_modules/
+.vs/

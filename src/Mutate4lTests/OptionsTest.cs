@@ -24,6 +24,8 @@ namespace Mutate4lTests
 
         public decimal DecimalValue { get; set; }
 
+        public bool SimpleBoolFlag { get; set; }
+
         [OptionInfo(min: 1, max: 100)]
         public int IntValue { get; set; }
     }
@@ -64,9 +66,11 @@ namespace Mutate4lTests
             var options = new Dictionary<TokenType, List<Token>>();
             options[TokenType.DecimalValue] = new List<Token>() { new Token(TokenType.MusicalDivision, "1/8", 0) };
             options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "14", 0) };
+            options[TokenType.SimpleBoolFlag] = new List<Token>();
             var parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(options);
             Assert.AreEqual(14, parsedOptions.IntValue);
             Assert.AreEqual(.5m, parsedOptions.DecimalValue);
+            Assert.IsTrue(parsedOptions.SimpleBoolFlag);
         }
 
         [TestMethod]

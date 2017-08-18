@@ -66,7 +66,12 @@ namespace Mutate4l.Dto
                         {
                             throw new Exception("Invalid option values: Values for a single option need to be of the same type.");
                         }
-                        if (tokens.Count == 1)
+                        if (tokens.Count == 0)
+                        {
+                            // handle simple bool flag
+                            property.SetMethod?.Invoke(result, new object[] { true });
+                        }
+                        else if (tokens.Count == 1)
                         {
                             // handle single value
                             if (type == TokenType.MusicalDivision && property.PropertyType == typeof(decimal))
