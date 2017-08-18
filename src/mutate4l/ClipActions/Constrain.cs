@@ -1,9 +1,4 @@
 ﻿using Mutate4l.Dto;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Mutate4l.Cli;
-using static Mutate4l.Cli.TokenType;
 using System.Linq;
 using Mutate4l.Core;
 
@@ -18,10 +13,13 @@ namespace Mutate4l.ClipActions
         public bool Start { get; set; }
 
         [OptionInfo(min: 1, max: 100)]
-        public int Strength { get; set; }
+        public int Strength { get; set; } = 100;
+
+        // todo: possibly have option for whether Constrain should output only processed clips or if source clip should also be included
+        // todo: option for whether Strength should also affect Pitch?
     }
 
-    // constrain = constrain pitch:true start:true, constrain pitch = constrain pitch:true start:false, similarly for constrain start
+    // constrain: first clip timing and/or pitch is replicated on all following clips. Position is optionally scaled with the Strength parameter.
     public class Constrain
     {
         public static ProcessResult Apply(ConstrainOptions options, params Clip[] clips)
@@ -30,26 +28,30 @@ namespace Mutate4l.ClipActions
             {
                 return new ProcessResult("Error: Less than two clips were specified.");
             }
-            // TODO: Add support for more than two clips
-            Clip a = clips[0];
-            Clip b = clips[1];
-            Utility.NormalizeClipLengths(a, b);
-            Clip constrainedClip = new Clip(b.Length, b.IsLooping);
+            Clip masterClip = clips[0];
+            Clip[] slaveClips = clips.Skip(1).ToArray();
+            Utility.NormalizeClipLengths(clips);
+            Clip[] processedClips = slaveClips.Select(c => new Clip(c.Length, c.IsLooping)).ToArray();
 
-            foreach (var note in b.Notes)
+            for (var i = 0; i < slaveClips.Length; i++)
             {
-                var constrainedNote = new Note(note);
-                if (options.Pitch)
+                var slaveClip = slaveClips[i];
+                foreach (var note in slaveClip.Notes)
                 {
-                    constrainedNote.Pitch = Utility.FindNearestNotePitchInSet(note, a.Notes);
+                    var constrainedNote = new Note(note);
+                    if (options.Pitch)
+                    {
+                        constrainedNote.Pitch = Utility.FindNearestNotePitchInSet(note, masterClip.Notes);
+                    }
+                    if (options.Start)
+                    {
+                        var newStart = Utility.FindNearestNoteStartInSet(note, masterClip.Notes);
+                        constrainedNote.Start += (newStart - constrainedNote.Start) * (options.Strength / 100);
+                    }
+                    slaveClip.Notes.Add(constrainedNote);
                 }
-                if (options.Start)
-                {
-                    constrainedNote.Start = Utility.FindNearestNoteStartInSet(note, a.Notes);
-                }
-                constrainedClip.Notes.Add(constrainedNote);
             }
-            return new ProcessResult(new Clip[] { constrainedClip });
+            return new ProcessResult(processedClips);
         }
     }
 }
