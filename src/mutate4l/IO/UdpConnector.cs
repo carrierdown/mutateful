@@ -66,5 +66,13 @@ namespace Mutate4l.IO
             Sender.Send(message, message.Length, "localhost", 8009);
         }
 
+        public bool TestCommunication()
+        {
+            byte[] message = OscHandler.CreateOscMessage("/mu4l/hello", 0, 0);
+            Sender.Send(message, message.Length, "localhost", 8009);
+            byte[] bytes = Listener.Receive(ref GroupEP);
+            string data = Encoding.ASCII.GetString(bytes);
+            return data.Contains("/mu4l/hello");
+        }
     }
 }

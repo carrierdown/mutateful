@@ -1,5 +1,11 @@
-outlets = 1;
+moutlets = 1;
 inlets = 1;
+
+function hello() {
+	post("hello");
+	outlet(0, ['/mu4l/hello']);
+}
+
 function getClip(trackNo, clipNo) {
     var liveObject = new LiveAPI("live_set tracks " + trackNo + " clip_slots " + clipNo + " clip"), result = "";
     if (!liveObject) {
@@ -21,7 +27,6 @@ function getClip(trackNo, clipNo) {
 }
 // todo: robustify handling of clip references. Track should refer to midi tracks only, filtering out audio tracks. Clip numbers must be checked for overflow wrt number of scenes available.
 function setClip(trackNo, clipNo, dataString) {
-    post("setClip");
     var data = dataString.split(' ');
     if (data.length < 3)
         return;

@@ -59,21 +59,28 @@ namespace Mutate4l.ClipActions
                 if (note.Start > end) break;
                 if (note.InsideInterval(start, end))
                 {
-                    results.Add(new Note(note.Pitch, note.Start - start + position, note.Duration, note.Velocity));
+                    AddNote(new Note(note.Pitch, note.Start - start + position, note.Duration, note.Velocity), results);
                 }
                 else if (note.CoversInterval(start, end))
                 {
-                    results.Add(new Note(note.Pitch, position, end - start, note.Velocity));
+                    AddNote(new Note(note.Pitch, position, end - start, note.Velocity), results);
                 }
                 else if (note.CrossesStartOfInterval(start, end))
                 {
-                    results.Add(new Note(note.Pitch, position, (note.Start + note.Duration) - start, note.Velocity));
+                    AddNote(new Note(note.Pitch, position, (note.Start + note.Duration) - start, note.Velocity), results);
                 }
                 else if (note.CrossesEndOfInterval(start, end)) {
-                    results.Add(new Note(note.Pitch, note.Start - start + position, end - note.Start, note.Velocity));
+                    AddNote(new Note(note.Pitch, note.Start - start + position, end - note.Start, note.Velocity), results);
                 }
             }
             return results;
+        }
+        public static void AddNote(Note note, List<Note> notes)
+        {
+            if (note.Duration > 0.0049m)
+            {
+                notes.Add(note);
+            }
         }
 
         public static List<Note> GetNotesInRange(decimal start, decimal end, SortedList<Note> notes)

@@ -71,7 +71,7 @@ namespace Mutate4l.Dto
                             // handle simple bool flag
                             property.SetMethod?.Invoke(result, new object[] { true });
                         }
-                        else if (tokens.Count == 1)
+                        else
                         {
                             // handle single value
                             if (type == TokenType.MusicalDivision && property.PropertyType == typeof(decimal))
@@ -106,15 +106,7 @@ namespace Mutate4l.Dto
                                     throw new Exception($"Enum {property.Name} does not support value {tokens[0].Value}");
                                 }
                             }
-                            else
-                            {
-                                throw new Exception($"Invalid combination. Token of type {type.ToString()} and property of type {property.PropertyType.Name} are not compatible.");
-                            }
-                        }
-                        else if (tokens.Count > 1)
-                        {
-                            // handle list
-                            if (type == TokenType.MusicalDivision && property.PropertyType == typeof(decimal[]))
+                            else if (type == TokenType.MusicalDivision && property.PropertyType == typeof(decimal[]))
                             {
                                 decimal[] values = tokens.Select(t => ClipUtilities.MusicalDivisionToDecimal(t.Value)).ToArray();
                                 property.SetMethod?.Invoke(result, new object[] { values });
