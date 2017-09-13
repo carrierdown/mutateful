@@ -24,6 +24,55 @@ namespace Mutate4l.Cli
             return new Tuple<int, int>(x, y);
         }
 
+        public static ChainedCommand ParseTokensToChainedCommand(IEnumerable<Token> tokens)
+        {
+            var sourceClips = tokens.TakeWhile(t => t.IsClipReference);
+            var commandTokens = tokens.Skip(sourceClips.Count()).TakeWhile(t => t.IsCommand || t.IsOption || t.IsOptionValue).ToArray();
+            var destClips = tokens.Skip(sourceClips.Count() + commands.Count()).TakeWhile(t => t.IsClipReference);
+
+            var commands = new List<List<Token>>();
+            var activeCommandTokenList = new List<Token>();
+            
+            foreach (var token in commandTokens)
+            {
+                if (token.IsCommand)
+                {
+                    if (activeCommandTokenList.Count == 0)
+                    {
+                        activeCommandTokenList.Add(token);
+                    }
+                    else
+                    {
+                        commands.Add(activeCommandTokenList);
+                        activeCommandTokenList = new List<Token> { token };
+                    }
+                }
+                else
+                {
+                    activeCommandTokenList.Add(token);
+                }
+            }
+
+            var i = 0;
+            while (i < commands.Length)
+            {
+                if (commands[i].IsCommand)
+                {
+                    var command = new Command() { Id = commands[i].Type };
+                    var values = new List<Token>();
+                    i++;
+                    while (i < commands.Length && (commands[i].IsOption || commands[i).IsOptionValue) {
+                        values.Add(commands[i++]);
+                    }
+                    command.Options.Add(type, values);
+                }
+                else
+                {
+                    // error: not a valid command
+                }
+            }
+        }
+
         public static Command ParseTokensToCommand(IEnumerable<Token> tokens)
         {
             var command = new Command();

@@ -28,13 +28,13 @@ namespace Mutate4l.Cli
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
         {
-            { "start", TokenType.Start },
-            { "pitch", TokenType.Pitch },
-            { "ranges", TokenType.Ranges },
-            { "repeats", TokenType.Repeats },
-            { "mode", TokenType.Mode },
-            { "mask", TokenType.Mask },
-            { "strength", TokenType.Strength }
+            { "-start", TokenType.Start },
+            { "-pitch", TokenType.Pitch },
+            { "-ranges", TokenType.Ranges },
+            { "-repeats", TokenType.Repeats },
+            { "-mode", TokenType.Mode },
+            { "-mask", TokenType.Mask },
+            { "-strength", TokenType.Strength }
         };
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>
@@ -78,6 +78,11 @@ namespace Mutate4l.Cli
             return IsAlpha(Buffer[pos]);
         }
 
+        private bool IsOption(int pos)
+        {
+            return Buffer[pos] == '-';
+        }
+
         public static bool IsAlpha(char c)
         {
             return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
@@ -98,7 +103,7 @@ namespace Mutate4l.Cli
             string identifier = "";
             int initialPos = pos;
 
-            while (IsAlpha(pos))
+            while (IsAlpha(pos) || (initialPos == pos && IsOption(pos)))
             {
                 identifier += Buffer[pos++].ToString();
             }
@@ -146,7 +151,12 @@ namespace Mutate4l.Cli
                 }
                 else if (IsAlpha(position))
                 {
-                    Token identifierToken = GetIdentifier(position, Commands, Options, EnumValues);
+                    Token identifierToken = GetIdentifier(position, Commands, EnumValues);
+                    token = identifierToken;
+                }
+                else if (IsOption(position))
+                {
+                    Token identifierToken = GetIdentifier(position, Options);
                     token = identifierToken;
                 }
                 if (token != null)

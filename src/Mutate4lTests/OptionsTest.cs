@@ -108,12 +108,12 @@ namespace Mutate4lTests
         [TestMethod]
         public void TestInverseToggleGroup()
         {
-            Lexer lexer = new Lexer("constrain A1 C4 start pitch => A2");
+            Lexer lexer = new Lexer("constrain A1 C4 -start -pitch => A2");
             var command = Parser.ParseTokensToCommand(lexer.GetTokens());
             var parsedOptions = OptionParser.ParseOptions<ConstrainOptions>(command.Options);
             Assert.IsTrue(parsedOptions.Pitch);
             Assert.IsTrue(parsedOptions.Start);
-            lexer = new Lexer("constrain A1 C4 start => A2");
+            lexer = new Lexer("constrain A1 C4 -start => A2");
             command = Parser.ParseTokensToCommand(lexer.GetTokens());
             parsedOptions = OptionParser.ParseOptions<ConstrainOptions>(command.Options);
             Assert.IsFalse(parsedOptions.Pitch);
