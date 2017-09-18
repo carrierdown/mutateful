@@ -19,6 +19,17 @@ I'm in the process of porting all code for this project to C# using the .NET Cor
 
 &#10003;=Implemented, &#9675;=Planned
 
+
+Ideer
+
+Med den nye chain-tankegangen på plass kan man begynne å nærme seg en del av de samme konseptene man hadde i recurse. F.eks. kan selections håndteres vha select og end-kommandoer som modifiserer klippene ved å dra ut visse noter i select-tilfellet. End-tilfellet vil kreve litt strukturelle endringer, kanskje en historikk på hvert klipp, eller kanskje et selected parameter på hver note. Sistnevnte er nok klart enklest å implementere og vil funke greit.
+
+noen andre ideer: 
+iterate - leverer de valgte klippene i rekkefølge til etterfølgende prosesser, slik at man i praksis lager en lengre sekvens av flere klipp
+add - legg inn ekstra klipp i en chain, f.eks. a1 a2 interleave add a3 a4 iterate => a5
+filter - filtrer noter på eksempelvis lengde eller pitch, eller alt (nyttig ved selections)
+
+
 ## Documentation
 
 `mutate4l` is not runnable yet, but I will be documenting each function here as a reference while I'm developing.

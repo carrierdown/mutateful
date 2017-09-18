@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\mutate4l\Mutate4l.csproj" />
+    <ProjectReference Include="..\Mutate4l\Mutate4l.csproj" />
   </ItemGroup>
 
   <ItemGroup>

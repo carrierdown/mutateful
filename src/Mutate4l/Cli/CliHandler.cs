@@ -26,7 +26,7 @@ namespace Mutate4l.Cli
                         break;
                     case "hello":
                     case "test":
-                        if (ClipProcessor.UdpConnector.TestCommunication())
+                        if (await ClipProcessor.UdpConnector.TestCommunication())
                         {
                             Console.WriteLine("Communication with Ableton Live up and running!");
                         } else

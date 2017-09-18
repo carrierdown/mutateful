@@ -23,7 +23,7 @@ namespace Mutate4l.Cli
             y = int.Parse(clip) - 1; // indexes into Live are 0-based
             return new Tuple<int, int>(x, y);
         }
-
+        /*
         public static ChainedCommand ParseTokensToChainedCommand(IEnumerable<Token> tokens)
         {
             var sourceClips = tokens.TakeWhile(t => t.IsClipReference);
@@ -71,7 +71,7 @@ namespace Mutate4l.Cli
                     // error: not a valid command
                 }
             }
-        }
+        }*/
 
         public static Command ParseTokensToCommand(IEnumerable<Token> tokens)
         {
