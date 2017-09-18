@@ -26,13 +26,13 @@ namespace Mutate4l.Cli
                         break;
                     case "hello":
                     case "test":
-                        if (await ClipProcessor.UdpConnector.TestCommunication())
-                        {
+                        ClipProcessor.UdpConnector.TestCommunication().Wait();
+/*                        {
                             Console.WriteLine("Communication with Ableton Live up and running!");
                         } else
                         {
                             Console.WriteLine("Error communicating with Ableton Live :(");
-                        }
+                        }*/
                         break;
                     default:
                         var lexer = new Lexer(command);
