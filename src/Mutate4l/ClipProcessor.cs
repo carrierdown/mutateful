@@ -9,19 +9,6 @@ namespace Mutate4l
 {
     public class ClipProcessor
     {
-        private static UdpConnector udpConnector;
-        public static UdpConnector UdpConnector {
-            get
-            {
-                if (udpConnector == null)
-                {
-                    udpConnector = new UdpConnector();
-                    udpConnector.Open();
-                }
-                return udpConnector;
-            }
-        }
-
         // todo: Add support for chaining? Would need a syntax change to make sense, e.g. a1 explode pitch interleave mode time repeats 1 2 counts 1/4 1/8 1/16 => a2
         public ProcessResult ProcessCommand(Command command)
         {

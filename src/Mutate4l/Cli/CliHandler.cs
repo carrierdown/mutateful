@@ -1,4 +1,5 @@
 ﻿using Mutate4l.Dto;
+using Mutate4l.IO;
 using System;
 
 namespace Mutate4l.Cli
@@ -26,18 +27,25 @@ namespace Mutate4l.Cli
                         break;
                     case "hello":
                     case "test":
-                        ClipProcessor.UdpConnector.TestCommunication().Wait();
-/*                        {
+                        if (UdpConnector.TestCommunication())
+                        {
                             Console.WriteLine("Communication with Ableton Live up and running!");
                         } else
                         {
                             Console.WriteLine("Error communicating with Ableton Live :(");
-                        }*/
+                        }
                         break;
                     default:
                         var lexer = new Lexer(command);
-                        Command structuredCommand = Parser.ParseTokensToCommand(lexer.GetTokens());
-                        var result = clipProcessor.ProcessCommand(structuredCommand);
+                        try
+                        {
+                            Command structuredCommand = Parser.ParseTokensToCommand(lexer.GetTokens());
+                            var result = clipProcessor.ProcessCommand(structuredCommand);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine($"Error: {e.Message}");
+                        }
                         break;
                 }
             }

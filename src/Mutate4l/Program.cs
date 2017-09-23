@@ -10,14 +10,7 @@ namespace Mutate4l
             System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
-            try
-            {
-                CliHandler.Start();
-            }
-            finally
-            {
-                ClipProcessor.UdpConnector.Close();
-            }
+            CliHandler.Start();
         }
     }
 }

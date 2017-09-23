@@ -103,22 +103,15 @@ namespace Mutate4l.Cli
             string identifier = "";
             int initialPos = pos;
 
-            while (IsAlpha(pos) || (initialPos == pos && IsOption(pos)))
+            while (pos < Buffer.Length && (IsAlpha(pos) || (initialPos == pos && IsOption(pos))))
             {
                 identifier += Buffer[pos++].ToString();
             }
             if (identifier.Length > 0 && validValues.Any(va => va.Any(v => v.Key == identifier)))
             {
-                try
-                {
-                    return new Token(validValues.Where(va => va.Any(v => v.Key.Equals(identifier, StringComparison.InvariantCultureIgnoreCase))).First()[identifier.ToLower()], identifier, initialPos);
-                }
-                catch (Exception)
-                {
-                    throw new Exception($"Unknown token encountered at position {initialPos}");
-                }
+                return new Token(validValues.Where(va => va.Any(v => v.Key.Equals(identifier, StringComparison.InvariantCultureIgnoreCase))).First()[identifier.ToLower()], identifier, initialPos);
             }
-            throw new Exception($"Unknown token encountered at position {initialPos}");
+            throw new Exception($"Unknown token encountered at position {initialPos}: {identifier}");
         }
 
         public IEnumerable<Token> GetTokens()
