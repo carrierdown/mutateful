@@ -58,6 +58,7 @@ namespace Mutate4l.Cli
             {
                 commands.Add(ParseTokensToCommand(commandTokensList));
             }
+
             var chainedCommand = new ChainedCommand
             {
                 SourceClips = sourceClips.Select(c => ResolveClipReference(c.Value)).ToList(),
@@ -66,6 +67,9 @@ namespace Mutate4l.Cli
             };
             return chainedCommand;
         }
+
+
+
 
         public static Command ParseTokensToCommand(IEnumerable<Token> tokens)
         {

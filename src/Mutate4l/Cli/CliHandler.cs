@@ -1,4 +1,5 @@
 ﻿using Mutate4l.Dto;
+using Mutate4l.IO;
 using System;
 
 namespace Mutate4l.Cli
@@ -26,7 +27,7 @@ namespace Mutate4l.Cli
                         break;
                     case "hello":
                     case "test":
-                        if (ClipProcessor.UdpConnector.TestCommunication())
+                        if (UdpConnector.TestCommunication())
                         {
                             Console.WriteLine("Communication with Ableton Live up and running!");
                         } else
@@ -36,6 +37,7 @@ namespace Mutate4l.Cli
                         break;
                     default:
                         var lexer = new Lexer(command);
+
                         if (lexer.IsValidCommand())
                         {
                             ChainedCommand structuredCommand = Parser.ParseTokensToChainedCommand(lexer.GetTokens());
@@ -47,6 +49,12 @@ namespace Mutate4l.Cli
                         } else
                         {
                             Console.WriteLine($"Unknown command: {command}");
+
+
+
+
+
+
                         }
                         break;
                 }

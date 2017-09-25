@@ -9,20 +9,7 @@ namespace Mutate4l
 {
     public class ClipProcessor
     {
-        private static UdpConnector udpConnector;
-        public static UdpConnector UdpConnector {
-            get
-            {
-                if (udpConnector == null)
-                {
-                    udpConnector = new UdpConnector();
-                    udpConnector.Open();
-                }
-                return udpConnector;
-            }
-        }
-
-        public ProcessResult ProcessChainedCommand(ChainedCommand chainedCommand)
+	public ProcessResult ProcessCommand(Command command)
         {
             List<Clip> sourceClips = new List<Clip>();
             List<Clip> targetClips = new List<Clip>();

@@ -3,7 +3,7 @@ inlets = 1;
 
 function hello() {
 	post("hello");
-	outlet(0, ['/mu4l/hello']);
+	outlet(0, ['/mu4l/out/hello']);
 }
 
 function getClip(trackNo, clipNo) {
