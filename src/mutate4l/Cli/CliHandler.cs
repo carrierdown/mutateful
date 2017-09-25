@@ -36,8 +36,18 @@ namespace Mutate4l.Cli
                         break;
                     default:
                         var lexer = new Lexer(command);
-                        Command structuredCommand = Parser.ParseTokensToCommand(lexer.GetTokens());
-                        var result = clipProcessor.ProcessCommand(structuredCommand);
+                        if (lexer.IsValidCommand())
+                        {
+                            ChainedCommand structuredCommand = Parser.ParseTokensToChainedCommand(lexer.GetTokens());
+                            var result = clipProcessor.ProcessChainedCommand(structuredCommand);
+                            if (result?.Success == false)
+                            {
+                                Console.WriteLine(result.ErrorMessage);
+                            }
+                        } else
+                        {
+                            Console.WriteLine($"Unknown command: {command}");
+                        }
                         break;
                 }
             }

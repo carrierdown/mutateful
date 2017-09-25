@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using Mutate4l.Dto;
+using Mutate4l.ClipActions;
 
 namespace Mutate4l.Cli
 {
@@ -28,9 +29,9 @@ namespace Mutate4l.Cli
         {
             var sourceClips = tokens.TakeWhile(t => t.IsClipReference);
             var commandTokens = tokens.Skip(sourceClips.Count()).TakeWhile(t => t.IsCommand || t.IsOption || t.IsOptionValue).ToArray();
-            var destClips = tokens.Skip(sourceClips.Count() + commands.Count()).TakeWhile(t => t.IsClipReference);
+            var destClips = tokens.Skip(sourceClips.Count() + commandTokens.Count()).TakeWhile(t => t.IsClipReference);
 
-            var commands = new List<List<Token>>();
+            var commandTokensLists = new List<List<Token>>();
             var activeCommandTokenList = new List<Token>();
             
             foreach (var token in commandTokens)
@@ -43,7 +44,7 @@ namespace Mutate4l.Cli
                     }
                     else
                     {
-                        commands.Add(activeCommandTokenList);
+                        commandTokensLists.Add(activeCommandTokenList);
                         activeCommandTokenList = new List<Token> { token };
                     }
                 }
@@ -52,25 +53,18 @@ namespace Mutate4l.Cli
                     activeCommandTokenList.Add(token);
                 }
             }
-
-            var i = 0;
-            while (i < commands.Length)
+            var commands = new List<Command>();
+            foreach (var commandTokensList in commandTokensLists)
             {
-                if (commands[i].IsCommand)
-                {
-                    var command = new Command() { Id = commands[i].Type };
-                    var values = new List<Token>();
-                    i++;
-                    while (i < commands.Length && (commands[i].IsOption || commands[i).IsOptionValue) {
-                        values.Add(commands[i++]);
-                    }
-                    command.Options.Add(type, values);
-                }
-                else
-                {
-                    // error: not a valid command
-                }
+                commands.Add(ParseTokensToCommand(commandTokensList));
             }
+            var chainedCommand = new ChainedCommand
+            {
+                SourceClips = sourceClips.Select(c => ResolveClipReference(c.Value)).ToList(),
+                TargetClips = destClips.Select(c => ResolveClipReference(c.Value)).ToList(),
+                Commands = commands
+            };
+            return chainedCommand;
         }
 
         public static Command ParseTokensToCommand(IEnumerable<Token> tokens)

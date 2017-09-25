@@ -187,5 +187,11 @@ namespace Mutate4l.Cli
             }
             return position;
         }
+
+        public bool IsValidCommand()
+        {
+            // to be expanded...
+            return Commands.Keys.Any(c => Buffer.Contains(c));
+        }
     }
 }
