@@ -49,12 +49,6 @@ namespace Mutate4l.Cli
                         } else
                         {
                             Console.WriteLine($"Unknown command: {command}");
-
-
-
-
-
-
                         }
                         break;
                 }

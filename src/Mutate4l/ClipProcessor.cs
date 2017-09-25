@@ -9,7 +9,7 @@ namespace Mutate4l
 {
     public class ClipProcessor
     {
-	public ProcessResult ProcessCommand(Command command)
+        public ProcessResult ProcessChainedCommand(ChainedCommand chainedCommand)
         {
             List<Clip> sourceClips = new List<Clip>();
             List<Clip> targetClips = new List<Clip>();

@@ -68,9 +68,6 @@ namespace Mutate4l.Cli
             return chainedCommand;
         }
 
-
-
-
         public static Command ParseTokensToCommand(IEnumerable<Token> tokens)
         {
             var command = new Command();
