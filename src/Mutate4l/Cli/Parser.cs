@@ -29,7 +29,7 @@ namespace Mutate4l.Cli
         {
             var sourceClips = tokens.TakeWhile(t => t.IsClipReference);
             var commandTokens = tokens.Skip(sourceClips.Count()).TakeWhile(t => t.IsCommand || t.IsOption || t.IsOptionValue).ToArray();
-            var destClips = tokens.Skip(sourceClips.Count() + commandTokens.Count()).TakeWhile(t => t.IsClipReference);
+            var destClips = tokens.Skip(sourceClips.Count() + commandTokens.Count()).SkipWhile(t => t.Type == TokenType.Destination).TakeWhile(t => t.IsClipReference);
 
             var commandTokensLists = new List<List<Token>>();
             var activeCommandTokenList = new List<Token>();
@@ -53,6 +53,7 @@ namespace Mutate4l.Cli
                     activeCommandTokenList.Add(token);
                 }
             }
+            commandTokensLists.Add(activeCommandTokenList); // add last command token list
             var commands = new List<Command>();
             foreach (var commandTokensList in commandTokensLists)
             {
@@ -82,8 +83,8 @@ namespace Mutate4l.Cli
                     var type = tokensAsList[i].Type;
                     var values = new List<Token>();
                     i++;
-                    while (i < tokensAsList.Count && (tokensAsList[i].Type > TokenType._ValuesBegin && tokensAsList[i].Type < TokenType._ValuesEnd) 
-                        || (tokensAsList[i].Type > TokenType._EnumValuesBegin && tokensAsList[i].Type < TokenType._EnumValuesEnd))
+                    while (i < tokensAsList.Count && ((tokensAsList[i].Type > TokenType._ValuesBegin && tokensAsList[i].Type < TokenType._ValuesEnd) 
+                        || (tokensAsList[i].Type > TokenType._EnumValuesBegin && tokensAsList[i].Type < TokenType._EnumValuesEnd)))
                     {
                         values.Add(tokensAsList[i++]);
                     }

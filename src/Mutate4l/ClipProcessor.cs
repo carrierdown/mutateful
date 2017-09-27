@@ -17,7 +17,12 @@ namespace Mutate4l
             // call out to OSC-layer to fetch actual data needed to process the command
             foreach (Tuple<int, int> clipReference in chainedCommand.SourceClips)
             {
-                sourceClips.Add(UdpConnector.GetClip(clipReference.Item1, clipReference.Item2));
+                var clip = UdpConnector.GetClip(clipReference.Item1, clipReference.Item2);
+                if (clip == null)
+                {
+                    return new ProcessResult("Source clip was empty");
+                }
+                sourceClips.Add(clip);
             }
             if (sourceClips.Count < 1)
             {
@@ -49,6 +54,7 @@ namespace Mutate4l
                 }
                 else
                 {
+                    // seems to be a bug here. subsequent fetching of clip contents from clips set this way returns no content.
                     var lastSourceClip = chainedCommand.SourceClips[chainedCommand.SourceClips.Count - 1];
                     UdpConnector.SetClips(lastSourceClip.Item1, lastSourceClip.Item2, resultContainer.Result);
                 }
