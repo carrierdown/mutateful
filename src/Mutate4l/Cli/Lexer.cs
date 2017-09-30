@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Mutate4l.Cli.TokenType;
 
 namespace Mutate4l.Cli
 {
@@ -10,37 +11,39 @@ namespace Mutate4l.Cli
 
         private Dictionary<char, TokenType> SingleOperators = new Dictionary<char, TokenType>
         {
-            { ':', TokenType.Colon }
+            { ':', Colon }
         };
 
         private Dictionary<string, TokenType> DoubleOperators = new Dictionary<string, TokenType>
         {
-            { "=>", TokenType.Destination },
-            { "+>", TokenType.AddToDestination }
+            { "=>", Destination },
+            { "+>", AddToDestination }
         };
 
         private Dictionary<string, TokenType> Commands = new Dictionary<string, TokenType>
         {
-            { "interleave", TokenType.Interleave },
-            { "constrain", TokenType.Constrain },
-            { "explode", TokenType.Explode }
+            { "interleave", Interleave },
+            { "constrain", Constrain },
+            { "explode", Explode },
+            { "slice", Slice }
         };
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
         {
-            { "-start", TokenType.Start },
-            { "-pitch", TokenType.Pitch },
-            { "-ranges", TokenType.Ranges },
-            { "-repeats", TokenType.Repeats },
-            { "-mode", TokenType.Mode },
-            { "-mask", TokenType.Mask },
-            { "-strength", TokenType.Strength }
+            { "-start", Start },
+            { "-pitch", Pitch },
+            { "-ranges", Ranges },
+            { "-repeats", Repeats },
+            { "-mode", Mode },
+            { "-mask", Mask },
+            { "-strength", Strength },
+            { "-lengths", Lengths }
         };
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>
         {
-            { "time", TokenType.Time },
-            { "event", TokenType.Event }
+            { "time", Time },
+            { "event", Event }
         };
 
         public Lexer(string buffer)
@@ -132,15 +135,15 @@ namespace Mutate4l.Cli
                 }
                 else if (IsClipReference(position))
                 {
-                    token = new Token(TokenType.ClipReference, GetRemainingNumericToken(position, 2), position);
+                    token = new Token(ClipReference, GetRemainingNumericToken(position, 2), position);
                 }
                 else if (IsMusicalDivision(position))
                 {
-                    token = new Token(TokenType.MusicalDivision, GetRemainingNumericToken(position, 3), position);
+                    token = new Token(MusicalDivision, GetRemainingNumericToken(position, 3), position);
                 }
                 else if (IsNumeric(position))
                 {
-                    token = new Token(TokenType.Number, GetRemainingNumericToken(position, 1), position);
+                    token = new Token(Number, GetRemainingNumericToken(position, 1), position);
                 }
                 else if (IsAlpha(position))
                 {

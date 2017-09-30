@@ -1,24 +1,12 @@
 ﻿using Mutate4l.Core;
 using Mutate4l.Dto;
+using Mutate4l.Options;
+using Mutate4l.Utility;
 using System.Linq;
-using static Mutate4l.ClipActions.InterleaveMode;
+using static Mutate4l.Options.InterleaveMode;
 
-namespace Mutate4l.ClipActions
+namespace Mutate4l.Commands
 {
-    public enum InterleaveMode
-    {
-        Event,
-        Time
-    }
-
-    public class InterleaveOptions
-    {
-        public InterleaveMode Mode { get; set; } = Time;
-        public int[] Repeats { get; set; } = new int[] { 1 };
-        public decimal[] Ranges { get; set; } = new decimal[] { 1 };
-        public bool Mask { get; set; } = false; // Instead of vvv xxx=vxvxvx, the current input "masks" the corresponding location of other inputs, producing vxv instead.
-    }
-
     public class Interleave
     {
         public static ProcessResult Apply(InterleaveOptions options, params Clip[] clips)

@@ -5,26 +5,27 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Mutate4l.ClipActions
+namespace Mutate4l.Utility
 {
     public class ClipUtilities
     {
-        public static SortedList<Note> SplitNotesAtEvery(SortedList<Note> notes, decimal position, decimal length)
+        public static Clip SplitNotesAtEvery(Clip clip, decimal[] timespans)
         {
             decimal currentPosition = 0;
-            while (currentPosition < length)
+            int timespanIx = 0;
+            while (currentPosition < clip.Length)
             {
                 int i = 0;
-                while (i < notes.Count)
+                while (i < clip.Notes.Count)
                 {
-                    Note note = notes[i];
+                    Note note = clip.Notes[i];
                     if (note.Start > currentPosition) break;
                     if (note.Start < currentPosition && (note.Start + note.Duration) > currentPosition)
                     {
                         // note runs across range boundary - split it
                         decimal rightSplitDuration = note.Start + note.Duration - currentPosition;
                         note.Duration = currentPosition - note.Start;
-                        notes.Add(new Note(note.Pitch, currentPosition, rightSplitDuration, note.Velocity));
+                        clip.Notes.Add(new Note(note.Pitch, currentPosition, rightSplitDuration, note.Velocity));
                         // For regular list: (though possible bug if split note spans more than one range unit)
                         //Note newNote = new Note(note.Pitch, currentPosition, rightSplitDuration, note.Velocity);
                         //notes.Insert(i + 1, newNote);
@@ -32,9 +33,9 @@ namespace Mutate4l.ClipActions
                     }
                     i++;
                 }
-                currentPosition = currentPosition + position;
+                currentPosition = currentPosition + timespans[timespanIx++ % timespans.Length];
             }
-            return notes;
+            return clip;
         }
 
         public static List<Note> GetNotesInRangeAtPosition(decimal start, decimal end, SortedList<Note> notes, decimal position)

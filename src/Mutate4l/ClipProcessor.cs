@@ -1,7 +1,8 @@
 ﻿using Mutate4l.Cli;
-using Mutate4l.ClipActions;
+using Mutate4l.Commands;
 using Mutate4l.Dto;
 using Mutate4l.IO;
+using Mutate4l.Options;
 using System;
 using System.Collections.Generic;
 
@@ -54,7 +55,7 @@ namespace Mutate4l
                 }
                 else
                 {
-                    // seems to be a bug here. subsequent fetching of clip contents from clips set this way returns no content.
+                    // seems to be a bug here. subsequent fetching of clip contents from clips set this way return no content.
                     var lastSourceClip = chainedCommand.SourceClips[chainedCommand.SourceClips.Count - 1];
                     UdpConnector.SetClips(lastSourceClip.Item1, lastSourceClip.Item2, resultContainer.Result);
                 }
@@ -72,6 +73,9 @@ namespace Mutate4l
                     break;
                 case TokenType.Constrain:
                     resultContainer = Constrain.Apply(OptionParser.ParseOptions<ConstrainOptions>(command.Options), clips);
+                    break;
+                case TokenType.Slice:
+                    resultContainer = Slice.Apply(OptionParser.ParseOptions<SliceOptions>(command.Options), clips);
                     break;
                 default:
                     // todo: error here

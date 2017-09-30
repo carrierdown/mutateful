@@ -17,6 +17,7 @@
         Mode,
         Strength,
         Mask,
+        Lengths,
         _OptionsEnd,
 
         _EnumValuesBegin,
