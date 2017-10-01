@@ -25,7 +25,8 @@ namespace Mutate4l.Cli
             { "interleave", Interleave },
             { "constrain", Constrain },
             { "explode", Explode },
-            { "slice", Slice }
+            { "slice", Slice },
+            { "arpeggiate", Arpeggiate }
         };
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
@@ -37,7 +38,9 @@ namespace Mutate4l.Cli
             { "-mode", Mode },
             { "-mask", Mask },
             { "-strength", Strength },
-            { "-lengths", Lengths }
+            { "-lengths", Lengths },
+            { "-rescale", Rescale },
+            { "-removeoffset", RemoveOffset }
         };
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>

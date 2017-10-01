@@ -6,21 +6,21 @@ namespace Mutate4l.Dto
 {
     public class NoteInfo
     {
-        public byte Pitch { get; set; }
+        public int Pitch { get; set; }
         public decimal Start { get; set; }
         public decimal Duration { get; set; }
-        public byte Velocity { get; set; }
+        public int Velocity { get; set; }
         public decimal DurationUntilNextNote { get; set; }
     }
 
     public class Note : IComparable<Note>
     {
-        public byte Pitch { get; set; }
+        public int Pitch { get; set; }
         public decimal Start { get; set; }
         public decimal Duration { get; set; }
-        public byte Velocity { get; set; }
+        public int Velocity { get; set; }
 
-        public Note(byte pitch, decimal start, decimal duration, byte velocity)
+        public Note(int pitch, decimal start, decimal duration, int velocity)
         {
             Pitch = pitch;
             Start = start;

@@ -42,6 +42,16 @@ namespace Mutate4l.Dto
                 return Notes[index + 1].Start - Notes[index].Start;
         }
 
+        // returns pitch relative to first note of clip
+        public int RelativePitch(int index)
+        {
+            if (index < 0 || index >= Notes.Count)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            return Notes[index].Pitch - Notes[0].Pitch;
+        }
+
         /*        public NoteInfo GetNextNoteInfo()
                 {
                     Note note;

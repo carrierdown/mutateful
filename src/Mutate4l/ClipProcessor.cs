@@ -5,6 +5,7 @@ using Mutate4l.IO;
 using Mutate4l.Options;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Mutate4l
 {
@@ -25,14 +26,13 @@ namespace Mutate4l
                 }
                 sourceClips.Add(clip);
             }
+
+            sourceClips = sourceClips.Where(c => c.Notes.Count > 0).ToList();
             if (sourceClips.Count < 1)
             {
-                throw new Exception("No source clips specified");
+                throw new Exception("No source clips specified, or only empty clip(s) specified.");
             }
-            if (sourceClips.Count < 2)
-            {
-                sourceClips.Add(sourceClips[0]);
-            }
+
             Clip[] currentSourceClips = sourceClips.ToArray();
             ProcessResult resultContainer = new ProcessResult("No commands specified");
             foreach (var command in chainedCommand.Commands)
@@ -76,6 +76,9 @@ namespace Mutate4l
                     break;
                 case TokenType.Slice:
                     resultContainer = Slice.Apply(OptionParser.ParseOptions<SliceOptions>(command.Options), clips);
+                    break;
+                case TokenType.Arpeggiate:
+                    resultContainer = Arpeggiate.Apply(OptionParser.ParseOptions<ArpeggiateOptions>(command.Options), clips);
                     break;
                 default:
                     // todo: error here

@@ -11,10 +11,9 @@ namespace Mutate4l.Commands
     {
         public static ProcessResult Apply(InterleaveOptions options, params Clip[] clips)
         {
-            clips = clips.Where(c => c.Notes.Count > 0).ToArray();
             if (clips.Length < 2)
             {
-                return new ProcessResult("Error: Less than two clips with content were specified.");
+                clips = new Clip[] { clips[0], clips[0] };
             }
             decimal position = 0;
             int repeatsIndex = 0;

@@ -123,18 +123,18 @@ namespace Mutate4l.Utility
             return haystack[nearestIndex].Start;
         }
 
-        public static byte FindNearestNotePitchInSet(Note needle, SortedList<Note> haystack)
+        public static int FindNearestNotePitchInSet(Note needle, SortedList<Note> haystack)
         {
             int nearestIndex = 0;
-            byte? nearestDelta = null;
+            int? nearestDelta = null;
 
             for (int i = 0; i < haystack.Count; i++)
             {
                 if (nearestDelta == null)
                 {
-                    nearestDelta = (byte)Math.Abs(needle.Pitch - haystack[i].Pitch);
+                    nearestDelta = Math.Abs(needle.Pitch - haystack[i].Pitch);
                 }
-                byte currentDelta = (byte)Math.Abs(needle.Pitch - haystack[i].Pitch);
+                int currentDelta = Math.Abs(needle.Pitch - haystack[i].Pitch);
                 if (currentDelta < nearestDelta)
                 {
                     nearestDelta = currentDelta;

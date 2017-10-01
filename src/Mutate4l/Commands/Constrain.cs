@@ -11,6 +11,10 @@ namespace Mutate4l.Commands
     {
         public static ProcessResult Apply(ConstrainOptions options, params Clip[] clips)
         {
+            if (clips.Length < 2)
+            {
+                clips = new Clip[] { clips[0], clips[0] };
+            }
             Clip masterClip = clips[0];
             Clip[] slaveClips = clips.Skip(1).ToArray();
             ClipUtilities.NormalizeClipLengths(clips);

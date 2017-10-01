@@ -7,13 +7,14 @@
 &#10003; Constrain note values<br>
 &#10003; Interleave clips<br>
 &#10003; Slice clips<br>
-&#9675; Sustain notes<br>
+&#10003; Retrigger from clip (arpeggiate)<br>
 &#9675; Transpose from clip<br>
-&#9675; Retrigger from clip (arpeggiate)<br>
 &#9675; Multitrigger from several clips<br>
 &#9675; Rescale<br>
+&#9675; Sustain notes<br>
+&#9675; Filter notes based on length, velocity, mute-state<br>
 &#9675; Explode clip (e.g. unique notes > new clip, or unique note positions > new clip)<br>
-Maybe:
+Maybe:<br>
 &#9675; Create retrig/ratchet<br>
 &#9675; Selection logic (even, every #, series from start, series from end, pitch values, pairs, invert flag)<br>
 

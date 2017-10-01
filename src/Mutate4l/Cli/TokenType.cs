@@ -7,6 +7,9 @@
         Constrain,
         Slice,
         Explode,
+        Arpeggiate,
+        Sustain,
+        Filter,
         _CommandsEnd,
 
         _OptionsBegin,
@@ -18,6 +21,8 @@
         Strength,
         Mask,
         Lengths,
+        Rescale,
+        RemoveOffset,
         _OptionsEnd,
 
         _EnumValuesBegin,
