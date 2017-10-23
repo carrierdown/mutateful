@@ -177,6 +177,11 @@ namespace Mutate4l.Utility
             }
         }
 
+        public static NoteContainer[] GetOverlappingNotes()
+        {
+            return new NoteContainer[0];
+        }
+
         public static Dictionary<TokenType, List<Token>> GetValidOptions(Dictionary<TokenType, List<Token>> options, TokenType[] validOptions)
         {
             var cleanedOptions = new Dictionary<TokenType, List<Token>>();

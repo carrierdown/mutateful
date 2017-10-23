@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Mutate4l.Core;
 
 namespace Mutate4l.Dto
 {
@@ -13,12 +14,13 @@ namespace Mutate4l.Dto
         public decimal DurationUntilNextNote { get; set; }
     }
 
-    public class Note : IComparable<Note>
+    public class Note : IComparable<Note>, INoteEvent
     {
         public int Pitch { get; set; }
         public decimal Start { get; set; }
         public decimal Duration { get; set; }
         public int Velocity { get; set; }
+        public decimal End => Start + Duration;
 
         public Note(int pitch, decimal start, decimal duration, int velocity)
         {
@@ -55,30 +57,6 @@ namespace Mutate4l.Dto
                 return 1;
             }
             return 0;
-        }
-
-        //   [ ---    ]
-        public bool InsideInterval(decimal start, decimal end)
-        {
-            return Start >= start && Start + Duration <= end;
-        }
-
-        // --[--------]---
-        public bool CoversInterval(decimal start, decimal end)
-        {
-            return Start < start && Start + Duration > end;
-        }
-
-        // --[------  ]
-        public bool CrossesStartOfInterval(decimal start, decimal end)
-        {
-            return Start < start && (Start + Duration) > start && (Start + Duration) <= end;
-        }
-
-        //   [    ----]----
-        public bool CrossesEndOfInterval(decimal start, decimal end)
-        {
-            return Start >= start && (Start + Duration) > end;
         }
     }
 }
