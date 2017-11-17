@@ -5,7 +5,7 @@ using Mutate4l.Utility;
 using System.Linq;
 using static Mutate4l.Options.InterleaveMode;
 
-namespace Mutate4l.Commands
+namespace Mutate4l.Commands.Porcelain
 {
     public class Interleave
     {
@@ -36,7 +36,7 @@ namespace Mutate4l.Commands
                             for (var repeats = 0; repeats < options.Repeats[repeatsIndex % options.Repeats.Length]; repeats++)
                             {
                                 var note = clip.Notes[currentNoteIndex];
-                                resultClip.Notes.Add(new Note(note.Pitch, position, note.Duration, note.Velocity));
+                                resultClip.Notes.Add(new NoteEvent(note.Pitch, position, note.Duration, note.Velocity));
                                 position += clip.DurationUntilNextNote(currentNoteIndex);
                             }
                             if (options.Mask)

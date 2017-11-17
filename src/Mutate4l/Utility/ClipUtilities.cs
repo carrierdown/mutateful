@@ -18,14 +18,14 @@ namespace Mutate4l.Utility
                 int i = 0;
                 while (i < clip.Notes.Count)
                 {
-                    Note note = clip.Notes[i];
+                    NoteEvent note = clip.Notes[i];
                     if (note.Start > currentPosition) break;
                     if (note.Start < currentPosition && (note.Start + note.Duration) > currentPosition)
                     {
                         // note runs across range boundary - split it
                         decimal rightSplitDuration = note.Start + note.Duration - currentPosition;
                         note.Duration = currentPosition - note.Start;
-                        clip.Notes.Add(new Note(note.Pitch, currentPosition, rightSplitDuration, note.Velocity));
+                        clip.Notes.Add(new NoteEvent(note.Pitch, currentPosition, rightSplitDuration, note.Velocity));
                         // For regular list: (though possible bug if split note spans more than one range unit)
                         //Note newNote = new Note(note.Pitch, currentPosition, rightSplitDuration, note.Velocity);
                         //notes.Insert(i + 1, newNote);
@@ -38,9 +38,9 @@ namespace Mutate4l.Utility
             return clip;
         }
 
-        public static List<Note> GetNotesInRangeAtPosition(decimal start, decimal end, SortedList<Note> notes, decimal position)
+        public static List<NoteEvent> GetNotesInRangeAtPosition(decimal start, decimal end, SortedList<NoteEvent> notes, decimal position)
         {
-            var results = new List<Note>();
+            var results = new List<NoteEvent>();
             var notesFromRange = GetNotesInRange(start, end, notes);
 
             foreach (var note in notesFromRange)
@@ -51,32 +51,32 @@ namespace Mutate4l.Utility
             return results;
         }
 
-        public static List<Note> GetSplitNotesInRangeAtPosition(decimal start, decimal end, SortedList<Note> notes, decimal position)
+        public static List<NoteEvent> GetSplitNotesInRangeAtPosition(decimal start, decimal end, SortedList<NoteEvent> notes, decimal position)
         {
-            List<Note> results = new List<Note>();
+            List<NoteEvent> results = new List<NoteEvent>();
             foreach (var note in notes)
             {
                 if ((note.Start + note.Duration) < start) continue;
                 if (note.Start > end) break;
                 if (note.InsideInterval(start, end))
                 {
-                    AddNote(new Note(note.Pitch, note.Start - start + position, note.Duration, note.Velocity), results);
+                    AddNote(new NoteEvent(note.Pitch, note.Start - start + position, note.Duration, note.Velocity), results);
                 }
                 else if (note.CoversInterval(start, end))
                 {
-                    AddNote(new Note(note.Pitch, position, end - start, note.Velocity), results);
+                    AddNote(new NoteEvent(note.Pitch, position, end - start, note.Velocity), results);
                 }
                 else if (note.CrossesStartOfInterval(start, end))
                 {
-                    AddNote(new Note(note.Pitch, position, (note.Start + note.Duration) - start, note.Velocity), results);
+                    AddNote(new NoteEvent(note.Pitch, position, (note.Start + note.Duration) - start, note.Velocity), results);
                 }
                 else if (note.CrossesEndOfInterval(start, end)) {
-                    AddNote(new Note(note.Pitch, note.Start - start + position, end - note.Start, note.Velocity), results);
+                    AddNote(new NoteEvent(note.Pitch, note.Start - start + position, end - note.Start, note.Velocity), results);
                 }
             }
             return results;
         }
-        public static void AddNote(Note note, List<Note> notes)
+        public static void AddNote(NoteEvent note, List<NoteEvent> notes)
         {
             if (note.Duration > 0.0049m)
             {
@@ -84,9 +84,9 @@ namespace Mutate4l.Utility
             }
         }
 
-        public static List<Note> GetNotesInRange(decimal start, decimal end, SortedList<Note> notes)
+        public static List<NoteEvent> GetNotesInRange(decimal start, decimal end, SortedList<NoteEvent> notes)
         {
-            var results = new List<Note>();
+            var results = new List<NoteEvent>();
 
             foreach (var note in notes)
             {
@@ -96,13 +96,13 @@ namespace Mutate4l.Utility
                 }
                 if (note.Start >= start && note.Start < end)
                 {
-                    results.Add(new Note(note.Pitch, note.Start, note.Duration, note.Velocity));
+                    results.Add(new NoteEvent(note.Pitch, note.Start, note.Duration, note.Velocity));
                 }
             }
             return results;
         }
 
-        public static decimal FindNearestNoteStartInSet(Note needle, SortedList<Note> haystack)
+        public static decimal FindNearestNoteStartInSet(NoteEvent needle, SortedList<NoteEvent> haystack)
         {
             var nearestIndex = 0;
             decimal? nearestDelta = null;
@@ -123,7 +123,7 @@ namespace Mutate4l.Utility
             return haystack[nearestIndex].Start;
         }
 
-        public static int FindNearestNotePitchInSet(Note needle, SortedList<Note> haystack)
+        public static int FindNearestNotePitchInSet(NoteEvent needle, SortedList<NoteEvent> haystack)
         {
             int nearestIndex = 0;
             int? nearestDelta = null;
@@ -154,14 +154,14 @@ namespace Mutate4l.Utility
                     decimal loopLength = clip.Length;
                     decimal currentLength = loopLength;
 
-                    var notesToAdd = new List<Note>();
+                    var notesToAdd = new List<NoteEvent>();
                     while (currentLength < maxLength)
                     {
                         foreach (var note in clip.Notes)
                         {
                             if (note.Start + currentLength < maxLength)
                             {
-                                notesToAdd.Add(new Note(note)
+                                notesToAdd.Add(new NoteEvent(note)
                                 {
                                     Start = note.Start + currentLength
                                 });
@@ -175,11 +175,6 @@ namespace Mutate4l.Utility
                     clip.Notes.AddRange(notesToAdd);
                 }
             }
-        }
-
-        public static NoteContainer[] GetOverlappingNotes()
-        {
-            return new NoteContainer[0];
         }
 
         public static Dictionary<TokenType, List<Token>> GetValidOptions(Dictionary<TokenType, List<Token>> options, TokenType[] validOptions)

@@ -5,24 +5,17 @@ using Mutate4l.Core;
 
 namespace Mutate4l.Dto
 {
-    public class NoteInfo
-    {
-        public int Pitch { get; set; }
-        public decimal Start { get; set; }
-        public decimal Duration { get; set; }
-        public int Velocity { get; set; }
-        public decimal DurationUntilNextNote { get; set; }
-    }
-
-    public class Note : IComparable<Note>, INoteEvent
+    public class NoteEvent : IComparable<NoteEvent>
     {
         public int Pitch { get; set; }
         public decimal Start { get; set; }
         public decimal Duration { get; set; }
         public int Velocity { get; set; }
         public decimal End => Start + Duration;
+        public bool IsSelected { get; set; }
+        public List<NoteEvent> Children { get; set; } // children have position, pitch and velocity relative to the parent noteEvent
 
-        public Note(int pitch, decimal start, decimal duration, int velocity)
+        public NoteEvent(int pitch, decimal start, decimal duration, int velocity)
         {
             Pitch = pitch;
             Start = start;
@@ -30,7 +23,7 @@ namespace Mutate4l.Dto
             Velocity = velocity;
         }
 
-        public Note(Note note)
+        public NoteEvent(NoteEvent note)
         {
             Pitch = note.Pitch;
             Start = note.Start;
@@ -38,7 +31,7 @@ namespace Mutate4l.Dto
             Velocity = note.Velocity;
         }
 
-        public int CompareTo(Note b)
+        public int CompareTo(NoteEvent b)
         {
             if (Start < b.Start)
             {

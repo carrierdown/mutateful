@@ -4,7 +4,7 @@ using Mutate4l.Utility;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Mutate4l.Commands
+namespace Mutate4l.Commands.Porcelain
 {
     public class Arpeggiate
     {

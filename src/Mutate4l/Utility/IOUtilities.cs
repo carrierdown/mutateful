@@ -15,10 +15,10 @@ namespace Mutate4l.Utility
             }
             decimal clipLength = decimal.Parse(noteData[0]);
             bool isLooping = noteData[1] == "1";
-            var notes = new SortedList<Note>();
+            var notes = new SortedList<NoteEvent>();
             for (var i = 2; i < noteData.Length; i += 4)
             {
-                notes.Add(new Note(byte.Parse(noteData[i]), decimal.Parse(noteData[i + 1], NumberStyles.Any), decimal.Parse(noteData[i + 2], NumberStyles.Any), byte.Parse(noteData[i + 3])));
+                notes.Add(new NoteEvent(byte.Parse(noteData[i]), decimal.Parse(noteData[i + 1], NumberStyles.Any), decimal.Parse(noteData[i + 2], NumberStyles.Any), byte.Parse(noteData[i + 3])));
             }
             return new Clip(clipLength, isLooping) { Notes = notes };
         }

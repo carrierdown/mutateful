@@ -13,28 +13,28 @@ namespace Mutate4lTests
         {
             var clip1 = new Clip(1, true)
             {
-                Notes = new SortedList<Note>()
+                Notes = new SortedList<NoteEvent>()
                 {
-                   new Note(60, 0, .25m, 100),
-                   new Note(60, .4m, .1m, 100),
+                   new NoteEvent(60, 0, .25m, 100),
+                   new NoteEvent(60, .4m, .1m, 100),
                 }
             };
             var clip2 = new Clip(4, true)
             {
-                Notes = new SortedList<Note>()
+                Notes = new SortedList<NoteEvent>()
                 {
-                   new Note(62, 0, 1, 100),
-                   new Note(62, 1, 1, 100),
-                   new Note(62, 2, 1, 100),
-                   new Note(62, 3, 1, 100)
+                   new NoteEvent(62, 0, 1, 100),
+                   new NoteEvent(62, 1, 1, 100),
+                   new NoteEvent(62, 2, 1, 100),
+                   new NoteEvent(62, 3, 1, 100)
                 }
             };
             var clip3 = new Clip(2, true)
             {
-                Notes = new SortedList<Note>()
+                Notes = new SortedList<NoteEvent>()
                 {
-                   new Note(64, .5m, 1, 100),
-                   new Note(64, 1.5m, .5m, 100),
+                   new NoteEvent(64, .5m, 1, 100),
+                   new NoteEvent(64, 1.5m, .5m, 100),
                 }
             };
             ClipUtilities.NormalizeClipLengths(clip1, clip2, clip3);

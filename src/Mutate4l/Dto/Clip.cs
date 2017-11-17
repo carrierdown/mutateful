@@ -5,17 +5,34 @@ namespace Mutate4l.Dto
 {
     public class Clip : IComparable<Clip>
     {
-        public SortedList<Note> Notes { get; set; }
+        public SortedList<NoteEvent> Notes { get; set; }
         public decimal Length { get; set; }
         public bool IsLooping { get; set; }
         public decimal EndDelta
         {
             get { return Length - Notes[Notes.Count - 1].Start + Notes[0].Start; }
         }
+        public bool SelectionActive { get; private set; }
+        public bool ContainsChunks { get; private set; }
+
+        // creates chunk by adding note event 2..n as children to note event 1, removing them from the Notes list in the process
+        public void Chunkify(params NoteEvent[] noteEvents)
+        {
+            if (noteEvents.Length < 2) return;
+            ContainsChunks = true;
+
+        }
+
+        // flattens clip by moving all child note events up to the master Notes list.
+        public void Flatten()
+        {
+            if (!ContainsChunks) return;
+
+        }
 
         public Clip(decimal length, bool isLooping)
         {
-            Notes = new SortedList<Note>();
+            Notes = new SortedList<NoteEvent>();
             IsLooping = isLooping;
             Length = length;
         }

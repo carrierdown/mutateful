@@ -10,17 +10,17 @@ namespace Mutate4lTests.Core
         [TestMethod]
         public void TestSortedList()
         {
-            var sortedList = new SortedList<Note>();
-            sortedList.Add(new Note(64, 1, 1, 100));
-            sortedList.Add(new Note(60, 0, 1, 100));
-            sortedList.Add(new Note(60, .5m, 1, 100));
-            sortedList.Add(new Note(60, .1m, 1, 100));
-            sortedList.Add(new Note(60, 2.00001m, 1, 100));
-            sortedList.Add(new Note(60, 7, 1, 100));
-            sortedList.Add(new Note(60, 12.5m, 1, 100));
-            sortedList.Add(new Note(60, 10, 1, 100));
-            sortedList.Add(new Note(60, 2, 1, 100));
-            sortedList.Add(new Note(60, 1, 1, 100));
+            var sortedList = new SortedList<NoteEvent>();
+            sortedList.Add(new NoteEvent(64, 1, 1, 100));
+            sortedList.Add(new NoteEvent(60, 0, 1, 100));
+            sortedList.Add(new NoteEvent(60, .5m, 1, 100));
+            sortedList.Add(new NoteEvent(60, .1m, 1, 100));
+            sortedList.Add(new NoteEvent(60, 2.00001m, 1, 100));
+            sortedList.Add(new NoteEvent(60, 7, 1, 100));
+            sortedList.Add(new NoteEvent(60, 12.5m, 1, 100));
+            sortedList.Add(new NoteEvent(60, 10, 1, 100));
+            sortedList.Add(new NoteEvent(60, 2, 1, 100));
+            sortedList.Add(new NoteEvent(60, 1, 1, 100));
 
             Assert.AreEqual(sortedList[0].Start, 0);
             Assert.AreEqual(sortedList[1].Start, .1m);

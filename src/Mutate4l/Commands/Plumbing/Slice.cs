@@ -3,7 +3,7 @@ using Mutate4l.Options;
 using Mutate4l.Utility;
 using System.Collections.Generic;
 
-namespace Mutate4l.Commands
+namespace Mutate4l.Commands.Plumbing
 {
     public class Slice
     {

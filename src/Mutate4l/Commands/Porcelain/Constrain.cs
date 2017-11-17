@@ -3,7 +3,7 @@ using Mutate4l.Options;
 using Mutate4l.Utility;
 using System.Linq;
 
-namespace Mutate4l.Commands
+namespace Mutate4l.Commands.Porcelain
 {
 
     // constrain: first clip timing and/or pitch is replicated on all following clips. Position is optionally scaled with the Strength parameter.
@@ -25,7 +25,7 @@ namespace Mutate4l.Commands
                 var slaveClip = slaveClips[i];
                 foreach (var note in slaveClip.Notes)
                 {
-                    var constrainedNote = new Note(note);
+                    var constrainedNote = new NoteEvent(note);
                     if (options.Pitch)
                     {
                         constrainedNote.Pitch = ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes);

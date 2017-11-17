@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.Commands;
+using Mutate4l.Commands.Porcelain;
 using Mutate4l.Core;
 using Mutate4l.Dto;
 using Mutate4l.Options;
@@ -15,16 +16,16 @@ namespace Mutate4lTests.ClipActions
         {
             var clip1 = new Clip(4, true)
             {
-                Notes = new SortedList<Note>()
+                Notes = new SortedList<NoteEvent>()
                 {
-                   new Note(60, 0, 4, 100)
+                   new NoteEvent(60, 0, 4, 100)
                 }
             };
             var clip2 = new Clip(4, true)
             {
-                Notes = new SortedList<Note>()
+                Notes = new SortedList<NoteEvent>()
                 {
-                   new Note(62, 0, 4, 100)
+                   new NoteEvent(62, 0, 4, 100)
                 }
             };
             var options = new InterleaveOptions
@@ -51,16 +52,16 @@ namespace Mutate4lTests.ClipActions
         {
             var clip1 = new Clip(4, true)
             {
-                Notes = new SortedList<Note>()
+                Notes = new SortedList<NoteEvent>()
                 {
-                   new Note(60, 0, 4, 100)
+                   new NoteEvent(60, 0, 4, 100)
                 }
             };
             var clip2 = new Clip(4, true)
             {
-                Notes = new SortedList<Note>()
+                Notes = new SortedList<NoteEvent>()
                 {
-                   new Note(62, 0, 4, 100)
+                   new NoteEvent(62, 0, 4, 100)
                 }
             };
             var options = new InterleaveOptions
@@ -95,18 +96,18 @@ namespace Mutate4lTests.ClipActions
         {
             var clip1 = new Clip(4, true)
             {
-                Notes = new SortedList<Note>()
+                Notes = new SortedList<NoteEvent>()
                 {
-                   new Note(60, .4m, .8m, 100),
-                   new Note(60, 1.3m, 2, 100),
-                   new Note(60, 3.3m, .7m, 100)
+                   new NoteEvent(60, .4m, .8m, 100),
+                   new NoteEvent(60, 1.3m, 2, 100),
+                   new NoteEvent(60, 3.3m, .7m, 100)
                 }
             };
             var clip2 = new Clip(4, true)
             {
-                Notes = new SortedList<Note>()
+                Notes = new SortedList<NoteEvent>()
                 {
-                   new Note(62, 0, 4, 100)
+                   new NoteEvent(62, 0, 4, 100)
                 }
             };
             var options = new InterleaveOptions
@@ -154,22 +155,22 @@ namespace Mutate4lTests.ClipActions
         {
             var clip1 = new Clip(4, true)
             {
-                Notes = new SortedList<Note>()
+                Notes = new SortedList<NoteEvent>()
                 {
-                   new Note(60, 0, 1, 100),
-                   new Note(60, 1, 1, 100),
-                   new Note(60, 2, 1, 100),
-                   new Note(60, 3, 1, 100)
+                   new NoteEvent(60, 0, 1, 100),
+                   new NoteEvent(60, 1, 1, 100),
+                   new NoteEvent(60, 2, 1, 100),
+                   new NoteEvent(60, 3, 1, 100)
                 }
             };
             var clip2 = new Clip(4, true)
             {
-                Notes = new SortedList<Note>()
+                Notes = new SortedList<NoteEvent>()
                 {
-                   new Note(62, 0, 1, 100),
-                   new Note(62, 1, 1, 100),
-                   new Note(62, 2, 1, 100),
-                   new Note(62, 3, 1, 100)
+                   new NoteEvent(62, 0, 1, 100),
+                   new NoteEvent(62, 1, 1, 100),
+                   new NoteEvent(62, 2, 1, 100),
+                   new NoteEvent(62, 3, 1, 100)
                 }
             };
             var options = new InterleaveOptions
