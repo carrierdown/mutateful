@@ -35,5 +35,15 @@ namespace Mutate4lTests.Core
             Assert.AreEqual(sortedList[8].Start, 10);
             Assert.AreEqual(sortedList[9].Start, 12.5m);
         }
+
+        [TestMethod]
+        public void TestDuplicateEntries()
+        {
+            var list = new SortedList<NoteEvent>();
+            var noteEvent = new NoteEvent(64, 1, 1, 100);
+            list.Add(noteEvent);
+            list.Add(new NoteEvent(noteEvent));
+            Assert.AreEqual(list.Count, 1);
+        }
     }
 }

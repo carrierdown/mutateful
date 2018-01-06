@@ -27,6 +27,7 @@ namespace Mutate4l.Core
 
         public void Add(T item)
         {
+            if (_list.Contains(item)) return;
             var index = _list.BinarySearch(item);
             _list.Insert(index < 0 ? ~index : index, item);
         }

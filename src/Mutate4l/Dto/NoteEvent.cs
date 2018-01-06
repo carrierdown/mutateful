@@ -5,7 +5,7 @@ using Mutate4l.Core;
 
 namespace Mutate4l.Dto
 {
-    public class NoteEvent : IComparable<NoteEvent>
+    public class NoteEvent : IComparable<NoteEvent>, IEquatable<NoteEvent>
     {
         public int Pitch { get; set; }
         public decimal Start { get; set; }
@@ -50,6 +50,12 @@ namespace Mutate4l.Dto
                 return 1;
             }
             return 0;
+        }
+
+        public bool Equals(NoteEvent other)
+        {
+            // We don't consider velocity or duration as only one note can occupy a specific start time and pitch
+            return Start == other.Start && Pitch == other.Pitch;
         }
     }
 }
