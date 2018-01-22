@@ -16,6 +16,12 @@ namespace Mutate4l.Commands.Porcelain
             }
             Clip arpSequence = clips[0];
             Clip[] triggerClips = clips.Skip(1).ToArray();
+            foreach (var triggerClip in triggerClips)
+            {
+                ClipUtilities.Monophonize(triggerClip);
+            }
+            ClipUtilities.Monophonize(arpSequence);
+            
             var processedClips = new List<Clip>(triggerClips.Length);
 
             if (arpSequence.Notes[0].Start != 0 && options.RemoveOffset)

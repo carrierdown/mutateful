@@ -28,5 +28,11 @@ namespace Mutate4l.Utility
         {
             return note.Start >= start && (note.Start + note.Duration) > end;
         }
+
+        public static bool StartsInsideInterval(this NoteEvent note, decimal start, decimal end)
+        {
+            return note.Start >= start && note.Start < end;
+        }
+
     }
 }

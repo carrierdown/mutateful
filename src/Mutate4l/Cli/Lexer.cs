@@ -26,7 +26,8 @@ namespace Mutate4l.Cli
             { "constrain", Constrain },
             { "explode", Explode },
             { "slice", Slice },
-            { "arpeggiate", Arpeggiate }
+            { "arpeggiate", Arpeggiate },
+            { "monophonize", Monophonize }
         };
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>

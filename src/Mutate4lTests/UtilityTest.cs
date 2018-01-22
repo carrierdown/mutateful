@@ -58,5 +58,38 @@ namespace Mutate4lTests
             Assert.AreEqual(clip3.Notes[3].Start, 3.5m);
             Assert.AreEqual(clip3.Notes.Count, 4);
         }
+
+        [TestMethod]
+        public void TestMonophonize()
+        {
+            var clip1 = new Clip(1, true)
+            {
+                Notes = new SortedList<NoteEvent>()
+                {
+                   new NoteEvent(60, 0, 1, 100),
+                   new NoteEvent(62, 0, 0.2m, 100),
+                   new NoteEvent(62, 0.3m, 0.2m, 100),
+                   new NoteEvent(62, 0.5m, 0.2m, 100),
+                   new NoteEvent(62, 0.8m, 0.2m, 100),
+                   new NoteEvent(60, 1, 1, 100),
+                }
+            };
+            Assert.AreEqual(6, clip1.Notes.Count);
+            ClipUtilities.Monophonize(clip1);
+            Assert.AreEqual(2, clip1.Notes.Count);
+
+            clip1 = new Clip(1, true)
+            {
+                Notes = new SortedList<NoteEvent>()
+                {
+                   new NoteEvent(60, 0, .2m, 100),
+                   new NoteEvent(62, .1m, .2m, 100),
+                   new NoteEvent(62, .2m, .2m, 100)
+                }
+            };
+            Assert.AreEqual(3, clip1.Notes.Count);
+            ClipUtilities.Monophonize(clip1);
+            Assert.AreEqual(2, clip1.Notes.Count);
+        }
     }
 }

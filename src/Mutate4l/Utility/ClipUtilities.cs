@@ -177,6 +177,34 @@ namespace Mutate4l.Utility
             }
         }
 
+        public static Clip Monophonize(Clip clip)
+        {
+            if (clip.Notes.Count < 2) return clip;
+            var notesToRemove = new List<NoteEvent>();
+            var result = new SortedList<NoteEvent>();
+
+            var i = 0;
+            foreach (var note in clip.Notes)
+            {
+                i++;
+                if (notesToRemove.Contains(note)) continue;
+                var overlappingNotes = clip.Notes.Skip(i).Where(x => x.StartsInsideInterval(note.Start, note.End)).ToList();
+                foreach (var overlappingNote in overlappingNotes)
+                {
+                    notesToRemove.Add(overlappingNote);
+                }
+            }
+            foreach (var note in clip.Notes)
+            {
+                if (!notesToRemove.Contains(note))
+                {
+                    result.Add(note);
+                }
+            }
+            clip.Notes = result;
+            return clip;
+        }
+
         public static Dictionary<TokenType, List<Token>> GetValidOptions(Dictionary<TokenType, List<Token>> options, TokenType[] validOptions)
         {
             var cleanedOptions = new Dictionary<TokenType, List<Token>>();

@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using Mutate4l.Dto;
 
 namespace Mutate4l.Core
 {
@@ -76,5 +78,7 @@ namespace Mutate4l.Core
         {
             return ((IEnumerable<T>)_list).GetEnumerator();
         }
+
+
     }
 }

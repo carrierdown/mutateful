@@ -37,6 +37,16 @@ namespace Mutate4l.Dto
             Length = length;
         }
 
+        public Clip(Clip clip) : this(clip.Length, clip.IsLooping)
+        {
+            foreach (var note in clip.Notes)
+            {
+                var clonedNote = new NoteEvent(note);
+                Notes.Add(clonedNote);
+            }
+
+        }
+
         public int CompareTo(Clip b)
         {
             if (Length < b.Length)

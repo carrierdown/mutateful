@@ -29,6 +29,7 @@ namespace Mutate4l.Dto
             Start = note.Start;
             Duration = note.Duration;
             Velocity = note.Velocity;
+            // todo: should also clone children
         }
 
         public int CompareTo(NoteEvent b)

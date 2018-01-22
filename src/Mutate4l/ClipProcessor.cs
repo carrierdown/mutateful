@@ -82,6 +82,9 @@ namespace Mutate4l
                 case TokenType.Arpeggiate:
                     resultContainer = Arpeggiate.Apply(OptionParser.ParseOptions<ArpeggiateOptions>(command.Options), clips);
                     break;
+                case TokenType.Monophonize:
+                    resultContainer = Monophonize.Apply(clips);
+                    break;
                 default:
                     // todo: error here
                     return new ProcessResult($"Unsupported command {command.Id}");

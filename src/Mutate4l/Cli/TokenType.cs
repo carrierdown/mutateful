@@ -10,6 +10,7 @@
         Arpeggiate,
         Sustain,
         Filter,
+        Monophonize,
         _CommandsEnd,
 
         _OptionsBegin,
