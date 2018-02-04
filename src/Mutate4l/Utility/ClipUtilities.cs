@@ -130,12 +130,10 @@ namespace Mutate4l.Utility
 
             for (int i = 0; i < haystack.Count; i++)
             {
-                if (nearestDelta == null)
-                {
-                    nearestDelta = Math.Abs(needle.Pitch - haystack[i].Pitch);
-                }
-                int currentDelta = Math.Abs(needle.Pitch - haystack[i].Pitch);
-                if (currentDelta < nearestDelta)
+                int needlePitch = needle.Pitch % 12;
+                int haystackPitch = haystack[i].Pitch % 12;
+                int currentDelta = Math.Min(Math.Abs(needlePitch - haystackPitch), Math.Abs(needlePitch - 12 - haystackPitch));
+                if (nearestDelta == null || currentDelta < nearestDelta)
                 {
                     nearestDelta = currentDelta;
                     nearestIndex = i;

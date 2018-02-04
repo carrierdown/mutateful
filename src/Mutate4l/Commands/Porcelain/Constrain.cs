@@ -1,6 +1,7 @@
 ﻿using Mutate4l.Dto;
 using Mutate4l.Options;
 using Mutate4l.Utility;
+using System;
 using System.Linq;
 
 namespace Mutate4l.Commands.Porcelain
@@ -28,14 +29,15 @@ namespace Mutate4l.Commands.Porcelain
                     var constrainedNote = new NoteEvent(note);
                     if (options.Pitch)
                     {
-                        constrainedNote.Pitch = ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes);
+                        var absPitch = ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes) % 12;
+                        constrainedNote.Pitch = (((constrainedNote.Pitch / 12)) * 12) + (absPitch == 0 ? 12 : 0) + absPitch;
                     }
                     if (options.Start)
                     {
                         var newStart = ClipUtilities.FindNearestNoteStartInSet(note, masterClip.Notes);
                         constrainedNote.Start += (newStart - constrainedNote.Start) * (options.Strength / 100);
                     }
-                    slaveClip.Notes.Add(constrainedNote);
+                    processedClips[i].Notes.Add(constrainedNote);
                 }
             }
             return new ProcessResult(processedClips);
