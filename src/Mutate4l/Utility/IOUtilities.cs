@@ -29,7 +29,7 @@ namespace Mutate4l.Utility
             for (var i = 0; i < clip.Notes.Count; i++)
             {
                 var note = clip.Notes[i];
-                data = string.Join(' ', data, note.Pitch, note.Start.ToString("F4"), note.Duration.ToString("F4"), note.Velocity);
+                data = string.Join(' ', data, note.Pitch, note.Start.ToString("F5"), note.Duration.ToString("F5"), note.Velocity);
             }
             return data;
         }

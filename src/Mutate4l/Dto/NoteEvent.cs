@@ -7,10 +7,13 @@ namespace Mutate4l.Dto
 {
     public class NoteEvent : IComparable<NoteEvent>, IEquatable<NoteEvent>
     {
-        public int Pitch { get; set; }
+        private int PitchField;
+        private int VelocityField;
+
+        public int Pitch { get { return Math.Clamp(PitchField, 0, 127); } set { PitchField = value; } }
         public decimal Start { get; set; }
         public decimal Duration { get; set; }
-        public int Velocity { get; set; }
+        public int Velocity { get { return Math.Clamp(VelocityField, 1, 127); } set { VelocityField = value; } }
         public decimal End => Start + Duration;
         public bool IsSelected { get; set; }
         public List<NoteEvent> Children { get; set; } // children have position, pitch and velocity relative to the parent noteEvent

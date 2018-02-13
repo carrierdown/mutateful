@@ -202,30 +202,5 @@ namespace Mutate4l.Utility
             clip.Notes = result;
             return clip;
         }
-
-        public static Dictionary<TokenType, List<Token>> GetValidOptions(Dictionary<TokenType, List<Token>> options, TokenType[] validOptions)
-        {
-            var cleanedOptions = new Dictionary<TokenType, List<Token>>();
-            foreach (var key in options.Keys)
-            {
-                if (validOptions.Contains(key))
-                {
-                    cleanedOptions.Add(key, options[key]);
-                }
-            }
-            return cleanedOptions;
-        }
-
-        public static decimal MusicalDivisionToDecimal(string value)
-        {
-            if (value.IndexOf('/') >= 0)
-            {
-                return (4m / int.Parse(value.Substring(value.IndexOf('/') + 1))) * (int.Parse(value.Substring(0, value.IndexOf('/'))));
-            }
-            else
-            {
-                return int.Parse(value) * 4m;
-            }
-        }
     }
 }

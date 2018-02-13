@@ -27,7 +27,8 @@ namespace Mutate4l.Cli
             { "explode", Explode },
             { "slice", Slice },
             { "arpeggiate", Arpeggiate },
-            { "monophonize", Monophonize }
+            { "monophonize", Monophonize },
+            { "ratchet", Ratchet }
         };
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
@@ -41,7 +42,14 @@ namespace Mutate4l.Cli
             { "-strength", Strength },
             { "-lengths", Lengths },
             { "-rescale", Rescale },
-            { "-removeoffset", RemoveOffset }
+            { "-removeoffset", RemoveOffset },
+            { "-min", Min },
+            { "-max", Max },
+            { "-shape", Shape },
+            { "-autoscale", AutoScale },
+            { "-controlmin", ControlMin },
+            { "-controlmax", ControlMax },
+            { "-velocitytostrength", VelocityToStrength }
         };
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>

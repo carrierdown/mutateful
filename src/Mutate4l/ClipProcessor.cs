@@ -85,6 +85,9 @@ namespace Mutate4l
                 case TokenType.Monophonize:
                     resultContainer = Monophonize.Apply(clips);
                     break;
+                case TokenType.Ratchet:
+                    resultContainer = Ratchet.Apply(OptionParser.ParseOptions<RatchetOptions>(command.Options), clips);
+                    break;
                 default:
                     // todo: error here
                     return new ProcessResult($"Unsupported command {command.Id}");

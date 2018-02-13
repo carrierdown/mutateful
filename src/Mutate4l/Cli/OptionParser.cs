@@ -76,7 +76,7 @@ namespace Mutate4l.Dto
                             // handle single value
                             if (type == TokenType.MusicalDivision && property.PropertyType == typeof(decimal))
                             {
-                                property.SetMethod?.Invoke(result, new object[] { ClipUtilities.MusicalDivisionToDecimal(tokens[0].Value) });
+                                property.SetMethod?.Invoke(result, new object[] { Utilities.MusicalDivisionToDecimal(tokens[0].Value) });
                             }
                             else if (type == TokenType.Number && property.PropertyType == typeof(Int32))
                             {
@@ -108,7 +108,7 @@ namespace Mutate4l.Dto
                             }
                             else if (type == TokenType.MusicalDivision && property.PropertyType == typeof(decimal[]))
                             {
-                                decimal[] values = tokens.Select(t => ClipUtilities.MusicalDivisionToDecimal(t.Value)).ToArray();
+                                decimal[] values = tokens.Select(t => Utilities.MusicalDivisionToDecimal(t.Value)).ToArray();
                                 property.SetMethod?.Invoke(result, new object[] { values });
                             }
                             else if (type == TokenType.Number && property.PropertyType == typeof(int[]))
@@ -140,7 +140,7 @@ namespace Mutate4l.Dto
 
             foreach (var optionGroup in optionsDefinition.OptionGroups)
             {
-                var specifiedOptions = ClipUtilities.GetValidOptions(options, optionGroup.Options);
+                var specifiedOptions = Utilities.GetValidOptions(options, optionGroup.Options);
                 bool noneOrAllSpecified = specifiedOptions.Keys.Count == 0 || specifiedOptions.Keys.Count == optionGroup.Options.Length;
                 foreach (var option in optionGroup.Options)
                 {

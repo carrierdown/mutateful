@@ -11,6 +11,7 @@
         Sustain,
         Filter,
         Monophonize,
+        Ratchet,
         _CommandsEnd,
 
         _OptionsBegin,
@@ -24,6 +25,13 @@
         Lengths,
         Rescale,
         RemoveOffset,
+        Min,
+        Max,
+        Shape,
+        AutoScale,
+        ControlMin,
+        ControlMax,
+        VelocityToStrength,
         _OptionsEnd,
 
         _EnumValuesBegin,
