@@ -49,19 +49,20 @@ namespace Mutate4l.Commands.Porcelain
             int i = 0;
             foreach (var targetSequence in targetSequences)
             {
-                resultSequences[i++] = DoRatchet(controlSequence, targetSequence, options.Strength / 100f, options.VelocityToStrength);
+                resultSequences[i++] = DoRatchet(controlSequence, targetSequence, options.Strength / 100f, options.VelocityToStrength, options.Shape);
             }
 
             return new ProcessResult(resultSequences);
         }
 
-        private static Clip DoRatchet(Clip controlSequence, Clip targetSequence, float scaleFactor, bool scaleWithVelocity)
+        private static Clip DoRatchet(Clip controlSequence, Clip targetSequence, float scaleFactor, bool scaleWithVelocity, Shape shape)
         {
             Clip result = new Clip(targetSequence.Length, targetSequence.IsLooping);
 
             Vector2 p1 = new Vector2(0, 0);
-            Vector2 p2 = new Vector2(.5f, 0); //new Vector2(.47f, .09f); // controls start of curve
-            Vector2 p3 = new Vector2(1, 1); // controls end of curve
+            // just a quick fix for now...
+            Vector2 p2 = shape == Shape.EaseIn ? new Vector2(.5f, 0) : new Vector2(0, 0); //new Vector2(.47f, .09f); // controls start of curve
+            Vector2 p3 = shape == Shape.EaseIn ? new Vector2(1, 1) : new Vector2(1, 1); // controls end of curve
             Vector2 p4 = new Vector2(1, 1);
 
             // scaling

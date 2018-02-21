@@ -2,6 +2,13 @@
 
 namespace Mutate4l.Options
 {
+    public enum Shape
+    {
+        Linear,
+        EaseInOut,
+        EaseIn
+    }
+
     public class RatchetOptions
     {
         [OptionInfo(min: 1, max: 20)]
@@ -15,7 +22,7 @@ namespace Mutate4l.Options
 
         public bool VelocityToStrength { get; set; }
 
-        public decimal[] Shape { get; set; } = new decimal[] { .5m, .5m };
+        public Shape Shape { get; set; } = Shape.Linear;
 
         // Automatically scale control sequence so that lowest note corresponds to minimum ratchet value and highest note corresponds to maximum ratchet value
         public bool AutoScale { get; set; }

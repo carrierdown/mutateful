@@ -55,7 +55,10 @@ namespace Mutate4l.Cli
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>
         {
             { "time", Time },
-            { "event", Event }
+            { "event", Event },
+            { "linear", Linear },
+            { "easeinout", EaseInOut },
+            { "easein", EaseIn }
         };
 
         public Lexer(string buffer)

@@ -37,6 +37,9 @@
         _EnumValuesBegin,
         Event,
         Time,
+        Linear,
+        EaseInOut,
+        EaseIn,
         _EnumValuesEnd,
 
         _ValuesBegin,
