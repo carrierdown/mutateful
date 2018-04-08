@@ -1,7 +1,5 @@
 ﻿using Mutate4l.Cli;
 using Mutate4l.Commands;
-using Mutate4l.Commands.Plumbing;
-using Mutate4l.Commands.Porcelain;
 using Mutate4l.Dto;
 using Mutate4l.IO;
 using Mutate4l.Options;
@@ -87,6 +85,9 @@ namespace Mutate4l
                     break;
                 case TokenType.Ratchet:
                     resultContainer = Ratchet.Apply(OptionParser.ParseOptions<RatchetOptions>(command.Options), clips);
+                    break;
+                case TokenType.Scan:
+                    resultContainer = Scan.Apply(OptionParser.ParseOptions<ScanOptions>(command.Options), clips);
                     break;
                 default:
                     // todo: error here

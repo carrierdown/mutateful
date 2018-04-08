@@ -1,18 +1,20 @@
 ﻿using Mutate4l.Dto;
 using Mutate4l.Options;
 using Mutate4l.Utility;
+using System;
 using System.Collections.Generic;
+using System.Text;
 
-namespace Mutate4l.Commands.Plumbing
+namespace Mutate4l.Commands
 {
-    public class Slice
+    public class Monophonize
     {
-        public static ProcessResult Apply(SliceOptions options, params Clip[] clips)
+        public static ProcessResult Apply(params Clip[] clips)
         {
             var processedClips = new List<Clip>();
             foreach (var clip in clips)
             {
-                processedClips.Add(ClipUtilities.SplitNotesAtEvery(clip, options.Lengths));
+                processedClips.Add(ClipUtilities.Monophonize(clip));
             }
             return new ProcessResult(processedClips.ToArray());
         }

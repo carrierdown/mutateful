@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.Numerics;
 
-namespace Mutate4l.Commands.Porcelain
+namespace Mutate4l.Commands
 {
     public class Ratchet
     {
@@ -14,7 +14,7 @@ namespace Mutate4l.Commands.Porcelain
 
         // Needs control sequence and target sequence(s)
         // If only one clip is specified, clip will be both control and target sequence(s)
-        // Enhancement: When shaping the ratchet, velocity might be another variable used by the control sequence to control extent of shaping
+        // Redo this to use velocity instead to control the ratcheting. Will be easier to control and also make sense for non-monophonic clips.
         public static ProcessResult Apply(RatchetOptions options, params Clip[] clips)
         {
             if (clips.Length < 2)

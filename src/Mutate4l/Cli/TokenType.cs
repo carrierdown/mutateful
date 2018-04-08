@@ -12,6 +12,7 @@
         Filter,
         Monophonize,
         Ratchet,
+        Scan,
         _CommandsEnd,
 
         _OptionsBegin,
@@ -32,6 +33,8 @@
         ControlMin,
         ControlMax,
         VelocityToStrength,
+        Count,
+        Window,
         _OptionsEnd,
 
         _EnumValuesBegin,

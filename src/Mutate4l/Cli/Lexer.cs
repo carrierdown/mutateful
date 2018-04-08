@@ -28,7 +28,8 @@ namespace Mutate4l.Cli
             { "slice", Slice },
             { "arpeggiate", Arpeggiate },
             { "monophonize", Monophonize },
-            { "ratchet", Ratchet }
+            { "ratchet", Ratchet },
+            { "scan", Scan }
         };
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
@@ -49,7 +50,9 @@ namespace Mutate4l.Cli
             { "-autoscale", AutoScale },
             { "-controlmin", ControlMin },
             { "-controlmax", ControlMax },
-            { "-velocitytostrength", VelocityToStrength }
+            { "-velocitytostrength", VelocityToStrength },
+            { "-window", Window },
+            { "-count", Count }
         };
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>

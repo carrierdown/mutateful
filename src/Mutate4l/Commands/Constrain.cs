@@ -3,7 +3,7 @@ using Mutate4l.Options;
 using Mutate4l.Utility;
 using System.Linq;
 
-namespace Mutate4l.Commands.Porcelain
+namespace Mutate4l.Commands
 {
 
     // constrain: first clip timing and/or pitch is replicated on all following clips. Position is optionally scaled with the Strength parameter.

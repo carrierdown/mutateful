@@ -1,10 +1,11 @@
 ﻿using Mutate4l.Dto;
 using Mutate4l.Options;
 using Mutate4l.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Mutate4l.Commands.Porcelain
+namespace Mutate4l.Commands
 {
     public class Arpeggiate
     {
@@ -38,9 +39,27 @@ namespace Mutate4l.Commands.Porcelain
                 for (var i = 0; i < triggerClip.Notes.Count; i++)
                 {
                     var note = triggerClip.Notes[i];
-                    var notes = ClipUtilities.GetSplitNotesInRangeAtPosition(0, note.Duration, arpSequence.Notes, note.Start);
-                    notes.ForEach(n => n.Pitch += triggerClip.RelativePitch(i));
-                    clip.Notes.AddRange(notes);
+                    //var notes = ClipUtilities.GetSplitNotesInRangeAtPosition(0, note.Duration, arpSequence.Notes, note.Start);
+                    var count = Math.Min(arpSequence.Notes.Count, options.Rescale);
+                    var duration = arpSequence.Notes[count - 1].Start + arpSequence.Notes[count - 1].Duration;
+                    var arpedNotes = new List<NoteEvent>(count);
+                    for (var srcI = 0; srcI < count; srcI++)
+                    {
+                        var arpNote = arpSequence.Notes[srcI];
+                        var arpedNote = new NoteEvent(arpNote);
+                        arpedNote.Start = note.Start + ((arpedNote.Start / duration) * note.Duration);
+                        arpedNote.Duration = (arpedNote.Duration / duration) * note.Duration;
+                        arpedNote.Pitch = note.Pitch + arpSequence.RelativePitch(srcI);
+                        arpedNotes.Add(arpedNote);
+                    }
+/*                    var arpNotes = arpSequence.Notes.Take(options.Rescale);
+                    var arpi = 0;
+                    foreach (var currentArpNote in arpNotes) // todo: test with chords as arpseq
+                    {
+                        currentArpNote.Pitch = note.Pitch + arpSequence.RelativePitch(arpi);
+                        arpi++;
+                    }*/
+                    clip.Notes.AddRange(arpedNotes);
                 }
                 processedClips.Add(clip);
             }

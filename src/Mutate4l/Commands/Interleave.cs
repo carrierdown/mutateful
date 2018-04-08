@@ -5,7 +5,7 @@ using Mutate4l.Utility;
 using System.Linq;
 using static Mutate4l.Options.InterleaveMode;
 
-namespace Mutate4l.Commands.Porcelain
+namespace Mutate4l.Commands
 {
     public class Interleave
     {
@@ -50,6 +50,7 @@ namespace Mutate4l.Commands.Porcelain
                             {
                                 noteCounters[clipIndex].Inc();
                             }
+                            repeatsIndex++;
                         }
                     }
                     resultClip.Length = position;
