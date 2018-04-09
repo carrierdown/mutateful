@@ -27,6 +27,11 @@ namespace Mutate4l.Core
             AddRange(items);
         }
 
+        public SortedList(IEnumerable<T> items) : this(comparer: null)
+        {
+            AddRange(items);
+        }
+
         public void Add(T item)
         {
             if (_list.Contains(item)) return;
@@ -37,6 +42,14 @@ namespace Mutate4l.Core
         public void AddRange(List<T> items)
         {
             items.ForEach(x => Add(x));
+        }
+
+        public void AddRange(IEnumerable<T> items)
+        {
+            foreach (var item in items)
+            {
+                Add(item);
+            }
         }
 
         public int IndexOf(T item)

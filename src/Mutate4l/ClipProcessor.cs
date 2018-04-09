@@ -89,6 +89,9 @@ namespace Mutate4l
                 case TokenType.Scan:
                     resultContainer = Scan.Apply(OptionParser.ParseOptions<ScanOptions>(command.Options), clips);
                     break;
+                case TokenType.Filter:
+                    resultContainer = Filter.Apply(OptionParser.ParseOptions<FilterOptions>(command.Options), clips);
+                    break;
                 default:
                     // todo: error here
                     return new ProcessResult($"Unsupported command {command.Id}");

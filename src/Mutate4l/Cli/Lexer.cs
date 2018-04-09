@@ -29,7 +29,8 @@ namespace Mutate4l.Cli
             { "arpeggiate", Arpeggiate },
             { "monophonize", Monophonize },
             { "ratchet", Ratchet },
-            { "scan", Scan }
+            { "scan", Scan },
+            { "filter", Filter }
         };
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
@@ -52,7 +53,8 @@ namespace Mutate4l.Cli
             { "-controlmax", ControlMax },
             { "-velocitytostrength", VelocityToStrength },
             { "-window", Window },
-            { "-count", Count }
+            { "-count", Count },
+            { "-duration", Duration }
         };
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>

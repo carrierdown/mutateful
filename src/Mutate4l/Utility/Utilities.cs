@@ -1,10 +1,11 @@
 ﻿using Mutate4l.Cli;
+using Mutate4l.Core;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Mutate4l.Utility
 {
-    public class Utilities
+    public static class Utilities
     {
         public static Dictionary<TokenType, List<Token>> GetValidOptions(Dictionary<TokenType, List<Token>> options, TokenType[] validOptions)
         {
@@ -36,6 +37,11 @@ namespace Mutate4l.Utility
             T _a = a;
             a = b;
             b = _a;
+        }
+
+        public static SortedList<T> ToSortedList<T>(this IEnumerable<T> list)
+        {
+            return new SortedList<T>(list);
         }
     }
 }

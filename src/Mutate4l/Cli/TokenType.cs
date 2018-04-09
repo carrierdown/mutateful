@@ -35,6 +35,7 @@
         VelocityToStrength,
         Count,
         Window,
+        Duration,
         _OptionsEnd,
 
         _EnumValuesBegin,
