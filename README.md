@@ -19,6 +19,8 @@ strength | Number | 1-100 | 100 | Specifies the strength of the quantization fro
 
 Ratchet applies ratcheting to a clip using either itself or another clip as a control clip. Various options can be specified to determine how the control clip is used.
 
+Note: Will be rewritten slightly so that velocity is used instead of pitch to control ratcheting. This makes a lot more sense for polyphonic clips and should be easier to reason about in general (typical workflow would be to simply duplicate the clip you want to apply ratcheting to, then adjust the velocities accordingly).
+
 Option | Type | Range | Default | Description
 --- | --- | --- | --- | ---
 min | Number | 1-20 | 1 | Minimum ratchet value
@@ -41,3 +43,23 @@ repeats | Array of numbers | | 1 | Optionally specify how many times an event or
 ranges | Array of numbers | | 1 | Only applicable for time mode. Specify the size of each range, specified in the same manner as the repeats option above.
 mask | Flag | | Off | If specified, the current input "masks" the corresponding location of other inputs.
 
+### Filter
+
+Filters the contents of a clip based on the duration of note events.
+
+Option | Type | Range | Default | Description
+--- | --- | --- | --- | ---
+duration | Decimal | | 1/64 | Specifies the cutoff point for filtering: Notes shorter than this will be filtered out.
+
+### Slice
+
+Slices the note events in a clip based on the lengths specified.
+
+### Scan
+
+"Scans" through a clip by moving a section of the specified size from the start to the end of the clip, keeping whatever falls within the window at each position and stitching this together to form a new clip.
+
+Option | Type | Range | Default | Description
+--- | --- | --- | --- | ---
+window | Decimal | | 1 | Specifies the size of the section which will be used to scan through the contents of the clip.
+count | Number | 1-500 | 8 | The number of times scanning will take place.
