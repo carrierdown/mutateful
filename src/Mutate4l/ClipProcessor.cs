@@ -9,9 +9,9 @@ using System.Linq;
 
 namespace Mutate4l
 {
-    public class ClipProcessor
+    public static class ClipProcessor
     {
-        public ProcessResult ProcessChainedCommand(ChainedCommand chainedCommand)
+        public static ProcessResultArray<Clip> ProcessChainedCommand(ChainedCommand chainedCommand)
         {
             List<Clip> sourceClips = new List<Clip>();
             List<Clip> targetClips = new List<Clip>();
@@ -22,7 +22,7 @@ namespace Mutate4l
                 var clip = UdpConnector.GetClip(clipReference.Item1, clipReference.Item2);
                 if (clip == null)
                 {
-                    return new ProcessResult("Source clip was empty");
+                    return new ProcessResultArray<Clip>("Source clip was empty");
                 }
                 sourceClips.Add(clip);
             }
@@ -34,7 +34,7 @@ namespace Mutate4l
             }
 
             Clip[] currentSourceClips = sourceClips.ToArray();
-            ProcessResult resultContainer = new ProcessResult("No commands specified");
+            ProcessResultArray<Clip> resultContainer = new ProcessResultArray<Clip>("No commands specified");
             foreach (var command in chainedCommand.Commands)
             {
                 resultContainer = ProcessCommand(command, currentSourceClips);
@@ -63,9 +63,9 @@ namespace Mutate4l
             return resultContainer;
         }
 
-        public ProcessResult ProcessCommand(Command command, Clip[] clips)
+        public static ProcessResultArray<Clip> ProcessCommand(Command command, Clip[] clips)
         {
-            ProcessResult resultContainer;
+            ProcessResultArray<Clip> resultContainer;
             switch (command.Id)
             {
                 case TokenType.Interleave:
@@ -94,7 +94,7 @@ namespace Mutate4l
                     break;
                 default:
                     // todo: error here
-                    return new ProcessResult($"Unsupported command {command.Id}");
+                    return new ProcessResultArray<Clip>($"Unsupported command {command.Id}");
             }
             return resultContainer;
         }

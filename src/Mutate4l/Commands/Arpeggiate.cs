@@ -9,7 +9,7 @@ namespace Mutate4l.Commands
 {
     public class Arpeggiate
     {
-        public static ProcessResult Apply(ArpeggiateOptions options, params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(ArpeggiateOptions options, params Clip[] clips)
         {
             if (clips.Length < 2)
             {
@@ -63,7 +63,7 @@ namespace Mutate4l.Commands
                 }
                 processedClips.Add(clip);
             }
-            return new ProcessResult(processedClips.ToArray());
+            return new ProcessResultArray<Clip>(processedClips.ToArray());
         }
     }
 }

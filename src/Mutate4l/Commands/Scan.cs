@@ -6,7 +6,7 @@ namespace Mutate4l.Commands
 {
     public class Scan
     {
-        public static ProcessResult Apply(ScanOptions options, params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(ScanOptions options, params Clip[] clips)
         {
             var processedClips = new Clip[clips.Length];
 
@@ -25,7 +25,7 @@ namespace Mutate4l.Commands
                 processedClips[c] = processedClip;
             }
 
-            return new ProcessResult(processedClips);
+            return new ProcessResultArray<Clip>(processedClips);
         }
     }
 }

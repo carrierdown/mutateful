@@ -15,7 +15,7 @@ namespace Mutate4l.Commands
         // Needs control sequence and target sequence(s)
         // If only one clip is specified, clip will be both control and target sequence(s)
         // Redo this to use velocity instead to control the ratcheting. Will be easier to control and also make sense for non-monophonic clips.
-        public static ProcessResult Apply(RatchetOptions options, params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(RatchetOptions options, params Clip[] clips)
         {
             if (clips.Length < 2)
             {
@@ -52,7 +52,7 @@ namespace Mutate4l.Commands
                 resultSequences[i++] = DoRatchet(controlSequence, targetSequence, options.Strength / 100f, options.VelocityToStrength, options.Shape);
             }
 
-            return new ProcessResult(resultSequences);
+            return new ProcessResultArray<Clip>(resultSequences);
         }
 
         private static Clip DoRatchet(Clip controlSequence, Clip targetSequence, float scaleFactor, bool scaleWithVelocity, Shape shape)

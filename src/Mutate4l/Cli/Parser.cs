@@ -24,11 +24,19 @@ namespace Mutate4l.Cli
             return new Tuple<int, int>(x, y);
         }
 
-        public static ChainedCommand ParseTokensToChainedCommand(IEnumerable<Token> tokens)
+        public static ProcessResult<ChainedCommand> ParseTokensToChainedCommand(IEnumerable<Token> tokens)
         {
             var sourceClips = tokens.TakeWhile(t => t.IsClipReference);
             var commandTokens = tokens.Skip(sourceClips.Count()).TakeWhile(t => t.IsCommand || t.IsOption || t.IsOptionValue).ToArray();
             var destClips = tokens.Skip(sourceClips.Count() + commandTokens.Count()).SkipWhile(t => t.Type == TokenType.Destination).TakeWhile(t => t.IsClipReference);
+
+            if (sourceClips.Count() == 0)
+                return new ProcessResult<ChainedCommand>("No source clips specified.");
+
+            if (destClips.Count() == 0 && sourceClips.Count() == 1)
+                destClips = sourceClips;
+            else if (destClips.Count() == 0)
+                return new ProcessResult<ChainedCommand>("No destination clip specified. When operating on a single clip, the destination clip may be omitted. Otherwise, it must be specified.");
 
             var commandTokensLists = new List<List<Token>>();
             var activeCommandTokenList = new List<Token>();
@@ -65,7 +73,7 @@ namespace Mutate4l.Cli
                 TargetClips = destClips.Select(c => ResolveClipReference(c.Value)).ToList(),
                 Commands = commands
             };
-            return chainedCommand;
+            return new ProcessResult<ChainedCommand>(chainedCommand);
         }
 
         public static Command ParseTokensToCommand(IEnumerable<Token> tokens)

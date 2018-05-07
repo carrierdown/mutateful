@@ -4,21 +4,21 @@ using System.Text;
 
 namespace Mutate4l.Dto
 {
-    public class ProcessResult
+    public class ProcessResult<T> where T:new()
     {
         public bool Success { get; }
-        public Clip[] Result { get; }
+        public T Result { get; }
         public string ErrorMessage { get; }
 
-        public ProcessResult(bool success, Clip[] result, string errorMessage)
+        public ProcessResult(bool success, T result, string errorMessage)
         {
             Success = success;
             Result = result;
             ErrorMessage = errorMessage;
         }
 
-        public ProcessResult(string errorMessage) : this(false, null, errorMessage) { }
+        public ProcessResult(string errorMessage) : this(false, new T(), $"Error: {errorMessage}") { }
 
-        public ProcessResult(Clip[] result) : this(true, result, "") { }
+        public ProcessResult(T result) : this(true, result, "") { }
     }
 }

@@ -9,7 +9,7 @@ namespace Mutate4l.Commands
 {
     public class Interleave
     {
-        public static ProcessResult Apply(InterleaveOptions options, params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(InterleaveOptions options, params Clip[] clips)
         {
             if (clips.Length < 2)
             {
@@ -95,7 +95,7 @@ namespace Mutate4l.Commands
                     resultClip.Length = position;
                     break;
             }
-            return new ProcessResult(new Clip[] { resultClip });
+            return new ProcessResultArray<Clip>(new Clip[] { resultClip });
         }
     }
 }

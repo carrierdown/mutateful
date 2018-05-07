@@ -9,7 +9,7 @@ namespace Mutate4l.Commands
     // constrain: first clip timing and/or pitch is replicated on all following clips. Position is optionally scaled with the Strength parameter.
     public class Constrain
     {
-        public static ProcessResult Apply(ConstrainOptions options, params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(ConstrainOptions options, params Clip[] clips)
         {
             if (clips.Length < 2)
             {
@@ -39,7 +39,7 @@ namespace Mutate4l.Commands
                     processedClips[i].Notes.Add(constrainedNote);
                 }
             }
-            return new ProcessResult(processedClips);
+            return new ProcessResultArray<Clip>(processedClips);
         }
     }
 }

@@ -9,14 +9,14 @@ namespace Mutate4l.Commands
 {
     public class Monophonize
     {
-        public static ProcessResult Apply(params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(params Clip[] clips)
         {
             var processedClips = new List<Clip>();
             foreach (var clip in clips)
             {
                 processedClips.Add(ClipUtilities.Monophonize(clip));
             }
-            return new ProcessResult(processedClips.ToArray());
+            return new ProcessResultArray<Clip>(processedClips.ToArray());
         }
     }
 }

@@ -7,14 +7,14 @@ namespace Mutate4l.Commands
 {
     public class Slice
     {
-        public static ProcessResult Apply(SliceOptions options, params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(SliceOptions options, params Clip[] clips)
         {
             var processedClips = new List<Clip>();
             foreach (var clip in clips)
             {
                 processedClips.Add(ClipUtilities.SplitNotesAtEvery(clip, options.Lengths));
             }
-            return new ProcessResult(processedClips.ToArray());
+            return new ProcessResultArray<Clip>(processedClips.ToArray());
         }
     }
 }

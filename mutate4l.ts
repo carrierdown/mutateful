@@ -87,3 +87,24 @@ function createSceneAndSetClip(trackNo: number, clipNo: number, data: string): v
     liveObject.call('create_scene', index);
     setClip(trackNo, clipNo, data);
 }
+
+function enum() {
+    var liveObject = new LiveAPI("live_set");
+    var numScenes = liveObject.get('scenes').length / 2
+    var numTracks = liveObject.get("tracks").length / 2;
+    //var trackIxs = [];
+    for (var i = 0; i < numTracks; i++) {
+        liveObject.goto("live_set tracks " + i);
+        if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0) {
+            for (var s = 0; s < numScenes; s++) {
+                liveObject.goto("live_set tracks " + i + " clip_slots " + s);
+                if (liveObject.get('has_clip') > 0) {
+                    liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
+                    var existingName = liveObject.get("name");
+                    liveObject.set("name", String.fromCharCode(65 + i) + (s + 1) + existingName);
+                }
+            }
+            //trackIxs[trackIxs.length] = i;
+        }
+    }
+}

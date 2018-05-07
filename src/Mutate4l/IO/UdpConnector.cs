@@ -61,5 +61,15 @@ namespace Mutate4l.IO
             string data = Encoding.ASCII.GetString(result);
             return data.Contains("/mu4l/out/hello");
         }
+
+        public static void EnumerateClips()
+        {
+            byte[] message = OscHandler.CreateOscMessage("/mu4l/enum", 0, 0);
+
+            using (var udpClient = new UdpClient(ReceivePort))
+            {
+                udpClient.Send(message, message.Length, "localhost", SendPort);
+            }
+        }
     }
 }

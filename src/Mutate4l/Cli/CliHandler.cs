@@ -9,14 +9,13 @@ namespace Mutate4l.Cli
     {
         public static void Start()
         {
-            var command = "";
-            var clipProcessor = new ClipProcessor();
+            string command = "";
 
             while (command != "q" && command != "quit")
             {
                 Console.WriteLine("Mutate4L: Enter command, or [l]ist commands | [h]elp | [q]uit");
                 Console.Write("> ");
-                command = Console.ReadLine();
+                command = Console.ReadLine().Trim();
                 switch (command)
                 {
                     case "help":
@@ -37,94 +36,108 @@ namespace Mutate4l.Cli
                         }
                         break;
                     default:
-
                         if (command.StartsWith("dump"))
                         {
-                            var arguments = command.Split(' ').Skip(1);
-                            foreach (var arg in arguments)
-                            {
-                                var clipReference = Parser.ResolveClipReference(arg);
-                                var clip = UdpConnector.GetClip(clipReference.Item1, clipReference.Item2);
-                                Console.WriteLine($"Clip length {clip.Length}");
-                                Console.WriteLine(Utility.IOUtilities.ClipToString(clip));
-/*                                foreach (var note in clip.Notes)
-                                {
-                                    Console.WriteLine($"Note start: {note.Start} duration: {note.Duration} pitch: {note.Pitch} velocity: {note.Velocity}");
-                                }*/
-                            }
+                            DoDump(command);
                         }
                         else if (command.StartsWith("svg"))
                         {
-                            var arguments = command.Split(' ').Skip(1);
-                            var options = arguments.Where(x => x.StartsWith("-"));
-                            var clipReferences = arguments.Except(options);
-                            int octaves = 2;
-                            int startNote = 60; // C3
-                            foreach (var option in options)
-                            {
-                                if (option.StartsWith("-octaves:"))
-                                {
-                                    octaves = int.Parse(option.Substring(option.IndexOf(':') + 1));
-                                }
-                                if (option.StartsWith("-startnote:"))
-                                {
-                                    startNote = int.Parse(option.Substring(option.IndexOf(':') + 1));
-                                }
-                                //Console.WriteLine($"option: {option}");
-                            }
-                            Console.WriteLine($"start: {startNote}");
-                            Console.WriteLine($"octaves: {octaves}");
-                            foreach (var clipReference in clipReferences)
-                            {
-                                var clipRefParsed = Parser.ResolveClipReference(clipReference);
-                                var clip = UdpConnector.GetClip(clipRefParsed.Item1, clipRefParsed.Item2);
-                                Console.WriteLine(Utility.IOUtilities.ClipToString(clip));
-                                var output = "<svg version=\"1.1\" baseProfile=\"full\" width=\"400\" height=\"300\" xmlns=\"http://www.w3.org/2000/svg\">";
-                                var yDelta = 300 / (octaves * 12);
-                                // piano + horizontal guides
-                                for (int i = 0; i <= octaves * 12; i++)
-                                {
-                                    bool white = i % 12 == 0 || i % 12 == 2 || i % 12 == 4 || i % 12 == 5 || i % 12 == 7 || i % 12 == 9 || i % 12 == 11;
-                                    output += $"<rect style=\"fill:#{(white ? "ffffff" : "000000")};fill-opacity:1;stroke:#8e8e8e;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1\" x=\"0\" y=\"{300 - yDelta - (i * yDelta)}\" width=\"30\" height=\"{yDelta}\" />";
-                                    output += $"<line x1=\"30\" x2=\"400\" y1=\"{300 - yDelta - (i * yDelta)}\" y2=\"{300 - yDelta - (i * yDelta)}\" stroke-width=\"1\" stroke=\"#bbbbbb\" />";
-                                }
-                                // vertical guides
-                                var xDelta = 370 / clip.Length;
-                                for (decimal i = 0; i < clip.Length; i += 4m / 8) // 8ths for now
-                                {
-                                    output += $"<line x1=\"{30 + (i * xDelta)}\" x2=\"{30 + (i * xDelta)}\" y1=\"0\" y2=\"300\" stroke-width=\"1\" stroke=\"#dddddd\" />";
-                                }
-                                foreach (var note in clip.Notes)
-                                {
-                                    if (note.Pitch >= startNote && note.Pitch <= startNote + (octaves * 12))
-                                    {
-                                        output += $"<rect style=\"fill:#ebebbc;fill-opacity:1;stroke:#8e8e8e;stroke-width:0.52916664;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1\" x=\"{30 + (note.Start * xDelta)}\" y=\"{(startNote + (octaves * 12) - note.Pitch) * yDelta}\" width=\"{note.Duration * xDelta}\" height=\"{yDelta}\" />";
-                                    }
-                                }
-                                output += "</svg>";
-                                Console.WriteLine(output);
-                            }
+                            DoSvg(command);
+                        }
+                        else if (command.StartsWith("enum"))
+                        {
+                            // enumerates all midi clips by prepending their "coordinates", i.e. A1, B5, and so on.
+                            UdpConnector.EnumerateClips();
                         }
                         else
                         {
-                            var lexer = new Lexer(command);
-
-                            if (lexer.IsValidCommand())
-                            {
-                                ChainedCommand structuredCommand = Parser.ParseTokensToChainedCommand(lexer.GetTokens());
-                                var result = clipProcessor.ProcessChainedCommand(structuredCommand);
-                                if (result?.Success == false)
-                                {
-                                    Console.WriteLine(result.ErrorMessage);
-                                }
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Unknown command: {command}");
-                            }
+                            var result = ParseAndProcessCommand(command);
+                            if (!result.Success)
+                                Console.WriteLine(result.ErrorMessage);
                         }
                         break;
                 }
+            }
+        }
+
+        public static Result ParseAndProcessCommand(string command)
+        {
+            var lexer = new Lexer(command);
+            var structuredCommand = Parser.ParseTokensToChainedCommand(lexer.GetTokens());
+            if (!structuredCommand.Success)
+                return new Result(structuredCommand.ErrorMessage);
+
+            var result = ClipProcessor.ProcessChainedCommand(structuredCommand.Result);
+
+            return new Result(result.Success, result.ErrorMessage);
+        }
+
+        public static void DoDump(string command)
+        {
+            var arguments = command.Split(' ').Skip(1);
+            foreach (var arg in arguments)
+            {
+                var clipReference = Parser.ResolveClipReference(arg);
+                var clip = UdpConnector.GetClip(clipReference.Item1, clipReference.Item2);
+                Console.WriteLine($"Clip length {clip.Length}");
+                Console.WriteLine(Utility.IOUtilities.ClipToString(clip));
+                /*                                foreach (var note in clip.Notes)
+                                                {
+                                                    Console.WriteLine($"Note start: {note.Start} duration: {note.Duration} pitch: {note.Pitch} velocity: {note.Velocity}");
+                                                }*/
+            }
+        }
+
+        public static void DoSvg(string command)
+        {
+            var arguments = command.Split(' ').Skip(1);
+            var options = arguments.Where(x => x.StartsWith("-"));
+            var clipReferences = arguments.Except(options);
+            int octaves = 2;
+            int startNote = 60; // C3
+            foreach (var option in options)
+            {
+                if (option.StartsWith("-octaves:"))
+                {
+                    octaves = int.Parse(option.Substring(option.IndexOf(':') + 1));
+                }
+                if (option.StartsWith("-startnote:"))
+                {
+                    startNote = int.Parse(option.Substring(option.IndexOf(':') + 1));
+                }
+                //Console.WriteLine($"option: {option}");
+            }
+            Console.WriteLine($"start: {startNote}");
+            Console.WriteLine($"octaves: {octaves}");
+            foreach (var clipReference in clipReferences)
+            {
+                var clipRefParsed = Parser.ResolveClipReference(clipReference);
+                var clip = UdpConnector.GetClip(clipRefParsed.Item1, clipRefParsed.Item2);
+                Console.WriteLine(Utility.IOUtilities.ClipToString(clip));
+                var output = "<svg version=\"1.1\" baseProfile=\"full\" width=\"400\" height=\"300\" xmlns=\"http://www.w3.org/2000/svg\">";
+                var yDelta = 300 / (octaves * 12);
+                // piano + horizontal guides
+                for (int i = 0; i <= octaves * 12; i++)
+                {
+                    bool white = i % 12 == 0 || i % 12 == 2 || i % 12 == 4 || i % 12 == 5 || i % 12 == 7 || i % 12 == 9 || i % 12 == 11;
+                    output += $"<rect style=\"fill:#{(white ? "ffffff" : "000000")};fill-opacity:1;stroke:#8e8e8e;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1\" x=\"0\" y=\"{300 - yDelta - (i * yDelta)}\" width=\"30\" height=\"{yDelta}\" />";
+                    output += $"<line x1=\"30\" x2=\"400\" y1=\"{300 - yDelta - (i * yDelta)}\" y2=\"{300 - yDelta - (i * yDelta)}\" stroke-width=\"1\" stroke=\"#bbbbbb\" />";
+                }
+                // vertical guides
+                var xDelta = 370 / clip.Length;
+                for (decimal i = 0; i < clip.Length; i += 4m / 8) // 8ths for now
+                {
+                    output += $"<line x1=\"{30 + (i * xDelta)}\" x2=\"{30 + (i * xDelta)}\" y1=\"0\" y2=\"300\" stroke-width=\"1\" stroke=\"#dddddd\" />";
+                }
+                foreach (var note in clip.Notes)
+                {
+                    if (note.Pitch >= startNote && note.Pitch <= startNote + (octaves * 12))
+                    {
+                        output += $"<rect style=\"fill:#ebebbc;fill-opacity:1;stroke:#8e8e8e;stroke-width:0.52916664;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1\" x=\"{30 + (note.Start * xDelta)}\" y=\"{(startNote + (octaves * 12) - note.Pitch) * yDelta}\" width=\"{note.Duration * xDelta}\" height=\"{yDelta}\" />";
+                    }
+                }
+                output += "</svg>";
+                Console.WriteLine(output);
             }
         }
     }

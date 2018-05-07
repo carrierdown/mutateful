@@ -7,7 +7,7 @@ namespace Mutate4l.Commands
 {
     public class Filter
     {
-        public static ProcessResult Apply(FilterOptions options, params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(FilterOptions options, params Clip[] clips)
         {
             var processedClips = new Clip[clips.Length];
 
@@ -21,7 +21,7 @@ namespace Mutate4l.Commands
                 processedClips[c] = processedClip;
             }
 
-            return new ProcessResult(processedClips);
+            return new ProcessResultArray<Clip>(processedClips);
         }
     }
 }
