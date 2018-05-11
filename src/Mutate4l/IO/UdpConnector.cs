@@ -13,7 +13,17 @@ namespace Mutate4l.IO
 
         public static Clip GetClip(int channel, int clip)
         {
-            byte[] message = OscHandler.CreateOscMessage("/mu4l/clip/get", channel, clip);
+            return GetClipData("/mu4l/clip/get", channel, clip);
+        }
+
+        public static Clip GetSelectedClip()
+        {
+            return GetClipData("/mu4l/selectedclip/get", 0, 0);
+        }
+
+        public static Clip GetClipData(string address, int channel, int clip)
+        {
+            byte[] message = OscHandler.CreateOscMessage(address, channel, clip);
             byte[] result;
             var endPoint = new IPEndPoint(IPAddress.Any, ReceivePort);
 
@@ -40,6 +50,17 @@ namespace Mutate4l.IO
         {
             string data = IOUtilities.ClipToString(clip);
             byte[] message = OscHandler.CreateOscMessage("/mu4l/clip/set", trackNo, clipNo, data);
+
+            using (var udpClient = new UdpClient(ReceivePort))
+            {
+                udpClient.Send(message, message.Length, "localhost", SendPort);
+            }
+        }
+
+        public static void SetSelectedClip(Clip clip)
+        {
+            string data = IOUtilities.ClipToString(clip);
+            byte[] message = OscHandler.CreateOscMessage("/mu4l/selectedclip/set", 0, 0, data);
 
             using (var udpClient = new UdpClient(ReceivePort))
             {

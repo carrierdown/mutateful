@@ -88,7 +88,7 @@ namespace Mutate4l.Cli
 
         private bool IsClipReference(int pos)
         {
-            return (Buffer.Length > pos + 1) && IsAlpha(pos) && IsNumeric(pos + 1);
+            return (Buffer.Length > pos + 1 && IsAlpha(pos) && IsNumeric(pos + 1)) || Buffer[pos] == '*';
         }
 
         private bool IsMusicalDivision(int pos)
@@ -155,7 +155,10 @@ namespace Mutate4l.Cli
                 }
                 else if (IsClipReference(position))
                 {
-                    token = new Token(ClipReference, GetRemainingNumericToken(position, 2), position);
+                    if (Buffer[position] == '*')
+                        token = new Token(ClipReference, "*", position);
+                    else
+                        token = new Token(ClipReference, GetRemainingNumericToken(position, 2), position);
                 }
                 else if (IsMusicalDivision(position))
                 {

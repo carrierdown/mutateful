@@ -88,7 +88,7 @@ function createSceneAndSetClip(trackNo: number, clipNo: number, data: string): v
     setClip(trackNo, clipNo, data);
 }
 
-function enum() {
+function enumerate(): void {
     var liveObject = new LiveAPI("live_set");
     var numScenes = liveObject.get('scenes').length / 2
     var numTracks = liveObject.get("tracks").length / 2;
@@ -107,4 +107,30 @@ function enum() {
             //trackIxs[trackIxs.length] = i;
         }
     }
+}
+
+function getSelectedClip(): void {
+	var basePath = "live_set view highlighted_clip_slot";
+    var liveObject = new LiveAPI(basePath);
+    var result = "";
+    if (!liveObject) {
+        post('Invalid liveObject, exiting...');
+        return;
+    }
+    if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0 && liveObject.get('has_clip')) {
+        liveObject.goto(basePath + " clip");
+        var loopStart = liveObject.get('loop_start');
+        var clipLength = liveObject.get('length');
+        var looping = liveObject.get('looping');
+        var data = liveObject.call("get_notes", loopStart, 0, clipLength, 128);
+        result += clipLength + " " + looping + " ";
+        for (var i = 2, len = data.length - 1; i < len; i += 6) {
+            if (data[i + 5 /* muted */] === 1) {
+                continue;
+            }
+            result += data[i + 1 /* pitch */] + " " + data[i + 2 /* start */] + " " + data[i + 3 /* duration */] + " " + data[i + 4 /* velocity */] + " ";
+        }
+        outlet(0, ['/mu4l/selectedclip/get', result.slice(0, result.length - 1 /* remove last space */)]);
+    }
+    outlet(0, ['/mu4l/selectedclip/get', ["!"]]);
 }

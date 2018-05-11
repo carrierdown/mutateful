@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using Mutate4l.Dto;
+using Mutate4l.IO;
 
 namespace Mutate4l.Cli
 {
@@ -10,6 +11,7 @@ namespace Mutate4l.Cli
     {
         public static Tuple<int, int> ResolveClipReference(string reference)
         {
+            if (reference == "*") return new Tuple<int, int>(-1, -1);
             string channel = "", clip = "";
             int c = 0;
             channel = reference[c++].ToString();
@@ -26,9 +28,10 @@ namespace Mutate4l.Cli
 
         public static ProcessResult<ChainedCommand> ParseTokensToChainedCommand(IEnumerable<Token> tokens)
         {
-            var sourceClips = tokens.TakeWhile(t => t.IsClipReference);
-            var commandTokens = tokens.Skip(sourceClips.Count()).TakeWhile(t => t.IsCommand || t.IsOption || t.IsOptionValue).ToArray();
-            var destClips = tokens.Skip(sourceClips.Count() + commandTokens.Count()).SkipWhile(t => t.Type == TokenType.Destination).TakeWhile(t => t.IsClipReference);
+            Token[] tokenList = tokens.ToArray();
+            var sourceClips = tokenList.TakeWhile(t => t.IsClipReference);
+            var commandTokens = tokenList.Skip(sourceClips.Count()).TakeWhile(t => t.IsCommand || t.IsOption || t.IsOptionValue).ToArray();
+            var destClips = tokenList.Skip(sourceClips.Count() + commandTokens.Count()).SkipWhile(t => t.Type == TokenType.Destination).TakeWhile(t => t.IsClipReference);
 
             if (sourceClips.Count() == 0)
                 return new ProcessResult<ChainedCommand>("No source clips specified.");

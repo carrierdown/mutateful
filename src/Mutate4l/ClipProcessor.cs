@@ -11,7 +11,7 @@ namespace Mutate4l
 {
     public static class ClipProcessor
     {
-        public static ProcessResultArray<Clip> ProcessChainedCommand(ChainedCommand chainedCommand)
+        public static Result ProcessChainedCommand(ChainedCommand chainedCommand)
         {
             List<Clip> sourceClips = new List<Clip>();
             List<Clip> targetClips = new List<Clip>();
@@ -19,10 +19,18 @@ namespace Mutate4l
             // call out to OSC-layer to fetch actual data needed to process the command
             foreach (Tuple<int, int> clipReference in chainedCommand.SourceClips)
             {
-                var clip = UdpConnector.GetClip(clipReference.Item1, clipReference.Item2);
+                Clip clip = null;
+                if (clipReference.Item1 == -1 && clipReference.Item2 == -1)
+                {
+                    clip = UdpConnector.GetSelectedClip();
+                }
+                else
+                {
+                    clip = UdpConnector.GetClip(clipReference.Item1, clipReference.Item2);
+                }
                 if (clip == null)
                 {
-                    return new ProcessResultArray<Clip>("Source clip was empty");
+                    return new Result("Source clip was empty");
                 }
                 sourceClips.Add(clip);
             }
@@ -30,7 +38,7 @@ namespace Mutate4l
             sourceClips = sourceClips.Where(c => c.Notes.Count > 0).ToList();
             if (sourceClips.Count < 1)
             {
-                throw new Exception("No source clips specified, or only empty clip(s) specified.");
+                return new Result("No source clips specified, or only empty clip(s) specified.");
             }
 
             Clip[] currentSourceClips = sourceClips.ToArray();
@@ -43,15 +51,23 @@ namespace Mutate4l
                     currentSourceClips = resultContainer.Result;
                 } else
                 {
-                    return resultContainer;
+                    break;
                 }
             }
-            if (resultContainer.Success)
+            if (resultContainer.Success && resultContainer.Result.Length > 0)
             {
                 // destination clip: if destination is specified, replace dest with created clip. If destination is not specified, created clips are added in new scenes after last specified source clip.
                 if (chainedCommand.TargetClips.Count > 0)
                 {
-                    UdpConnector.SetClips(chainedCommand.TargetClips[0].Item1, chainedCommand.TargetClips[0].Item2, resultContainer.Result);
+                    var targetClip = chainedCommand.TargetClips[0];
+                    if (targetClip.Item1 == -1 && targetClip.Item2 == -1)
+                    {
+                        UdpConnector.SetSelectedClip(resultContainer.Result[0]);
+                    }
+                    else
+                    {
+                        UdpConnector.SetClips(targetClip.Item1, targetClip.Item2, resultContainer.Result);
+                    }
                 }
                 else
                 {
@@ -60,7 +76,11 @@ namespace Mutate4l
                     UdpConnector.SetClips(lastSourceClip.Item1, lastSourceClip.Item2, resultContainer.Result);
                 }
             }
-            return resultContainer;
+            else
+            {
+                return new Result("No clips affected");
+            }
+            return new Result(resultContainer.Success, resultContainer.ErrorMessage);
         }
 
         public static ProcessResultArray<Clip> ProcessCommand(Command command, Clip[] clips)
