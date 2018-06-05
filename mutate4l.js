@@ -10,6 +10,11 @@ function getClip(trackNo, clipNo) {
         post('Invalid liveObject, exiting...');
         return;
     }
+    var result = getClipData(liveObject);
+    outlet(0, ['/mu4l/clip/get', result]);
+}
+
+function getClipData(liveObject) {
     var loopStart = liveObject.get('loop_start');
     var clipLength = liveObject.get('length');
     var looping = liveObject.get('looping');
@@ -21,8 +26,9 @@ function getClip(trackNo, clipNo) {
         }
         result += data[i + 1 /* pitch */] + " " + data[i + 2 /* start */] + " " + data[i + 3 /* duration */] + " " + data[i + 4 /* velocity */] + " ";
     }
-    outlet(0, ['/mu4l/clip/get', result.slice(0, result.length - 1 /* remove last space */)]);
+    return result.slice(0, result.length - 1);  // remove last space
 }
+
 // todo: robustify handling of clip references. Track should refer to midi tracks only, filtering out audio tracks. Clip numbers must be checked for overflow wrt number of scenes available.
 function setClip(trackNo, clipNo, dataString) {
     post("setClip: " + dataString);
@@ -155,7 +161,11 @@ ObservableCallback.prototype.getCallback = function() {
         callback: function(arg) {
             post("cb called with " + arg + " on id: " + self.id + "\r\n");
             if (self.api !== undefined) {
-                self.api.call("select_all_notes");
+                var name = self.api.get("name") || [""];
+                var thisClipData = getClipData(self.api);
+                var data = expandFormula(name[0], thisClipData);
+                data = "{" + self.id + "} " + data;
+                outlet(0, ["/mu4l/formula/process", data]);
             }
         }
     };
@@ -252,7 +262,7 @@ function expandFormula(formula, ownClipData) {
         }
     }
 
-    if (clipRefs.indexOf("*") < 0) expandedFormulaParts.push("[" + ownClipData + "]");
+    if (clipRefs.indexOf("*") == -1) expandedFormulaParts.push("[" + ownClipData + "]");
 
     for (i = 0; i < parts.length; i++) {
         if (!clipRefTester.test(parts[i])) {
