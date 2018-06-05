@@ -12,28 +12,28 @@ namespace Mutate4l.IO
         public static int ReceivePort = 8022;
         public static int SendPort = 8023;
 
-        public static Task<Clip> GetClip(int channel, int clip)
+        public static Clip GetClip(int channel, int clip)
         {
             return GetClipData("/mu4l/clip/get", channel, clip);
         }
 
-        public static Task<Clip> GetSelectedClip()
+        public static Clip GetSelectedClip()
         {
             return GetClipData("/mu4l/selectedclip/get", 0, 0);
         }
 
-        public static async Task<Clip> GetClipData(string address, int channel, int clip)
+        public static Clip GetClipData(string address, int channel, int clip)
         {
             byte[] message = OscHandler.CreateOscMessage(address, channel, clip);
-            UdpReceiveResult result;
+            byte[] result;
             var endPoint = new IPEndPoint(IPAddress.Any, ReceivePort);
 
             using (var udpClient = new UdpClient(ReceivePort))
             {
-                await udpClient.SendAsync(message, message.Length, "localhost", SendPort);
-                result = await udpClient.ReceiveAsync();
+                udpClient.Send(message, message.Length, "localhost", SendPort);
+                result = udpClient.Receive(ref endPoint);
             }
-            var data = Encoding.ASCII.GetString(result.Buffer);
+            var data = Encoding.ASCII.GetString(result);
             var noteData = OscHandler.GetOscStringValue(data);
             return IOUtilities.StringToClip(noteData);
         }
