@@ -40,7 +40,7 @@ namespace Mutate4l.Cli
             { "-ranges", Ranges },
             { "-repeats", Repeats },
             { "-mode", Mode },
-            { "-mask", Mask },
+            { "-mask", Mask }, // rename to skip?
             { "-strength", Strength },
             { "-lengths", Lengths },
             { "-rescale", Rescale },
@@ -54,7 +54,9 @@ namespace Mutate4l.Cli
             { "-velocitytostrength", VelocityToStrength },
             { "-window", Window },
             { "-count", Count },
-            { "-duration", Duration }
+            { "-duration", Duration },
+            { "-enablemask", EnableMask },
+            { "-chunkchords", ChunkChords }
         };
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>
@@ -93,7 +95,7 @@ namespace Mutate4l.Cli
 
         private bool IsMusicalDivision(int pos)
         {
-            return IsNumeric(pos) && Buffer[pos + 1] == '/' && IsNumeric(pos + 2);
+            return Buffer.Length > pos + 2 && IsNumeric(pos) && Buffer[pos + 1] == '/' && IsNumeric(pos + 2);
         }
 
         private bool IsAlpha(int pos)

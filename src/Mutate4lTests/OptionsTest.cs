@@ -52,7 +52,7 @@ namespace Mutate4lTests
         {
             var options = new Dictionary<TokenType, List<Token>>();
             options[TokenType.GroupOneToggleOne] = new List<Token>();
-            var parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(options);
+            var parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(new Command { Options = options });
             Assert.IsTrue(parsedOptions.GroupOneToggleOne);
             Assert.IsFalse(parsedOptions.GroupOneToggleTwo);
             Assert.IsTrue(parsedOptions.GroupTwoToggleOne);
@@ -66,7 +66,7 @@ namespace Mutate4lTests
             options[TokenType.DecimalValue] = new List<Token>() { new Token(TokenType.MusicalDivision, "1/8", 0) };
             options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "14", 0) };
             options[TokenType.SimpleBoolFlag] = new List<Token>();
-            var parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(options);
+            var parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(new Command { Options = options });
             Assert.AreEqual(14, parsedOptions.IntValue);
             Assert.AreEqual(.5m, parsedOptions.DecimalValue);
             Assert.IsTrue(parsedOptions.SimpleBoolFlag);
@@ -77,10 +77,10 @@ namespace Mutate4lTests
         {
             var options = new Dictionary<TokenType, List<Token>>();
             options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "1000", 0) };
-            var parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(options);
+            var parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(new Command { Options = options });
             Assert.AreEqual(100, parsedOptions.IntValue);
             options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "0", 0) };
-            parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(options);
+            parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(new Command { Options = options });
             Assert.AreEqual(1, parsedOptions.IntValue);
         }
 
@@ -90,7 +90,7 @@ namespace Mutate4lTests
             var options = new Dictionary<TokenType, List<Token>>();
             options[TokenType.DecimalValue] = new List<Token>() { new Token(TokenType.MusicalDivision, "1/8", 0), new Token(TokenType.MusicalDivision, "1/16", 0) };
             options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "14", 0), new Token(TokenType.Number, "2", 0), new Token(TokenType.Number, "900", 0) };
-            var parsedOptions = OptionParser.ParseOptions<OptionsClassTwo>(options);
+            var parsedOptions = OptionParser.ParseOptions<OptionsClassTwo>(new Command { Options = options });
             Assert.AreEqual(2, parsedOptions.DecimalValue.Length);
             Assert.AreEqual(3, parsedOptions.IntValue.Length);
         }
@@ -100,27 +100,27 @@ namespace Mutate4lTests
         {
             var options = new Dictionary<TokenType, List<Token>>();
             options[TokenType.EnumValue] = new List<Token>() { new Token(TokenType.EnumValue, "enumvalue2", 0) };
-            var parsedOptions = OptionParser.ParseOptions<OptionsClassTwo>(options);
+            var parsedOptions = OptionParser.ParseOptions<OptionsClassTwo>(new Command { Options = options });
             Assert.AreEqual(TestEnum.EnumValue2, parsedOptions.EnumValue);
         }
 
         [TestMethod]
         public void TestInverseToggleGroup()
         {
-            Lexer lexer = new Lexer("constrain A1 C4 -start -pitch => A2");
+            Lexer lexer = new Lexer("constrain -start -pitch");
             var command = Parser.ParseTokensToCommand(lexer.GetTokens());
-            var parsedOptions = OptionParser.ParseOptions<ConstrainOptions>(command.Options);
+            var parsedOptions = OptionParser.ParseOptions<ConstrainOptions>(command);
             Assert.IsTrue(parsedOptions.Pitch);
             Assert.IsTrue(parsedOptions.Start);
-            lexer = new Lexer("constrain A1 C4 -start => A2");
+            lexer = new Lexer("constrain -start");
             command = Parser.ParseTokensToCommand(lexer.GetTokens());
-            parsedOptions = OptionParser.ParseOptions<ConstrainOptions>(command.Options);
+            parsedOptions = OptionParser.ParseOptions<ConstrainOptions>(command);
             Assert.IsFalse(parsedOptions.Pitch);
             Assert.IsTrue(parsedOptions.Start);
 
-            lexer = new Lexer("constrain A1 C4 => A2");
+            lexer = new Lexer("constrain");
             command = Parser.ParseTokensToCommand(lexer.GetTokens());
-            parsedOptions = OptionParser.ParseOptions<ConstrainOptions>(command.Options);
+            parsedOptions = OptionParser.ParseOptions<ConstrainOptions>(command);
             Assert.IsTrue(parsedOptions.Pitch);
             Assert.IsTrue(parsedOptions.Start);
         }

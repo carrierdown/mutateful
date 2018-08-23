@@ -36,6 +36,8 @@
         Count,
         Window,
         Duration,
+        ChunkChords,
+        EnableMask,
         _OptionsEnd,
 
         _EnumValuesBegin,

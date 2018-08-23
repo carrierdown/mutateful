@@ -58,6 +58,17 @@ namespace Mutate4l.IO
             }
         }
 
+        public static void SetClipById(string id, Clip clip)
+        {
+            string data = IOUtilities.ClipToString(clip);
+            byte[] message = OscHandler.CreateOscMessage("/mu4l/clip/setbyid", int.Parse(id), 0, data);
+
+            using (var udpClient = new UdpClient(ReceivePort))
+            {
+                udpClient.Send(message, message.Length, "localhost", SendPort);
+            }
+        }
+
         public static void SetSelectedClip(Clip clip)
         {
             string data = IOUtilities.ClipToString(clip);
@@ -92,6 +103,21 @@ namespace Mutate4l.IO
             {
                 udpClient.Send(message, message.Length, "localhost", SendPort);
             }
+        }
+
+        public static string WaitForData()
+        {
+            byte[] result;
+            var endPoint = new IPEndPoint(IPAddress.Any, ReceivePort);
+
+            using (var udpClient = new UdpClient(ReceivePort))
+            {
+//                udpClient.Send(message, message.Length, "localhost", SendPort);
+                result = udpClient.Receive(ref endPoint);
+            }
+            string rawData = Encoding.ASCII.GetString(result);
+            string data = OscHandler.GetOscStringValue(rawData);
+            return data;
         }
     }
 }

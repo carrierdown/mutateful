@@ -4,6 +4,7 @@ using System.Text;
 using System.Linq;
 using Mutate4l.Dto;
 using Mutate4l.IO;
+using Mutate4l.Utility;
 
 namespace Mutate4l.Cli
 {
@@ -26,6 +27,7 @@ namespace Mutate4l.Cli
             return new Tuple<int, int>(x, y);
         }
 
+        /*
         public static ProcessResult<ChainedCommand> ParseTokensToChainedCommand(IEnumerable<Token> tokens)
         {
             Token[] tokenList = tokens.ToArray();
@@ -77,6 +79,56 @@ namespace Mutate4l.Cli
                 Commands = commands
             };
             return new ProcessResult<ChainedCommand>(chainedCommand);
+        }*/
+
+        public static ProcessResult<ChainedCommand> ParseFormulaToChainedCommand(string formula)
+        {
+            var valid = new char[] { '{', '[', ']', '}' }.All(c => formula.IndexOf(c) >= 0);
+            if (!valid) return new ProcessResult<ChainedCommand>($"Invalid formula: {formula}");
+
+            int index = formula.IndexOf('{') + 1;
+            string targetId = formula.Substring(index, formula.IndexOf('}') - index);
+            var sourceClips = formula
+                .Substring(formula.IndexOf('['), formula.LastIndexOf(']') - formula.IndexOf('['))
+                .Split(']')
+                .Select(x => IOUtilities.StringToClip(x.Trim().TrimStart('[')))
+                .ToArray();
+            string command = formula.Substring(formula.LastIndexOf(']') + 1);
+
+            var lexer = new Lexer(command);
+            Token[] commandTokens = lexer.GetTokens().ToArray();
+            var commandTokensLists = new List<List<Token>>();
+            var activeCommandTokenList = new List<Token>();
+
+            foreach (var token in commandTokens)
+            {
+                if (token.IsCommand)
+                {
+                    if (activeCommandTokenList.Count == 0)
+                    {
+                        activeCommandTokenList.Add(token);
+                    }
+                    else
+                    {
+                        commandTokensLists.Add(activeCommandTokenList);
+                        activeCommandTokenList = new List<Token> { token };
+                    }
+                }
+                else
+                {
+                    activeCommandTokenList.Add(token);
+                }
+            }
+            commandTokensLists.Add(activeCommandTokenList); // add last command token list
+            var commands = commandTokensLists.Select(x => ParseTokensToCommand(x)).ToList();
+
+            var chainedCommand = new ChainedCommand
+            {
+                SourceClips = sourceClips,
+                TargetId = targetId,
+                Commands = commands
+            };
+            return new ProcessResult<ChainedCommand>(chainedCommand);
         }
 
         public static Command ParseTokensToCommand(IEnumerable<Token> tokens)
@@ -85,8 +137,8 @@ namespace Mutate4l.Cli
             
             List<Token> tokensAsList = tokens.ToList();
             command.Id = tokensAsList[0].Type;
-            var i = 1;
-            while (i < tokensAsList.Count)
+            var i = 0;
+            while (++i < tokensAsList.Count)
             {
                 if (tokensAsList[i].Type > TokenType._OptionsBegin && tokensAsList[i].Type < TokenType._OptionsEnd)
                 {
@@ -100,17 +152,13 @@ namespace Mutate4l.Cli
                     }
                     command.Options.Add(type, values);
                 }
-                else if (tokensAsList[i].Type == TokenType.Destination)
+                else 
                 {
-                    i++;
-                    while (i < tokensAsList.Count && tokensAsList[i].Type == TokenType.ClipReference)
-                    {
-                        command.TargetClips.Add(ResolveClipReference(tokensAsList[i++].Value));
+                    while (i < tokensAsList.Count && ((tokensAsList[i].Type > TokenType._ValuesBegin && tokensAsList[i].Type < TokenType._ValuesEnd)
+                        || (tokensAsList[i].Type > TokenType._EnumValuesBegin && tokensAsList[i].Type < TokenType._EnumValuesEnd))) {
+                        // If we don't get an option header but just one or more values, assume these are values for the default option
+                        command.DefaultOptionValues.Add(tokensAsList[i++]);
                     }
-                }
-                while (i < tokensAsList.Count && tokensAsList[i].Type == TokenType.ClipReference)
-                {
-                    command.SourceClips.Add(ResolveClipReference(tokensAsList[i++].Value));
                 }
             }
             return command;

@@ -22,9 +22,9 @@ namespace Mutate4l.Commands
                 clips = new Clip[] { clips[0], clips[0] };
             }
 
+            ClipUtilities.NormalizeClipLengths(clips);
             Clip controlSequence = new Clip(clips[0]);
             Clip[] targetSequences = clips.Skip(1).Select(x => new Clip(x)).ToArray();
-            ClipUtilities.NormalizeClipLengths(targetSequences.Prepend(controlSequence).ToArray());
             Clip[] resultSequences = new Clip[targetSequences.Count()];
 
             int lowestPitch = options.ControlMin;

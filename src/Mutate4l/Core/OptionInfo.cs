@@ -7,7 +7,8 @@ namespace Mutate4l.Core
     public enum OptionType
     {
         AllOrSpecified, // If none specified, all are active. Otherwise, only specified options are active.
-        Value // Option that takes one or more values.
+        Value, // Option that takes one or more values.
+        Default // If values are given without an option header, use them for this parameter.
     }
 
     [AttributeUsage(AttributeTargets.Property)]

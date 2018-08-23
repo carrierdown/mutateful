@@ -9,7 +9,16 @@ namespace Mutate4l.Cli
     {
         public static void Start()
         {
-            string command = "";
+            while (true)
+            {
+                var data = UdpConnector.WaitForData();
+                Console.WriteLine($"Received data: {data}");
+                var result = ParseAndProcessCommand(data);
+                if (!result.Success)
+                    Console.WriteLine(result.ErrorMessage);
+            }
+            
+/*            string command = "";
 
             while (command != "q" && command != "quit")
             {
@@ -57,13 +66,12 @@ namespace Mutate4l.Cli
                         }
                         break;
                 }
-            }
+            }*/
         }
 
         public static Result ParseAndProcessCommand(string command)
         {
-            var lexer = new Lexer(command);
-            var structuredCommand = Parser.ParseTokensToChainedCommand(lexer.GetTokens());
+            var structuredCommand = Parser.ParseFormulaToChainedCommand(command);
             if (!structuredCommand.Success)
                 return new Result(structuredCommand.ErrorMessage);
 

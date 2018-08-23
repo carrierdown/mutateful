@@ -15,7 +15,7 @@ namespace Mutate4lTests
             Assert.AreEqual(result.Item2, 3);
         }
 
-        [TestMethod]
+//        [TestMethod]
         public void TestParseTokensToCommand()
         {
             Lexer lexer = new Lexer("interleave A1 C4 -ranges A1 -repeats => A2");
