@@ -11,9 +11,8 @@ Constrain applies the rhythm and/or pitch information from one clip to another, 
 
 Option | Type | Range | Default | Description
 --- | --- | --- | --- | ---
-pitch | Switch | | On | Specifies if pitch should be taken into account. If specified, only pitch is taken into account.
-start | Switch | | On | Specifies if start position should be taken into account. If specified, only start position is taken into account.
-strength | Number | 1-100 | 100 | Specifies the strength of the quantization from 1 to 100, where 100 is full quantization.
+mode | Enum | pitch, rhythm, both | both | Specifies whether pitch and/or rhythmic data should be taken into account when constraining the target clip.
+strength | Number | 1-100 | 100 | Specifies the strength of the quantization from 1 to 100, where 100 is full quantization. Only applies to the timing of notes, not their pitch.
 
 ### Ratchet
 
