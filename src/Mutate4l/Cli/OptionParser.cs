@@ -14,6 +14,7 @@ namespace Mutate4l.Dto
         {
             var options = command.Options;
             // todo: This code can be cleaned up considerably. OptionDefinitions no longer needed, should be possible to do everything in one pass.
+            // todo: remove toggles-stuff. Not really needed much and adds complexity.
             T result = new T();
             System.Reflection.MemberInfo info = typeof(T);
             var props = result.GetType().GetProperties();
@@ -54,7 +55,7 @@ namespace Mutate4l.Dto
                     .Where(a => a.Type == OptionType.AllOrSpecified)
                     .ToArray(); //.GroupBy(p => p.GroupId).Select(g => new OptionGroup(g.S))
 
-                if (attributes.Length > 0)
+/*                if (attributes.Length > 0)
                 {
                     // handle properties with OptionType AllOrSpecified
                     foreach (var attrib in attributes)
@@ -73,17 +74,17 @@ namespace Mutate4l.Dto
                     }
                 }
                 else
-                {
+                {*/
                     // handle value properties
-                    if (options.ContainsKey(option))
-                    {
-                        var tokens = options[option];
-                        object[] propertyData = ExtractPropertyData(property, tokens);
-                        property.SetMethod?.Invoke(result, propertyData);
-                    }
+                if (options.ContainsKey(option))
+                {
+                    var tokens = options[option];
+                    object[] propertyData = ExtractPropertyData(property, tokens);
+                    property.SetMethod?.Invoke(result, propertyData);
                 }
+                //}
             }
-
+            /*
             var optionGroups = new List<OptionGroup>();
             foreach (var toggle in togglesByGroupId.Keys)
             {
@@ -104,7 +105,7 @@ namespace Mutate4l.Dto
                         result.GetType().GetProperty(option.ToString())?.SetMethod?.Invoke(result, new object[] { true });
                     }
                 }
-            }
+            }*/
             return result;
         }
 
@@ -117,8 +118,15 @@ namespace Mutate4l.Dto
             }
             if (tokens.Count == 0)
             {
-                // handle simple bool flag
-                return new object[] { true };
+                if (property.PropertyType == typeof(bool))
+                {
+                    // handle simple bool flag
+                    return new object[] { true };
+                } else
+                {
+                    // todo: report error here - missing property value(s)
+                    return new object[] { };
+                }
             }
             else
             {
@@ -159,6 +167,11 @@ namespace Mutate4l.Dto
                 {
                     decimal[] values = tokens.Select(t => Utilities.MusicalDivisionToDecimal(t.Value)).ToArray();
                     return new object[] { values };
+                }
+                else if (type == TokenType.InlineClip && property.PropertyType == typeof(Clip))
+                {
+                    Clip value = IOUtilities.StringToClip(tokens[0].Value);
+                    return new object[] { value };
                 }
                 else if (type == TokenType.Number && property.PropertyType == typeof(int[]))
                 {

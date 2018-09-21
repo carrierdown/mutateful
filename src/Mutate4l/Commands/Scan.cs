@@ -1,9 +1,17 @@
-﻿using Mutate4l.Dto;
-using Mutate4l.Options;
+﻿using Mutate4l.Core;
+using Mutate4l.Dto;
 using Mutate4l.Utility;
 
 namespace Mutate4l.Commands
 {
+    public class ScanOptions
+    {
+        public decimal Window { get; set; } = 1;
+
+        [OptionInfo(min: 1, max: 500)]
+        public int Count { get; set; } = 8;
+    }
+
     public class Scan
     {
         public static ProcessResultArray<Clip> Apply(ScanOptions options, params Clip[] clips)

@@ -1,13 +1,29 @@
 ﻿using Mutate4l.Core;
 using Mutate4l.Dto;
-using Mutate4l.Options;
 using Mutate4l.Utility;
 using System.Collections.Generic;
 using System.Linq;
-using static Mutate4l.Options.InterleaveMode;
+using static Mutate4l.Commands.InterleaveMode;
 
 namespace Mutate4l.Commands
 {
+    public class InterleaveOptions
+    {
+        public InterleaveMode Mode { get; set; } = Time;
+        public int[] Repeats { get; set; } = new int[] { 1 };
+        public decimal[] Ranges { get; set; } = new decimal[] { 1 };
+        public bool Mask { get; set; } = false; // Instead of vvv xxx=vxvxvx, the current input "masks" the corresponding location of other inputs, producing vxv instead. Rename skip maybe?
+        public bool ChunkChords { get; set; } = true; // Process notes having the exact same start times as a single event. Only applies to time mode.
+        public int[] EnableMask { get; set; } = new int[] { 1 }; // Allows specifying a sequence of numbers to use as a mask for whether the note should be included or omitted. E.g. 1 0 will alternately play and omit every even/odd note. Useful when combining two or more clips but you want to retain only the notes for the current track. In this scenario you would have several formulas that are the same except having different masks.
+        // todo: public decimal[] ScaleFactors { get; set; } = new decimal[] { 1 }; // Scaling is done after slicing, but prior to interleaving
+    }
+
+    public enum InterleaveMode
+    {
+        Event,
+        Time
+    }
+
     public class Interleave
     {
         public static ProcessResultArray<Clip> Apply(InterleaveOptions options, params Clip[] clips)
@@ -59,7 +75,6 @@ namespace Mutate4l.Commands
                             repeatsIndex++;
                         }
                     }
-                    resultClip.Length = position;
                     break;
                 case Time:
                     var srcPositions = clips.Select(c => new DecimalCounter(c.Length)).ToArray();
@@ -73,14 +88,17 @@ namespace Mutate4l.Commands
                             var currentTimeRange = options.Ranges[timeRangeIndex];
                             for (var repeats = 0; repeats < options.Repeats[repeatsIndex % options.Repeats.Length]; repeats++) 
                             {
-                                resultClip.Notes.AddRange(
-                                    ClipUtilities.GetSplitNotesInRangeAtPosition(
-                                        srcPositions[clipIndex].Value,
-                                        srcPositions[clipIndex].Value + currentTimeRange,
-                                        clips[clipIndex].Notes,
-                                        position
-                                    )
-                                );
+                                if (options.EnableMask[clipIndex % options.EnableMask.Length] == 1)
+                                {
+                                    resultClip.Notes.AddRange(
+                                        ClipUtilities.GetSplitNotesInRangeAtPosition(
+                                            srcPositions[clipIndex].Value,
+                                            srcPositions[clipIndex].Value + currentTimeRange,
+                                            clips[clipIndex].Notes,
+                                            position
+                                        )
+                                    );
+                                }
                                 position += currentTimeRange;
                             }
                             if (options.Mask)
@@ -98,9 +116,9 @@ namespace Mutate4l.Commands
                             timeRangeIndex = (timeRangeIndex + 1) % options.Ranges.Length; // this means that you cannot use the Counts parameter to have varying time ranges for each repeat
                         }
                     }
-                    resultClip.Length = position;
                     break;
             }
+            resultClip.Length = position;
             return new ProcessResultArray<Clip>(new Clip[] { resultClip });
         }
     }

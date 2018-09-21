@@ -23,14 +23,22 @@ namespace Mutate4l.Cli
         private Dictionary<string, TokenType> Commands = new Dictionary<string, TokenType>
         {
             { "interleave", Interleave },
+            { "intrlv", Interleave },
+            { "il", Interleave },
+            { "interleavevent", InterleaveEvent },
+            { "intrlvnt", InterleaveEvent },
+            { "ilvt", InterleaveEvent },
+
             { "constrain", Constrain },
-            { "explode", Explode },
+            { "shuffle", Shuffle },
             { "slice", Slice },
             { "arpeggiate", Arpeggiate },
             { "monophonize", Monophonize },
             { "ratchet", Ratchet },
+            { "relength", Relength },
             { "scan", Scan },
-            { "filter", Filter }
+            { "filter", Filter },
+            { "transpose", Transpose }
         };
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
@@ -56,7 +64,10 @@ namespace Mutate4l.Cli
             { "-count", Count },
             { "-duration", Duration },
             { "-enablemask", EnableMask },
-            { "-chunkchords", ChunkChords }
+            { "-chunkchords", ChunkChords },
+            { "-by", By },
+            { "-factor", Factor },
+            { "-with", With} 
         };
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>
@@ -65,7 +76,12 @@ namespace Mutate4l.Cli
             { "event", Event },
             { "linear", Linear },
             { "easeinout", EaseInOut },
-            { "easein", EaseIn }
+            { "easein", EaseIn },
+            { "pitch", Pitches },
+            { "rhythm", Rhythm },
+            { "both", Both },
+            { "absolute", Absolute },
+            { "relative", Relative }
         };
 
         public Lexer(string buffer)
@@ -91,6 +107,23 @@ namespace Mutate4l.Cli
         private bool IsClipReference(int pos)
         {
             return (Buffer.Length > pos + 1 && IsAlpha(pos) && IsNumeric(pos + 1)) || Buffer[pos] == '*';
+        }
+
+        private bool IsInlineClip(int pos)
+        {
+            if (Buffer[pos] == '[')
+            {
+                int i = pos + 1;
+                while(i < Buffer.Length && (IsNumeric(Buffer[i]) || Buffer[i] == ' ' || Buffer[i] == '.'))
+                {
+                    i++;
+                }
+                if (Buffer[i] == ']')
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private bool IsMusicalDivision(int pos)
@@ -122,16 +155,33 @@ namespace Mutate4l.Cli
         {
             return c >= '0' && c <= '9';
         }
+        /*
+        private Token GetIdentifier(int pos)
+        {
+            var isOptionHeader = IsOption(pos);
+
+            int length = 1;
+            while (pos + length < Buffer.Length && (IsAlpha(pos + length)) {
+                length++;
+            }
+            return new Token(isOptionHeader ? TokenType.OptionHeader : TokenType)
+
+
+        }*/
 
         private Token GetIdentifier(int pos, params Dictionary<string, TokenType>[] validValues)
         {
             string identifier = "";
             int initialPos = pos;
+            int length = 0;
 
             while (pos < Buffer.Length && (IsAlpha(pos) || (initialPos == pos && IsOption(pos))))
             {
-                identifier += Buffer[pos++].ToString();
+                length++;
+                pos++;
             }
+            identifier = Buffer.Substring(initialPos, length);
+
             if (identifier.Length > 0 && validValues.Any(va => va.Any(v => v.Key == identifier)))
             {
                 return new Token(validValues.Where(va => va.Any(v => v.Key.Equals(identifier, StringComparison.InvariantCultureIgnoreCase))).First()[identifier.ToLower()], identifier, initialPos);
@@ -161,6 +211,10 @@ namespace Mutate4l.Cli
                         token = new Token(ClipReference, "*", position);
                     else
                         token = new Token(ClipReference, GetRemainingNumericToken(position, 2), position);
+                }
+                else if (IsInlineClip(position))
+                {
+                    token = new Token(InlineClip, Buffer.Substring(position, (Buffer.IndexOf(']', position) - position + 1)), position);
                 }
                 else if (IsMusicalDivision(position))
                 {

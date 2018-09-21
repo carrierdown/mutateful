@@ -2,7 +2,6 @@
 using Mutate4l.Commands;
 using Mutate4l.Core;
 using Mutate4l.Dto;
-using Mutate4l.Options;
 
 namespace Mutate4lTests.ClipActions
 {
@@ -32,7 +31,7 @@ namespace Mutate4lTests.ClipActions
             };
             var options = new ConstrainOptions()
             {
-                Pitch = true
+                Mode = ConstrainMode.Pitch
             };
             var resultObj = Constrain.Apply(options, clip1, clip2);
             Assert.IsTrue(resultObj.Success);

@@ -1,10 +1,16 @@
-﻿using Mutate4l.Dto;
-using Mutate4l.Options;
+﻿using Mutate4l.Core;
+using Mutate4l.Dto;
 using Mutate4l.Utility;
 using System.Collections.Generic;
 
 namespace Mutate4l.Commands
 {
+    public class SliceOptions
+    {
+        [OptionInfo(type: OptionType.Default)]
+        public decimal[] Lengths { get; set; } = new decimal[] { .25m };
+    }
+
     public class Slice
     {
         public static ProcessResultArray<Clip> Apply(SliceOptions options, params Clip[] clips)

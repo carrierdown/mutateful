@@ -2,9 +2,15 @@
 {
     public enum TokenType
     {
+        CommandName,
+        OptionHeader,
+        OptionValue,
+
         _CommandsBegin,
         Interleave,
+        InterleaveEvent,
         Constrain,
+        Shuffle,
         Slice,
         Explode,
         Arpeggiate,
@@ -12,7 +18,9 @@
         Filter,
         Monophonize,
         Ratchet,
+        Relength,
         Scan,
+        Transpose,
         _CommandsEnd,
 
         _OptionsBegin,
@@ -38,6 +46,9 @@
         Duration,
         ChunkChords,
         EnableMask,
+        By,
+        Factor,
+        With,
         _OptionsEnd,
 
         _EnumValuesBegin,
@@ -46,12 +57,19 @@
         Linear,
         EaseInOut,
         EaseIn,
+        Pitches, // todo: Quickfix to avoid conflict with Pitch. Need to find a better solution here...
+        Rhythm,
+        Both,
+        Absolute,
+        Relative,
+        Overwrite,
         _EnumValuesEnd,
 
         _ValuesBegin,
         ClipReference,
         Number,
         MusicalDivision,
+        InlineClip,
         _ValuesEnd,
 
         Colon,

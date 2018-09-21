@@ -2,7 +2,6 @@
 using Mutate4l.Cli;
 using Mutate4l.Core;
 using Mutate4l.Dto;
-using Mutate4l.Options;
 using System.Collections.Generic;
 
 namespace Mutate4lTests
@@ -103,47 +102,5 @@ namespace Mutate4lTests
             var parsedOptions = OptionParser.ParseOptions<OptionsClassTwo>(new Command { Options = options });
             Assert.AreEqual(TestEnum.EnumValue2, parsedOptions.EnumValue);
         }
-
-        [TestMethod]
-        public void TestInverseToggleGroup()
-        {
-            Lexer lexer = new Lexer("constrain -start -pitch");
-            var command = Parser.ParseTokensToCommand(lexer.GetTokens());
-            var parsedOptions = OptionParser.ParseOptions<ConstrainOptions>(command);
-            Assert.IsTrue(parsedOptions.Pitch);
-            Assert.IsTrue(parsedOptions.Start);
-            lexer = new Lexer("constrain -start");
-            command = Parser.ParseTokensToCommand(lexer.GetTokens());
-            parsedOptions = OptionParser.ParseOptions<ConstrainOptions>(command);
-            Assert.IsFalse(parsedOptions.Pitch);
-            Assert.IsTrue(parsedOptions.Start);
-
-            lexer = new Lexer("constrain");
-            command = Parser.ParseTokensToCommand(lexer.GetTokens());
-            parsedOptions = OptionParser.ParseOptions<ConstrainOptions>(command);
-            Assert.IsTrue(parsedOptions.Pitch);
-            Assert.IsTrue(parsedOptions.Start);
-        }
-        /*
-        [TestMethod]
-        public void TestValueGroup()
-        {
-            // todo: complete
-            var interleaveOptions = new InterleaveOptions();
-            var optionSet = new OptionsDefinition()
-            {
-                OptionGroups = new OptionGroup[]
-                {
-                    new OptionGroup()
-                    {
-                        Type = OptionGroupType.Value,
-                        Options = new TokenType[]
-                        {
-                            TokenType.Mode
-                        }
-                    }
-                }
-            };
-        }*/
     }
 }

@@ -8,6 +8,10 @@ namespace Mutate4l.Utility
     {
         public static Clip StringToClip(string data)
         {
+            if (data.IndexOf('[') >= 0 && data.IndexOf(']') >= 0)
+            {
+                data = data.Substring(data.IndexOf('[') + 1).Substring(0, data.IndexOf(']') - 1);
+            }
             var noteData = data.Split(' ');
             if (noteData.Length < 2)
             {

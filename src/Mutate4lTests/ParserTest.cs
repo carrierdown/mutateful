@@ -1,5 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.Cli;
+using Mutate4l.Commands;
+using Mutate4l.Dto;
 using System;
 
 namespace Mutate4lTests
@@ -25,6 +27,14 @@ namespace Mutate4lTests
             Assert.AreEqual(command.Options[TokenType.Repeats].Count, 0);
             Assert.AreEqual(command.SourceClips.Count, 2);
             Assert.AreEqual(command.TargetClips.Count, 1);
+        }
+
+        [TestMethod]
+        public void TestParseFormulaToCommand()
+        {
+            var command = Parser.ParseFormulaToChainedCommand("{456} [4 1 70 0 4 100] constrain -by [4 1 70 0 0.5 100 70 0.5 0.5 100 70 1 0.5 100 70 1.5 0.5 100 70 2 0.5 100 70 2.5 0.5 100 70 3 0.5 100 70 3.5 0.5 100] -mode absolute");
+            var parsedOptions = OptionParser.ParseOptions<TransposeOptions>(command.Result.Commands[0]);
+            var i = 0;
         }
     }
 }

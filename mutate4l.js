@@ -81,7 +81,7 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
             if (referredIds.indexOf(clipId) >= 0) {
                 debuglog("found current clip in referring formula - all is well\r\n");
 
-                var expandedFormula = expandFormula(formula, id);
+                var expandedFormula = expandFormulaClipRefsAnywhereEdition(formula, id);
                 if (expandedFormula) {
                     expandedFormula = "{" + id + "} " + expandedFormula;
                     outlet(0, ["/mu4l/formula/process", expandedFormula]);
@@ -109,7 +109,7 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
         debuglog("hei");
         var formulaSlot = new LiveAPI("id " + clipId);
         var formula = getClipName(formulaSlot);
-        var expandedFormula = expandFormula(formula, clipId);
+        var expandedFormula = expandFormulaClipRefsAnywhereEdition(formula, clipId);
         if (expandedFormula) {
             expandedFormula = "{" + clipId + "} " + expandedFormula;
             outlet(0, ["/mu4l/formula/process", expandedFormula]);
@@ -358,7 +358,7 @@ function processAllClips() {
                     liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
                     clipName = getClipName(liveObject);
                     if (containsFormula(clipName)) {
-                        var expandedFormula = expandFormula(clipName, liveObject.id);
+                        var expandedFormula = expandFormulaClipRefsAnywhereEdition(clipName, liveObject.id);
                         if (expandedFormula) {
                             expandedFormula = "{" + liveObject.id + "} " + expandedFormula;
                             outlet(0, ["/mu4l/formula/process", expandedFormula]);
@@ -413,7 +413,6 @@ function expandFormula(formula, ownId) {
     var clipRefTester = /^([a-z]+\d+)$|^(\*)$/,
         clipRefsFound = false,
         clipRefs = [],
-        clipRefsResolved = [],
         expandedFormulaParts = [];
 
     if (formula.length < 5) return;
@@ -467,6 +466,49 @@ function expandFormula(formula, ownId) {
         if (!clipRefTester.test(parts[i])) {
             expandedFormulaParts.push(parts[i]);
         }
+    }
+    return expandedFormulaParts.join(" ");
+}
+
+function expandFormulaClipRefsAnywhereEdition(formula, ownId) {
+    var clipRefTester = /^([a-z]+\d+)$|^(\*)$/,
+        expandedFormulaParts = [];
+
+    if (formula.length < 5) return;
+
+    var formulaStartIndex = formula.indexOf("=");
+    var formulaStopIndex = formula.indexOf(";");
+    if (formulaStartIndex == -1) return; // no valid formula
+
+    if (formulaStopIndex >= 0) {
+        formula = formula.substring(formulaStartIndex + 1, formulaStopIndex).toLowerCase();
+    } else {
+        formula = formula.substring(formulaStartIndex + 1).toLowerCase();
+    }
+    var parts = formula.split(" ");
+
+    for (var i = 0; i < parts.length; i++) {
+        var part = parts[i];
+        var result = clipRefTester.test(part); 
+        if (result) {
+            var target = resolveClipReference(part);
+            var liveObjectAtClip = getLiveObjectAtClip(target.x, target.y);
+
+            debuglog("Getting clipRef " + part);
+            var clipData = getClipData(liveObjectAtClip);
+
+            if (watchedClips[liveObjectAtClip.id] === undefined) {
+                debuglog("watchedclips at " + liveObjectAtClip.id + " set to " + ownId);
+                watchedClips[liveObjectAtClip.id] = [ownId];
+            } else if (watchedClips[liveObjectAtClip.id].indexOf(ownId) < 0) {
+                watchedClips[liveObjectAtClip.id].push(ownId);
+            }
+            debuglog("updated watchedClips for id " + liveObjectAtClip.id + ": " + watchedClips[liveObjectAtClip.id]);
+            var transformedPart = "[" + clipData + "]";
+        } else {
+            transformedPart = part;
+        }
+        expandedFormulaParts.push(transformedPart);
     }
     return expandedFormulaParts.join(" ");
 }

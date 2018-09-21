@@ -2,8 +2,8 @@
 using Mutate4l.Commands;
 using Mutate4l.Core;
 using Mutate4l.Dto;
-using Mutate4l.Options;
 using System;
+using static Mutate4l.Commands.Interleave;
 
 namespace Mutate4lTests.ClipActions
 {

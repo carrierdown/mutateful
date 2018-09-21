@@ -9,6 +9,16 @@ namespace Mutate4l.Utility
 {
     public class ClipUtilities
     {
+        public static IEnumerable<NoteEvent> RescaleNotes(List<NoteEvent> notes, decimal factor)
+        {
+            foreach (var note in notes)
+            {
+                note.Start *= factor;
+                note.Duration *= factor;
+            }
+            return notes;
+        }
+
         public static Clip SplitNotesAtEvery(Clip clip, decimal[] timespans)
         {
             decimal currentPosition = 0;

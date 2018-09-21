@@ -83,24 +83,28 @@ namespace Mutate4l.Cli
 
         public static ProcessResult<ChainedCommand> ParseFormulaToChainedCommand(string formula)
         {
+            // TBC: Change parse logic to deal with sourceclips anywhere in the formula - and add logic to make source clips specified inside a formula be added as data for the relevant option (with new option type clip or similar)
             var valid = new char[] { '{', '[', ']', '}' }.All(c => formula.IndexOf(c) >= 0);
             if (!valid) return new ProcessResult<ChainedCommand>($"Invalid formula: {formula}");
 
             int index = formula.IndexOf('{') + 1;
             string targetId = formula.Substring(index, formula.IndexOf('}') - index);
-            var sourceClips = formula
+            /* formula
                 .Substring(formula.IndexOf('['), formula.LastIndexOf(']') - formula.IndexOf('['))
                 .Split(']')
-                .Select(x => IOUtilities.StringToClip(x.Trim().TrimStart('[')))
-                .ToArray();
-            string command = formula.Substring(formula.LastIndexOf(']') + 1);
+                .Select(x => IOUtilities.StringToClip(x.Substring(x.IndexOf('[') + 1)))
+                .ToArray();*/
+            string command = formula.Substring(formula.LastIndexOf('}') + 1);
 
             var lexer = new Lexer(command);
             Token[] commandTokens = lexer.GetTokens().ToArray();
             var commandTokensLists = new List<List<Token>>();
             var activeCommandTokenList = new List<Token>();
 
-            foreach (var token in commandTokens)
+            var sourceClips = commandTokens.TakeWhile(x => x.Type == TokenType.InlineClip).Select(x => IOUtilities.StringToClip(x.Value.Substring(1, x.Value.Length - 2))).ToArray();
+            var tokensToProcess = commandTokens.Skip(sourceClips.Count());
+
+            foreach (var token in tokensToProcess)
             {
                 if (token.IsCommand)
                 {
@@ -137,8 +141,8 @@ namespace Mutate4l.Cli
             
             List<Token> tokensAsList = tokens.ToList();
             command.Id = tokensAsList[0].Type;
-            var i = 0;
-            while (++i < tokensAsList.Count)
+            var i = 1;
+            while (i < tokensAsList.Count)
             {
                 if (tokensAsList[i].Type > TokenType._OptionsBegin && tokensAsList[i].Type < TokenType._OptionsEnd)
                 {

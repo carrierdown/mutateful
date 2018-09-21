@@ -1,10 +1,14 @@
 ﻿using Mutate4l.Dto;
-using Mutate4l.Options;
 using Mutate4l.Utility;
 using System.Linq;
 
 namespace Mutate4l.Commands
 {
+    public class FilterOptions
+    {
+        public decimal Duration { get; set; } = 1 / 64m;
+    }
+
     public class Filter
     {
         public static ProcessResultArray<Clip> Apply(FilterOptions options, params Clip[] clips)

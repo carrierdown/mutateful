@@ -5,9 +5,16 @@
 
 ## Operations
 
+A note on usage examples: All parameters are prefixed with -, and are always optional. The basic syntax of a command is `commandname -parameter value -anotherparameter value`. Values can be numbers, in which case the valid range is displayed as e.g. 1-100. 
+
 ### Constrain
 
 Constrain applies the rhythm and/or pitch information from one clip to another, sort of like a more flexible quantize.
+
+Usage: `constrain -mode pitch|rhythm|*both* -strength 1-100`
+
+*strength* Specifies the strength of the quantization from 1 to 100, where 100 is full quantization. Default value is 100.
+*mode* Specifies whether pitch, rhythm, or both aspects should be taken into account when aligning clip contents.
 
 Option | Type | Range | Default | Description
 --- | --- | --- | --- | ---
@@ -62,3 +69,4 @@ Option | Type | Range | Default | Description
 --- | --- | --- | --- | ---
 window | Decimal | | 1 | Specifies the size of the section which will be used to scan through the contents of the clip.
 count | Number | 1-500 | 8 | The number of times scanning will take place.
+
