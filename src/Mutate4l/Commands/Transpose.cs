@@ -14,11 +14,11 @@ namespace Mutate4l.Commands
 
     public class TransposeOptions
     {
-        public TransposeMode Mode { get; set; } = TransposeMode.Relative;
-
         public Clip By { get; set; } // Allows syntax like a1 transpose -by a2 -mode relative. This syntax makes it much clearer which clip is being affected, and which is used as the source.
+        public TransposeMode Mode { get; set; } = TransposeMode.Relative;
     }
 
+    // also needed: a transpose function (rangetranspose?) transposing all notes contained within the bounds of the respective note in the control clip
     public class Transpose
     {
         public static ProcessResultArray<Clip> Apply(TransposeOptions options, params Clip[] clips)

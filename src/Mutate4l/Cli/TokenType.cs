@@ -30,7 +30,7 @@
         Repeats,
         Mode,
         Strength,
-        Mask,
+        Skip,
         Lengths,
         Rescale,
         RemoveOffset,

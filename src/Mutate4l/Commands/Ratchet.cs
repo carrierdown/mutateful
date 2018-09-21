@@ -24,7 +24,14 @@ namespace Mutate4l.Commands
 
     public class RatchetOptions
     {
-        public RatchetMode Mode { get; set; } = RatchetMode.Velocity;
+        // Automatically scale control sequence so that lowest note corresponds to minimum ratchet value and highest note corresponds to maximum ratchet value
+        public bool AutoScale { get; set; }
+
+        public Clip By { get; set; }
+
+        public int ControlMin { get; set; } = -1; // lowest pitch/velocity for control sequence (unless AutoScale is on), e.g. pitch values 60 or lower equal Min ratchet-value.
+
+        public int ControlMax { get; set; } = -1; // highest pitch/velocity for control sequence (unless AutoScale is on), e.g. pitch values 68 or higher equal Max ratchet-value.
 
         [OptionInfo(min: 1, max: 20)]
         public int Min { get; set; } = 1;
@@ -32,23 +39,16 @@ namespace Mutate4l.Commands
         [OptionInfo(min: 1, max: 20)]
         public int Max { get; set; } = 8;
 
+        public RatchetMode Mode { get; set; } = RatchetMode.Velocity;
+
+        public Shape Shape { get; set; } = Shape.Linear;
+
         [OptionInfo(min: 0, max: 100)]
         public int Strength { get; set; } = 100;
 
         public bool VelocityToStrength { get; set; }
-
-        public Shape Shape { get; set; } = Shape.Linear;
-
-        // Automatically scale control sequence so that lowest note corresponds to minimum ratchet value and highest note corresponds to maximum ratchet value
-        public bool AutoScale { get; set; }
-
-        public int ControlMin { get; set; } = -1; // lowest pitch/velocity for control sequence (unless AutoScale is on), e.g. pitch values 60 or lower equal Min ratchet-value.
-
-        public int ControlMax { get; set; } = -1; // highest pitch/velocity for control sequence (unless AutoScale is on), e.g. pitch values 68 or higher equal Max ratchet-value.
-
-        public Clip By { get; set; }
     }
-
+    
     public class Ratchet
     {
         // Basic use:

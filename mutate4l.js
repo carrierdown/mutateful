@@ -65,7 +65,7 @@ function onInit() {
 function onSelectedClipRenamedOrChanged(arg1, arg2) {
     debuglog("onSelectedClipRenamedOrChanged " + arg1 + " " + arg2);
     var clipId = arg1;
-    var name = arg2;
+    var name = arg2 || "";
 
     if (watchedClips[clipId] !== undefined && watchedClips[clipId].length !== 0) {
         var currentlyWatchedClips = watchedClips[clipId];
@@ -301,13 +301,26 @@ function enumerate() {
                 liveObject.goto("live_set tracks " + i + " clip_slots " + s);
                 if (liveObject.get('has_clip') > 0) {
                     liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
-                    var existingName = liveObject.get("name");
-                    liveObject.set("name", String.fromCharCode(65 + i) + (s + 1) + existingName);
+                    var existingName = getClipName(liveObject);
+debuglog(existingName.charCodeAt(0));
+                    var newName = "";
+                    var clipRefString = String.fromCharCode(65 + i) + (s + 1);
+                    var startBracketIx = existingName.indexOf("[");
+debuglog(startBracketIx);
+                    var endBracketIx = existingName.indexOf("]", startBracketIx);
+debuglog(endBracketIx);
+                    if (startBracketIx >= 0 && endBracketIx >= 0) {
+                        newName = existingName.substring(0, startBracketIx + 1) + clipRefString + existingName.substring(endBracketIx);
+                    } else {
+                        newName = "[" + clipRefString + "] " + existingName;
+                    }
+                    liveObject.set("name",  newName);
                 }
             }
         }
     }
 }
+
 function getSelectedClip() {
     var liveObject = new LiveAPI("live_set view selected_track");
     var result = "";

@@ -6,12 +6,13 @@ namespace Mutate4l.Commands
 {
     public class ScanOptions
     {
-        public decimal Window { get; set; } = 1;
-
         [OptionInfo(min: 1, max: 500)]
         public int Count { get; set; } = 8;
+
+        public decimal Window { get; set; } = 1;
     }
 
+    // rename to stretch -grainsize 1/16 -factor 2.0
     public class Scan
     {
         public static ProcessResultArray<Clip> Apply(ScanOptions options, params Clip[] clips)

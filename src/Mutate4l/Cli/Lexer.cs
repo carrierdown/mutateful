@@ -48,7 +48,7 @@ namespace Mutate4l.Cli
             { "-ranges", Ranges },
             { "-repeats", Repeats },
             { "-mode", Mode },
-            { "-mask", Mask }, // rename to skip?
+            { "-skip", Skip }, // rename to skip?
             { "-strength", Strength },
             { "-lengths", Lengths },
             { "-rescale", Rescale },
