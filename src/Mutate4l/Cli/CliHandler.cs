@@ -1,6 +1,7 @@
 ﻿using Mutate4l.Dto;
 using Mutate4l.IO;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Mutate4l.Cli
@@ -9,13 +10,19 @@ namespace Mutate4l.Cli
     {
         public static void Start()
         {
+            var udpMultiPacketsById = new Dictionary<int, UdpMultiPacket>();
             while (true)
             {
-                var data = UdpConnector.WaitForData();
-                Console.WriteLine($"Received data: {data}");
-                var result = ParseAndProcessCommand(data);
-                if (!result.Success)
-                    Console.WriteLine(result.ErrorMessage);
+                UdpConnector.WaitForData(udpMultiPacketsById);
+                int[] completedMultiPacketIds = udpMultiPacketsById.Keys.Where(x => udpMultiPacketsById[x].IsCompleted).ToArray();
+                foreach (var id in completedMultiPacketIds)
+                {
+                    Result result = ParseAndProcessCommand(udpMultiPacketsById[id].Content);
+                    Console.WriteLine($"Received data: {udpMultiPacketsById[id].Content}");
+                    if (!result.Success)
+                        Console.WriteLine(result.ErrorMessage);
+                    udpMultiPacketsById.Remove(id);
+                }
             }
             
 /*            string command = "";

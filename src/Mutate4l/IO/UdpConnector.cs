@@ -1,5 +1,6 @@
 ﻿using Mutate4l.Dto;
 using Mutate4l.Utility;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -105,19 +106,31 @@ namespace Mutate4l.IO
             }
         }
 
-        public static string WaitForData()
+        public static void WaitForData(Dictionary<int, UdpMultiPacket> udpMultiPacketsById)
         {
             byte[] result;
             var endPoint = new IPEndPoint(IPAddress.Any, ReceivePort);
 
             using (var udpClient = new UdpClient(ReceivePort))
             {
-//                udpClient.Send(message, message.Length, "localhost", SendPort);
                 result = udpClient.Receive(ref endPoint);
             }
             string rawData = Encoding.ASCII.GetString(result);
             string data = OscHandler.GetOscStringValue(rawData);
-            return data;
+            int metaDataStart = data.IndexOf('<') + 1;
+            int metaDataLength = data.IndexOf('>') - metaDataStart;
+            string multiPacketMetaData = data.Substring(metaDataStart, metaDataLength);
+            string[] metaDataParts = multiPacketMetaData.Split(',', '/');
+            int id = int.Parse(metaDataParts[0]);
+            int packetIx = int.Parse(metaDataParts[1]);
+            int totalPacketCount = int.Parse(metaDataParts[2]);
+            if (!udpMultiPacketsById.ContainsKey(id))
+            {
+                udpMultiPacketsById[id] = new UdpMultiPacket(id, totalPacketCount);
+            }
+            udpMultiPacketsById[id][packetIx] = data.Substring(data.IndexOf('{'));
         }
+
+        public static int[] extractMultiPacketData(string data)
     }
 }
