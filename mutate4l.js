@@ -11,6 +11,7 @@ var nameCallback = new ObservableCallback(-1);
 var notesCallback = new ObservableCallback(-1);
 var watchedClips = [];
 var udpPacketId = 1;
+var maxPacketSize = 60000;
 
 function debuglog(msg) {
     if (!debuglogging) return;
@@ -64,9 +65,9 @@ function onInit() {
 }
 
 function sendFormula(formula) {
-    var numPackets = Math.floor(formula.length / 60000) + (formula.length % 60000 === 0 ? 0 : 1);
+    var numPackets = Math.floor(formula.length / maxPacketSize) + (formula.length % maxPacketSize === 0 ? 0 : 1);
     for (var i = 0; i < numPackets; i++) {
-        outlet(0, ["/mu4l/formula/process", "<" + udpPacketId + "," + (i + 1) + "/" + numPackets + "> " + formula.substring(i * 60000, (i + 1) * 60000]);
+        outlet(0, ["/mu4l/formula/process", "<" + udpPacketId + "," + (i + 1) + "/" + numPackets + "> " + formula.substring(i * maxPacketSize, (i + 1) * maxPacketSize)]);
     }
     udpPacketId++;
 }
