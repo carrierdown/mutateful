@@ -119,11 +119,10 @@ namespace Mutate4l.IO
             string data = OscHandler.GetOscStringValue(rawData);
             int metaDataStart = data.IndexOf('<') + 1;
             int metaDataLength = data.IndexOf('>') - metaDataStart;
-            if (metaDataStart < 0 || metaDataLength < 0) return;
             string multiPacketMetaData = data.Substring(metaDataStart, metaDataLength);
             string[] metaDataParts = multiPacketMetaData.Split(',', '/');
             int id = int.Parse(metaDataParts[0]);
-            int packetIx = int.Parse(metaDataParts[1]) - 1;
+            int packetIx = int.Parse(metaDataParts[1]);
             int totalPacketCount = int.Parse(metaDataParts[2]);
             if (!udpMultiPacketsById.ContainsKey(id))
             {
@@ -131,5 +130,7 @@ namespace Mutate4l.IO
             }
             udpMultiPacketsById[id][packetIx] = data.Substring(data.IndexOf('{'));
         }
+
+        public static int[] extractMultiPacketData(string data)
     }
 }

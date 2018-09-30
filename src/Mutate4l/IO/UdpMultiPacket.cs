@@ -12,7 +12,7 @@ namespace Mutate4l.IO
             set
             {
                 PacketContents[i] = value;
-                IsCompleted = PacketContents.All(x => x != null && x.Length > 0);
+                IsCompleted = PacketContents.All(x => x.Length > 0);
             }
         }
         private string[] PacketContents;
@@ -20,9 +20,8 @@ namespace Mutate4l.IO
         public bool IsCompleted { get; private set; } = false;
         public string Content {
             get {
-                var result = "";
-                foreach (var content in PacketContents)
-                    result += content;
+                string result = "";
+                PacketContents.ForEach(x => { result += x });
                 return result;
             }
         }
