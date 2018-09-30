@@ -9,15 +9,19 @@ namespace Mutate4l.Dto
     {
         private int PitchField;
         private int VelocityField;
+        private decimal StartField;
 
         public int Pitch { get { return Math.Clamp(PitchField, 0, 127); } set { PitchField = value; } }
-        public decimal Start { get; set; }
+        public decimal Start {
+            get { return Parent != null ? Parent.Start + StartField : StartField; }
+            set { if (Parent != null) StartField = value - Parent.Start; else StartField = value; }
+        }
         public decimal Duration { get; set; }
         public int Velocity { get { return Math.Clamp(VelocityField, 1, 127); } set { VelocityField = value; } }
         public decimal End => Start + Duration;
         public bool IsSelected { get; set; }
-        public List<NoteEvent> Children { get; set; } // children have position, pitch and velocity relative to the parent noteEvent
-
+        public NoteEvent Parent { get; private set; }
+        
         public NoteEvent(int pitch, decimal start, decimal duration, int velocity)
         {
             Pitch = pitch;
@@ -32,7 +36,18 @@ namespace Mutate4l.Dto
             Start = note.Start;
             Duration = note.Duration;
             Velocity = note.Velocity;
-            // todo: should also clone children
+        }
+
+        public void SetParent(NoteEvent parent)
+        {
+            StartField -= parent.Start;
+            Parent = parent;
+        }
+
+        public void RemoveParent()
+        {
+            StartField += Parent.Start;
+            Parent = null;
         }
 
         public int CompareTo(NoteEvent b)

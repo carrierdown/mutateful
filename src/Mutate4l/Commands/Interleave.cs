@@ -34,14 +34,13 @@ namespace Mutate4l.Commands
             }
             decimal position = 0;
             int repeatsIndex = 0;
-            Clip resultClip = new Clip(4, true); // Actual length set below, according to operation
+            Clip resultClip = new Clip(4, true);
 
             switch (options.Mode)
             {
                 case Event:
                     var noteCounters = clips.Select(c => new IntCounter(c.Notes.Count)).ToArray();
                     position = clips[0].Notes[0].Start;
-                    var alreadyAddedNotes = new List<NoteEvent>();
 
                     while (noteCounters.Any(nc => !nc.Overflow))
                     {
@@ -57,21 +56,18 @@ namespace Mutate4l.Commands
                                 if (options.EnableMask[clipIndex % options.EnableMask.Length] == 1) resultClip.Notes.Add(new NoteEvent(note.Pitch, position, note.Duration, note.Velocity));
                                 if (options.ChunkChords && clip.Notes.Any(x => x.Start == note.Start && x.Pitch != note.Pitch))
                                 {
+                                    // Note: This works ok-ish, but chunking will not be 100% unless proper chunking is implemented at the clip level, since Skip for instance will not behave correctly in all situations unless chords have been chunked prior to processing
                                     var chordNotes = clip.Notes.Where(x => x.Start == note.Start && x.Pitch != note.Pitch).Select(x => new NoteEvent(x.Pitch, position, x.Duration, x.Velocity));
-                                    alreadyAddedNotes.AddRange(chordNotes);
                                     if (options.EnableMask[clipIndex % options.EnableMask.Length] == 1) resultClip.Notes.AddRange(chordNotes);
                                     currentNoteCounter.Inc(chordNotes.Count());
                                 }
                                 position += clip.DurationUntilNextNote(currentNoteCounter.Value);
+//                                position += clip.Notesclip.SilentDurationUntilNextNote(currentNoteCounter.Value);
                             }
                             if (options.Skip)
-                            {
                                 foreach (var noteCounter in noteCounters) noteCounter.Inc();
-                            }
                             else
-                            {
-                                noteCounters[clipIndex].Inc();
-                            }
+                                currentNoteCounter.Inc();
                             repeatsIndex++;
                         }
                     }

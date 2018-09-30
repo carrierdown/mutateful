@@ -1,5 +1,6 @@
 ﻿using Mutate4l.Core;
 using System;
+using System.Linq;
 
 namespace Mutate4l.Dto
 {
@@ -10,24 +11,24 @@ namespace Mutate4l.Dto
         public bool IsLooping { get; set; }
         public decimal EndDelta
         {
-            get { return Length - Notes[Notes.Count - 1].Start + Notes[0].Start; }
+            get { return Length - Math.Clamp(Notes[Notes.Count - 1].Start, 0, Length) + Notes[0].Start; }
+        }
+        public decimal EndDeltaSilent
+        {
+            get { return Length - Math.Clamp(Notes[Notes.Count - 1].End, 0, Length) + Notes[0].Start; }
         }
         public bool SelectionActive { get; private set; }
-        public bool ContainsChunks { get; private set; }
 
-        // creates chunk by adding note event 2..n as children to note event 1, removing them from the Notes list in the process
         public void Chunkify(params NoteEvent[] noteEvents)
         {
             if (noteEvents.Length < 2) return;
-            ContainsChunks = true;
-
+            NoteEvent parentNote = noteEvents[0];
+            noteEvents.Skip(1).ToList().ForEach(note => note.SetParent(parentNote));
         }
 
-        // flattens clip by moving all child note events up to the master Notes list.
         public void Flatten()
         {
-            if (!ContainsChunks) return;
-
+            Notes.ToList().ForEach(note => note.RemoveParent());
         }
 
         public Clip(decimal length, bool isLooping)
@@ -44,7 +45,6 @@ namespace Mutate4l.Dto
                 var clonedNote = new NoteEvent(note);
                 Notes.Add(clonedNote);
             }
-
         }
 
         public int CompareTo(Clip b)
@@ -69,14 +69,20 @@ namespace Mutate4l.Dto
                 return Notes[index + 1].Start - Notes[index].Start;
         }
 
+        // useful when the length of an event has changed and you want to consider only the interval of silence (if any) preceding the next event
+        public decimal SilentDurationUntilNextNote(int index)
+        {
+            if (index >= Notes.Count - 1)
+                return EndDeltaSilent;
+            var silentDuration = Notes[index + 1].Start - Notes[index].End;
+            return silentDuration > 0 ? silentDuration : 0;
+        }
+
         // returns pitch relative to first note of clip
         public int RelativePitch(int index)
         {
-            if (index < 0 || index >= Notes.Count)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-            return Notes[index].Pitch - Notes[0].Pitch;
+            if (Notes.Count == 0) return 0;
+            return Notes[Math.Clamp(index, 0, Notes.Count)].Pitch - Notes[0].Pitch;
         }
 
         /*        public NoteInfo GetNextNoteInfo()
