@@ -10,7 +10,6 @@ var clipContentsObserver = {};
 var nameCallback = new ObservableCallback(-1);
 var notesCallback = new ObservableCallback(-1);
 var watchedClips = [];
-var udpPacketId = 1;
 
 function debuglog(msg) {
     if (!debuglogging) return;
@@ -63,14 +62,6 @@ function onInit() {
     processAllClips();
 }
 
-function sendFormula(formula) {
-    var numPackets = Math.floor(formula.length / 60000) + (formula.length % 60000 === 0 ? 0 : 1);
-    for (var i = 0; i < numPackets; i++) {
-        outlet(0, ["/mu4l/formula/process", "<" + udpPacketId + "," + (i + 1) + "/" + numPackets + "> " + formula.substring(i * 60000, (i + 1) * 60000]);
-    }
-    udpPacketId++;
-}
-
 function onSelectedClipRenamedOrChanged(arg1, arg2) {
     debuglog("onSelectedClipRenamedOrChanged " + arg1 + " " + arg2);
     var clipId = arg1;
@@ -90,10 +81,10 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
             if (referredIds.indexOf(clipId) >= 0) {
                 debuglog("found current clip in referring formula - all is well\r\n");
 
-                var expandedFormula = expandFormula(formula, id);
+                var expandedFormula = expandFormulaClipRefsAnywhereEdition(formula, id);
                 if (expandedFormula) {
                     expandedFormula = "{" + id + "} " + expandedFormula;
-                    sendFormula(expandedFormula);
+                    outlet(0, ["/mu4l/formula/process", expandedFormula]);
                 } else {
                     debuglog("Unable to expand formula - check syntax: " + formula);
                 }
@@ -118,10 +109,10 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
         debuglog("hei");
         var formulaSlot = new LiveAPI("id " + clipId);
         var formula = getClipName(formulaSlot);
-        var expandedFormula = expandFormula(formula, clipId);
+        var expandedFormula = expandFormulaClipRefsAnywhereEdition(formula, clipId);
         if (expandedFormula) {
             expandedFormula = "{" + clipId + "} " + expandedFormula;
-            sendFormula(expandedFormula);
+            outlet(0, ["/mu4l/formula/process", expandedFormula]);
         } else {
             debuglog("Unable to expand formula - check syntax: " + formula);
         }
@@ -311,13 +302,13 @@ function enumerate() {
                 if (liveObject.get('has_clip') > 0) {
                     liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
                     var existingName = getClipName(liveObject);
-                    debuglog(existingName.charCodeAt(0));
+debuglog(existingName.charCodeAt(0));
                     var newName = "";
                     var clipRefString = String.fromCharCode(65 + i) + (s + 1);
                     var startBracketIx = existingName.indexOf("[");
-                    debuglog(startBracketIx);
+debuglog(startBracketIx);
                     var endBracketIx = existingName.indexOf("]", startBracketIx);
-                    debuglog(endBracketIx);
+debuglog(endBracketIx);
                     if (startBracketIx >= 0 && endBracketIx >= 0) {
                         newName = existingName.substring(0, startBracketIx + 1) + clipRefString + existingName.substring(endBracketIx);
                     } else {
@@ -380,10 +371,10 @@ function processAllClips() {
                     liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
                     clipName = getClipName(liveObject);
                     if (containsFormula(clipName)) {
-                        var expandedFormula = expandFormula(clipName, liveObject.id);
+                        var expandedFormula = expandFormulaClipRefsAnywhereEdition(clipName, liveObject.id);
                         if (expandedFormula) {
                             expandedFormula = "{" + liveObject.id + "} " + expandedFormula;
-                            sendFormula(expandedFormula);
+                            outlet(0, ["/mu4l/formula/process", expandedFormula]);
                         } else {
                             debuglog("Unable to expand formula for track " + (i + 1) + " clip " + (s + 1) + " - check syntax");
                         }
@@ -432,6 +423,67 @@ function formulaToReferredIds(formula) {
 }
 
 function expandFormula(formula, ownId) {
+    var clipRefTester = /^([a-z]+\d+)$|^(\*)$/,
+        clipRefsFound = false,
+        clipRefs = [],
+        expandedFormulaParts = [];
+
+    if (formula.length < 5) return;
+
+    var formulaStartIndex = formula.indexOf("=");
+    var formulaStopIndex = formula.indexOf(";");
+    if (formulaStartIndex == -1) return; // no valid formula
+
+    if (formulaStopIndex >= 0) {
+        formula = formula.substring(formulaStartIndex + 1, formulaStopIndex).toLowerCase();
+    } else {
+        formula = formula.substring(formulaStartIndex + 1).toLowerCase();
+    }
+    var parts = formula.split(" ");
+    for (var i = 0; i < parts.length; i++) { 
+        var result = clipRefTester.test(parts[i]); 
+        if (!result && clipRefsFound) break;
+        if (!result && i == 0) break;
+        if (result) {
+            clipRefsFound = true;
+            clipRefs.push(parts[i]);
+        }
+    }
+
+    debuglog("Found cliprefs...");
+    for (i = 0; i < clipRefs.length; i++) {
+        debuglog("clipref " + clipRefs[i]);
+    }
+
+    for (i = 0; i < clipRefs.length; i++) {
+        var target = resolveClipReference(clipRefs[i]);
+        var liveObjectAtClip = getLiveObjectAtClip(target.x, target.y);
+
+        debuglog("Iterating cliprefs");
+        if (watchedClips[liveObjectAtClip.id] === undefined) {
+            debuglog("watchedclips at " + liveObjectAtClip.id + " set to " + ownId);
+            watchedClips[liveObjectAtClip.id] = [ownId];
+        } else if (watchedClips[liveObjectAtClip.id].indexOf(ownId) < 0) {
+            watchedClips[liveObjectAtClip.id].push(ownId);
+        }
+        debuglog("updated watchedClips for id " + liveObjectAtClip.id + ": " + watchedClips[liveObjectAtClip.id]);
+
+        var clipData = getClipData(liveObjectAtClip);
+        if (!clipData) {
+            return;
+        }
+        expandedFormulaParts.push("[" + clipData + "]");
+    }
+
+    for (i = 0; i < parts.length; i++) {
+        if (!clipRefTester.test(parts[i])) {
+            expandedFormulaParts.push(parts[i]);
+        }
+    }
+    return expandedFormulaParts.join(" ");
+}
+
+function expandFormulaClipRefsAnywhereEdition(formula, ownId) {
     var clipRefTester = /^([a-z]+\d+)$|^(\*)$/,
         expandedFormulaParts = [];
 
