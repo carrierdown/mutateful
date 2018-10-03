@@ -37,6 +37,7 @@ namespace Mutate4l.Cli
             { "ratchet", Ratchet },
             { "relength", Relength },
             { "scan", Scan },
+            { "take", Take },
             { "filter", Filter },
             { "transpose", Transpose }
         };
@@ -67,7 +68,8 @@ namespace Mutate4l.Cli
             { "-chunkchords", ChunkChords },
             { "-by", By },
             { "-factor", Factor },
-            { "-with", With} 
+            { "-with", With },
+            { "-solo", Solo }
         };
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>
@@ -114,7 +116,7 @@ namespace Mutate4l.Cli
             if (Buffer[pos] == '[')
             {
                 int i = pos + 1;
-                while(i < Buffer.Length && (IsNumeric(Buffer[i]) || Buffer[i] == ' ' || Buffer[i] == '.'))
+                while(i < Buffer.Length && (IsNumeric(Buffer[i]) || Buffer[i] == ' ' || Buffer[i] == '.' || Buffer[i] == 'e' || Buffer[i] == '-' || Buffer[i] == ',' || Buffer[i] == ':'))
                 {
                     i++;
                 }
@@ -189,8 +191,9 @@ namespace Mutate4l.Cli
             throw new Exception($"Unknown token encountered at position {initialPos}: {identifier}");
         }
 
-        public IEnumerable<Token> GetTokens()
+        public bool TryGetTokens(out List<Token> tokens)
         {
+            var result = new List<Token>();
             int position = 0;
             while (position < Buffer.Length)
             {
@@ -237,7 +240,71 @@ namespace Mutate4l.Cli
                 if (token != null)
                 {
                     position += token.Value.Length;
+                    result.Add(token);
+                }
+                else
+                {
+                    tokens = null;
+                    return false;
+                }
+                position = SkipNonTokens(position);
+            }
+            tokens = result;
+            return true;
+        }
+
+        public IEnumerable<Token> GetTokens()
+        {
+            int position = 0;
+            while (position < Buffer.Length) // todo: add safety net here to avoid endless loop on unrecognized input
+            {
+                Token token = null;
+                if (IsSingleOperator(position))
+                {
+                    char value = Buffer[position];
+                    token = new Token(SingleOperators[value], value.ToString(), position);
+                }
+                else if (IsDoubleOperator(position))
+                {
+                    string value = $"{Buffer[position]}{Buffer[position + 1]}";
+                    token = new Token(DoubleOperators[value], value, position);
+                }
+                else if (IsClipReference(position))
+                {
+                    if (Buffer[position] == '*')
+                        token = new Token(ClipReference, "*", position);
+                    else
+                        token = new Token(ClipReference, GetRemainingNumericToken(position, 2), position);
+                }
+                else if (IsInlineClip(position))
+                {
+                    token = new Token(InlineClip, Buffer.Substring(position, (Buffer.IndexOf(']', position) - position + 1)), position);
+                }
+                else if (IsMusicalDivision(position))
+                {
+                    token = new Token(MusicalDivision, GetRemainingNumericToken(position, 3), position);
+                }
+                else if (IsNumeric(position))
+                {
+                    token = new Token(Number, GetRemainingNumericToken(position, 1), position);
+                }
+                else if (IsAlpha(position))
+                {
+                    Token identifierToken = GetIdentifier(position, Commands, EnumValues);
+                    token = identifierToken;
+                }
+                else if (IsOption(position))
+                {
+                    Token identifierToken = GetIdentifier(position, Options);
+                    token = identifierToken;
+                }
+                if (token != null)
+                {
+                    position += token.Value.Length;
                     yield return token;
+                } else
+                {
+
                 }
                 position = SkipNonTokens(position);
             }

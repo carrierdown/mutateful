@@ -20,6 +20,7 @@
         Ratchet,
         Relength,
         Scan,
+        Take,
         Transpose,
         _CommandsEnd,
 
@@ -49,6 +50,7 @@
         By,
         Factor,
         With,
+        Solo,
         _OptionsEnd,
 
         _EnumValuesBegin,

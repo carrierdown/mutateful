@@ -17,6 +17,7 @@ namespace Mutate4l.IO
             return GetClipData("/mu4l/clip/get", channel, clip);
         }
 
+        // currently unused
         public static Clip GetSelectedClip()
         {
             return GetClipData("/mu4l/selectedclip/get", 0, 0);
@@ -38,6 +39,7 @@ namespace Mutate4l.IO
             return IOUtilities.StringToClip(noteData);
         }
 
+        // currently unused
         public static void SetClips(int trackNo, int startingClipNo, Clip[] clips)
         {
             var i = 0;
@@ -47,6 +49,7 @@ namespace Mutate4l.IO
             }
         }
 
+        // currently unused
         public static void SetClip(int trackNo, int clipNo, Clip clip)
         {
             string data = IOUtilities.ClipToString(clip);
@@ -69,6 +72,7 @@ namespace Mutate4l.IO
             }
         }
 
+        // currently unused
         public static void SetSelectedClip(Clip clip)
         {
             string data = IOUtilities.ClipToString(clip);
@@ -95,6 +99,7 @@ namespace Mutate4l.IO
             return data.Contains("/mu4l/out/hello");
         }
 
+        // currently unused
         public static void EnumerateClips()
         {
             byte[] message = OscHandler.CreateOscMessage("/mu4l/enum", 0, 0);

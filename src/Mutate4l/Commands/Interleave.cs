@@ -10,7 +10,8 @@ namespace Mutate4l.Commands
     public class InterleaveOptions
     {
         public bool ChunkChords { get; set; } = true; // Process notes having the exact same start times as a single event. Only applies to time mode.
-        public int[] EnableMask { get; set; } = new int[] { 1 }; // Allows specifying a sequence of numbers to use as a mask for whether the note should be included or omitted. E.g. 1 0 will alternately play and omit every even/odd note. Useful when combining two or more clips but you want to retain only the notes for the current track. In this scenario you would have several formulas that are the same except having different masks.
+        public int[] EnableMask { get; set; } = new int[] { 1 }; // Deprecated. Allows specifying a sequence of numbers to use as a mask for whether the note should be included or omitted. E.g. 1 0 will alternately play and omit every even/odd note. Useful when combining two or more clips but you want to retain only the notes for the current track. In this scenario you would have several formulas that are the same except having different masks.
+        public bool Solo { get; set; } = false; // A quicker and more convenient way to control what enablemask is usually made to do - soloing the events from the current channel only.
         public InterleaveMode Mode { get; set; } = Time;
         public decimal[] Ranges { get; set; } = new decimal[] { 1 };
         public int[] Repeats { get; set; } = new int[] { 1 };
@@ -26,7 +27,7 @@ namespace Mutate4l.Commands
 
     public class Interleave
     {
-        public static ProcessResultArray<Clip> Apply(InterleaveOptions options, params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(InterleaveOptions options, ClipMetaData metadata, params Clip[] clips)
         {
             if (clips.Length < 2)
             {
@@ -53,12 +54,14 @@ namespace Mutate4l.Commands
                             {
                                 var note = clip.Notes[currentNoteCounter.Value];
 
-                                if (options.EnableMask[clipIndex % options.EnableMask.Length] == 1) resultClip.Notes.Add(new NoteEvent(note.Pitch, position, note.Duration, note.Velocity));
+                                if (!options.Solo || clip.ClipReference.Track == metadata.TrackNumber) resultClip.Notes.Add(new NoteEvent(note.Pitch, position, note.Duration, note.Velocity));
+                                //if (options.EnableMask[clipIndex % options.EnableMask.Length] == 1) resultClip.Notes.Add(new NoteEvent(note.Pitch, position, note.Duration, note.Velocity));
                                 if (options.ChunkChords && clip.Notes.Any(x => x.Start == note.Start && x.Pitch != note.Pitch))
                                 {
                                     // Note: This works ok-ish, but chunking will not be 100% unless proper chunking is implemented at the clip level, since Skip for instance will not behave correctly in all situations unless chords have been chunked prior to processing
                                     var chordNotes = clip.Notes.Where(x => x.Start == note.Start && x.Pitch != note.Pitch).Select(x => new NoteEvent(x.Pitch, position, x.Duration, x.Velocity));
-                                    if (options.EnableMask[clipIndex % options.EnableMask.Length] == 1) resultClip.Notes.AddRange(chordNotes);
+                                    if (!options.Solo || clip.ClipReference.Track == metadata.TrackNumber) resultClip.Notes.AddRange(chordNotes);
+                                    //if (options.EnableMask[clipIndex % options.EnableMask.Length] == 1) resultClip.Notes.AddRange(chordNotes);
                                     currentNoteCounter.Inc(chordNotes.Count());
                                 }
                                 position += clip.DurationUntilNextNote(currentNoteCounter.Value);
@@ -84,7 +87,7 @@ namespace Mutate4l.Commands
                             var currentTimeRange = options.Ranges[timeRangeIndex];
                             for (var repeats = 0; repeats < options.Repeats[repeatsIndex % options.Repeats.Length]; repeats++) 
                             {
-                                if (options.EnableMask[clipIndex % options.EnableMask.Length] == 1)
+                                if (!options.Solo || clip.ClipReference.Track == metadata.TrackNumber)
                                 {
                                     resultClip.Notes.AddRange(
                                         ClipUtilities.GetSplitNotesInRangeAtPosition(

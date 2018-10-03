@@ -20,7 +20,7 @@ namespace Mutate4l
             ProcessResultArray<Clip> resultContainer = new ProcessResultArray<Clip>("No commands specified");
             foreach (var command in chainedCommand.Commands)
             {
-                resultContainer = ProcessCommand(command, currentSourceClips);
+                resultContainer = ProcessCommand(command, currentSourceClips, chainedCommand.TargetMetaData);
                 if (resultContainer.Success)
                     currentSourceClips = resultContainer.Result;
                 else
@@ -28,7 +28,7 @@ namespace Mutate4l
             }
             if (resultContainer.Success && resultContainer.Result.Length > 0)
             {
-                UdpConnector.SetClipById(chainedCommand.TargetId, resultContainer.Result[0]);
+                UdpConnector.SetClipById(chainedCommand.TargetMetaData.Id, resultContainer.Result[0]);
             }
             else
                 return new Result("No clips affected");
@@ -36,7 +36,7 @@ namespace Mutate4l
             return new Result(resultContainer.Success, resultContainer.ErrorMessage);
         }
 
-        public static ProcessResultArray<Clip> ProcessCommand(Command command, Clip[] clips)
+        public static ProcessResultArray<Clip> ProcessCommand(Command command, Clip[] clips, ClipMetaData targetMetadata)
         {
             ProcessResultArray<Clip> resultContainer;
             switch (command.Id)
@@ -51,12 +51,12 @@ namespace Mutate4l
                     resultContainer = Filter.Apply(OptionParser.ParseOptions<FilterOptions>(command), clips);
                     break;
                 case TokenType.Interleave:
-                    resultContainer = Interleave.Apply(OptionParser.ParseOptions<InterleaveOptions>(command), clips); 
+                    resultContainer = Interleave.Apply(OptionParser.ParseOptions<InterleaveOptions>(command), targetMetadata, clips); 
                     break;
                 case TokenType.InterleaveEvent:
                     var options = OptionParser.ParseOptions<InterleaveOptions>(command);
                     options.Mode = InterleaveMode.Event;
-                    resultContainer = Interleave.Apply(options, clips);
+                    resultContainer = Interleave.Apply(options, targetMetadata, clips);
                     break;
                 case TokenType.Monophonize:
                     resultContainer = Monophonize.Apply(clips);
@@ -75,6 +75,9 @@ namespace Mutate4l
                     break;
                 case TokenType.Slice:
                     resultContainer = Slice.Apply(OptionParser.ParseOptions<SliceOptions>(command), clips);
+                    break;
+                case TokenType.Take:
+                    resultContainer = Take.Apply(OptionParser.ParseOptions<TakeOptions>(command), clips);
                     break;
                 case TokenType.Transpose:
                     resultContainer = Transpose.Apply(OptionParser.ParseOptions<TransposeOptions>(command), clips);

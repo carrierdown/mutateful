@@ -77,13 +77,11 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
             var formulaSlot = new LiveAPI("id " + id);
             var formula = getClipName(formulaSlot);
             var referredIds = formulaToReferredIds(formula);
-            debuglog("attempting to find id " + clipId + " in referred ids: " + referredIds + " extra stuff " + referredIds.length);
+//            debuglog("attempting to find id " + clipId + " in referred ids: " + referredIds + " extra stuff " + referredIds.length);
             if (referredIds.indexOf(clipId) >= 0) {
-                debuglog("found current clip in referring formula - all is well\r\n");
-
-                var expandedFormula = expandFormulaClipRefsAnywhereEdition(formula, id);
+//                debuglog("found current clip in referring formula - all is well\r\n");
+                var expandedFormula = expandFormula(formula, id);
                 if (expandedFormula) {
-                    expandedFormula = "{" + id + "} " + expandedFormula;
                     outlet(0, ["/mu4l/formula/process", expandedFormula]);
                 } else {
                     debuglog("Unable to expand formula - check syntax: " + formula);
@@ -109,9 +107,9 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
         debuglog("hei");
         var formulaSlot = new LiveAPI("id " + clipId);
         var formula = getClipName(formulaSlot);
-        var expandedFormula = expandFormulaClipRefsAnywhereEdition(formula, clipId);
+        var expandedFormula = expandFormula(formula, clipId);
+        debuglog("outlet 0: " + formula);
         if (expandedFormula) {
-            expandedFormula = "{" + clipId + "} " + expandedFormula;
             outlet(0, ["/mu4l/formula/process", expandedFormula]);
         } else {
             debuglog("Unable to expand formula - check syntax: " + formula);
@@ -190,7 +188,21 @@ function getLiveObjectAtClip(trackNo, clipNo) {
     return liveObject;
 }
 
+function getTrackNumber(liveObject) {
+    var path = liveObject.path;
+    debuglog("getTrackNumber " + path);
+    var pathParts = path.split(" ");
+    var trackNoIx = pathParts.indexOf("tracks");
+    if (trackNoIx >= 0) {
+        var trackNoPart = parseInt(pathParts[trackNoIx + 1], 10);
+        return trackNoPart;
+    }
+    return false;
+}
+
 function getClipData(liveObject) {
+    if (!liveObject) return;
+    debuglog("Hello from getclipdata. trackNo is " + getTrackNumber(liveObject));
     var loopStart = liveObject.get('loop_start');
     var clipLength = liveObject.get('length');
     var looping = liveObject.get('looping');
@@ -202,7 +214,6 @@ function getClipData(liveObject) {
         }
         result += data[i + 1 /* pitch */] + " " + data[i + 2 /* start */] + " " + data[i + 3 /* duration */] + " " + data[i + 4 /* velocity */] + " ";
     }
-//    debuglog(result);
     return result.slice(0, result.length - 1);  // remove last space
 }
 
@@ -371,9 +382,8 @@ function processAllClips() {
                     liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
                     clipName = getClipName(liveObject);
                     if (containsFormula(clipName)) {
-                        var expandedFormula = expandFormulaClipRefsAnywhereEdition(clipName, liveObject.id);
+                        var expandedFormula = expandFormula(clipName, liveObject.id);
                         if (expandedFormula) {
-                            expandedFormula = "{" + liveObject.id + "} " + expandedFormula;
                             outlet(0, ["/mu4l/formula/process", expandedFormula]);
                         } else {
                             debuglog("Unable to expand formula for track " + (i + 1) + " clip " + (s + 1) + " - check syntax");
@@ -424,67 +434,6 @@ function formulaToReferredIds(formula) {
 
 function expandFormula(formula, ownId) {
     var clipRefTester = /^([a-z]+\d+)$|^(\*)$/,
-        clipRefsFound = false,
-        clipRefs = [],
-        expandedFormulaParts = [];
-
-    if (formula.length < 5) return;
-
-    var formulaStartIndex = formula.indexOf("=");
-    var formulaStopIndex = formula.indexOf(";");
-    if (formulaStartIndex == -1) return; // no valid formula
-
-    if (formulaStopIndex >= 0) {
-        formula = formula.substring(formulaStartIndex + 1, formulaStopIndex).toLowerCase();
-    } else {
-        formula = formula.substring(formulaStartIndex + 1).toLowerCase();
-    }
-    var parts = formula.split(" ");
-    for (var i = 0; i < parts.length; i++) { 
-        var result = clipRefTester.test(parts[i]); 
-        if (!result && clipRefsFound) break;
-        if (!result && i == 0) break;
-        if (result) {
-            clipRefsFound = true;
-            clipRefs.push(parts[i]);
-        }
-    }
-
-    debuglog("Found cliprefs...");
-    for (i = 0; i < clipRefs.length; i++) {
-        debuglog("clipref " + clipRefs[i]);
-    }
-
-    for (i = 0; i < clipRefs.length; i++) {
-        var target = resolveClipReference(clipRefs[i]);
-        var liveObjectAtClip = getLiveObjectAtClip(target.x, target.y);
-
-        debuglog("Iterating cliprefs");
-        if (watchedClips[liveObjectAtClip.id] === undefined) {
-            debuglog("watchedclips at " + liveObjectAtClip.id + " set to " + ownId);
-            watchedClips[liveObjectAtClip.id] = [ownId];
-        } else if (watchedClips[liveObjectAtClip.id].indexOf(ownId) < 0) {
-            watchedClips[liveObjectAtClip.id].push(ownId);
-        }
-        debuglog("updated watchedClips for id " + liveObjectAtClip.id + ": " + watchedClips[liveObjectAtClip.id]);
-
-        var clipData = getClipData(liveObjectAtClip);
-        if (!clipData) {
-            return;
-        }
-        expandedFormulaParts.push("[" + clipData + "]");
-    }
-
-    for (i = 0; i < parts.length; i++) {
-        if (!clipRefTester.test(parts[i])) {
-            expandedFormulaParts.push(parts[i]);
-        }
-    }
-    return expandedFormulaParts.join(" ");
-}
-
-function expandFormulaClipRefsAnywhereEdition(formula, ownId) {
-    var clipRefTester = /^([a-z]+\d+)$|^(\*)$/,
         expandedFormulaParts = [];
 
     if (formula.length < 5) return;
@@ -506,6 +455,10 @@ function expandFormulaClipRefsAnywhereEdition(formula, ownId) {
         if (result) {
             var target = resolveClipReference(part);
             var liveObjectAtClip = getLiveObjectAtClip(target.x, target.y);
+            if (!liveObjectAtClip) {
+                debuglog("liveobjectatclip undefined: " + target.x + "," + target.y);
+                return;
+            }
 
             debuglog("Getting clipRef " + part);
             var clipData = getClipData(liveObjectAtClip);
@@ -517,13 +470,13 @@ function expandFormulaClipRefsAnywhereEdition(formula, ownId) {
                 watchedClips[liveObjectAtClip.id].push(ownId);
             }
             debuglog("updated watchedClips for id " + liveObjectAtClip.id + ": " + watchedClips[liveObjectAtClip.id]);
-            var transformedPart = "[" + clipData + "]";
+            var transformedPart = "[" + target.x + "," + target.y + ":" + clipData + "]";
         } else {
             transformedPart = part;
         }
         expandedFormulaParts.push(transformedPart);
     }
-    return expandedFormulaParts.join(" ");
+    return "{id:" + ownId + ",trackIx:" + getTrackNumber(new LiveAPI("id " + ownId)) + "} " + expandedFormulaParts.join(" ");
 }
 
 function resolveClipReference(reference) {

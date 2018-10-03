@@ -4,11 +4,24 @@ using System.Linq;
 
 namespace Mutate4l.Dto
 {
+    public struct ClipReference
+    {
+        public int Track;
+        public int Clip;
+
+        public ClipReference(int track, int clip)
+        {
+            Track = track;
+            Clip = clip;
+        }
+    }
+
     public class Clip : IComparable<Clip>
     {
         public SortedList<NoteEvent> Notes { get; set; }
         public decimal Length { get; set; }
         public bool IsLooping { get; set; }
+        public ClipReference ClipReference { get; set; }
         public decimal EndDelta
         {
             get { return Length - Math.Clamp(Notes[Notes.Count - 1].Start, 0, Length) + Notes[0].Start; }

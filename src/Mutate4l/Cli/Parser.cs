@@ -27,73 +27,42 @@ namespace Mutate4l.Cli
             return new Tuple<int, int>(x, y);
         }
 
-        /*
-        public static ProcessResult<ChainedCommand> ParseTokensToChainedCommand(IEnumerable<Token> tokens)
+        public static bool TryExtractMetaData(string formula, out ClipMetaData metaData)
         {
-            Token[] tokenList = tokens.ToArray();
-            var sourceClips = tokenList.TakeWhile(t => t.IsClipReference);
-            var commandTokens = tokenList.Skip(sourceClips.Count()).TakeWhile(t => t.IsCommand || t.IsOption || t.IsOptionValue).ToArray();
-            var destClips = tokenList.Skip(sourceClips.Count() + commandTokens.Count()).SkipWhile(t => t.Type == TokenType.Destination).TakeWhile(t => t.IsClipReference);
+            int index = formula.IndexOf('{') + 1;
+            string rawMetaData = formula.Substring(index, formula.IndexOf('}') - index);
+            var metaDataPairs = rawMetaData.Split(',');
+            string[] metaDataHeaders = new string[] { "id:", "trackIx:" };
+            int succesfullyExtractedParams = 0;
+            metaData.Id = "";
+            metaData.TrackNumber = -1;
 
-            if (sourceClips.Count() == 0)
-                return new ProcessResult<ChainedCommand>("No source clips specified.");
-
-            if (destClips.Count() == 0 && sourceClips.Count() == 1)
-                destClips = sourceClips;
-            else if (destClips.Count() == 0)
-                return new ProcessResult<ChainedCommand>("No destination clip specified. When operating on a single clip, the destination clip may be omitted. Otherwise, it must be specified.");
-
-            var commandTokensLists = new List<List<Token>>();
-            var activeCommandTokenList = new List<Token>();
-            
-            foreach (var token in commandTokens)
+            foreach (var metaDataPair in metaDataPairs)
             {
-                if (token.IsCommand)
+                int ix, value;
+                if ((ix = metaDataPair.IndexOf(metaDataHeaders[0])) >= 0)
                 {
-                    if (activeCommandTokenList.Count == 0)
-                    {
-                        activeCommandTokenList.Add(token);
-                    }
-                    else
-                    {
-                        commandTokensLists.Add(activeCommandTokenList);
-                        activeCommandTokenList = new List<Token> { token };
-                    }
+                    metaData.Id = metaDataPair.Substring(ix + metaDataHeaders[0].Length);
+                    succesfullyExtractedParams++;
                 }
-                else
+                else if ((ix = metaDataPair.IndexOf(metaDataHeaders[1])) >= 0 && int.TryParse(metaDataPair.Substring(ix + metaDataHeaders[1].Length), out value))
                 {
-                    activeCommandTokenList.Add(token);
+                    metaData.TrackNumber = value;
+                    succesfullyExtractedParams++;
                 }
             }
-            commandTokensLists.Add(activeCommandTokenList); // add last command token list
-            var commands = new List<Command>();
-            foreach (var commandTokensList in commandTokensLists)
-            {
-                commands.Add(ParseTokensToCommand(commandTokensList));
-            }
-
-            var chainedCommand = new ChainedCommand
-            {
-                SourceClips = sourceClips.Select(c => ResolveClipReference(c.Value)).ToList(),
-                TargetClips = destClips.Select(c => ResolveClipReference(c.Value)).ToList(),
-                Commands = commands
-            };
-            return new ProcessResult<ChainedCommand>(chainedCommand);
-        }*/
+            return succesfullyExtractedParams == metaDataHeaders.Length;
+        }
 
         public static ProcessResult<ChainedCommand> ParseFormulaToChainedCommand(string formula)
         {
-            // TBC: Change parse logic to deal with sourceclips anywhere in the formula - and add logic to make source clips specified inside a formula be added as data for the relevant option (with new option type clip or similar)
             var valid = new char[] { '{', '[', ']', '}' }.All(c => formula.IndexOf(c) >= 0);
             if (!valid) return new ProcessResult<ChainedCommand>($"Invalid formula: {formula}");
 
-            int index = formula.IndexOf('{') + 1;
-            string targetId = formula.Substring(index, formula.IndexOf('}') - index);
-            /* formula
-                .Substring(formula.IndexOf('['), formula.LastIndexOf(']') - formula.IndexOf('['))
-                .Split(']')
-                .Select(x => IOUtilities.StringToClip(x.Substring(x.IndexOf('[') + 1)))
-                .ToArray();*/
+            ClipMetaData metadata;
+            if (!TryExtractMetaData(formula, out metadata))
+                return new ProcessResult<ChainedCommand>($"Unable to extract metadata for formula: {formula}");
+
             string command = formula.Substring(formula.LastIndexOf('}') + 1);
 
             var lexer = new Lexer(command);
@@ -126,12 +95,7 @@ namespace Mutate4l.Cli
             commandTokensLists.Add(activeCommandTokenList); // add last command token list
             var commands = commandTokensLists.Select(x => ParseTokensToCommand(x)).ToList();
 
-            var chainedCommand = new ChainedCommand
-            {
-                SourceClips = sourceClips,
-                TargetId = targetId,
-                Commands = commands
-            };
+            var chainedCommand = new ChainedCommand(commands, sourceClips, metadata);
             return new ProcessResult<ChainedCommand>(chainedCommand);
         }
 

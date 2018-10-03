@@ -32,7 +32,7 @@ namespace Mutate4lTests.ClipActions
                 Ranges = new decimal[] { 1, 1 },
                 Mode = InterleaveMode.Time
             };
-            var resultObj = Interleave.Apply(options, clip1, clip2);
+            var resultObj = Interleave.Apply(options, new ClipMetaData("", -1), clip1, clip2);
             Assert.IsTrue(resultObj.Success);
             Assert.IsTrue(resultObj.Result.Length == 1);
             var result = resultObj.Result[0];
@@ -70,7 +70,7 @@ namespace Mutate4lTests.ClipActions
                 Mode = InterleaveMode.Time
             };
 
-            var resultObj = Interleave.Apply(options, clip1, clip2);
+            var resultObj = Interleave.Apply(options, new ClipMetaData("", -1), clip1, clip2);
             Assert.IsTrue(resultObj.Success);
             Assert.IsTrue(resultObj.Result.Length == 1);
             var result = resultObj.Result[0];
@@ -114,7 +114,7 @@ namespace Mutate4lTests.ClipActions
                 Ranges = new decimal[] { 1, 1 },
                 Mode = InterleaveMode.Time
             };
-            var resultObj = Interleave.Apply(options, clip1, clip2);
+            var resultObj = Interleave.Apply(options, new ClipMetaData("", -1), clip1, clip2);
             var result = resultObj.Result[0];
             Assert.AreEqual(8, result.Length);
             Assert.AreEqual(60, result.Notes[0].Pitch);
@@ -176,7 +176,7 @@ namespace Mutate4lTests.ClipActions
             {
                 Mode = InterleaveMode.Event
             };
-            var resultObj = Interleave.Apply(options, clip1, clip2);
+            var resultObj = Interleave.Apply(options, new ClipMetaData("", -1), clip1, clip2);
             Assert.IsTrue(resultObj.Success);
             Assert.IsTrue(resultObj.Result.Length == 1);
             var clip = resultObj.Result[0];
