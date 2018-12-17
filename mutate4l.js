@@ -16,6 +16,64 @@ function debuglog(msg) {
     post(msg + "\r\n");
 }
 
+function floatToByteArray(value) {
+    var floatValue = new Float32Array(1);
+    floatValue[0] = value;
+    return new Uint8Array(floatValue.buffer);
+}
+
+function asciiStringToByteArray(input) {
+    var bytes = new Uint8Array(input.length);
+    for (var i = 0; i < input.length; i++)
+    {
+        charCode = input.charCodeAt(i);
+        bytes[i] = charCode & 0xFF;
+    }
+    return bytes;
+}
+
+function replaceAt(string, index, replace) {
+  return string.substring(0, index) + replace + string.substring(index + 1);
+}
+
+function testOscBlob() {
+    var string = "/mu4l/test\0\0,s\0\0heidetteerentest";
+    post(string.length);
+    var countBytes = [4,0,0,0];
+    var valueBytes = [154,153,153,62];
+    //var result = new Uint8Array(countBytes.length + valueBytes.length);
+
+    /*for (var i = 0; i < string.length; i++)
+    {
+        charCode = string.charCodeAt(i);
+        result[i] = charCode & 0xFF;
+    }*//*
+    var pos = 0;
+    for (i = 0; i < countBytes.length; i++) {
+        result[pos++] = countBytes[i];
+    }
+    for (i = 0; i < valueBytes.length; i++) {
+        result[pos++] = valueBytes[i];
+    }
+    post(result.length + "\r\n");
+    for (i = 0; i < result.length; i++) {
+        post(result[i] + " ");
+    }
+    var finalRes = new Uint32Array(result.buffer);
+    var finalfinal = [];
+    finalfinal[0] = finalRes[0];
+    finalfinal[1] = finalRes[1];
+    finalfinal[2] = finalRes[2];
+    finalfinal[3] = finalRes[3];
+*/
+    var result = [];
+    for (var y = 0; y < 255; y++) {
+        result[y] = y;
+    }
+
+    outlet(0, ["/mu4l/test", result]);
+}
+
 function ObservableCallback(id) {
     this.id = id;
     this.name = "<not set>";
@@ -477,6 +535,121 @@ function expandFormula(formula, ownId) {
         expandedFormulaParts.push(transformedPart);
     }
     return "{id:" + ownId + ",trackIx:" + getTrackNumber(new LiveAPI("id " + ownId)) + "} " + expandedFormulaParts.join(" ");
+}
+
+function expandFormulaAsBytes(formula, ownId) {
+    var clipRefTester = /^([a-z]+\d+)$|^(\*)$/,
+        expandedFormulaParts = [];
+
+    if (formula.length < 5) return;
+
+    var formulaStartIndex = formula.indexOf("=");
+    var formulaStopIndex = formula.indexOf(";");
+    if (formulaStartIndex == -1) return; // no valid formula
+
+    if (formulaStopIndex >= 0) {
+        formula = formula.substring(formulaStartIndex + 1, formulaStopIndex).toLowerCase();
+    } else {
+        formula = formula.substring(formulaStartIndex + 1).toLowerCase();
+    }
+    var parts = formula.split(" ");
+
+    for (var i = 0; i < parts.length; i++) {
+        var part = parts[i];
+        var result = clipRefTester.test(part); 
+        if (result) {
+            var target = resolveClipReference(part);
+            var liveObjectAtClip = getLiveObjectAtClip(target.x, target.y);
+            if (!liveObjectAtClip) {
+                debuglog("liveobjectatclip undefined: " + target.x + "," + target.y);
+                return;
+            }
+
+            debuglog("Getting clipRef " + part);
+            var clipData = getClipDataAsBytes(liveObjectAtClip);
+
+            if (watchedClips[liveObjectAtClip.id] === undefined) {
+                debuglog("watchedclips at " + liveObjectAtClip.id + " set to " + ownId);
+                watchedClips[liveObjectAtClip.id] = [ownId];
+            } else if (watchedClips[liveObjectAtClip.id].indexOf(ownId) < 0) {
+                watchedClips[liveObjectAtClip.id].push(ownId);
+            }
+            debuglog("updated watchedClips for id " + liveObjectAtClip.id + ": " + watchedClips[liveObjectAtClip.id]);
+            var transformedPart = "[" + target.x + "," + target.y + ":" + clipData + "]";
+        } else {
+            transformedPart = part;
+        }
+        expandedFormulaParts.push(transformedPart);
+    }
+    return "{id:" + ownId + ",trackIx:" + getTrackNumber(new LiveAPI("id " + ownId)) + "} " + expandedFormulaParts.join(" ");
+}
+
+function getClipDataAsBytes(liveObject) {
+    if (!liveObject) return;
+    debuglog("Hello from getClipDataAsBytes. trackNo is " + getTrackNumber(liveObject));
+
+    var loopStart = liveObject.get('loop_start'),
+        clipLength = liveObject.get('length'),
+        looping = liveObject.get('looping'),
+        data = liveObject.call("get_notes", loopStart, 0, clipLength, 128),
+        sizeOfOneNoteInBytes = 1 /* pitch */ + 4 /* start */ + 4 /* duration */ + 1 /* velocity */,
+        sizeOfHeaderInBytes = 4 /* clipLength */ + 1 /* looping */,
+        bufferContentOffset = sizeOfHeaderInBytes,
+        notes = [];
+
+    for (var i = 2, len = data.length - 1; i < len; i += 6) {
+        if (data[i + 5 /* muted */] === 1) {
+            continue;
+        }
+        notes.push({pitch: data[i + 1], start: data [i + 2], duration: data[i + 3], velocity: data[i + 4]});
+    }
+    var sizeOfByteBuffer = sizeOfHeaderInBytes + (notes.length * sizeOfOneNoteInBytes),
+        resultBuffer = new Uint8Array(sizeOfByteBuffer);
+
+    floatToBufferAtPos(clipLength, resultBuffer, 0);
+    resultBuffer[4] = looping;
+
+    for (i = 0; i < notes.length; i++) {
+        var note = notes[i];
+        var currentNoteOffset = bufferContentOffset + (i * sizeOfOneNoteInBytes);
+        resultBuffer[currentNoteOffset] = note.pitch;
+        floatToBufferAtPos(note.start, resultBuffer, currentNoteOffset + 1);
+        floatToBufferAtPos(note.duration, resultBuffer, currentNoteOffset + 5);
+        resultBuffer[currentNoteOffset + 9] = note.velocity;
+    }
+    return resultBuffer;
+}
+
+function getSelectedClipAsBytes() {
+    var liveObject = new LiveAPI("live_set view selected_track");
+    var result = "";
+    if (!liveObject) {
+        debuglog('Invalid liveObject, exiting...');
+        return;
+    }
+    if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0) {
+        liveObject.goto("live_set view highlighted_clip_slot");
+        if (liveObject.get('has_clip')) {
+            liveObject.goto("live_set view highlighted_clip_slot clip");
+            var buffer = getClipDataAsBytes(liveObject);
+            for (var i = 0; i < buffer.length; i++) {
+                post(buffer[i] + ",");
+            }
+        }
+    }
+}
+
+function floatToBufferAtPos(value, byteBuffer, pos) {
+    var buffer = floatToByteArray(value);
+    for (var i = 0; i < buffer.length; i++) {
+        byteBuffer[pos + i] = buffer[i];
+    }
+}
+
+function floatToByteArray(value) {
+    var floatValue = new Float32Array(1);
+    floatValue[0] = value;
+    return new Uint8Array(floatValue.buffer);
 }
 
 function resolveClipReference(reference) {
