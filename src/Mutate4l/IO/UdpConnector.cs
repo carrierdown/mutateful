@@ -1,5 +1,6 @@
 ﻿using Mutate4l.Dto;
 using Mutate4l.Utility;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -121,6 +122,7 @@ namespace Mutate4l.IO
                 result = udpClient.Receive(ref endPoint);
             }
             string rawData = Encoding.ASCII.GetString(result);
+            for (var i = 0; i < result.Length; i++) { Console.Write(result[i] + ", "); }
             string data = OscHandler.GetOscStringValue(rawData);
             return data;
         }

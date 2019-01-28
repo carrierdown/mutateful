@@ -7,6 +7,7 @@ using System.Text;
 
 namespace Mutate4l.Commands
 {
+    // Extracts a region of the current clips, effectively cropping them. If two params, start - duration is used, otherwise 0 - duration.
     public class TakeOptions
     {
         [OptionInfo(type: OptionType.Default)]
