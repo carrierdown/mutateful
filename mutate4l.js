@@ -566,6 +566,9 @@ function expandFormulaAsBytes(formula, ownId) {
         formula = formula.substring(formulaStartIndex + 1).toLowerCase();
     }
     var parts = formula.split(" ");
+    var clipDataBuffer = [];
+    var transformedPart;
+    var numberOfClips = 0;
 
     for (i = 0; i < parts.length; i++) {
         var part = parts[i];
@@ -586,15 +589,14 @@ function expandFormulaAsBytes(formula, ownId) {
             debuglog("updated watchedClips for id " + liveObjectAtClip.id + ": " + watchedClips[liveObjectAtClip.id]);
             debuglog("Getting clipRef " + part);
             var temp = getClipDataAsBytes(liveObjectAtClip, target.x, target.y);
-            var transformedPart = new Uint8Array(9 /* 5 id bytes + 4 length bytes */ + temp.length);
-            transformedPart.set(temp, 9);
-            // clip data id bytes
-            transformedPart[0] = 255;
-            transformedPart[1] = 254;
-            transformedPart[2] = 253;
-            transformedPart[3] = 252;
-            transformedPart[4] = 251;
-            int32ToBufferAtPos(temp.length, transformedPart, 5);
+            transformedPart = new Uint8Array(4 /* 4 length bytes */ + temp.length);
+            int32ToBufferAtPos(temp.length, transformedPart, 0);
+            transformedPart.set(temp, 4);
+            for (var z = 0; z < transformedPart.length; z++) {
+                clipDataBuffer[clipDataBuffer.length] = transformedPart[z];
+            }
+            numberOfClips++;
+            transformedPart = getStringAsUint8Array("[" + numberOfClips + "]");
         } else {
             transformedPart = getStringAsUint8Array(part);
         }
@@ -614,7 +616,7 @@ function expandFormulaAsBytes(formula, ownId) {
 //        formulaAsBytes.set(expandedFormulaParts[i], startPos);
 //        startPos += expandedFormulaParts[i].length;
     //}
-    return byteBuffer
+    return clipDataBuffer.concat(byteBuffer);
 }
 
 function getClipDataAsBytes(liveObject, trackNo, clipNo) {
