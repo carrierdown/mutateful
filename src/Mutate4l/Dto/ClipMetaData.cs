@@ -6,10 +6,10 @@ namespace Mutate4l.Dto
 {
     public struct ClipMetaData
     {
-        public string Id;
-        public int TrackNumber;
+        public ushort Id;
+        public byte TrackNumber;
 
-        public ClipMetaData(string id, int trackNumber)
+        public ClipMetaData(ushort id, byte trackNumber)
         {
             Id = id;
             TrackNumber = trackNumber;

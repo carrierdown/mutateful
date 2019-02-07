@@ -7,7 +7,7 @@ namespace Mutate4lTests
     [TestClass]
     public class LexerTest
     {
-        [TestMethod]
+        /*[TestMethod]
         public void TestLexer()
         {
             Lexer lexer = new Lexer("interleave A1:C4 -ranges 1/16 -repeats 2 10  => A2");
@@ -18,6 +18,6 @@ namespace Mutate4lTests
             {
                 Assert.AreEqual(token.Type, expected[i++]);
             }
-        }
+        }*/
     }
 }

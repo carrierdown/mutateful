@@ -27,7 +27,7 @@ namespace Mutate4l.Cli
             return new Tuple<int, int>(x, y);
         }
 
-        public static bool TryExtractMetaData(string formula, out ClipMetaData metaData)
+        /*public static bool TryExtractMetaData(string formula, out ClipMetaData metaData)
         {
             int index = formula.IndexOf('{') + 1;
             string rawMetaData = formula.Substring(index, formula.IndexOf('}') - index);
@@ -52,25 +52,18 @@ namespace Mutate4l.Cli
                 }
             }
             return succesfullyExtractedParams == metaDataHeaders.Length;
-        }
+        }*/
 
-        public static ProcessResult<ChainedCommand> ParseFormulaToChainedCommand(string formula)
+        public static ProcessResult<ChainedCommand> ParseFormulaToChainedCommand(string formula, List<Clip> clips, ClipMetaData metadata)
         {
-            var valid = new char[] { '{', '[', ']', '}' }.All(c => formula.IndexOf(c) >= 0);
+            var valid = new char[] { '[', ']' }.All(c => formula.IndexOf(c) >= 0);
             if (!valid) return new ProcessResult<ChainedCommand>($"Invalid formula: {formula}");
 
-            ClipMetaData metadata;
-            if (!TryExtractMetaData(formula, out metadata))
-                return new ProcessResult<ChainedCommand>($"Unable to extract metadata for formula: {formula}");
-
-            string command = formula.Substring(formula.LastIndexOf('}') + 1);
-
-            var lexer = new Lexer(command);
+            var lexer = new Lexer(formula, clips);
             Token[] commandTokens = lexer.GetTokens().ToArray();
             var commandTokensLists = new List<List<Token>>();
             var activeCommandTokenList = new List<Token>();
-
-            var sourceClips = commandTokens.TakeWhile(x => x.Type == TokenType.InlineClip).Select(x => IOUtilities.StringToClip(x.Value.Substring(1, x.Value.Length - 2))).ToArray();
+            var sourceClips = commandTokens.TakeWhile(x => x.Type == TokenType.InlineClip).Select(x => x.Clip).ToArray();
             var tokensToProcess = commandTokens.Skip(sourceClips.Count());
 
             foreach (var token in tokensToProcess)

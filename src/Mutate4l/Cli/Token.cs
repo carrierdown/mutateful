@@ -1,28 +1,30 @@
-﻿using static Mutate4l.Cli.TokenType;
+﻿using Mutate4l.Dto;
+using static Mutate4l.Cli.TokenType;
 
 namespace Mutate4l.Cli
 {
-    public class Token<T>
+    public class Token
     {
-        public TokenType Type { get; set; }
-        public T Value { get; set; }
-        public int Position { get; set; }
+        public TokenType Type { get; }
+        public string Value { get; }
+        public int Position { get; }
+        public Clip Clip { get; }
 
-        public Token(TokenType type, T value, int position)
+        public Token(TokenType type, string value, int position)
         {
             Type = type;
             Value = value;
             Position = position;
         }
 
-        public bool IsClipReference => Type == ClipReference;
+        public Token(TokenType type, string value, Clip clip, int position) : this(type, value, position)
+        {
+            Clip = clip;
+        }
+
+        public bool IsClipReference => Type == TokenType.ClipReference;
         public bool IsOption => Type > _OptionsBegin && Type < _OptionsEnd;
         public bool IsCommand => Type > _CommandsBegin && Type < _CommandsEnd;
         public bool IsOptionValue => (Type > _EnumValuesBegin && Type < _EnumValuesEnd) || Type == Number || Type == MusicalDivision;
-    }
-
-    public class Token : Token<string>
-    {
-        public Token(TokenType type, string value, int position) : base(type, value, position) {}
     }
 }

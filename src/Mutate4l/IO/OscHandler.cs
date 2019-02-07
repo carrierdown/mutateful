@@ -46,9 +46,31 @@ namespace Mutate4l.IO
             return bytes.ToArray();
         }
 
+        public static byte[] CreateOscMessage(string route, List<byte> data)
+        {
+            var paddedRoute = FourPadString(route) + FourPadString(",b");
+            var payload = FourPadByteList(data);
+            List<byte> bytes = new List<byte>(route.Length + payload.Count);
+            bytes.AddRange(Encoding.ASCII.GetBytes(paddedRoute));
+            bytes.AddRange(payload);
+            return bytes.ToArray();
+        }
+
         public static string FourPadString(string input)
         {
             return input.PadRight(((input.Length / 4) + 1) * 4, '\0');
+        }
+
+        public static List<byte> FourPadByteList(List<byte> input)
+        {
+            var paddedLength = ((input.Count / 4) + 1) * 4;
+            if (paddedLength == input.Count) return input;
+
+            while (input.Count < paddedLength)
+            {
+                input.Add(0);
+            }
+            return input;
         }
 
         public static byte[] Int32ToBytes(Int32 val)

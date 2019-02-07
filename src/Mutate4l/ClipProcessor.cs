@@ -28,7 +28,7 @@ namespace Mutate4l
             }
             if (resultContainer.Success && resultContainer.Result.Length > 0)
             {
-                UdpConnector.SetClipById(chainedCommand.TargetMetaData.Id, resultContainer.Result[0]);
+                UdpConnector.SetClipAsBytesById(chainedCommand.TargetMetaData.Id, resultContainer.Result[0]);
             }
             else
                 return new Result("No clips affected");

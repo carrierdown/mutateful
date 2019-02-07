@@ -1,6 +1,7 @@
 ﻿using Mutate4l.Dto;
 using Mutate4l.IO;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Mutate4l.Cli
@@ -11,73 +12,16 @@ namespace Mutate4l.Cli
         {
             while (true)
             {
-                var data = UdpConnector.WaitForData();
-                Console.WriteLine($"Received data: {data}");
-                var result = ParseAndProcessCommand(data);
-                if (!result.Success)
-                    Console.WriteLine(result.ErrorMessage);
-            }
-            
-/*            string command = "";
-
-            while (command != "q" && command != "quit")
-            {
-                Console.WriteLine("Mutate4L: Enter command, or [l]ist commands | [h]elp | [q]uit");
-                Console.Write("> ");
-                command = Console.ReadLine().Trim();
-                switch (command)
+                (List<Clip> clips, string formula, ushort id, byte trackNo) = UdpConnector.WaitForData();
+                Console.WriteLine($"Received {clips.Count} clips and formula: {formula}");
+                var structuredCommand = Parser.ParseFormulaToChainedCommand(formula, clips, new ClipMetaData(id, trackNo));
+                if (!structuredCommand.Success)
                 {
-                    case "help":
-                    case "h":
-                        Console.WriteLine("Help text coming here");
-                        break;
-                    case "quit":
-                    case "q":
-                        break;
-                    case "hello":
-                    case "test":
-                        if (UdpConnector.TestCommunication())
-                        {
-                            Console.WriteLine("Communication with Ableton Live up and running!");
-                        } else
-                        {
-                            Console.WriteLine("Error communicating with Ableton Live :(");
-                        }
-                        break;
-                    default:
-                        if (command.StartsWith("dump"))
-                        {
-                            DoDump(command);
-                        }
-                        else if (command.StartsWith("svg"))
-                        {
-                            DoSvg(command);
-                        }
-                        else if (command.StartsWith("enum"))
-                        {
-                            // enumerates all midi clips by prepending their "coordinates", i.e. A1, B5, and so on.
-                            UdpConnector.EnumerateClips();
-                        }
-                        else
-                        {
-                            var result = ParseAndProcessCommand(command);
-                            if (!result.Success)
-                                Console.WriteLine(result.ErrorMessage);
-                        }
-                        break;
+                    Console.WriteLine(structuredCommand.ErrorMessage);
+                    return;
                 }
-            }*/
-        }
-
-        public static Result ParseAndProcessCommand(string command)
-        {
-            var structuredCommand = Parser.ParseFormulaToChainedCommand(command);
-            if (!structuredCommand.Success)
-                return new Result(structuredCommand.ErrorMessage);
-
-            var result = ClipProcessor.ProcessChainedCommand(structuredCommand.Result);
-
-            return new Result(result.Success, result.ErrorMessage);
+                var result = ClipProcessor.ProcessChainedCommand(structuredCommand.Result);
+            }
         }
 
         public static void DoDump(string command)

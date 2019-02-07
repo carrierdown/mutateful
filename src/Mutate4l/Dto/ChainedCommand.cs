@@ -17,6 +17,6 @@ namespace Mutate4l.Dto
             TargetMetaData = targetMetadata;
         }
 
-        public ChainedCommand() : this(new List<Command>(), new Clip[0], new ClipMetaData("", -1)) { }
+        public ChainedCommand() { }
     }
 }
