@@ -105,9 +105,10 @@ namespace Mutate4l.IO
                 result.AddRange(BitConverter.GetBytes((Single)note.Duration));
                 result.Add((byte)note.Velocity);
             }
-            using (UdpSender = new UdpClient(ReceivePort))
+            using (var udpClient = new UdpClient())
             {
-                UdpSender.Send(result.ToArray(), result.Count, "localhost", SendPort);
+                udpClient.Send(result.ToArray(), result.Count, "localhost", SendPort);
+                Console.WriteLine($"Sent {result.Count} bytes over UDP");
             }
         }
 
@@ -149,7 +150,7 @@ namespace Mutate4l.IO
             }
         }
 
-        public static (List<Clip> Clips, string Formula, ushort Id, byte TrackNo) WaitForData()
+        public static byte[] WaitForData()
         {
             byte[] result;
             var endPoint = new IPEndPoint(IPAddress.Any, ReceivePort);
@@ -158,7 +159,18 @@ namespace Mutate4l.IO
             {
                 result = udpClient.Receive(ref endPoint);
             }
-            return DecodeData(result);
+            return result;
+        }
+
+        public static bool IsString(byte[] result)
+        {
+            return (result.Length > 4 && result[0] == 127 && result[1] == 126 && result[2] == 125 && result[3] == 124);
+        }
+
+        public static string GetText(byte[] data)
+        {
+            if (data.Length < 5) return "";
+            return Encoding.UTF8.GetString(data.Skip(4).ToArray());
         }
 
         public static (List<Clip> Clips, string Formula, ushort Id, byte TrackNo) DecodeData(byte[] data)

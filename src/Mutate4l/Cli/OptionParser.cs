@@ -13,8 +13,6 @@ namespace Mutate4l.Dto
         public static T ParseOptions<T>(Command command) where T : new()
         {
             var options = command.Options;
-            // todo: This code can be cleaned up considerably. OptionDefinitions no longer needed, should be possible to do everything in one pass.
-            // todo: remove toggles-stuff. Not really needed much and adds complexity.
             T result = new T();
             System.Reflection.MemberInfo info = typeof(T);
             var props = result.GetType().GetProperties();
@@ -55,57 +53,14 @@ namespace Mutate4l.Dto
                     .Where(a => a.Type == OptionType.AllOrSpecified)
                     .ToArray(); //.GroupBy(p => p.GroupId).Select(g => new OptionGroup(g.S))
 
-/*                if (attributes.Length > 0)
-                {
-                    // handle properties with OptionType AllOrSpecified
-                    foreach (var attrib in attributes)
-                    {
-                        List<TokenType> toggles;
-                        if (togglesByGroupId.ContainsKey(attrib.GroupId))
-                        {
-                            toggles = togglesByGroupId[attrib.GroupId];
-                        }
-                        else
-                        {
-                            toggles = new List<TokenType>();
-                            togglesByGroupId[attrib.GroupId] = toggles;
-                        }
-                        toggles.Add(option);
-                    }
-                }
-                else
-                {*/
-                    // handle value properties
+                // handle value properties
                 if (options.ContainsKey(option))
                 {
                     var tokens = options[option];
                     object[] propertyData = ExtractPropertyData(property, tokens);
                     property.SetMethod?.Invoke(result, propertyData);
                 }
-                //}
             }
-            /*
-            var optionGroups = new List<OptionGroup>();
-            foreach (var toggle in togglesByGroupId.Keys)
-            {
-                var group = new OptionGroup();
-                group.Options = togglesByGroupId[toggle].ToArray();
-                optionGroups.Add(group);
-            }
-            var optionsDefinition = new OptionsDefinition() { OptionGroups = optionGroups.ToArray() };
-
-            foreach (var optionGroup in optionsDefinition.OptionGroups)
-            {
-                var specifiedOptions = Utilities.GetValidOptions(options, optionGroup.Options);
-                bool noneOrAllSpecified = specifiedOptions.Keys.Count == 0 || specifiedOptions.Keys.Count == optionGroup.Options.Length;
-                foreach (var option in optionGroup.Options)
-                {
-                    if (noneOrAllSpecified || specifiedOptions.ContainsKey(option))
-                    {
-                        result.GetType().GetProperty(option.ToString())?.SetMethod?.Invoke(result, new object[] { true });
-                    }
-                }
-            }*/
             return result;
         }
 
@@ -170,8 +125,7 @@ namespace Mutate4l.Dto
                 }
                 else if (type == TokenType.InlineClip && property.PropertyType == typeof(Clip))
                 {
-                    Clip value = IOUtilities.StringToClip(tokens[0].Value);
-                    return new object[] { value };
+                    return new object[] { tokens[0].Clip };
                 }
                 else if (type == TokenType.Number && property.PropertyType == typeof(int[]))
                 {

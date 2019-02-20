@@ -1,4 +1,3 @@
-// v 4
 outlets = 3;
 inlets = 3;
 
@@ -10,15 +9,12 @@ var clipContentsObserver = {};
 var nameCallback = new ObservableCallback(-1);
 var notesCallback = new ObservableCallback(-1);
 var watchedClips = [];
+var messageQueue = [];
+var stringMessageHeader = [127,126,125,124];
 
 // constants
 var SIZE_OF_ONE_NOTE_IN_BYTES = 1 /* pitch */ + 4 /* start */ + 4 /* duration */ + 1 /* velocity */;
 var SIZE_OF_HEADER_IN_BYTES = 1 /* track number */ + 1 /* clip number */ + 4 /* clipLength */ + 1 /* looping */ + 2 /* numNotes */;
-
-function debuglog(msg) {
-    if (!debuglogging) return;
-    post(msg + "\r\n");
-}
 
 function floatToByteArray(value) {
     var floatValue = new Float32Array(1);
@@ -57,17 +53,17 @@ ObservableCallback.prototype.getCallback = function() {
                     name = name.substr(1, name.length - 2);
                 }
             }
-            debuglog("name " + name + " self.name " + self.name);
+            //debuglog("name " + name + " self.name " + self.name);
             if (name.length > 0 && self.name !== name) {
-                debuglog("Name changed! cb called with " + arg + " on id: " + self.id);
+                //debuglog("Name changed! cb called with ", arg, " on id: ", self.id);
                 self.name = name;
-                debuglog("outletting to onSelectedClipRenamedOrChanged: " + self.id + "," + name);
+                //debuglog("outletting to onSelectedClipRenamedOrChanged: ", self.id, name);
                 outlet(2, ["onSelectedClipRenamedOrChanged", parseInt(self.id, 10), name]);
             }
         },
         onNotesChanged: function(arg) {
             if (arg.indexOf("notes") >= 0) {
-                debuglog("Notes changed!");
+                ////debuglog("Notes changed!");
                 outlet(2, ["onSelectedClipRenamedOrChanged", parseInt(self.id, 10)]);
             }
         }
@@ -79,15 +75,12 @@ ObservableCallback.prototype.setLiveApi = function(api) {
 }
 
 function onInit() {
-    debuglog("onInit called");
-    debuglog("setting up selectedClipObserver");
     selectedClipObserver = new LiveAPI(onSelectedClipChanged, "live_set view");
     selectedClipObserver.property = "detail_clip";
     processAllClips();
 }
 
 function onSelectedClipRenamedOrChanged(arg1, arg2) {
-    debuglog("onSelectedClipRenamedOrChanged " + arg1 + " " + arg2);
     var clipId = arg1;
     var name = arg2 || "";
 
@@ -101,14 +94,15 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
             var formulaSlot = new LiveAPI("id " + id);
             var formula = getClipName(formulaSlot);
             var referredIds = formulaToReferredIds(formula);
-//            debuglog("attempting to find id " + clipId + " in referred ids: " + referredIds + " extra stuff " + referredIds.length);
+            //debuglog("attempting to find id ", clipId, " in referred ids: ", referredIds);
             if (referredIds.indexOf(clipId) >= 0) {
-//                debuglog("found current clip in referring formula - all is well\r\n");
-                var expandedFormula = expandFormula(formula, id);
+                debuglog("found current clip in referring formula - all is well");
+                var expandedFormula = expandFormulaAsBytes(formula, id);
                 if (expandedFormula) {
-                   //outlet(0, ["/mu4l/formula/process", expandedFormula]);
+                    debuglog("send expandedFormula", expandedFormula);
+                    outlet(0, expandedFormula);
                 } else {
-                    debuglog("Unable to expand formula - check syntax: " + formula);
+                    debuglog("Unable to expand formula for track " + (i + 1) + " clip " + (s + 1) + " - check syntax", expandedFormula);
                 }
             } else {
                 debuglog("could not find current clip in referring formula");
@@ -126,15 +120,12 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
             watchedClips[clipId] = updatedWatchedClips;
         }
     }
-    debuglog("name: " + name);
     if (containsFormula(name)) {
-        debuglog("hei");
         var formulaSlot = new LiveAPI("id " + clipId);
         var formula = getClipName(formulaSlot);
-        var expandedFormula = expandFormula(formula, clipId);
-        debuglog("outlet 0: " + formula);
+        var expandedFormula = expandFormulaAsBytes(formula, clipId);
         if (expandedFormula) {
-            //outlet(0, ["/mu4l/formula/process", expandedFormula]);
+            outlet(0, expandedFormula);
         } else {
             debuglog("Unable to expand formula - check syntax: " + formula);
         }
@@ -142,7 +133,6 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
 }
 
 function updateObserversOnClipChange(rawId) {
-    debuglog("Updating observers...");
     var id = "id " + rawId;
     clipNameObserver.property = "";
     clipNameObserver = null;
@@ -162,10 +152,8 @@ function updateObserversOnClipChange(rawId) {
 }
 
 function onSelectedClipChanged(args) {
-    if (!args || args.length === 0) return;
     var id = args[args.length - 1];
     if (id === 0) return; // return on empty clip
-    debuglog("Selected clip changed, id: " + id);
     // update watchers
     outlet(1, ["updateObserversOnClipChange", id]); // Max does not support creating LiveAPI objects in custom callbacks, so this is handled by piping data back into inlet 2 (see msg_int function above)
 }
@@ -195,21 +183,35 @@ function getClip(trackNo, clipNo) {
     return getClipData(liveObjectAtClip);
 }
 
+function isMidiTrack(liveObject) {
+    if (liveObject.get('has_audio_input')[0] === 0 && liveObject.get('has_midi_input')[0] === 1) {
+        return true;
+    }
+    return false;
+}
+
+function hasClip(liveObject) {
+    if (liveObject.get('has_clip')[0] === 1) {
+        return true;
+    }
+    return false;
+}
+
 function getLiveObjectAtClip(trackNo, clipNo) {
-    debuglog("getting track " + trackNo + " clip " + clipNo);
+    //debuglog("getting track " + trackNo + " clip " + clipNo);
     var liveObject = new LiveAPI("live_set tracks " + trackNo);
 
     if (!liveObject) {
         debuglog('Invalid liveObject, exiting...');
         return;
     }
-    if (liveObject.get('has_audio_input') > 0 && liveObject.get('has_midi_input') < 1) {
+    if (!isMidiTrack(liveObject)) {
         debuglog('Not a midi track!');
         return;
     }
     liveObject.goto("live_set tracks " + trackNo + " clip_slots " + clipNo);
 
-    if (liveObject.get('has_clip') < 1) {
+    if (!hasClip(liveObject)) {
         debuglog("No clip present at track: " + trackNo + 1 + " clip: " + clipNo + 1);
         return;
     }
@@ -220,7 +222,7 @@ function getLiveObjectAtClip(trackNo, clipNo) {
 
 function getTrackNumber(liveObject) {
     var path = liveObject.path;
-    debuglog("getTrackNumber " + path);
+    //debuglog("getTrackNumber " + path);
     var pathParts = path.split(" ");
     var trackNoIx = pathParts.indexOf("tracks");
     if (trackNoIx >= 0) {
@@ -232,7 +234,7 @@ function getTrackNumber(liveObject) {
 
 function getClipData(liveObject) {
     if (!liveObject) return;
-    debuglog("Hello from getclipdata. trackNo is " + getTrackNumber(liveObject));
+    //debuglog("Hello from getclipdata. trackNo is " + getTrackNumber(liveObject));
     var loopStart = liveObject.get('loop_start');
     var clipLength = getClipLength(liveObject);
     var looping = liveObject.get('looping');
@@ -249,7 +251,7 @@ function getClipData(liveObject) {
 
 // todo: robustify handling of clip references. Track should refer to midi tracks only, filtering out audio tracks. Clip numbers must be checked for overflow wrt number of scenes available.
 function setClip(trackNo, clipNo, dataString) {
-    debuglog("setClip: " + dataString);
+    //debuglog("setClip: " + dataString);
     var data = dataString.split(' ');
     if (data.length < 3)
         return;
@@ -257,13 +259,13 @@ function setClip(trackNo, clipNo, dataString) {
     var pathCurrentClipHolder = pathCurrentTrack + " clip_slots " + clipNo;
     var pathCurrentClip = pathCurrentClipHolder + " clip";
     var liveObject = new LiveAPI(pathCurrentTrack);
-    if (liveObject.get('has_audio_input') > 0 && liveObject.get('has_midi_input') < 1) {
+    if (!isMidiTrack(liveObject)) {
         debuglog('Not a midi track!');
     }
     var clipLength = data[0];
     var looping = data[1];
     liveObject.goto(pathCurrentClipHolder);
-    if (liveObject.get('has_clip') < 1) {
+    if (!hasClip(liveObject)) {
         liveObject.call('create_clip', clipLength);
     }
     liveObject.goto(pathCurrentClip);
@@ -305,13 +307,14 @@ function getNormalizedFloatValue(val) {
     }
 }
 
-function setClipFromBytes() {
+function setClipFromBytes(/* ... arguments */) {
+    debuglog("setClipFromBytes called");
     if (arguments.length < 9) {
         post("Error - expected bigger payload");
     }
     var id = getUint16FromByteArray(arguments, 0);
     var clipLength = getFloat32FromByteArray(arguments, 2);
-    var isLooping = (arguments[6] == 1 ? true : false);
+    var isLooping = arguments[6];
     var numNotes = getUint16FromByteArray(arguments, 7);
     var startOffset = 9;
 
@@ -319,6 +322,7 @@ function setClipFromBytes() {
     liveObject.set('loop_start', '0');
     liveObject.set('loop_end', clipLength);
     liveObject.set('end_marker', clipLength);
+    liveObject.set('looping', isLooping);
     liveObject.call('select_all_notes');
     liveObject.call('replace_selected_notes');
     liveObject.call('notes', numNotes);
@@ -327,18 +331,14 @@ function setClipFromBytes() {
         var start = getNormalizedFloatValue(getFloat32FromByteArray(arguments, startOffset + 1));
         var duration = getNormalizedFloatValue(getFloat32FromByteArray(arguments, startOffset + 5));
         var velocity = arguments[startOffset + 9];
-        if (start.indexOf(".") == -1) {
-            start += ".0";
-        }
         liveObject.call('note', pitch, start, duration, velocity, 0 /* not muted */);
         startOffset += 10;
     }
     liveObject.call('done');
-    liveObject.set('looping', isLooping);
 }
 
 function setClipById(id, dummy, dataString) {
-    debuglog("hello from setClipById");
+    //debuglog("hello from setClipById");
     var data = dataString.split(' ');
     if (data.length < 3)
         return;
@@ -358,21 +358,21 @@ function setClipById(id, dummy, dataString) {
 }
 
 function setSelectedClip(dummyTrackNo, dummyClipNo, dataString) {
-    debuglog("setSelectedClip: " + dataString);
+    //debuglog("setSelectedClip: " + dataString);
     var data = dataString.split(' ');
     if (data.length < 3)
         return;
     var pathCurrentClipHolder = "live_set view highlighted_clip_slot";
     var pathCurrentClip = pathCurrentClipHolder + " clip";
     var liveObject = new LiveAPI("live_set view selected_track");
-    if (liveObject.get('has_audio_input') > 0 && liveObject.get('has_midi_input') < 1) {
+    if (!isMidiTrack(liveObject)) {
         debuglog('Not a midi track!');
         return;
     }
     var clipLength = data[0];
     var looping = data[1];
     liveObject.goto(pathCurrentClipHolder);
-    if (liveObject.get('has_clip') < 1) {
+    if (!hasClip(liveObject)) {
         liveObject.call('create_clip', clipLength);
     }
     liveObject.goto(pathCurrentClip);
@@ -398,7 +398,7 @@ function enumerate() {
         if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0) {
             for (var s = 0; s < numScenes; s++) {
                 liveObject.goto("live_set tracks " + i + " clip_slots " + s);
-                if (liveObject.get('has_clip') > 0) {
+                if (hasClip(liveObject)) {
                     liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
                     var existingName = getClipName(liveObject);
                     var newName = "";
@@ -424,13 +424,18 @@ function getSelectedClip() {
         debuglog('Invalid liveObject, exiting...');
         return;
     }
+    //debuglog("has_audio_input", liveObject.get('has_audio_input'));
+    post(liveObject.get('has_audio_input')[0]);
     if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0) {
         liveObject.goto("live_set view highlighted_clip_slot");
-        if (liveObject.get('has_clip')) {
+        if (hasClip(liveObject)) {
             liveObject.goto("live_set view highlighted_clip_slot clip");
             var loopStart = liveObject.get('loop_start');
+            //debuglog("loopstart", loopStart);
+            post(loopStart[0]);
             var clipLength = getClipLength(liveObject);
             var looping = liveObject.get('looping');
+            //debuglog("looping", looping);
             var data = liveObject.call("get_notes", loopStart, 0, clipLength, 128);
             result += clipLength + " " + looping + " ";
             for (var i = 2, len = data.length - 1; i < len; i += 6) {
@@ -463,7 +468,7 @@ function processAllClips() {
         if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0) {
             for (var s = 0; s < numScenes; s++) {
                 liveObject.goto("live_set tracks " + i + " clip_slots " + s);
-                if (liveObject.get("has_clip") > 0) { // todo: ...and if name of clip corresponds to a mutate4l command
+                if (hasClip(liveObject)) { // todo: ...and if name of clip corresponds to a mutate4l command
                     liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
                     clipName = getClipName(liveObject);
                     if (containsFormula(clipName)) {
@@ -501,8 +506,6 @@ function formulaToReferredIds(formula) {
     var parts = formula.split(" ");
     for (var i = 0; i < parts.length; i++) { 
         var result = clipRefTester.test(parts[i]); 
-        if (!result && clipRefsFound) break;
-        if (!result && i == 0) break;
         if (result) {
             clipRefsFound = true;
             clipRefs.push(parts[i]);
@@ -545,16 +548,17 @@ function expandFormula(formula, ownId) {
                 return;
             }
 
-            debuglog("Getting clipRef " + part);
+            //debuglog("Getting clipRef " + part);
             var clipData = getClipData(liveObjectAtClip);
 
             if (watchedClips[liveObjectAtClip.id] === undefined) {
-                debuglog("watchedclips at " + liveObjectAtClip.id + " set to " + ownId);
+//                debuglog("watchedclips at " + liveObjectAtClip.id + " set to " + ownId);
                 watchedClips[liveObjectAtClip.id] = [ownId];
             } else if (watchedClips[liveObjectAtClip.id].indexOf(ownId) < 0) {
                 watchedClips[liveObjectAtClip.id].push(ownId);
             }
-            debuglog("updated watchedClips for id " + liveObjectAtClip.id + ": " + watchedClips[liveObjectAtClip.id]);
+            //debuglog("updated watchedClips for id " + liveObjectAtClip.id + ": " + watchedClips[liveObjectAtClip.id]);
+            //debuglog("watchedClips now looks like", watchedClips);
             var transformedPart = "[" + target.x + "," + target.y + ":" + clipData + "]";
         } else {
             transformedPart = part;
@@ -566,7 +570,6 @@ function expandFormula(formula, ownId) {
 
 function expandFormulaAsBytes(formula, ownId) {
     var clipRefTester = /^([a-z]+\d+)$|^(\*)$/,
-        expandedFormulaParts = [], // array of Uint8Array
         i;
 
     if (formula.length < 5) return;
@@ -604,8 +607,9 @@ function expandFormulaAsBytes(formula, ownId) {
             } else if (watchedClips[liveObjectAtClip.id].indexOf(ownId) < 0) {
                 watchedClips[liveObjectAtClip.id].push(ownId);
             }
-            debuglog("updated watchedClips for id " + liveObjectAtClip.id + ": " + watchedClips[liveObjectAtClip.id]);
-            debuglog("Getting clipRef " + part);
+            //debuglog("updated watchedClips for id " + liveObjectAtClip.id + ": " + watchedClips[liveObjectAtClip.id]);
+            //debuglog("Getting clipRef " + part);
+            //debuglog(watchedClips, "watchedClips");
             var clipData = getClipDataAsBytes(liveObjectAtClip, target.x, target.y);
             for (var z = 0; z < clipData.length; z++) {
                 clipDataBuffer[clipDataBuffer.length] = clipData[z];
@@ -628,13 +632,12 @@ function expandFormulaAsBytes(formula, ownId) {
     for (i = 0; i < metaDataBytes.length; i++) {
         metaData[i] = metaDataBytes[i];
     }
-	post(metaData.length + " " + clipDataBuffer.length + " " + byteBuffer.length + "\r\n");
     return metaData.concat(clipDataBuffer).concat(byteBuffer);
 }
 
 function getClipDataAsBytes(liveObject, trackNo, clipNo) {
     if (!liveObject) return;
-    debuglog("Hello from getClipDataAsBytes. trackNo is " + getTrackNumber(liveObject));
+    //debuglog("Hello from getClipDataAsBytes. trackNo is " + getTrackNumber(liveObject));
 
     var loopStart = liveObject.get('loop_start'),
         clipLength = getClipLength(liveObject),
@@ -642,7 +645,7 @@ function getClipDataAsBytes(liveObject, trackNo, clipNo) {
         data = liveObject.call("get_notes", loopStart, 0, clipLength, 128),
         notes = [];
 
-    debuglog("getClipDataAsBytes clipLength = " + clipLength);
+    //debuglog("getClipDataAsBytes clipLength = " + clipLength);
 
     for (var i = 2, len = data.length - 1; i < len; i += 6) {
         if (data[i + 5 /* muted */] === 1) {
@@ -679,12 +682,9 @@ function getSelectedClipAsBytes() {
     }
     if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0) {
         liveObject.goto("live_set view highlighted_clip_slot");
-        if (liveObject.get('has_clip')) {
+        if (hasClip(liveObject)) {
             liveObject.goto("live_set view highlighted_clip_slot clip");
             var buffer = getClipDataAsBytes(liveObject);
-            for (var i = 0; i < buffer.length; i++) {
-                post(buffer[i] + ",");
-            }
         }
     }
 }
@@ -749,6 +749,69 @@ function isNumeric(c) {
 
 function isAlpha(c) {
     return c.length == 1 && (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+function test() {
+    debuglogExt([100, 103, 1, [101, 102]], "ting", 10, "tang");
+    var hei = {hei:"hadet",hopp:{sommerslott:[1,2,3], sjeik: 12},fesk: 3};
+    debuglogExt(hei);
+    debuglogExt("hei", 10, 1, "tang", [11,11]);
+}
+
+function debuglogExt(/* ... args */) {
+    if (!debuglogging) return;
+    var result = "";
+    for (var i = 0; i < arguments.length; i++) {
+        result += (i !== 0 && i < arguments.length ? " " : "") + debugPost(arguments[i], "");
+    }
+    var bytesToSend = [];
+    for (i = 0; i < result.length; i++) {
+        bytesToSend[i] = result.charCodeAt(i);
+    }
+    messageQueue[messageQueue.length] = stringMessageHeader.concat(bytesToSend);
+}
+
+function debuglog(/* ... args */) {
+    if (!debuglogging) return;
+    var result = "";
+    for (var i = 0; i < arguments.length; i++) {
+        result += (i !== 0 && i < arguments.length ? " " : "") + debugPost(arguments[i], "");
+    }
+    post(result + "\r\n");
+}
+
+function processQueue() {
+    if (messageQueue.length === 0) return;
+    outlet(0, messageQueue[0]);
+    messageQueue.shift();
+}
+
+function debugPost(val, res) {
+    if (Array.isArray(val)) {
+        res += "[";
+        for (var i = 0; i < val.length; i++) {
+            var currentVal = val[i];
+            if (currentVal === undefined || currentVal === null) {
+                res += ".";
+                continue;
+            }
+            res = debugPost(currentVal, res);
+            if (i < val.length - 1) res += ", ";
+        }
+        res += "]";
+    } else if ((typeof val === "object") && (val !== null)) {
+        var props = Object.getOwnPropertyNames(val);
+        res += "{";
+        for (var ii = 0; ii < props.length; ii++) {
+            res += props[ii] + ": ";
+            res = debugPost(val[props[ii]], res);
+            if (ii < props.length - 1) res += ", ";
+        }
+        res += "}";
+    } else {
+        res += val;
+    }
+    return res;
 }
 
 /*

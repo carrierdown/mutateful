@@ -12,7 +12,14 @@ namespace Mutate4l.Cli
         {
             while (true)
             {
-                (List<Clip> clips, string formula, ushort id, byte trackNo) = UdpConnector.WaitForData();
+                var result = UdpConnector.WaitForData();
+                if (UdpConnector.IsString(result))
+                {
+                    string text = UdpConnector.GetText(result);
+                    Console.WriteLine(text);
+                    continue;
+                }
+                (List<Clip> clips, string formula, ushort id, byte trackNo) = UdpConnector.DecodeData(result);
                 Console.WriteLine($"Received {clips.Count} clips and formula: {formula}");
                 var structuredCommand = Parser.ParseFormulaToChainedCommand(formula, clips, new ClipMetaData(id, trackNo));
                 if (!structuredCommand.Success)
@@ -20,7 +27,7 @@ namespace Mutate4l.Cli
                     Console.WriteLine(structuredCommand.ErrorMessage);
                     return;
                 }
-                var result = ClipProcessor.ProcessChainedCommand(structuredCommand.Result);
+                var status = ClipProcessor.ProcessChainedCommand(structuredCommand.Result);
             }
         }
 
