@@ -9,16 +9,16 @@ Basic syntax: [ClipReference #1](#parameter-types) ... [ClipReference #N](#param
 
 Command | Parameters (default values in **bold**) | Description | Example
 --- | --- | --- | ---
-arpeggiate | -by [ClipReference](#parameter-types) -removeoffset -rescale 1-10
-constrain | -by a1 -mode **pitch**|rhythm|both -strength 1-**100**
-filter | -duration **1/64**
-interleave | -chunkchords -enablemask 1 0 -mode event|time -ranges 1/16 1/8 -repeats 1 2 -skip -solo
-monophonize
-ratchet | -autoscale -by a1 -controlmin 60 -controlmax 68 -min 1 -max 8 -mode velocity|pitch -shape **linear**|easeinout|easein -strength 0-100 -velocitytostrength
-relength | -factor 2
-shuffle | -by a1
-slice | list of [MusicalDivision](#parameter-types)
-transpose | -by a1 -mode absolute|relative|overwrite
+arpeggiate | -by [ClipReference](#parameter-types) -removeoffset -rescale 1-10 | |
+constrain | -by a1 -mode **pitch**&#124;rhythm&#124;both -strength 1-**100** | |
+filter | -duration **1/64** | |
+interleave | -chunkchords -enablemask 1 0 -mode event&#124;time -ranges 1/16 1/8 -repeats 1 2 -skip -solo | |
+monophonize | | |
+ratchet | -autoscale -by a1 -controlmin 60 -controlmax 68 -min 1 -max 8 -mode velocity&#124;pitch -shape **linear**&#124;easeinout&#124;easein -strength 0-100 -velocitytostrength | |
+relength | -factor 2 | |
+shuffle | -by a1 | |
+slice | list of [MusicalDivision](#parameter-types) | |
+transpose | -by a1 -mode absolute&#124;relative&#124;overwrite | |
 
 ## Parameter types
 
