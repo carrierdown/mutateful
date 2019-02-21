@@ -3,7 +3,31 @@
 ### About
 `mutate4l` is a swiss army knife for offline processing of MIDI clips in Ableton Live. It can be used for tasks like aligning the notes of one clip rhythmically with another, using one clip as a transpose track for another clip, recursively applying the contents of a clip on itself (fractalize!), and a ton of other uses.
 
-## Operations
+## Available commands
+
+Basic syntax: [ClipReference #1](#parameter-types) ... [ClipReference #N](#parameter-types) commandname -parameter1 value -parameter2 value
+
+Command | Parameters (default values in **bold**) | Description | Example
+--- | --- | --- | ---
+arpeggiate | -by [ClipReference](#parameter-types) -removeoffset -rescale 1-10
+constrain | -by a1 -mode **pitch**|rhythm|both -strength 1-**100**
+filter | -duration **1/64**
+interleave | -chunkchords -enablemask 1 0 -mode event|time -ranges 1/16 1/8 -repeats 1 2 -skip -solo
+monophonize
+ratchet | -autoscale -by a1 -controlmin 60 -controlmax 68 -min 1 -max 8 -mode velocity|pitch -shape **linear**|easeinout|easein -strength 0-100 -velocitytostrength
+relength | -factor 2
+shuffle | -by a1
+slice | list of [MusicalDivision](#parameter-types)
+transpose | -by a1 -mode absolute|relative|overwrite
+
+## Parameter types
+
+Type | Description
+--- | ---
+ClipReference | Cells in the session view are referenced like they would be in a spreadsheet, i.e. tracks are assigned letters (A-Z) and clip rows are assigned numbers (1-N). Example: track 1 clip 1 becomes A1, track 2 clip 3 becomes B3.
+MusicalDivision | These are commonly used in sequencer software to denote musical divisions like quarter notes, eight notes and so on. Examples: quarter note = 1/4, eight note = 1/8.
+
+## Command reference
 
 A note on usage examples: All parameters are prefixed with -, and are always optional. The basic syntax of a command is `commandname -parameter value -anotherparameter value`. Values can be numbers, in which case the valid range is displayed as e.g. 1-100. 
 
