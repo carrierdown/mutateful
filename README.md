@@ -9,16 +9,16 @@ Basic syntax: [ClipReference #1](#parameter-types) ... [ClipReference #N](#param
 
 Command | Parameters (default values in **bold**) | Description | Example
 --- | --- | --- | ---
-arpeggiate | -by [ClipReference](#parameter-types) -removeoffset -rescale 1-10 | |
-constrain | -by a1 -mode **pitch**&#124;rhythm&#124;both -strength 1-**100** | |
-filter | -duration **1/64** | |
-interleave | -chunkchords -enablemask 1 0 -mode event&#124;time -ranges 1/16 1/8 -repeats 1 2 -skip -solo | |
+arpeggiate | -by <[ClipReference](#parameter-types)> -removeoffset -rescale <[Number](#parameter-types) in range 1-10> | |
+constrain | -by <[ClipReference](#parameter-types)> -mode **pitch**&#124;rhythm&#124;both -strength <[Number](#parameter-types) in range 1-**100**> | |
+filter | -duration <[MusicalDivision](#parameter-types): **1/64**> | |
+interleave | -chunkchords -mode event&#124;time -ranges <list of [MusicalDivision](#parameter-types)> -repeats <list of [Number](#parameter-types)> -skip -solo | |
 monophonize | | |
-ratchet | -autoscale -by a1 -controlmin 60 -controlmax 68 -min 1 -max 8 -mode velocity&#124;pitch -shape **linear**&#124;easeinout&#124;easein -strength 0-100 -velocitytostrength | |
-relength | -factor 2 | |
-shuffle | -by a1 | |
+ratchet | -autoscale -by [ClipReference](#parameter-types) -controlmin <[Number](#parameter-types): **60**> -controlmax <[Number](#parameter-types): **68**> -min <[Number](#parameter-types): **1**> -max <[Number](#parameter-types): **8**> -mode velocity&#124;pitch -shape **linear**&#124;easeinout&#124;easein -strength <[Number](#parameter-types) in range 0-**100**> -velocitytostrength | |
+relength | -factor <[Number](#parameter-types) in range 1-10> | |
+shuffle | -by [ClipReference](#parameter-types) | |
 slice | list of [MusicalDivision](#parameter-types) | |
-transpose | -by a1 -mode absolute&#124;relative&#124;overwrite | |
+transpose | -by [ClipReference](#parameter-types) -mode absolute&#124;relative&#124;overwrite | |
 
 ## Parameter types
 
@@ -26,6 +26,7 @@ Type | Description
 --- | ---
 ClipReference | Cells in the session view are referenced like they would be in a spreadsheet, i.e. tracks are assigned letters (A-Z) and clip rows are assigned numbers (1-N). Example: track 1 clip 1 becomes A1, track 2 clip 3 becomes B3.
 MusicalDivision | These are commonly used in sequencer software to denote musical divisions like quarter notes, eight notes and so on. Examples: quarter note = 1/4, eight note = 1/8.
+Number | Whole number (integer) from 0 and upwards
 
 ## Command reference
 
