@@ -28,7 +28,11 @@ namespace Mutate4l.Commands
     {
         public static ProcessResultArray<Clip> Apply(ConstrainOptions options, params Clip[] clips)
         {
-            ClipUtilities.NormalizeClipLengths((options.By != null ? clips.Prepend(options.By).ToArray() : clips));
+            if (options.By != null)
+            {
+                clips = clips.Prepend(options.By).ToArray();
+            }
+            ClipUtilities.NormalizeClipLengths(clips);
             if (clips.Length < 2) return new ProcessResultArray<Clip>(clips);
             Clip masterClip = clips[0];
             Clip[] slaveClips = clips.Skip(1).ToArray();
@@ -43,7 +47,7 @@ namespace Mutate4l.Commands
                     if (options.Mode == Pitch || options.Mode == Both)
                     {
                         var absPitch = ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes) % 12;
-                        constrainedNote.Pitch = (((constrainedNote.Pitch / 12)) * 12) + (absPitch == 0 ? 12 : 0) + absPitch;
+                        constrainedNote.Pitch = (((constrainedNote.Pitch / 12)) * 12) + absPitch;
                     }
                     if (options.Mode == Rhythm || options.Mode == Both)
                     {
