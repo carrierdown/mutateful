@@ -10,6 +10,8 @@ namespace Mutate4l.Commands
         public Clip By { get; set; }
     }
 
+    // todo: Add support for chunking here as well, so that chords, layered drums, etc will behave more logically.
+
     public class Shuffle
     {
         public static ProcessResultArray<Clip> Apply(ShuffleOptions options, params Clip[] clips)

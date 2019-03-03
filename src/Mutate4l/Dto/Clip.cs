@@ -1,6 +1,6 @@
 ﻿using Mutate4l.Core;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace Mutate4l.Dto
 {
@@ -19,6 +19,7 @@ namespace Mutate4l.Dto
     public class Clip : IComparable<Clip>
     {
         public SortedList<NoteEvent> Notes { get; set; }
+        public int Count { get { return Notes.Count; } }
         public decimal Length { get; set; }
         public bool IsLooping { get; set; }
         public ClipReference ClipReference { get; set; }
@@ -31,18 +32,6 @@ namespace Mutate4l.Dto
             get { return Length - Math.Clamp(Notes[Notes.Count - 1].End, 0, Length) + Notes[0].Start; }
         }
         public bool SelectionActive { get; private set; }
-
-        public void Chunkify(params NoteEvent[] noteEvents)
-        {
-            if (noteEvents.Length < 2) return;
-            NoteEvent parentNote = noteEvents[0];
-            noteEvents.Skip(1).ToList().ForEach(note => note.SetParent(parentNote));
-        }
-
-        public void Flatten()
-        {
-            Notes.ToList().ForEach(note => note.RemoveParent());
-        }
 
         public Clip(decimal length, bool isLooping)
         {
@@ -58,6 +47,16 @@ namespace Mutate4l.Dto
                 var clonedNote = new NoteEvent(note);
                 Notes.Add(clonedNote);
             }
+        }
+
+        public void Add(NoteEvent noteEvent)
+        {
+            Notes.Add(noteEvent);
+        }
+
+        public void AddRange(List<NoteEvent> noteEvents)
+        {
+            Notes.AddRange(noteEvents);
         }
 
         public int CompareTo(Clip b)

@@ -10,17 +10,50 @@ namespace Mutate4l.Dto
         private int PitchField;
         private int VelocityField;
         private decimal StartField;
+        private NoteEvent ParentField;
 
         public int Pitch { get { return Math.Clamp(PitchField, 0, 127); } set { PitchField = value; } }
-        public decimal Start {
-            get { return Parent != null ? Parent.Start + StartField : StartField; }
-            set { if (Parent != null) StartField = value - Parent.Start; else StartField = value; }
-        }
+
         public decimal Duration { get; set; }
+
         public int Velocity { get { return Math.Clamp(VelocityField, 1, 127); } set { VelocityField = value; } }
+
         public decimal End => Start + Duration;
+
         public bool IsSelected { get; set; }
-        public NoteEvent Parent { get; private set; }
+
+        public List<NoteEvent> Children { get; set; }
+
+        public decimal Start
+        {
+            get { return (Parent?.Start ?? 0) + StartField }
+            set { StartField = value - (Parent?.Start ?? 0); }
+        }
+
+        public NoteEvent Parent
+        {
+            get
+            {
+                return ParentField;
+            }
+            set
+            {
+                if (ParentField == value)
+                {
+                    return;
+                }
+                if (ParentField == null)
+                {
+                    ParentField = value;
+                    StartField -= ParentField.Start;
+                }
+                else if (value == null)
+                {
+                    StartField += ParentField.Start;
+                    ParentField = null;
+                }
+            }
+        }
         
         public NoteEvent(int pitch, decimal start, decimal duration, int velocity)
         {
@@ -36,18 +69,6 @@ namespace Mutate4l.Dto
             Start = note.Start;
             Duration = note.Duration;
             Velocity = note.Velocity;
-        }
-
-        public void SetParent(NoteEvent parent)
-        {
-            StartField -= parent.Start;
-            Parent = parent;
-        }
-
-        public void RemoveParent()
-        {
-            StartField += Parent.Start;
-            Parent = null;
         }
 
         public int CompareTo(NoteEvent b)
