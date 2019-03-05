@@ -24,9 +24,17 @@ namespace Mutate4l.Dto
 
         public List<NoteEvent> Children { get; set; }
 
+        public bool HasChildren
+        {
+            get
+            {
+                return Children?.Count > 0;
+            }
+        }
+
         public decimal Start
         {
-            get { return (Parent?.Start ?? 0) + StartField }
+            get { return (Parent?.Start ?? 0) + StartField; }
             set { StartField = value - (Parent?.Start ?? 0); }
         }
 
@@ -69,6 +77,7 @@ namespace Mutate4l.Dto
             Start = note.Start;
             Duration = note.Duration;
             Velocity = note.Velocity;
+            Children = note.Children;
         }
 
         public int CompareTo(NoteEvent b)

@@ -9,25 +9,39 @@ namespace Mutate4lTests
     [TestClass]
     public class ClipTest
     {
-//        [TestMethod]
-        public void TestChunkifyAndFlatten()
+        [TestMethod]
+        public void TestGroupSimultaneousNotesAndFlattenNotes()
         {
-            var clip1 = new Clip(4, true)
+            var clip = new Clip(4, true)
             {
                 Notes = new SortedList<NoteEvent>()
                 {
                    new NoteEvent(60, 0, 2m, 100),
                    new NoteEvent(62, .5m, .5m, 100),
                    new NoteEvent(62, 1, .5m, 100),
-                   new NoteEvent(62, 1.5m, .5m, 100),
+                   new NoteEvent(65, 1, 1m, 100),
                    new NoteEvent(60, 2, .5m, 100),
                    new NoteEvent(62, 2.5m, .5m, 100),
-                   new NoteEvent(62, 3, .5m, 100)
+                   new NoteEvent(66, 2.5m, .5m, 100)
                 }
             };
+            clip.GroupSimultaneousNotes();
 
-//            clip1.Chunkify(clip1.Notes.Except(clip1.Notes[0]).Where(x => x.Start >= clip1.Notes[0]))
+            Assert.AreEqual(clip.Notes[0].Start, 0);
+            Assert.AreEqual(clip.Notes[1].Start, .5m);
+            Assert.AreEqual(clip.Notes[2].Start, 1);
+            Assert.AreEqual(clip.Notes[3].Start, 2);
+            Assert.AreEqual(clip.Notes[4].Start, 2.5m);
+            
+            clip.Flatten();
 
+            Assert.AreEqual(clip.Notes[0].Start, 0);
+            Assert.AreEqual(clip.Notes[1].Start, .5m);
+            Assert.AreEqual(clip.Notes[2].Start, 1);
+            Assert.AreEqual(clip.Notes[3].Start, 1);
+            Assert.AreEqual(clip.Notes[4].Start, 2);
+            Assert.AreEqual(clip.Notes[5].Start, 2.5m);
+            Assert.AreEqual(clip.Notes[6].Start, 2.5m);
         }
     }
 }
