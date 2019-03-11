@@ -12,9 +12,13 @@ namespace Mutate4l.Utility
             {
                 data = data.Substring(data.IndexOf('[') + 1).Substring(0, data.IndexOf(']') - 1);
             }
-            var metadata = data.Substring(0, data.IndexOf(':'));
-            var metadataParts = metadata.Split(',');
-            var actualData = data.Substring(data.IndexOf(':') + 1);
+            var metadataParts = new string[0];
+            if (data.IndexOf(':') > 0)
+            {
+                var metadata = data.Substring(0, data.IndexOf(':'));
+                metadataParts = metadata.Split(',');
+            }
+            var actualData = metadataParts.Length > 0 ? data.Substring(data.IndexOf(':') + 1) : data;
             var noteData = actualData.Split(' ');
             if (noteData.Length < 2)
             {
@@ -27,7 +31,11 @@ namespace Mutate4l.Utility
             {
                 notes.Add(new NoteEvent(byte.Parse(noteData[i]), decimal.Parse(noteData[i + 1], NumberStyles.Any), decimal.Parse(noteData[i + 2], NumberStyles.Any), byte.Parse(noteData[i + 3])));
             }
-            return new Clip(clipLength, isLooping) { Notes = notes, ClipReference = new ClipReference(int.Parse(metadataParts[0]), int.Parse(metadataParts[1])) };
+            if (metadataParts.Length > 0)
+            {
+                return new Clip(clipLength, isLooping) { Notes = notes, ClipReference = new ClipReference(int.Parse(metadataParts[0]), int.Parse(metadataParts[1])) };
+            }
+            return new Clip(clipLength, isLooping) { Notes = notes };
         }
 
         public static string ClipToString(Clip clip)

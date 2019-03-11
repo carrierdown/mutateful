@@ -15,9 +15,11 @@ namespace Mutate4l.Commands
     {
         public static ProcessResultArray<Clip> Apply(ShuffleOptions options, params Clip[] clips)
         {
-            var c = 0;
             if (options.By == null || options.By.Notes.Count == 0) options.By = clips[0];
+            ClipUtilities.Monophonize(options.By);
             var targetClips = new Clip[clips.Length];
+
+            var c = 0;
             foreach (var clip in clips) // we only support one generated clip since these are tied to a specific clip slot. Maybe support multiple clips under the hood, but discard any additional clips when sending the output is the most flexible approach.
             {
                 clip.GroupSimultaneousNotes();

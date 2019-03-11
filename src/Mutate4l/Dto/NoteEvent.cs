@@ -34,35 +34,22 @@ namespace Mutate4l.Dto
 
         public decimal Start
         {
-            get { return (Parent?.Start ?? 0) + StartField; }
-            set { StartField = value - (Parent?.Start ?? 0); }
-        }
-
-        public NoteEvent Parent
-        {
             get
             {
-                return ParentField;
+                return StartField;
             }
             set
             {
-                if (ParentField == value)
+                StartField = value;
+                if (HasChildren)
                 {
-                    return;
-                }
-                if (ParentField == null)
-                {
-                    ParentField = value;
-                    StartField -= ParentField.Start;
-                }
-                else if (value == null)
-                {
-                    StartField += ParentField.Start;
-                    ParentField = null;
+                    Children.ForEach(c => c.Start = StartField);
                 }
             }
         }
-        
+
+        public NoteEvent Parent { get; set; }
+
         public NoteEvent(int pitch, decimal start, decimal duration, int velocity)
         {
             Pitch = pitch;
@@ -77,7 +64,15 @@ namespace Mutate4l.Dto
             Start = note.Start;
             Duration = note.Duration;
             Velocity = note.Velocity;
-            Children = note.Children;
+            if (note.Children != null)
+            {
+                var children = new List<NoteEvent>(note.Children.Count);
+                foreach (var childNote in note.Children)
+                {
+                    children.Add(new NoteEvent(childNote));
+                }
+                Children = children;
+            }
         }
 
         public int CompareTo(NoteEvent b)

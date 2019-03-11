@@ -1,5 +1,6 @@
 ﻿using Mutate4l.Dto;
 using Mutate4l.IO;
+using Mutate4l.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,15 @@ namespace Mutate4l.Cli
                 }
                 (List<Clip> clips, string formula, ushort id, byte trackNo) = UdpConnector.DecodeData(result);
                 Console.WriteLine($"Received {clips.Count} clips and formula: {formula}");
+                if (formula.Contains("dump"))
+                {
+                    Console.WriteLine($"Dumping data for clips:");
+                    foreach (var clip in clips)
+                    {
+                        Console.WriteLine(IOUtilities.ClipToString(clip));
+                    }
+                    continue;
+                }
                 var structuredCommand = Parser.ParseFormulaToChainedCommand(formula, clips, new ClipMetaData(id, trackNo));
                 if (!structuredCommand.Success)
                 {

@@ -46,7 +46,7 @@ namespace Mutate4lTests
     [TestClass]
     public class OptionsTest
     {
-        [TestMethod]
+        //[TestMethod]
         public void TestToggleGroups()
         {
             var options = new Dictionary<TokenType, List<Token>>();
