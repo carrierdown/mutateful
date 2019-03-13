@@ -131,6 +131,32 @@ namespace Mutate4l.Cli
             return false;
         }
 
+        public bool IsDecimalValue(int pos)
+        {
+            int i = pos;
+            int? decimalPointFoundAt = null;
+            while (i < Buffer.Length && (IsNumeric(Buffer[i]) || Buffer[i] == '.'))
+            {
+                if (Buffer[i] == '.')
+                {
+                    if (decimalPointFoundAt == null)
+                    {
+                        decimalPointFoundAt = i - pos;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                i++;
+            }
+            if (decimalPointFoundAt == null)
+            {
+                return false;
+            }
+            return i > (pos + decimalPointFoundAt + 1);
+        }
+
         private bool IsMusicalDivision(int pos)
         {
             return Buffer.Length > pos + 2 && IsNumeric(pos) && Buffer[pos + 1] == '/' && IsNumeric(pos + 2);
@@ -231,6 +257,10 @@ namespace Mutate4l.Cli
                 {
                     token = new Token(Number, GetRemainingNumericToken(position, 1), position);
                 }
+                else if (IsDecimalValue(position))
+                {
+                    token = new Token(TokenType.Decimal, GetDecimalToken(position), position);
+                }
                 else if (IsAlpha(position))
                 {
                     Token identifierToken = GetIdentifier(position, Commands, EnumValues);
@@ -258,6 +288,16 @@ namespace Mutate4l.Cli
         private string GetRemainingNumericToken(int position, int offset)
         {
             while (position + offset < Buffer.Length && IsNumeric(position + offset))
+            {
+                offset++;
+            }
+            return Buffer.Substring(position, offset);
+        }
+
+        private string GetDecimalToken(int position)
+        {
+            int offset = 0;
+            while (IsNumeric(Buffer[position + offset]) || Buffer[position + offset] == '.') 
             {
                 offset++;
             }

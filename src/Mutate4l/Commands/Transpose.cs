@@ -1,15 +1,12 @@
 ﻿using Mutate4l.Dto;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Mutate4l.Commands
 {
     public enum TransposeMode
     {
-        Absolute,
-        Relative,
-        Overwrite
+        Absolute, // pitch is transposed relative to an absolute base pitch of 60 (C4)
+        Relative, // pitch is transposed relative to the first note in the transposing clip
+        Overwrite // pitch is set to the notes in the transposing clip
     }
 
     public class TransposeOptions

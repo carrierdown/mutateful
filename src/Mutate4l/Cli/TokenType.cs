@@ -70,6 +70,7 @@
         _ValuesBegin,
         ClipReference,
         Number,
+        Decimal,
         MusicalDivision,
         InlineClip,
         _ValuesEnd,

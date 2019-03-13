@@ -1,5 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.Cli;
+using Mutate4l.Dto;
+using System.Collections.Generic;
 using static Mutate4l.Cli.TokenType;
 
 namespace Mutate4lTests
@@ -19,5 +21,16 @@ namespace Mutate4lTests
                 Assert.AreEqual(token.Type, expected[i++]);
             }
         }*/
+
+        [TestMethod]
+        public void TestIsDecimal()
+        {
+            var lex = new Lexer("1.0 123 34.08 35. 34.08.", new List<Clip>());
+            Assert.IsTrue(lex.IsDecimalValue(0));
+            Assert.IsFalse(lex.IsDecimalValue(4));
+            Assert.IsTrue(lex.IsDecimalValue(8));
+            Assert.IsFalse(lex.IsDecimalValue(14));
+            Assert.IsFalse(lex.IsDecimalValue(18));
+        }
     }
 }
