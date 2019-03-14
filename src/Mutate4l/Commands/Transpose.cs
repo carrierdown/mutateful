@@ -1,4 +1,5 @@
 ﻿using Mutate4l.Dto;
+using Mutate4l.Utility;
 
 namespace Mutate4l.Commands
 {
@@ -20,7 +21,12 @@ namespace Mutate4l.Commands
     {
         public static ProcessResultArray<Clip> Apply(TransposeOptions options, params Clip[] clips)
         {
-            int basePitch = 60;
+            int basePitch = 60; // absolute basePitch should maybe be relative to c in whatever octave first note is in
+            if (options.By == null)
+            {
+                return new ProcessResultArray<Clip>("No -by clip specified");
+            }
+            ClipUtilities.Monophonize(options.By);
             if (options.Mode == TransposeMode.Relative && options.By.Notes.Count > 0)
             {
                 basePitch = options.By.Notes[0].Pitch;
@@ -28,7 +34,8 @@ namespace Mutate4l.Commands
 
             foreach (var clip in clips)
             {
-                for (var i = 0; i < clip.Length; i++)
+                clip.GroupSimultaneousNotes();
+                for (var i = 0; i < clip.Count; i++)
                 {
                     var noteEvent = clip.Notes[i];
                     var transposeNoteEvent = options.By.Notes[i % options.By.Notes.Count];
@@ -40,6 +47,7 @@ namespace Mutate4l.Commands
                         noteEvent.Pitch += transposeNoteEvent.Pitch - basePitch;
                     }
                 }
+                clip.Flatten();
             }
             return new ProcessResultArray<Clip>(clips); // currently destructive
         }

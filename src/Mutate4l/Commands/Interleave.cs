@@ -61,7 +61,12 @@ namespace Mutate4l.Commands
                             {
                                 var note = clip.Notes[currentNoteCounter.Value];
 
-                                if (!options.Solo || clip.ClipReference.Track == metadata.TrackNumber) resultClip.Notes.Add(new NoteEvent(note.Pitch, position, note.Duration, note.Velocity));
+                                if (!options.Solo || clip.ClipReference.Track == metadata.TrackNumber)
+                                {
+                                    var newNote = new NoteEvent(note);
+                                    newNote.Start = position;
+                                    resultClip.Notes.Add(newNote);
+                                }
                                 position += clip.DurationUntilNextNote(currentNoteCounter.Value);
                             }
                             if (options.Skip)
@@ -73,10 +78,7 @@ namespace Mutate4l.Commands
                     }
                     if (options.ChunkChords)
                     {
-                        foreach (var clip in clips)
-                        {
-                            clip.Flatten();
-                        }
+                        resultClip.Flatten();
                     }
                     break;
                 case Time:

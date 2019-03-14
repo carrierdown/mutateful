@@ -101,13 +101,12 @@ namespace Mutate4l.Cli
             var i = 1;
             while (i < tokensAsList.Count)
             {
-                if (tokensAsList[i].Type > TokenType._OptionsBegin && tokensAsList[i].Type < TokenType._OptionsEnd)
+                if (tokensAsList[i].IsOption)
                 {
                     var type = tokensAsList[i].Type;
                     var values = new List<Token>();
                     i++;
-                    while (i < tokensAsList.Count && ((tokensAsList[i].Type > TokenType._ValuesBegin && tokensAsList[i].Type < TokenType._ValuesEnd) 
-                        || (tokensAsList[i].Type > TokenType._EnumValuesBegin && tokensAsList[i].Type < TokenType._EnumValuesEnd)))
+                    while (i < tokensAsList.Count && tokensAsList[i].IsOptionValue)
                     {
                         values.Add(tokensAsList[i++]);
                     }
@@ -115,8 +114,7 @@ namespace Mutate4l.Cli
                 }
                 else 
                 {
-                    while (i < tokensAsList.Count && ((tokensAsList[i].Type > TokenType._ValuesBegin && tokensAsList[i].Type < TokenType._ValuesEnd)
-                        || (tokensAsList[i].Type > TokenType._EnumValuesBegin && tokensAsList[i].Type < TokenType._EnumValuesEnd))) {
+                    while (i < tokensAsList.Count && tokensAsList[i].IsOptionValue) {
                         // If we don't get an option header but just one or more values, assume these are values for the default option
                         command.DefaultOptionValues.Add(tokensAsList[i++]);
                     }

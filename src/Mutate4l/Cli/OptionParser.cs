@@ -90,6 +90,10 @@ namespace Mutate4l.Dto
                 {
                     return new object[] { Utilities.MusicalDivisionToDecimal(tokens[0].Value) };
                 }
+                else if (type == TokenType.Decimal && property.PropertyType == typeof(decimal))
+                {
+                    return new object[] { decimal.Parse(tokens[0].Value) };
+                }
                 else if (type == TokenType.Number && property.PropertyType == typeof(Int32))
                 {
                     // todo: extract this logic so that it can be used in the list version below as well
@@ -131,10 +135,6 @@ namespace Mutate4l.Dto
                 {
                     int[] values = tokens.Select(t => int.Parse(t.Value)).ToArray();
                     return new object[] { values };
-                }
-                else if (property.PropertyType.IsEnum)
-                {
-                    throw new Exception("Only one value supported for enums");
                 }
                 else
                 {

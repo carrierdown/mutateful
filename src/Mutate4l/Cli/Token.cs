@@ -25,6 +25,6 @@ namespace Mutate4l.Cli
         public bool IsClipReference => Type == TokenType.ClipReference;
         public bool IsOption => Type > _OptionsBegin && Type < _OptionsEnd;
         public bool IsCommand => Type > _CommandsBegin && Type < _CommandsEnd;
-        public bool IsOptionValue => (Type > _EnumValuesBegin && Type < _EnumValuesEnd) || Type == Number || Type == MusicalDivision;
+        public bool IsOptionValue => (Type > _EnumValuesBegin && Type < _EnumValuesEnd) || (Type > _ValuesBegin && Type < _ValuesEnd);
     }
 }

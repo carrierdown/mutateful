@@ -253,13 +253,13 @@ namespace Mutate4l.Cli
                 {
                     token = new Token(MusicalDivision, GetRemainingNumericToken(position, 3), position);
                 }
-                else if (IsNumeric(position))
-                {
-                    token = new Token(Number, GetRemainingNumericToken(position, 1), position);
-                }
                 else if (IsDecimalValue(position))
                 {
                     token = new Token(TokenType.Decimal, GetDecimalToken(position), position);
+                }
+                else if (IsNumeric(position))
+                {
+                    token = new Token(Number, GetRemainingNumericToken(position, 1), position);
                 }
                 else if (IsAlpha(position))
                 {
@@ -297,7 +297,7 @@ namespace Mutate4l.Cli
         private string GetDecimalToken(int position)
         {
             int offset = 0;
-            while (IsNumeric(Buffer[position + offset]) || Buffer[position + offset] == '.') 
+            while (position + offset < Buffer.Length && (IsNumeric(Buffer[position + offset]) || Buffer[position + offset] == '.')) 
             {
                 offset++;
             }
