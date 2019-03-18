@@ -14,7 +14,7 @@ namespace Mutate4l.IO
     {
         public static int ReceivePort = 8022;
         public static int SendPort = 8023;
-        private static UdpClient UdpSender;
+        private static UdpClient UdpClient;
 
         public static Clip GetClip(int channel, int clip)
         {
@@ -155,9 +155,9 @@ namespace Mutate4l.IO
             byte[] result;
             var endPoint = new IPEndPoint(IPAddress.Any, ReceivePort);
 
-            using (var udpClient = new UdpClient(ReceivePort))
+            using (UdpClient = new UdpClient(ReceivePort))
             {
-                result = udpClient.Receive(ref endPoint);
+                result = UdpClient.Receive(ref endPoint);
             }
             return result;
         }

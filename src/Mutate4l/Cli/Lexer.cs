@@ -24,68 +24,69 @@ namespace Mutate4l.Cli
 
         private Dictionary<string, TokenType> Commands = new Dictionary<string, TokenType>
         {
-            { "interleave", Interleave },
-            { "intrlv", Interleave },
-            { "il", Interleave },
-            { "interleavevent", InterleaveEvent },
-            { "intrlvnt", InterleaveEvent },
-            { "ilvt", InterleaveEvent },
-
-            { "constrain", Constrain },
-            { "shuffle", Shuffle },
-            { "slice", Slice },
             { "arpeggiate", Arpeggiate },
+            { "constrain", Constrain },
+            { "filter", Filter },
+            { "il", Interleave },
+            { "ilvt", InterleaveEvent },
+            { "interleave", Interleave },
+            { "interleavevent", InterleaveEvent },
+            { "intrlv", Interleave },
+            { "intrlvnt", InterleaveEvent },
             { "monophonize", Monophonize },
             { "ratchet", Ratchet },
             { "relength", Relength },
+            { "resize", Resize },
             { "scan", Scan },
+            { "shuffle", Shuffle },
+            { "slice", Slice },
             { "take", Take },
-            { "filter", Filter },
             { "transpose", Transpose }
         };
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
         {
-            { "-start", Start },
-            { "-pitch", Pitch },
-            { "-ranges", Ranges },
-            { "-repeats", Repeats },
-            { "-mode", Mode },
-            { "-skip", Skip }, // rename to skip?
-            { "-strength", Strength },
-            { "-lengths", Lengths },
-            { "-rescale", Rescale },
-            { "-removeoffset", RemoveOffset },
-            { "-min", Min },
-            { "-max", Max },
-            { "-shape", Shape },
             { "-autoscale", AutoScale },
-            { "-controlmin", ControlMin },
+            { "-by", By },
+            { "-chunkchords", ChunkChords },
             { "-controlmax", ControlMax },
-            { "-velocitytostrength", VelocityToStrength },
-            { "-window", Window },
+            { "-controlmin", ControlMin },
             { "-count", Count },
             { "-duration", Duration },
             { "-enablemask", EnableMask },
-            { "-chunkchords", ChunkChords },
-            { "-by", By },
             { "-factor", Factor },
-            { "-with", With },
-            { "-solo", Solo }
+            { "-lengths", Lengths },
+            { "-max", Max },
+            { "-min", Min },
+            { "-mode", Mode },
+            { "-pitch", Pitch },
+            { "-ranges", Ranges },
+            { "-removeoffset", RemoveOffset },
+            { "-repeats", Repeats },
+            { "-rescale", Rescale },
+            { "-shape", Shape },
+            { "-skip", Skip }, // rename to skip?
+            { "-solo", Solo },
+            { "-start", Start },
+            { "-strength", Strength },
+            { "-strict", Strict },
+            { "-velocitytostrength", VelocityToStrength },
+            { "-window", Window },
+            { "-with", With }
         };
 
         private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>
         {
-            { "time", Time },
+            { "absolute", Absolute },
+            { "both", Both },
+            { "easein", EaseIn },
+            { "easeinout", EaseInOut },
             { "event", Event },
             { "linear", Linear },
-            { "easeinout", EaseInOut },
-            { "easein", EaseIn },
             { "pitch", Pitches },
+            { "relative", Relative },
             { "rhythm", Rhythm },
-            { "both", Both },
-            { "absolute", Absolute },
-            { "relative", Relative }
+            { "time", Time }
         };
 
         public Lexer(string buffer, List<Clip> clips)

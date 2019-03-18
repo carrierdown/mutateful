@@ -94,7 +94,11 @@ namespace Mutate4l.Dto
                 {
                     return new object[] { decimal.Parse(tokens[0].Value) };
                 }
-                else if (type == TokenType.Number && property.PropertyType == typeof(Int32))
+                else if (type == TokenType.Decimal && property.PropertyType == typeof(int))
+                {
+                    return new object[] { (decimal)int.Parse(tokens[0].Value) };
+                }
+                else if (type == TokenType.Number && property.PropertyType == typeof(int))
                 {
                     // todo: extract this logic so that it can be used in the list version below as well
                     var rangeInfo = property.GetCustomAttributes(false)

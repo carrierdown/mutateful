@@ -67,6 +67,9 @@ namespace Mutate4l
                 case TokenType.Relength:
                     resultContainer = Relength.Apply(OptionParser.ParseOptions<RelengthOptions>(command), clips);
                     break;
+                case TokenType.Resize:
+                    resultContainer = Resize.Apply(OptionParser.ParseOptions<ResizeOptions>(command), clips);
+                    break;
                 case TokenType.Scan:
                     resultContainer = Scan.Apply(OptionParser.ParseOptions<ScanOptions>(command), clips);
                     break;

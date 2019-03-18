@@ -10,7 +10,6 @@ namespace Mutate4l.Dto
         private int PitchField;
         private int VelocityField;
         private decimal StartField;
-        private NoteEvent ParentField;
 
         public int Pitch { get { return Math.Clamp(PitchField, 0, 127); } set { PitchField = value; } }
 

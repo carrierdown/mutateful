@@ -15,12 +15,14 @@ namespace Mutate4l.Commands
 
     public class ConstrainOptions
     {
-        public ConstrainMode Mode { get; set; }
+        public ConstrainMode Mode { get; set; } = Pitch;
 
         [OptionInfo(min: 1, max: 100)]
         public int Strength { get; set; } = 100;
 
         public Clip By { get; set; }
+
+        public bool Strict { get; set; }
     }
 
     // constrain: first clip timing and/or pitch is replicated on all following clips. Position is optionally scaled with the Strength parameter.
@@ -46,8 +48,16 @@ namespace Mutate4l.Commands
                     var constrainedNote = new NoteEvent(note);
                     if (options.Mode == Pitch || options.Mode == Both)
                     {
-                        var absPitch = ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes) % 12;
-                        constrainedNote.Pitch = (((constrainedNote.Pitch / 12)) * 12) + absPitch;
+                        if (options.Strict)
+                        {
+                            var pitch = ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes);
+                            constrainedNote.Pitch = pitch;
+                        }
+                        else
+                        {
+                            var pitchInOctave = ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes) % 12;
+                            constrainedNote.Pitch = (((constrainedNote.Pitch / 12)) * 12) + pitchInOctave;
+                        }
                     }
                     if (options.Mode == Rhythm || options.Mode == Both)
                     {
