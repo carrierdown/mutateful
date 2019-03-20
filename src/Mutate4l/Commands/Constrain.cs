@@ -49,15 +49,9 @@ namespace Mutate4l.Commands
                     if (options.Mode == Pitch || options.Mode == Both)
                     {
                         if (options.Strict)
-                        {
-                            var pitch = ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes);
-                            constrainedNote.Pitch = pitch;
-                        }
+                            constrainedNote.Pitch = ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes);
                         else
-                        {
-                            var pitchInOctave = ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes) % 12;
-                            constrainedNote.Pitch = (((constrainedNote.Pitch / 12)) * 12) + pitchInOctave;
-                        }
+                            constrainedNote.Pitch = ClipUtilities.FindNearestNotePitchInSetMusical(note, masterClip.Notes);
                     }
                     if (options.Mode == Rhythm || options.Mode == Both)
                     {

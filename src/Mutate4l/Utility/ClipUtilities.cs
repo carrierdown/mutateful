@@ -133,6 +133,7 @@ namespace Mutate4l.Utility
             return haystack[nearestIndex].Start;
         }
 
+        // Simple algorithm for finding nearest note in a list of note events
         public static int FindNearestNotePitchInSet(NoteEvent needle, SortedList<NoteEvent> haystack)
         {
             int nearestIndex = 0;
@@ -150,6 +151,74 @@ namespace Mutate4l.Utility
                 }
             }
             return haystack[nearestIndex].Pitch;
+        }
+
+        // More "musical" algorithm for finding nearest note which takes into account notes in other octaves that might be closer in note value than notes in the same octave.
+        public static int FindNearestNotePitchInSetMusical(NoteEvent needle, SortedList<NoteEvent> haystack, bool normalizeOctave = true)
+        {
+            int nearestPitch = FindNearestNotePitchInSet(needle.Pitch, haystack.Select(x => x.Pitch).ToArray());
+            if (normalizeOctave)
+            {
+                return ((nearestPitch - needle.Pitch) % 12) + needle.Pitch;
+            }
+            return nearestPitch;
+        }
+
+        public static int FindNearestNotePitchInSet(int needle, int[] haystack)
+        {
+            (int nearestDelta, int[] nearestIxs, int[] octaves) = FindNearestDelta(needle, haystack);
+
+            // check exact match
+            for (int i = 0; i < haystack.Length; i++)
+            {
+                int currentDelta = Math.Abs(needle - haystack[i]);
+                if (currentDelta == nearestDelta)
+                {
+                    return haystack[i];
+                }
+            }
+            // get closest matching octave
+            int curOctave = needle / 12;
+            int nearestIx = 0;
+            int nearestOctave = 11;
+            for (int i = 0; i < nearestIxs.Length; i++)
+            {
+                int oct = Math.Abs(curOctave - octaves[i]);
+                if (oct < nearestOctave)
+                {
+                    nearestOctave = oct;
+                    nearestIx = nearestIxs[i];
+                }
+            }
+            return haystack[nearestIx];
+        }
+
+        private static (int Delta, int[] Indexes, int[] Octaves) FindNearestDelta(int needle, int[] haystack)
+        {
+            int nearestDelta = 127;
+            var nearestIxs = new List<int>();
+            var octaves = new List<int>();
+
+            for (int i = 0; i < haystack.Length; i++)
+            {
+                int needlePitch = needle % 12;
+                int haystackPitch = haystack[i] % 12;
+                int currentDelta = Math.Min(Math.Abs(needlePitch - haystackPitch), Math.Abs(needlePitch - haystackPitch - 12));
+                if (currentDelta <= nearestDelta)
+                    nearestDelta = currentDelta;
+            }
+            for (int i = 0; i < haystack.Length; i++)
+            {
+                int needlePitch = needle % 12;
+                int haystackPitch = haystack[i] % 12;
+                int currentDelta = Math.Min(Math.Abs(needlePitch - haystackPitch), Math.Abs(needlePitch - haystackPitch - 12));
+                if (currentDelta == nearestDelta)
+                {
+                    nearestIxs.Add(i);
+                    octaves.Add(haystack[i] / 12);
+                }
+            }
+            return (nearestDelta, nearestIxs.ToArray(), octaves.ToArray());
         }
 
         public static void NormalizeClipLengths(params Clip[] clips)

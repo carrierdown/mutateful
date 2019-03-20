@@ -15,18 +15,18 @@ namespace Mutate4lTests.ClipActions
             {
                 Notes = new SortedList<NoteEvent>()
                 {
-                   new NoteEvent(60, 0, .5m, 100),
-                   new NoteEvent(55, 1, .5m, 100),
-                   new NoteEvent(62, 2, .5m, 100)
+                   new NoteEvent(60, 0, .5m, 100), // C
+                   new NoteEvent(55, 1, .5m, 100), // G
+                   new NoteEvent(62, 2, .5m, 100)  // D
                 }
             };
             var clip2 = new Clip(4, true)
             {
                 Notes = new SortedList<NoteEvent>()
                 {
-                    new NoteEvent(47, 0, .5m, 100),
-                    new NoteEvent(63, 3, .5m, 100),
-                    new NoteEvent(81, 4, .5m, 100)
+                    new NoteEvent(47, 0, .5m, 100), // B
+                    new NoteEvent(63, 3, .5m, 100), // D#
+                    new NoteEvent(81, 4, .5m, 100)  // A
                 }
             };
             var options = new ConstrainOptions()

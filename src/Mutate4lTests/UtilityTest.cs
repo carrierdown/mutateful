@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.Dto;
 using Mutate4l.Core;
 using Mutate4l.Utility;
+using System;
 
 namespace Mutate4lTests
 {
@@ -90,6 +91,16 @@ namespace Mutate4lTests
             Assert.AreEqual(3, clip1.Notes.Count);
             ClipUtilities.Monophonize(clip1);
             Assert.AreEqual(2, clip1.Notes.Count);
+        }
+
+        //[TestMethod]
+        public void MyTestMethod()
+        {
+            for (var i = 10; i < 36; i += 5)
+            {
+                Console.WriteLine($"pitch {i} nearest: {ClipUtilities.FindNearestNotePitchInSet(i, new int[] { 0,12,24,32 })}");
+            }
+            
         }
     }
 }
