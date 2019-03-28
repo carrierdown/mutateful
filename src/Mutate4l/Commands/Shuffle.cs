@@ -9,10 +9,21 @@ namespace Mutate4l.Commands
     public class ShuffleOptions
     {
         public Clip By { get; set; }
+//        public bool RelativeToNearestBoundary { get; set; } = false;
     }
 
     public class Shuffle
     {
+        public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+        {
+            (var success, var msg) = OptionParser.TryParseOptions(command, out ShuffleOptions options);
+            if (!success)
+            {
+                return new ProcessResultArray<Clip>(msg);
+            }
+            return Apply(options, clips);
+        }
+
         public static ProcessResultArray<Clip> Apply(ShuffleOptions options, params Clip[] clips)
         {
             if (options.By == null || options.By.Notes.Count == 0) options.By = clips[0];

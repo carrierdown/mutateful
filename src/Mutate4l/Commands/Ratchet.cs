@@ -12,7 +12,8 @@ namespace Mutate4l.Commands
     {
         Linear,
         EaseInOut,
-        EaseIn
+        EaseIn,
+        EaseOut
     }
 
     public enum RatchetMode
@@ -25,21 +26,21 @@ namespace Mutate4l.Commands
     public class RatchetOptions
     {
         // Automatically scale control sequence so that lowest note corresponds to minimum ratchet value and highest note corresponds to maximum ratchet value
-        public bool AutoScale { get; set; }
+        public bool AutoScale { get; set; } // Default behaviour is that range begins at lowest note rounded to nearest octave boundary (i.e. C) and ends with highest note (without rounding)
 
         public Clip By { get; set; }
 
-        public int ControlMin { get; set; } = -1; // lowest pitch/velocity for control sequence (unless AutoScale is on), e.g. pitch values 60 or lower equal Min ratchet-value.
+//        public int ControlMin { get; set; } = -1; // lowest pitch/velocity for control sequence (unless AutoScale is on), e.g. pitch values 60 or lower equal Min ratchet-value.
 
-        public int ControlMax { get; set; } = -1; // highest pitch/velocity for control sequence (unless AutoScale is on), e.g. pitch values 68 or higher equal Max ratchet-value.
+//        public int ControlMax { get; set; } = -1; // highest pitch/velocity for control sequence (unless AutoScale is on), e.g. pitch values 68 or higher equal Max ratchet-value.
 
-        [OptionInfo(min: 1, max: 20)]
+  /*      [OptionInfo(min: 1, max: 20)]
         public int Min { get; set; } = 1;
 
         [OptionInfo(min: 1, max: 20)]
         public int Max { get; set; } = 8;
-
-        public RatchetMode Mode { get; set; } = RatchetMode.Velocity;
+        */
+        public RatchetMode Mode { get; set; } = RatchetMode.Pitch;
 
         public Shape Shape { get; set; } = Shape.Linear;
 
@@ -49,8 +50,18 @@ namespace Mutate4l.Commands
         public bool VelocityToStrength { get; set; }
     }
     
-    public class Ratchet
+    public static class Ratchet
     {
+        public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+        {
+            (var success, var msg) = OptionParser.TryParseOptions(command, out RatchetOptions options);
+            if (!success)
+            {
+                return new ProcessResultArray<Clip>(msg);
+            }
+            return Apply(options, clips);
+        }
+
         // Basic use:
         // a1 ratchet -by a2 => b2
 
@@ -64,33 +75,52 @@ namespace Mutate4l.Commands
             Clip[] targetSequences = clips.Skip(1).Select(x => new Clip(x)).ToArray();
             Clip[] resultSequences = new Clip[targetSequences.Count()];
 
-            // set defaults based on mode if unset
-            if (options.ControlMin == -1) options.ControlMin = options.Mode == RatchetMode.Pitch ? 60 : 20;
-            if (options.ControlMax == -1) options.ControlMax = options.Mode == RatchetMode.Pitch ? 68 : 120;
+            int controlMin, controlMax;
+            decimal controlRange, targetRange;
 
-            int lowestValue = options.ControlMin;
-            int highestValue = options.ControlMax;
-            if (lowestValue > highestValue) Utilities.Swap<int>(ref lowestValue, ref highestValue);
-
-            if (options.AutoScale)
+            if (options.Mode == RatchetMode.Pitch)
             {
-                lowestValue = options.Mode == RatchetMode.Pitch ? controlSequence.Notes.Select(x => x.Pitch).Min() : controlSequence.Notes.Select(x => x.Velocity).Min();
-                highestValue = options.Mode == RatchetMode.Pitch ? controlSequence.Notes.Select(x => x.Pitch).Max() : controlSequence.Notes.Select(x => x.Velocity).Max();
+                int min = controlSequence.Notes.Select(x => x.Pitch).Min();
+                int max = controlSequence.Notes.Select(x => x.Pitch).Max();
+                if (options.AutoScale)
+                {
+                    controlMin = min;
+                    controlMax = max;
+                }
+                else
+                {
+                    controlMin = min - min % 12;
+                    controlMax = max + 12 - max % 12;
+                }
+                targetRange = Math.Max(controlMax - controlMin, 1);
             }
-
-            decimal controlRange = Math.Max(highestValue - lowestValue, 1);
-            decimal targetRange = Math.Max(Math.Abs(options.Max - options.Min), 1);
+            else
+            {
+                if (options.AutoScale)
+                {
+                    controlMin = controlSequence.Notes.Select(x => x.Velocity).Min();
+                    controlMax = controlSequence.Notes.Select(x => x.Velocity).Max();
+                    targetRange = Math.Max(controlMax - controlMin, 10) / 10;
+                }
+                else
+                {
+                    controlMin = 20;
+                    controlMax = 120;
+                    targetRange = 16;
+                }
+            }
+            controlRange = Math.Max(controlMax - controlMin, 1);
 
             // set pitch for each note in control sequence
             if (options.Mode == RatchetMode.Pitch)
             {
                 foreach (var note in controlSequence.Notes)
-                    note.Pitch = (int)Math.Round((Math.Clamp(note.Pitch, lowestValue, highestValue) - lowestValue) / controlRange * targetRange) + options.Min;
+                    note.Pitch = (int)Math.Round((note.Pitch - controlMin) / controlRange * targetRange) + 1;
             }
             else
             {
                 foreach (var note in controlSequence.Notes)
-                    note.Velocity = (int)Math.Round((Math.Clamp(note.Velocity, lowestValue, highestValue) - lowestValue) / controlRange * targetRange) + options.Min;
+                    note.Velocity = (int)Math.Round((Math.Clamp(note.Velocity, controlMin, controlMax) - controlMin) / controlRange * targetRange) + 1;
             }
 
             int i = 0;
@@ -106,13 +136,7 @@ namespace Mutate4l.Commands
         {
             Clip result = new Clip(targetSequence.Length, targetSequence.IsLooping);
 
-            Vector2 p1 = new Vector2(0, 0);
-            // just a quick fix for now...
-            Vector2 p2 = shape == Shape.EaseIn ? new Vector2(.5f, 0) : new Vector2(0, 0); //new Vector2(.47f, .09f); // controls start of curve
-            Vector2 p3 = shape == Shape.EaseIn ? new Vector2(1, 1) : new Vector2(1, 1); // controls end of curve
-            Vector2 p4 = new Vector2(1, 1);
-
-            // scaling
+            (Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) = GetCurveControlPoints(shape);
             p2.X = p2.X * scaleFactor;
             p2.Y = p2.Y * scaleFactor;
             p3.X = 1 - ((p4.X - p3.X) * scaleFactor);
@@ -163,12 +187,28 @@ namespace Mutate4l.Commands
             return result;
         }
 
+        private static (Vector2 Point1, Vector2 Point2, Vector2 Point3, Vector2 Point4) GetCurveControlPoints(Shape shape)
+        {
+            switch (shape)
+            {
+                case Shape.EaseIn:
+                    return (new Vector2(0, 0), new Vector2(.55f, 0), new Vector2(1, 1), new Vector2(1, 1));
+                case Shape.EaseOut:
+                    return (new Vector2(0, 0), new Vector2(0, 0), new Vector2(.5f, 1), new Vector2(1, 1));
+                case Shape.EaseInOut:
+                    return (new Vector2(0, 0), new Vector2(.55f, 0), new Vector2(.45f, 1), new Vector2(1, 1));
+            }
+            // linear
+            return (new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1), new Vector2(1, 1));
+        }
+
         private static decimal GetScaledValue(decimal value, Vector2[] curvePoints)
         {
             if (value <= 0) return 0;
             if (value >= 1) return 1;
             int[] boundaryIndexes = FindBoundaryIndexesByX(curvePoints, (float)value);
-            int lowerIndex = boundaryIndexes[0], upperIndex = boundaryIndexes[1];
+            int lowerIndex = boundaryIndexes[0], 
+                upperIndex = boundaryIndexes[1];
             float Yval = (((float)value - curvePoints[lowerIndex].X) / (curvePoints[upperIndex].X - curvePoints[lowerIndex].X)) * (curvePoints[upperIndex].Y - curvePoints[lowerIndex].Y);
             Yval += curvePoints[lowerIndex].Y;
 //            Console.WriteLine($"Point at t={value} between: {boundaryIndexes[0]}, {boundaryIndexes[1]} ({curvePoints[boundaryIndexes[0]].X} - {curvePoints[boundaryIndexes[1]].X})");

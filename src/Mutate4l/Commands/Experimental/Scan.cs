@@ -15,8 +15,13 @@ namespace Mutate4l.Commands
     // rename to stretch -grainsize 1/16 -factor 2.0
     public class Scan
     {
-        public static ProcessResultArray<Clip> Apply(ScanOptions options, params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
+            (var success, var msg) = OptionParser.TryParseOptions(command, out ScanOptions options);
+            if (!success)
+            {
+                return new ProcessResultArray<Clip>(msg);
+            }
             var processedClips = new Clip[clips.Length];
 
             for (var c = 0; c < clips.Length; c++)

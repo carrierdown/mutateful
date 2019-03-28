@@ -21,6 +21,16 @@ namespace Mutate4l.Commands
 
     public class Arpeggiate
     {
+        public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+        {
+            (var success, var msg) = OptionParser.TryParseOptions(command, out ArpeggiateOptions options);
+            if (!success)
+            {
+                return new ProcessResultArray<Clip>(msg);
+            }
+            return Apply(options, clips);
+        }
+
         // Add option to dynamically set # of events that should be rescaled to another note, probably via velocity.
         public static ProcessResultArray<Clip> Apply(ArpeggiateOptions options, params Clip[] clips)
         {

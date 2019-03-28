@@ -28,6 +28,16 @@ namespace Mutate4l.Commands
     // constrain: first clip timing and/or pitch is replicated on all following clips. Position is optionally scaled with the Strength parameter.
     public class Constrain
     {
+        public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+        {
+            (var success, var msg) = OptionParser.TryParseOptions(command, out ConstrainOptions options);
+            if (!success)
+            {
+                return new ProcessResultArray<Clip>(msg);
+            }
+            return Apply(options, clips);
+        }
+
         public static ProcessResultArray<Clip> Apply(ConstrainOptions options, params Clip[] clips)
         {
             if (options.By != null)

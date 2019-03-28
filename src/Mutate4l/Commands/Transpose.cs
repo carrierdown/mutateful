@@ -19,6 +19,16 @@ namespace Mutate4l.Commands
     // also needed: a transpose function (rangetranspose?) transposing all notes contained within the bounds of the respective note in the control clip
     public class Transpose
     {
+        public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+        {
+            (var success, var msg) = OptionParser.TryParseOptions(command, out TransposeOptions options);
+            if (!success)
+            {
+                return new ProcessResultArray<Clip>(msg);
+            }
+            return Apply(options, clips);
+        }
+
         public static ProcessResultArray<Clip> Apply(TransposeOptions options, params Clip[] clips)
         {
             int basePitch = 60; // absolute basePitch should maybe be relative to c in whatever octave first note is in

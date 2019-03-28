@@ -51,7 +51,7 @@ namespace Mutate4lTests
         {
             var options = new Dictionary<TokenType, List<Token>>();
             options[TokenType.GroupOneToggleOne] = new List<Token>();
-            var parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(new Command { Options = options });
+            (var success, var msg) = OptionParser.TryParseOptions(new Command { Options = options }, out OptionsClassOne parsedOptions);
             Assert.IsTrue(parsedOptions.GroupOneToggleOne);
             Assert.IsFalse(parsedOptions.GroupOneToggleTwo);
             Assert.IsTrue(parsedOptions.GroupTwoToggleOne);
@@ -65,7 +65,7 @@ namespace Mutate4lTests
             options[TokenType.DecimalValue] = new List<Token>() { new Token(TokenType.MusicalDivision, "1/8", 0) };
             options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "14", 0) };
             options[TokenType.SimpleBoolFlag] = new List<Token>();
-            var parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(new Command { Options = options });
+            (var success, var msg) = OptionParser.TryParseOptions(new Command { Options = options }, out OptionsClassOne parsedOptions);
             Assert.AreEqual(14, parsedOptions.IntValue);
             Assert.AreEqual(.5m, parsedOptions.DecimalValue);
             Assert.IsTrue(parsedOptions.SimpleBoolFlag);
@@ -76,10 +76,11 @@ namespace Mutate4lTests
         {
             var options = new Dictionary<TokenType, List<Token>>();
             options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "1000", 0) };
-            var parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(new Command { Options = options });
+            (var success, var msg) = OptionParser.TryParseOptions(new Command { Options = options }, out OptionsClassOne parsedOptions);
             Assert.AreEqual(100, parsedOptions.IntValue);
             options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "0", 0) };
-            parsedOptions = OptionParser.ParseOptions<OptionsClassOne>(new Command { Options = options });
+            parsedOptions = new OptionsClassOne();
+            (success, msg) = OptionParser.TryParseOptions(new Command { Options = options }, out parsedOptions);
             Assert.AreEqual(1, parsedOptions.IntValue);
         }
 
@@ -89,7 +90,7 @@ namespace Mutate4lTests
             var options = new Dictionary<TokenType, List<Token>>();
             options[TokenType.DecimalValue] = new List<Token>() { new Token(TokenType.MusicalDivision, "1/8", 0), new Token(TokenType.MusicalDivision, "1/16", 0) };
             options[TokenType.IntValue] = new List<Token>() { new Token(TokenType.Number, "14", 0), new Token(TokenType.Number, "2", 0), new Token(TokenType.Number, "900", 0) };
-            var parsedOptions = OptionParser.ParseOptions<OptionsClassTwo>(new Command { Options = options });
+            (var success, var msg) = OptionParser.TryParseOptions(new Command { Options = options }, out OptionsClassTwo parsedOptions);
             Assert.AreEqual(2, parsedOptions.DecimalValue.Length);
             Assert.AreEqual(3, parsedOptions.IntValue.Length);
         }
@@ -99,7 +100,7 @@ namespace Mutate4lTests
         {
             var options = new Dictionary<TokenType, List<Token>>();
             options[TokenType.EnumValue] = new List<Token>() { new Token(TokenType.EnumValue, "enumvalue2", 0) };
-            var parsedOptions = OptionParser.ParseOptions<OptionsClassTwo>(new Command { Options = options });
+            (var success, var msg) = OptionParser.TryParseOptions(new Command { Options = options }, out OptionsClassTwo parsedOptions);
             Assert.AreEqual(TestEnum.EnumValue2, parsedOptions.EnumValue);
         }
     }

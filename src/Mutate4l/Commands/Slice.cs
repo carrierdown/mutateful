@@ -13,6 +13,16 @@ namespace Mutate4l.Commands
 
     public class Slice
     {
+        public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+        {
+            (var success, var msg) = OptionParser.TryParseOptions(command, out SliceOptions options);
+            if (!success)
+            {
+                return new ProcessResultArray<Clip>(msg);
+            }
+            return Apply(options, clips);
+        }
+
         public static ProcessResultArray<Clip> Apply(SliceOptions options, params Clip[] clips)
         {
             var processedClips = new List<Clip>();

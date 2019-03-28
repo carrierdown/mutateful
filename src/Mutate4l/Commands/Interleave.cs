@@ -27,6 +27,16 @@ namespace Mutate4l.Commands
 
     public class Interleave
     {
+        public static ProcessResultArray<Clip> Apply(Command command, ClipMetaData metadata, params Clip[] clips)
+        {
+            (var success, var msg) = OptionParser.TryParseOptions(command, out InterleaveOptions options);
+            if (!success)
+            {
+                return new ProcessResultArray<Clip>(msg);
+            }
+            return Apply(options, metadata, clips);
+        }
+
         public static ProcessResultArray<Clip> Apply(InterleaveOptions options, ClipMetaData metadata, params Clip[] clips)
         {
             if (clips.Length < 2)

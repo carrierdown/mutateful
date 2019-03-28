@@ -10,29 +10,27 @@ namespace Mutate4l.Dto
 {
     public class OptionParser
     {
-        public static T ParseOptions<T>(Command command) where T : new()
+        public static (bool Success, string Message) TryParseOptions<T>(Command command, out T result) where T : new()
         {
             var options = command.Options;
-            T result = new T();
-            System.Reflection.MemberInfo info = typeof(T);
+            result = new T();
+            MemberInfo info = typeof(T);
             var props = result.GetType().GetProperties();
             var togglesByGroupId = new Dictionary<int, List<TokenType>>();
 
             // todo: better checking for whether incoming options are valid for the current options class or not
             foreach (var property in props)
             {
-                TokenType option;
-                try
+                if (Enum.TryParse<TokenType>(property.Name, out TokenType option))
                 {
-                    option = Enum.Parse<TokenType>(property.Name);
                     if (!(option > TokenType._OptionsBegin && option < TokenType._OptionsEnd || option > TokenType._TestOptionsBegin && option < TokenType._TestOptionsEnd))
                     {
-                        throw new Exception($"Property {property.Name} is not a valid option or test option.");
+                        return (false, $"Property {property.Name} is not a valid option or test option.");
                     }
                 }
-                catch (ArgumentException)
+                else
                 {
-                    throw new Exception($"No corresponding entity found for {property.Name}");
+                    return (false, $"No corresponding entity found for {property.Name}");
                 }
 
                 OptionInfo defaultAttribute = property.GetCustomAttributes(false)
@@ -43,8 +41,12 @@ namespace Mutate4l.Dto
                 if (defaultAttribute != null && command.DefaultOptionValues.Count > 0)
                 {
                     var tokens = command.DefaultOptionValues;
-                    object[] propertyData = ExtractPropertyData(property, tokens);
-                    property.SetMethod?.Invoke(result, propertyData);
+                    ProcessResultArray<object> res = ExtractPropertyData(property, tokens);
+                    if (!res.Success)
+                    {
+                        return (false, res.ErrorMessage);
+                    }
+                    property.SetMethod?.Invoke(result, res.Result);
                     continue;
                 }
 
@@ -57,30 +59,33 @@ namespace Mutate4l.Dto
                 if (options.ContainsKey(option))
                 {
                     var tokens = options[option];
-                    object[] propertyData = ExtractPropertyData(property, tokens);
-                    property.SetMethod?.Invoke(result, propertyData);
+                    ProcessResultArray<object> res = ExtractPropertyData(property, tokens);
+                    if (!res.Success)
+                    {
+                        return (false, res.ErrorMessage);
+                    }
+                    property.SetMethod?.Invoke(result, res.Result);
                 }
             }
-            return result;
+            return (true, "");
         }
 
-        public static object[] ExtractPropertyData(PropertyInfo property, List<Token> tokens)
+        public static ProcessResultArray<object> ExtractPropertyData(PropertyInfo property, List<Token> tokens)
         {
             TokenType? type = tokens.FirstOrDefault()?.Type;
             if (!tokens.All(t => t.Type == type))
             {
-                throw new Exception("Invalid option values: Values for a single option need to be of the same type.");
+                return new ProcessResultArray<object>("Invalid option values: Values for a single option need to be of the same type.");
             }
             if (tokens.Count == 0)
             {
                 if (property.PropertyType == typeof(bool))
                 {
                     // handle simple bool flag
-                    return new object[] { true };
+                    return new ProcessResultArray<object>(new object[] { true });
                 } else
                 {
-                    // todo: report error here - missing property value(s)
-                    return new object[] { };
+                    return new ProcessResultArray<object>($"Missing property value for non-bool parameter: {property.Name}");
                 }
             }
             else
@@ -88,15 +93,15 @@ namespace Mutate4l.Dto
                 // handle single value
                 if (type == TokenType.MusicalDivision && property.PropertyType == typeof(decimal))
                 {
-                    return new object[] { Utilities.MusicalDivisionToDecimal(tokens[0].Value) };
+                    return new ProcessResultArray<object>(new object[] { Utilities.MusicalDivisionToDecimal(tokens[0].Value) });
                 }
                 else if (type == TokenType.Decimal && property.PropertyType == typeof(decimal))
                 {
-                    return new object[] { decimal.Parse(tokens[0].Value) };
+                    return new ProcessResultArray<object>(new object[] { decimal.Parse(tokens[0].Value) });
                 }
                 else if (type == TokenType.Decimal && property.PropertyType == typeof(int))
                 {
-                    return new object[] { (decimal)int.Parse(tokens[0].Value) };
+                    return new ProcessResultArray<object>(new object[] { (decimal)int.Parse(tokens[0].Value) });
                 }
                 else if (type == TokenType.Number && property.PropertyType == typeof(int))
                 {
@@ -113,36 +118,37 @@ namespace Mutate4l.Dto
                     {
                         value = (int)rangeInfo.MinNumberValue;
                     }
-                    return new object[] { value };
+                    return new ProcessResultArray<object>(new object[] { value });
                 }
                 else if (property.PropertyType.IsEnum)
                 {
-                    try
+                    object result = new object();
+                    if (Enum.TryParse(property.PropertyType, tokens[0].Value, true, out result))
                     {
-                        return new object[] { Enum.Parse(property.PropertyType, tokens[0].Value, ignoreCase: true) };
+                        return new ProcessResultArray<object>(new object[] { result });
                     }
-                    catch (ArgumentException)
+                    else
                     {
-                        throw new Exception($"Enum {property.Name} does not support value {tokens[0].Value}");
+                        return new ProcessResultArray<object>($"Enum {property.Name} does not support value {tokens[0].Value}");
                     }
                 }
                 else if (type == TokenType.MusicalDivision && property.PropertyType == typeof(decimal[]))
                 {
                     decimal[] values = tokens.Select(t => Utilities.MusicalDivisionToDecimal(t.Value)).ToArray();
-                    return new object[] { values };
+                    return new ProcessResultArray<object>(new object[] { values });
                 }
                 else if (type == TokenType.InlineClip && property.PropertyType == typeof(Clip))
                 {
-                    return new object[] { tokens[0].Clip };
+                    return new ProcessResultArray<object>(new object[] { tokens[0].Clip });
                 }
                 else if (type == TokenType.Number && property.PropertyType == typeof(int[]))
                 {
                     int[] values = tokens.Select(t => int.Parse(t.Value)).ToArray();
-                    return new object[] { values };
+                    return new ProcessResultArray<object>(new object[] { values });
                 }
                 else
                 {
-                    throw new Exception($"Invalid combination. Token of type {type.ToString()} and property of type {property.PropertyType.Name} are not compatible.");
+                    return new ProcessResultArray<object>($"Invalid combination. Token of type {type.ToString()} and property of type {property.PropertyType.Name} are not compatible.");
                 }
             }
         }

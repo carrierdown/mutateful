@@ -60,6 +60,7 @@
         Both,
         EaseIn,
         EaseInOut,
+        EaseOut,
         Event,
         Linear,
         Overwrite,

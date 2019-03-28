@@ -1,5 +1,6 @@
 ﻿using Mutate4l.Cli;
 using Mutate4l.Commands;
+using Mutate4l.Core;
 using Mutate4l.Dto;
 using Mutate4l.IO;
 using System.Linq;
@@ -42,48 +43,48 @@ namespace Mutate4l
             switch (command.Id)
             {
                 case TokenType.Arpeggiate:
-                    resultContainer = Arpeggiate.Apply(OptionParser.ParseOptions<ArpeggiateOptions>(command), clips);
+                    resultContainer = Arpeggiate.Apply(command, clips);
                     break;
                 case TokenType.Constrain:
-                    resultContainer = Constrain.Apply(OptionParser.ParseOptions<ConstrainOptions>(command), clips);
+                    resultContainer = Constrain.Apply(command, clips);
                     break;
                 case TokenType.Filter:
-                    resultContainer = Filter.Apply(OptionParser.ParseOptions<FilterOptions>(command), clips);
+                    resultContainer = Filter.Apply(command, clips);
                     break;
                 case TokenType.Interleave:
-                    resultContainer = Interleave.Apply(OptionParser.ParseOptions<InterleaveOptions>(command), targetMetadata, clips); 
+                    resultContainer = Interleave.Apply(command, targetMetadata, clips); 
                     break;
-                case TokenType.InterleaveEvent:
+/*                case TokenType.InterleaveEvent:
                     var options = OptionParser.ParseOptions<InterleaveOptions>(command);
                     options.Mode = InterleaveMode.Event;
                     resultContainer = Interleave.Apply(options, targetMetadata, clips);
-                    break;
+                    break;*/
                 case TokenType.Monophonize:
                     resultContainer = Monophonize.Apply(clips);
                     break;
                 case TokenType.Ratchet:
-                    resultContainer = Ratchet.Apply(OptionParser.ParseOptions<RatchetOptions>(command), clips);
+                    resultContainer = Ratchet.Apply(command, clips);
                     break;
                 case TokenType.Relength:
-                    resultContainer = Relength.Apply(OptionParser.ParseOptions<RelengthOptions>(command), clips);
+                    resultContainer = Relength.Apply(command, clips);
                     break;
                 case TokenType.Resize:
-                    resultContainer = Resize.Apply(OptionParser.ParseOptions<ResizeOptions>(command), clips);
+                    resultContainer = Resize.Apply(command, clips);
                     break;
                 case TokenType.Scan:
-                    resultContainer = Scan.Apply(OptionParser.ParseOptions<ScanOptions>(command), clips);
+                    resultContainer = Scan.Apply(command, clips);
                     break;
                 case TokenType.Shuffle:
-                    resultContainer = Shuffle.Apply(OptionParser.ParseOptions<ShuffleOptions>(command), clips);
+                    resultContainer = Shuffle.Apply(command, clips);
                     break;
                 case TokenType.Slice:
-                    resultContainer = Slice.Apply(OptionParser.ParseOptions<SliceOptions>(command), clips);
+                    resultContainer = Slice.Apply(command, clips);
                     break;
                 case TokenType.Take:
-                    resultContainer = Take.Apply(OptionParser.ParseOptions<TakeOptions>(command), clips);
+                    resultContainer = Take.Apply(command, clips);
                     break;
                 case TokenType.Transpose:
-                    resultContainer = Transpose.Apply(OptionParser.ParseOptions<TransposeOptions>(command), clips);
+                    resultContainer = Transpose.Apply(command, clips);
                     break;
                 default:
                     // todo: error here

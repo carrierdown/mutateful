@@ -16,6 +16,16 @@ namespace Mutate4l.Commands
 
     public class Take
     {
+        public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+        {
+            (var success, var msg) = OptionParser.TryParseOptions(command, out TakeOptions options);
+            if (!success)
+            {
+                return new ProcessResultArray<Clip>(msg);
+            }
+            return Apply(options, clips);
+        }
+
         public static ProcessResultArray<Clip> Apply(TakeOptions options, params Clip[] clips)
         {
             var processedClips = new Clip[clips.Length];
