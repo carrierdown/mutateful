@@ -10,6 +10,8 @@ namespace Mutate4l.Cli
     {
         private readonly string Buffer;
         private readonly List<Clip> Clips;
+        private int Position = 0;
+        private readonly Token NonToken = new Token(NoToken, "", -1);
 
         private Dictionary<char, TokenType> SingleOperators = new Dictionary<char, TokenType>
         {
@@ -186,21 +188,8 @@ namespace Mutate4l.Cli
         {
             return c >= '0' && c <= '9';
         }
-        /*
-        private Token GetIdentifier(int pos)
-        {
-            var isOptionHeader = IsOption(pos);
 
-            int length = 1;
-            while (pos + length < Buffer.Length && (IsAlpha(pos + length)) {
-                length++;
-            }
-            return new Token(isOptionHeader ? TokenType.OptionHeader : TokenType)
-
-
-        }*/
-
-        private Token GetIdentifier(int pos, params Dictionary<string, TokenType>[] validValues)
+        private (bool Success, String ErrorMessage, Token Token) GetIdentifier(int pos, params Dictionary<string, TokenType>[] validValues)
         {
             string identifier = "";
             int initialPos = pos;
@@ -215,73 +204,114 @@ namespace Mutate4l.Cli
 
             if (identifier.Length > 0 && validValues.Any(va => va.Any(v => v.Key == identifier)))
             {
-                return new Token(validValues.Where(va => va.Any(v => v.Key.Equals(identifier, StringComparison.InvariantCultureIgnoreCase))).First()[identifier.ToLower()], identifier, initialPos);
+                return (true, "", new Token(validValues.First(va => va.Any(v => v.Key.Equals(identifier, StringComparison.InvariantCultureIgnoreCase)))[identifier.ToLower()], identifier, initialPos));
             }
-            throw new Exception($"Unknown token encountered at position {initialPos}: {identifier}");
+            return (false, $"Unknown token encountered at position {initialPos}: {identifier}", NonToken);
         }
 
-        public IEnumerable<Token> GetTokens()
+        public ProcessResultArray<Token> GetTokens()
         {
-            int position = 0;
-            while (position < Buffer.Length) // todo: add safety net here to avoid endless loop on unrecognized input
-            {
-                Token token = null;
-                if (IsSingleOperator(position))
-                {
-                    char value = Buffer[position];
-                    token = new Token(SingleOperators[value], value.ToString(), position);
-                }
-                else if (IsDoubleOperator(position))
-                {
-                    string value = $"{Buffer[position]}{Buffer[position + 1]}";
-                    token = new Token(DoubleOperators[value], value, position);
-                }
-                else if (IsClipReference(position))
-                {
-                    if (Buffer[position] == '*')
-                        token = new Token(TokenType.ClipReference, "*", position);
-                    else
-                        token = new Token(TokenType.ClipReference, GetRemainingNumericToken(position, 2), position);
-                }
-                else if (IsInlineClip(position))
-                {
-                    var clipRef = Buffer.Substring(position, (Buffer.IndexOf(']', position) - position + 1));
-                    int clipIx = int.Parse(clipRef.Substring(1, clipRef.Length - 2));
-                    token = new Token(InlineClip, clipRef, Clips[clipIx], position);
-                }
-                else if (IsMusicalDivision(position))
-                {
-                    token = new Token(MusicalDivision, GetRemainingNumericToken(position, 3), position);
-                }
-                else if (IsDecimalValue(position))
-                {
-                    token = new Token(TokenType.Decimal, GetDecimalToken(position), position);
-                }
-                else if (IsNumeric(position))
-                {
-                    token = new Token(Number, GetRemainingNumericToken(position, 1), position);
-                }
-                else if (IsAlpha(position))
-                {
-                    Token identifierToken = GetIdentifier(position, Commands, EnumValues);
-                    token = identifierToken;
-                }
-                else if (IsOption(position))
-                {
-                    Token identifierToken = GetIdentifier(position, Options);
-                    token = identifierToken;
-                }
-                if (token != null)
-                {
-                    position += token.Value.Length;
-                    yield return token;
-                } else
-                {
+            bool success, empty;
+            string msg = "";
+            var tokens = new List<Token>();
 
+            while (true)
+            {
+                (success, empty, msg) = TryGetToken(out Token token);
+                if (!success || empty)
+                {
+                    break;
                 }
-                position = SkipNonTokens(position);
+                tokens.Add(token);
             }
-            yield break;
+
+            if (!success && !empty)
+            {
+                return new ProcessResultArray<Token>(msg);
+            }
+            return new ProcessResultArray<Token>(tokens.ToArray());
+        }
+
+        public (bool Success, bool Empty, string ErrorMessage) TryGetToken(out Token token)
+        {
+            token = NonToken;
+            while (Position < Buffer.Length) // todo: add safety net here to avoid endless loop on unrecognized input
+            {
+                if (IsSingleOperator(Position))
+                {
+                    char value = Buffer[Position];
+                    token = new Token(SingleOperators[value], value.ToString(), Position);
+                }
+                else if (IsDoubleOperator(Position))
+                {
+                    string value = $"{Buffer[Position]}{Buffer[Position + 1]}";
+                    token = new Token(DoubleOperators[value], value, Position);
+                }
+                else if (IsClipReference(Position))
+                {
+                    if (Buffer[Position] == '*')
+                        token = new Token(TokenType.ClipReference, "*", Position);
+                    else
+                        token = new Token(TokenType.ClipReference, GetRemainingNumericToken(Position, 2), Position);
+                }
+                else if (IsInlineClip(Position))
+                {
+                    var clipRef = Buffer.Substring(Position, (Buffer.IndexOf(']', Position) - Position + 1));
+                    int clipIx = int.Parse(clipRef.Substring(1, clipRef.Length - 2));
+                    token = new Token(InlineClip, clipRef, Clips[clipIx], Position);
+                }
+                else if (IsMusicalDivision(Position))
+                {
+                    token = new Token(MusicalDivision, GetRemainingNumericToken(Position, 3), Position);
+                }
+                else if (IsDecimalValue(Position))
+                {
+                    token = new Token(TokenType.Decimal, GetDecimalToken(Position), Position);
+                }
+                else if (IsNumeric(Position))
+                {
+                    token = new Token(Number, GetRemainingNumericToken(Position, 1), Position);
+                }
+                else if (IsAlpha(Position))
+                {
+                    var (success, msg, identifierToken) = GetIdentifier(Position, Commands, EnumValues);
+                    if (!success) return (false, false, msg);
+                    token = identifierToken;
+                }
+                else if (IsOption(Position))
+                {
+                    var (success, msg, identifierToken) = GetIdentifier(Position, Options);
+                    if (!success) return (false, false, msg);
+                    token = identifierToken;
+                }
+                if (token.Type != NoToken)
+                {
+                    Position += token.Value.Length;
+                    return (true, false, "");
+                }
+                int prevPos = Position;
+                SkipNonTokens();
+                if (prevPos == Position)
+                {
+                    return (false, false, $"Unrecognized input at position {Position}:\\r\\n{GetErroneousTokenExcerpt()}");
+                }
+            }
+            return (false, true, "No more tokens available");
+        }
+
+        private string GetErroneousTokenExcerpt()
+        {
+            int backTrack = Math.Max(Position - 3, 0);
+            int fwdTrack = Math.Min(Buffer.Length - Position - 1, 7);
+            char[] errorIndicator = new char[backTrack + fwdTrack];
+            for (var i = 0; i < errorIndicator.Length; i++)
+            {
+                if (i == backTrack)
+                    errorIndicator[i] = '^';
+                else
+                    errorIndicator[i] = ' ';
+            }
+            return Buffer.Substring(Position - backTrack, fwdTrack + backTrack) + @"\r\n" + new string(errorIndicator);
         }
 
         // Fetches the remainder of a token consisting of numeric digits, with an optional offset which can be used in the case of values like 1/32 where you know the first 3 digits to be valid
@@ -304,13 +334,12 @@ namespace Mutate4l.Cli
             return Buffer.Substring(position, offset);
         }
 
-        private int SkipNonTokens(int position)
+        private void SkipNonTokens()
         {
-            while (position < Buffer.Length && (Buffer[position] == ' ' || Buffer[position] == '\t' || Buffer[position] == '\r' || Buffer[position] == '\n'))
+            while (Position < Buffer.Length && (Buffer[Position] == ' ' || Buffer[Position] == '\t' || Buffer[Position] == '\r' || Buffer[Position] == '\n'))
             {
-                position++;
+                Position++;
             }
-            return position;
         }
 
         public bool IsValidCommand()

@@ -60,7 +60,9 @@ namespace Mutate4l.Cli
             if (!valid) return new ProcessResult<ChainedCommand>($"Invalid formula: {formula}");
 
             var lexer = new Lexer(formula, clips);
-            Token[] commandTokens = lexer.GetTokens().ToArray();
+            var result = lexer.GetTokens();
+            if (!result.Success) return new ProcessResult<ChainedCommand>(result.ErrorMessage);
+            Token[] commandTokens = result.Result;
             var commandTokensLists = new List<List<Token>>();
             var activeCommandTokenList = new List<Token>();
             var sourceClips = commandTokens.TakeWhile(x => x.Type == TokenType.InlineClip).Select(x => x.Clip).ToArray();

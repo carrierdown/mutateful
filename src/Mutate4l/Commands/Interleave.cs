@@ -29,7 +29,7 @@ namespace Mutate4l.Commands
     {
         public static ProcessResultArray<Clip> Apply(Command command, ClipMetaData metadata, params Clip[] clips)
         {
-            (var success, var msg) = OptionParser.TryParseOptions(command, out InterleaveOptions options);
+            var (success, msg) = OptionParser.TryParseOptions(command, out InterleaveOptions options);
             if (!success)
             {
                 return new ProcessResultArray<Clip>(msg);
@@ -41,7 +41,7 @@ namespace Mutate4l.Commands
         {
             if (clips.Length < 2)
             {
-                clips = new Clip[] { clips[0], clips[0] };
+                clips = new[] { clips[0], clips[0] };
             }
             decimal position = 0;
             int repeatsIndex = 0;

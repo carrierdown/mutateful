@@ -3,9 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26510.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mutate4l", "Mutate4l\Mutate4l.csproj", "{F2C13618-616B-4906-8843-2C9342C49C3A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mutate4l", "Mutate4l\Mutate4l.csproj", "{F2C13618-616B-4906-8843-2C9342C49C3A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mutate4lTests", "Mutate4lTests\Mutate4lTests.csproj", "{785E75EA-FECA-42E4-83FF-271A2F84E181}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mutate4lTests", "Mutate4lTests\Mutate4lTests.csproj", "{785E75EA-FECA-42E4-83FF-271A2F84E181}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9FE9B675-A765-4FCA-94C9-D4C2E8D2257E}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +29,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {31C39135-CD9B-43BD-876F-55EB9FEFE607}
 	EndGlobalSection
 EndGlobal

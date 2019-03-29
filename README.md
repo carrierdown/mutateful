@@ -14,7 +14,7 @@ constrain | -by <[ClipReference](#parameter-types)> -mode **pitch**&#124;rhythm&
 filter | -duration <[MusicalDivision](#parameter-types): **1/64**> | |
 interleave | -chunkchords -mode event&#124;time -ranges <list of [MusicalDivision](#parameter-types)> -repeats <list of [Number](#parameter-types)> -skip -solo | |
 monophonize | | |
-ratchet | -autoscale -by [ClipReference](#parameter-types) -controlmin <[Number](#parameter-types): **60**> -controlmax <[Number](#parameter-types): **68**> -min <[Number](#parameter-types): **1**> -max <[Number](#parameter-types): **8**> -mode velocity&#124;pitch -shape **linear**&#124;easeinout&#124;easein -strength <[Number](#parameter-types) in range 0-**100**> -velocitytostrength | |
+ratchet | -autoscale -by [ClipReference](#parameter-types) -mode velocity&#124;pitch -shape **linear**&#124;easeinout&#124;easein -strength <[Number](#parameter-types) in range 0-**100**> -velocitytostrength | |
 relength | -factor <[Number](#parameter-types) in range 1-10> | |
 shuffle | -by [ClipReference](#parameter-types) | |
 slice | list of [MusicalDivision](#parameter-types) | |

@@ -11,6 +11,7 @@ namespace Mutate4l.Cli
     {
         public static void Start()
         {
+            Console.Write($"Error: Unrecognized input at position 15:\r\n interleave % fisk \r\n            ^");
             while (true)
             {
                 var result = UdpConnector.WaitForData();

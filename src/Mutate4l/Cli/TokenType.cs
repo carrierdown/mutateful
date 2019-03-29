@@ -2,6 +2,7 @@
 {
     public enum TokenType
     {
+        NoToken,
         CommandName,
         OptionHeader,
         OptionValue,
