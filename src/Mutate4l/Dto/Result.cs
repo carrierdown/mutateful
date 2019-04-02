@@ -16,5 +16,7 @@ namespace Mutate4l.Dto
         }
 
         public Result(string errorMessage) : this(false, $"Error: {errorMessage}") { }
+
+        public Result(string errorMessage, string header) : this(false, $"{header}: {errorMessage}") { }
     }
 }

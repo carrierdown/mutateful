@@ -27,6 +27,7 @@ namespace Mutate4l.Cli
         private Dictionary<string, TokenType> Commands = new Dictionary<string, TokenType>
         {
             { "arpeggiate", Arpeggiate },
+            { "concat", Concat },
             { "constrain", Constrain },
             { "filter", Filter },
             { "il", Interleave },
@@ -70,6 +71,7 @@ namespace Mutate4l.Cli
             { "-start", Start },
             { "-strength", Strength },
             { "-strict", Strict },
+            { "-transposevalues", TransposeValues },
             { "-velocitytostrength", VelocityToStrength },
             { "-window", Window },
             { "-with", With }
@@ -171,7 +173,7 @@ namespace Mutate4l.Cli
 
         private bool IsOption(int pos)
         {
-            return Buffer[pos] == '-';
+            return (Buffer.Length > pos + 1 && Buffer[pos] == '-' && IsAlpha(pos + 1));
         }
 
         public static bool IsAlpha(char c)
@@ -181,7 +183,7 @@ namespace Mutate4l.Cli
 
         private bool IsNumeric(int pos)
         {
-            return IsNumeric(Buffer[pos]);
+            return IsNumeric(Buffer[pos]) || (Buffer.Length > pos + 1 && Buffer[pos] == '-' && IsNumeric(pos + 1));
         }
 
         public static bool IsNumeric(char c)

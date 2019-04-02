@@ -84,6 +84,11 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
     var clipId = arg1;
     var name = arg2 || "";
 
+    /*if (clipId > 0) {
+        var lo = new LiveAPI("id " + clipId);
+        enumerateClip(getTrackNumber(lo), getClipNumber(lo), lo);
+    }*/
+
     if (watchedClips[clipId] !== undefined && watchedClips[clipId].length !== 0) {
         var currentlyWatchedClips = watchedClips[clipId];
         var indexesToRemove = [];
@@ -155,19 +160,19 @@ function onSelectedClipChanged(args) {
     var id = args[args.length - 1];
     if (id === 0) return; // return on empty clip
     // update watchers
-    outlet(1, ["updateObserversOnClipChange", id]); // Max does not support creating LiveAPI objects in custom callbacks, so this is handled by piping data back into inlet 2 (see msg_int function above)
+    outlet(1, ["updateObserversOnClipChange", id]); // Max does not support creating LiveAPI objects in custom callbacks, so this is handled by piping data back into itself (see updateObserversOnClipChange function above)
 }
 
 function getClipName(liveObject) {
     var clipName = liveObject.get("name");
     if (!clipName.length || clipName.length === 0) return "";
-    else return clipName[0];
+    return clipName[0] + ""; // if name is numeric, the live api turns it into a number instead of a string, so we need to coerce it.
 }
 
 function getClipLength(liveObject) {
     var clipLength = liveObject.get("length");
     if (clipLength.length > 0) return clipLength[0];
-    else return clipLength;
+    return clipLength;
 }
 
 function clipRefToId(clipRef) {
@@ -228,6 +233,17 @@ function getTrackNumber(liveObject) {
     if (trackNoIx >= 0) {
         var trackNoPart = parseInt(pathParts[trackNoIx + 1], 10);
         return trackNoPart;
+    }
+    return false;
+}
+
+function getClipNumber(liveObject) {
+    return liveObject.path;
+    var pathParts = path.split(" ");
+    var clipNoIx = pathParts.indexOf("clip_slots");
+    if (clipNoIx >= 0) {
+        var clipNoPart = parseInt(pathParts[clipNoIx + 1], 10);
+        return clipNoPart;
     }
     return false;
 }
@@ -400,21 +416,27 @@ function enumerate() {
                 liveObject.goto("live_set tracks " + i + " clip_slots " + s);
                 if (hasClip(liveObject)) {
                     liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
-                    var existingName = getClipName(liveObject);
-                    var newName = "";
-                    var clipRefString = String.fromCharCode(65 + i) + (s + 1);
-                    var startBracketIx = existingName.indexOf("[");
-                    var endBracketIx = existingName.indexOf("]", startBracketIx);
-                    if (startBracketIx >= 0 && endBracketIx >= 0) {
-                        newName = existingName.substring(0, startBracketIx + 1) + clipRefString + existingName.substring(endBracketIx);
-                    } else {
-                        newName = "[" + clipRefString + "] " + existingName;
-                    }
-                    liveObject.set("name",  newName);
+                    enumerateClip(i, s + 1, liveObject);
                 }
             }
         }
     }
+}
+
+function enumerateClip(trackNo, clipNo, liveObject) {
+    var existingName = getClipName(liveObject);
+    debuglogExt("existingName", existingName);
+    var newName = "";
+    var clipRefString = String.fromCharCode(65 + trackNo) + clipNo;
+    var startBracketIx = existingName.indexOf("[");
+    var endBracketIx = existingName.indexOf("]", startBracketIx);
+    if (startBracketIx >= 0 && endBracketIx >= 0) {
+        newName = existingName.substring(0, startBracketIx + 1) + clipRefString + existingName.substring(endBracketIx);
+    } else {
+        newName = "[" + clipRefString + "] " + existingName;
+    }
+    debuglogExt(startBracketIx, endBracketIx, newName);
+    liveObject.set("name",  newName);
 }
 
 function getSelectedClip() {
@@ -452,7 +474,7 @@ function getSelectedClip() {
 }
 
 function containsFormula(clipName) {
-    return clipName.indexOf("=") >= 0;
+    return clipName !== undefined && clipName.indexOf("=") >= 0;
 }
 
 function processAllClips() {
@@ -624,9 +646,12 @@ function expandFormulaAsBytes(formula, ownId) {
             byteBuffer[byteBuffer.length] = transformedPart.charCodeAt(y);
         }
     }
+    var currentClipLiveObject = new LiveAPI("id " + ownId);
     var metaDataBytes = new Uint8Array(4 /* id - 2 bytes, track no - 1 byte, number of inline clips - 1 byte */);
     int16ToBufferAtPos(ownId, metaDataBytes, 0);
-    metaDataBytes[2] = getTrackNumber(new LiveAPI("id " + ownId));
+    metaDataBytes[2] = getTrackNumber(currentClipLiveObject);
+//    debuglogExt("getTrackNumber returned " + metaDataBytes[2]);
+//    debuglogExt("get clip number " + getClipNumber(currentClipLiveObject));
     metaDataBytes[3] = numberOfClips;
     var metaData = [];
     for (i = 0; i < metaDataBytes.length; i++) {

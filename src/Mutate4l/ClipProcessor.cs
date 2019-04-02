@@ -32,7 +32,7 @@ namespace Mutate4l
                 UdpConnector.SetClipAsBytesById(chainedCommand.TargetMetaData.Id, resultContainer.Result[0]);
             }
             else
-                return new Result("No clips affected");
+                return new Result(resultContainer.ErrorMessage, "Error applying formula");
 
             return new Result(resultContainer.Success, resultContainer.ErrorMessage);
         }
@@ -44,6 +44,9 @@ namespace Mutate4l
             {
                 case TokenType.Arpeggiate:
                     resultContainer = Arpeggiate.Apply(command, clips);
+                    break;
+                case TokenType.Concat:
+                    resultContainer = Concat.Apply(clips);
                     break;
                 case TokenType.Constrain:
                     resultContainer = Constrain.Apply(command, clips);

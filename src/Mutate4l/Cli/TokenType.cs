@@ -9,6 +9,7 @@
 
         _CommandsBegin,
         Arpeggiate,
+        Concat,
         Constrain,
         Explode,
         Filter,
@@ -51,6 +52,7 @@
         Start,
         Strength,
         Strict,
+        TransposeValues,
         VelocityToStrength,
         Window,
         With,

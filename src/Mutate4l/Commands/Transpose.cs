@@ -1,5 +1,7 @@
-﻿using Mutate4l.Dto;
+﻿using Mutate4l.Core;
+using Mutate4l.Dto;
 using Mutate4l.Utility;
+using System.Linq;
 
 namespace Mutate4l.Commands
 {
@@ -12,8 +14,10 @@ namespace Mutate4l.Commands
 
     public class TransposeOptions
     {
-        public Clip By { get; set; } // Allows syntax like a1 transpose -by a2 -mode relative. This syntax makes it much clearer which clip is being affected, and which is used as the source.
+        public Clip By { get; set; } = new Clip(4, true); // Allows syntax like a1 transpose -by a2 -mode relative. This syntax makes it much clearer which clip is being affected, and which is used as the source.
         public TransposeMode Mode { get; set; } = TransposeMode.Relative;
+        [OptionInfo(type: OptionType.Default)]
+        public int[] TransposeValues { get; set; } = new int[0];
     }
 
     // also needed: a transpose function (rangetranspose?) transposing all notes contained within the bounds of the respective note in the control clip
@@ -32,9 +36,9 @@ namespace Mutate4l.Commands
         public static ProcessResultArray<Clip> Apply(TransposeOptions options, params Clip[] clips)
         {
             int basePitch = 60; // absolute basePitch should maybe be relative to c in whatever octave first note is in
-            if (options.By == null)
+            if (options.By.Count == 0 && options.TransposeValues.Length == 0)
             {
-                return new ProcessResultArray<Clip>("No -by clip specified");
+                return new ProcessResultArray<Clip>("No -by clip or transpose values specified.");
             }
             ClipUtilities.Monophonize(options.By);
             if (options.Mode == TransposeMode.Relative && options.By.Notes.Count > 0)
@@ -42,19 +46,34 @@ namespace Mutate4l.Commands
                 basePitch = options.By.Notes[0].Pitch;
             }
 
+            int[] transposeValues;
+            if (options.TransposeValues.Length > 0)
+            {
+                transposeValues = options.TransposeValues;
+            } else
+            {
+                transposeValues = options.By.Notes.Select(x => 
+                    options.Mode == TransposeMode.Overwrite ? 
+                        x.Pitch : 
+                        x.Pitch - basePitch
+                ).ToArray();
+            }
+
             foreach (var clip in clips)
             {
                 clip.GroupSimultaneousNotes();
-                for (var i = 0; i < clip.Count; i++)
+                if (options.Mode == TransposeMode.Overwrite)
                 {
-                    var noteEvent = clip.Notes[i];
-                    var transposeNoteEvent = options.By.Notes[i % options.By.Notes.Count];
-                    if (options.Mode == TransposeMode.Overwrite)
+                    for (var i = 0; i < clip.Count; i++)
                     {
-                        noteEvent.Pitch = transposeNoteEvent.Pitch;
-                    } else
+                        clip.Notes[i].Pitch = transposeValues[i % transposeValues.Length];
+                    }
+                }
+                else
+                {
+                    for (var i = 0; i < clip.Count; i++)
                     {
-                        noteEvent.Pitch += transposeNoteEvent.Pitch - basePitch;
+                        clip.Notes[i].Pitch += transposeValues[i % transposeValues.Length];
                     }
                 }
                 clip.Flatten();

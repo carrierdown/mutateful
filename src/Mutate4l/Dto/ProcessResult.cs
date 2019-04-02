@@ -19,6 +19,8 @@ namespace Mutate4l.Dto
 
         public ProcessResult(string errorMessage) : this(false, new T(), $"Error: {errorMessage}") { }
 
+        public ProcessResult(string errorMessage, string header) : this(false, new T(), $"{header}: {errorMessage}") { }
+
         public ProcessResult(T result) : this(true, result, "") { }
     }
 }

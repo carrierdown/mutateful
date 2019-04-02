@@ -11,7 +11,17 @@ namespace Mutate4l.Dto
         private int VelocityField;
         private decimal StartField;
 
-        public int Pitch { get { return Math.Clamp(PitchField, 0, 127); } set { PitchField = value; } }
+        public int Pitch {
+            get { return Math.Clamp(PitchField, 0, 127); }
+            set {
+                if (HasChildren)
+                {
+                    var delta = value - PitchField;
+                    Children.ForEach(c => c.Pitch += delta);
+                }
+                PitchField = value;
+            }
+        }
 
         public decimal Duration { get; set; }
 
