@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.Cli;
 using Mutate4l.Dto;
 using System.Collections.Generic;
+using Mutate4l.Core;
 using static Mutate4l.Cli.TokenType;
 
 namespace Mutate4lTests

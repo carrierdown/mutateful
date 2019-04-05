@@ -1,4 +1,5 @@
 ﻿using System;
+using Mutate4l.Core;
 using Mutate4l.Dto;
 
 namespace Mutate4l.Utility

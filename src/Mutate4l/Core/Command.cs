@@ -1,8 +1,7 @@
-﻿using Mutate4l.Cli;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Mutate4l.Cli;
 
-namespace Mutate4l.Dto
+namespace Mutate4l.Core
 {
     public class Command
     {

@@ -1,8 +1,7 @@
-﻿using Mutate4l.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace Mutate4l.Dto
+namespace Mutate4l.Core
 {
     public struct ClipReference
     {

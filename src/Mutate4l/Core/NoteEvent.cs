@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using Mutate4l.Core;
 
-namespace Mutate4l.Dto
+namespace Mutate4l.Core
 {
     public class NoteEvent : IComparable<NoteEvent>, IEquatable<NoteEvent>
     {

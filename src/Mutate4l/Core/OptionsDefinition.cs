@@ -1,6 +1,6 @@
 ﻿using Mutate4l.Cli;
 
-namespace Mutate4l.Dto
+namespace Mutate4l.Core
 {
     public class OptionsDefinition
     {

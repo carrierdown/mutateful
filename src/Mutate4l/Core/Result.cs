@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Mutate4l.Dto
+﻿namespace Mutate4l.Core
 {
     public class Result
     {

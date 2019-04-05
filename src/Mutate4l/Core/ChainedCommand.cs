@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace Mutate4l.Dto
+namespace Mutate4l.Core
 {
     public class ChainedCommand
     {
