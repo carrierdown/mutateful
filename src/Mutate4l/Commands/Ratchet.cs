@@ -1,10 +1,10 @@
 ﻿using Mutate4l.Core;
-using Mutate4l.Dto;
 using Mutate4l.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Mutate4l.Cli;
 
 namespace Mutate4l.Commands
 {
@@ -26,20 +26,10 @@ namespace Mutate4l.Commands
     public class RatchetOptions
     {
         // Automatically scale control sequence so that lowest note corresponds to minimum ratchet value and highest note corresponds to maximum ratchet value
-        public bool AutoScale { get; set; } // Default behaviour is that range begins at lowest note rounded to nearest octave boundary (i.e. C) and ends with highest note (without rounding)
+        public bool AutoScale { get; set; } // Default behaviour is that range begins at lowest note rounded to nearest octave boundary (i.e. C) and ends with highest note rounded to nearest octave boundary
 
         public Clip By { get; set; }
 
-//        public int ControlMin { get; set; } = -1; // lowest pitch/velocity for control sequence (unless AutoScale is on), e.g. pitch values 60 or lower equal Min ratchet-value.
-
-//        public int ControlMax { get; set; } = -1; // highest pitch/velocity for control sequence (unless AutoScale is on), e.g. pitch values 68 or higher equal Max ratchet-value.
-
-  /*      [OptionInfo(min: 1, max: 20)]
-        public int Min { get; set; } = 1;
-
-        [OptionInfo(min: 1, max: 20)]
-        public int Max { get; set; } = 8;
-        */
         public RatchetMode Mode { get; set; } = RatchetMode.Pitch;
 
         public Shape Shape { get; set; } = Shape.Linear;
@@ -48,13 +38,16 @@ namespace Mutate4l.Commands
         public int Strength { get; set; } = 100;
 
         public bool VelocityToStrength { get; set; }
+
+        [OptionInfo(type: OptionType.Default)]
+        public int[] RatchetValues { get; set; } = new int[0];
     }
-    
+
     public static class Ratchet
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
-            (var success, var msg) = OptionParser.TryParseOptions(command, out RatchetOptions options);
+            var (success, msg) = OptionParser.TryParseOptions(command, out RatchetOptions options);
             if (!success)
             {
                 return new ProcessResultArray<Clip>(msg);
@@ -75,52 +68,71 @@ namespace Mutate4l.Commands
             Clip[] targetSequences = clips.Skip(1).Select(x => new Clip(x)).ToArray();
             Clip[] resultSequences = new Clip[targetSequences.Count()];
 
-            int controlMin, controlMax;
-            decimal controlRange, targetRange;
-
-            if (options.Mode == RatchetMode.Pitch)
+            if (options.RatchetValues.Length > 0)
             {
-                int min = controlSequence.Notes.Select(x => x.Pitch).Min();
-                int max = controlSequence.Notes.Select(x => x.Pitch).Max();
-                if (options.AutoScale)
+                controlSequence.Notes = new SortedList<NoteEvent>();
+                var y = 0;
+                var targetSeq = targetSequences[0];
+                foreach (var value in options.RatchetValues)
                 {
-                    controlMin = min;
-                    controlMax = max;
+                    controlSequence.Add(
+                        new NoteEvent(options.Mode == RatchetMode.Pitch ? value : targetSeq.Notes[y % targetSeq.Count].Pitch, 
+                            targetSeq.Notes[y % targetSeq.Count].Start, 
+                            targetSeq.Notes[y % targetSeq.Count].Duration,
+                            options.Mode == RatchetMode.Velocity ? value : targetSeq.Notes[y % targetSeq.Count].Velocity)
+                    );
                 }
-                else
-                {
-                    controlMin = min - min % 12;
-                    controlMax = max + 12 - max % 12;
-                }
-                targetRange = Math.Max(controlMax - controlMin, 1);
             }
             else
             {
-                if (options.AutoScale)
+                int controlMin, 
+                    controlMax;
+                int targetRange;
+
+                if (options.Mode == RatchetMode.Pitch)
                 {
-                    controlMin = controlSequence.Notes.Select(x => x.Velocity).Min();
-                    controlMax = controlSequence.Notes.Select(x => x.Velocity).Max();
-                    targetRange = Math.Max(controlMax - controlMin, 10) / 10;
+                    int min = controlSequence.Notes.Select(x => x.Pitch).Min();
+                    int max = controlSequence.Notes.Select(x => x.Pitch).Max();
+                    if (options.AutoScale)
+                    {
+                        controlMin = min;
+                        controlMax = max;
+                    }
+                    else
+                    {
+                        controlMin = min - min % 12;
+                        controlMax = max + 12 - max % 12;
+                    }
+                    targetRange = Math.Max(controlMax - controlMin, 1);
                 }
                 else
                 {
-                    controlMin = 20;
-                    controlMax = 120;
-                    targetRange = 16;
+                    if (options.AutoScale)
+                    {
+                        controlMin = controlSequence.Notes.Select(x => x.Velocity).Min();
+                        controlMax = controlSequence.Notes.Select(x => x.Velocity).Max();
+                        targetRange = Math.Max(controlMax - controlMin, 10) / 10;
+                    }
+                    else
+                    {
+                        controlMin = 20;
+                        controlMax = 120;
+                        targetRange = 16;
+                    }
                 }
-            }
-            controlRange = Math.Max(controlMax - controlMin, 1);
+                float controlRange = Math.Max(controlMax - controlMin, 1);
 
-            // set pitch for each note in control sequence
-            if (options.Mode == RatchetMode.Pitch)
-            {
-                foreach (var note in controlSequence.Notes)
-                    note.Pitch = (int)Math.Round((note.Pitch - controlMin) / controlRange * targetRange) + 1;
-            }
-            else
-            {
-                foreach (var note in controlSequence.Notes)
-                    note.Velocity = (int)Math.Round((Math.Clamp(note.Velocity, controlMin, controlMax) - controlMin) / controlRange * targetRange) + 1;
+                // set pitch for each note in control sequence
+                if (options.Mode == RatchetMode.Pitch)
+                {
+                    foreach (var note in controlSequence.Notes)
+                        note.Pitch = (int)Math.Round((note.Pitch - controlMin) / controlRange * targetRange) + 1;
+                }
+                else
+                {
+                    foreach (var note in controlSequence.Notes)
+                        note.Velocity = (int)Math.Round((Math.Clamp(note.Velocity, controlMin, controlMax) - controlMin) / controlRange * targetRange) + 1;
+                }
             }
 
             int i = 0;
@@ -136,11 +148,11 @@ namespace Mutate4l.Commands
         {
             Clip result = new Clip(targetSequence.Length, targetSequence.IsLooping);
 
-            (Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) = GetCurveControlPoints(shape);
+            var (p1, p2, p3, p4) = GetCurveControlPoints(shape);
             p2.X = p2.X * scaleFactor;
             p2.Y = p2.Y * scaleFactor;
-            p3.X = 1 - ((p4.X - p3.X) * scaleFactor);
-            p3.Y = 1 - ((p4.Y - p3.Y) * scaleFactor);
+            p3.X = 1 - (p4.X - p3.X) * scaleFactor;
+            p3.Y = 1 - (p4.Y - p3.Y) * scaleFactor;
 
             Vector2[] curvePoints = new Vector2[11];
             for (int i = 0; i < curvePoints.Length; i++)

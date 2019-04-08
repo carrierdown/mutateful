@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using Mutate4l.Core;
-using Mutate4l.Dto;
-using Mutate4l.IO;
-using Mutate4l.Utility;
 
 namespace Mutate4l.Cli
 {

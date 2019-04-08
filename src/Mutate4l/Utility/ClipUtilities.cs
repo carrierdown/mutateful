@@ -1,6 +1,4 @@
-﻿using Mutate4l.Cli;
-using Mutate4l.Core;
-using Mutate4l.Dto;
+﻿using Mutate4l.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

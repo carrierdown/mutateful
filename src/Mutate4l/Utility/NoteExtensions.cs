@@ -1,6 +1,4 @@
-﻿using System;
-using Mutate4l.Core;
-using Mutate4l.Dto;
+﻿using Mutate4l.Core;
 
 namespace Mutate4l.Utility
 {
@@ -30,6 +28,7 @@ namespace Mutate4l.Utility
             return note.Start >= start && (note.Start + note.Duration) > end;
         }
 
+        //   [ -------]??
         public static bool StartsInsideInterval(this NoteEvent note, decimal start, decimal end)
         {
             return note.Start >= start && note.Start < end;

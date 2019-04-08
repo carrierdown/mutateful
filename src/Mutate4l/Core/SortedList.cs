@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using Mutate4l.Dto;
 
 namespace Mutate4l.Core
 {

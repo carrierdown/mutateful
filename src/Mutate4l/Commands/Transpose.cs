@@ -1,7 +1,7 @@
 ﻿using Mutate4l.Core;
-using Mutate4l.Dto;
 using Mutate4l.Utility;
 using System.Linq;
+using Mutate4l.Cli;
 
 namespace Mutate4l.Commands
 {
@@ -15,7 +15,9 @@ namespace Mutate4l.Commands
     public class TransposeOptions
     {
         public Clip By { get; set; } = new Clip(4, true); // Allows syntax like a1 transpose -by a2 -mode relative. This syntax makes it much clearer which clip is being affected, and which is used as the source.
+
         public TransposeMode Mode { get; set; } = TransposeMode.Relative;
+
         [OptionInfo(type: OptionType.Default)]
         public int[] TransposeValues { get; set; } = new int[0];
     }
@@ -25,22 +27,23 @@ namespace Mutate4l.Commands
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
-            (var success, var msg) = OptionParser.TryParseOptions(command, out TransposeOptions options);
-            if (!success)
-            {
-                return new ProcessResultArray<Clip>(msg);
-            }
-            return Apply(options, clips);
+            var (success, msg) = OptionParser.TryParseOptions(command, out TransposeOptions options);
+            return !success ? new ProcessResultArray<Clip>(msg) : Apply(options, clips);
         }
 
         public static ProcessResultArray<Clip> Apply(TransposeOptions options, params Clip[] clips)
         {
-            int basePitch = 60; // absolute basePitch should maybe be relative to c in whatever octave first note is in
             if (options.By.Count == 0 && options.TransposeValues.Length == 0)
             {
                 return new ProcessResultArray<Clip>("No -by clip or transpose values specified.");
             }
             ClipUtilities.Monophonize(options.By);
+            int basePitch = options.By.Notes[0]?.Pitch ?? 60;
+            if (options.Mode == TransposeMode.Absolute)
+            {
+                basePitch -= basePitch % 12;
+            }
+
             if (options.Mode == TransposeMode.Relative && options.By.Notes.Count > 0)
             {
                 basePitch = options.By.Notes[0].Pitch;

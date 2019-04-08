@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Mutate4l.Dto
+namespace Mutate4l.Cli
 {
     public class OptionParser
     {

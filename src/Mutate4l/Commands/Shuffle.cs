@@ -1,33 +1,40 @@
-﻿using Mutate4l.Dto;
-using Mutate4l.Utility;
+﻿using Mutate4l.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Mutate4l.Cli;
 using Mutate4l.Core;
 
 namespace Mutate4l.Commands
 {
     public class ShuffleOptions
     {
-        public Clip By { get; set; }
-//        public bool RelativeToNearestBoundary { get; set; } = false;
+        public Clip By { get; set; } = new Clip(4, true);
+
+        [OptionInfo(type: OptionType.Default)]
+        public int[] ShuffleValues { get; set; } = new int[0];
     }
 
     public class Shuffle
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
-            (var success, var msg) = OptionParser.TryParseOptions(command, out ShuffleOptions options);
-            if (!success)
-            {
-                return new ProcessResultArray<Clip>(msg);
-            }
-            return Apply(options, clips);
+            var (success, msg) = OptionParser.TryParseOptions(command, out ShuffleOptions options);
+            return !success ? new ProcessResultArray<Clip>(msg) : Apply(options, clips);
         }
 
         public static ProcessResultArray<Clip> Apply(ShuffleOptions options, params Clip[] clips)
         {
-            if (options.By == null || options.By.Notes.Count == 0) options.By = clips[0];
+            if (options.By.Notes.Count == 0) options.By = clips[0];
+            if (options.By.Count == 0 && options.ShuffleValues.Length == 0)
+            {
+                return new ProcessResultArray<Clip>("No -by clip or shuffle values specified.");
+            }
+
+            int[] shuffleValues = options.ShuffleValues.Length == 0
+                ? options.By.Notes.Select(x => x.Pitch).ToArray()
+                : options.ShuffleValues;
+
             ClipUtilities.Monophonize(options.By);
             var targetClips = new Clip[clips.Length];
 
@@ -36,17 +43,17 @@ namespace Mutate4l.Commands
             {
                 clip.GroupSimultaneousNotes();
                 targetClips[c] = new Clip(clip.Length, clip.IsLooping);
-                int minPitch = options.By.Notes.Min(x => x.Pitch);
-                var numShuffleIndexes = options.By.Notes.Count;
+                int minPitch = shuffleValues.Min();
+                var numShuffleIndexes = shuffleValues.Length;
                 if (numShuffleIndexes < clip.Notes.Count) numShuffleIndexes = clip.Notes.Count;
                 var indexes = new int[numShuffleIndexes];
 
                 for (var i = 0; i < numShuffleIndexes; i++)
                 {
                     // Calc shuffle indexes as long as there are notes in the source clip. If the clip to be shuffled contains more events than the source, add zero-indexes so that the rest of the sequence is produced sequentially.
-                    if (i < options.By.Notes.Count)
+                    if (i < shuffleValues.Length)
                     {
-                        indexes[i] = (int)Math.Floor(((options.By.Notes[i].Pitch - minPitch - 0f) / clip.Notes.Count) * clip.Notes.Count);
+                        indexes[i] = (int)Math.Floor(((shuffleValues[i] - minPitch - 0f) / clip.Notes.Count) * clip.Notes.Count);
                     } else
                     {
                         indexes[i] = 0;

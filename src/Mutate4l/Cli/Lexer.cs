@@ -1,5 +1,4 @@
-﻿using Mutate4l.Dto;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mutate4l.Core;
@@ -63,10 +62,12 @@ namespace Mutate4l.Cli
             { "-mode", Mode },
             { "-pitch", Pitch },
             { "-ranges", Ranges },
+            { "-ratchetvalues", RatchetValues },
             { "-removeoffset", RemoveOffset },
             { "-repeats", Repeats },
             { "-rescale", Rescale },
             { "-shape", Shape },
+            { "-shufflevalues", ShuffleValues },
             { "-skip", Skip }, // rename to skip?
             { "-solo", Solo },
             { "-start", Start },

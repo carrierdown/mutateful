@@ -1,7 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.Cli;
-using Mutate4l.Commands;
-using Mutate4l.Dto;
 using System;
 using System.Collections.Generic;
 using Mutate4l.Core;
