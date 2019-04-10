@@ -63,17 +63,22 @@ namespace Mutate4l.Commands
         public static ProcessResultArray<Clip> Apply(RatchetOptions options, params Clip[] clips)
         {
             ClipUtilities.NormalizeClipLengths((options.By != null ? clips.Prepend(options.By).ToArray() : clips));
-            if (clips.Length < 2) return new ProcessResultArray<Clip>(clips);
+            if (clips.Length < 2)
+            {
+                clips = new Clip[] { clips[0], clips[0] };
+            }
             Clip controlSequence = new Clip(clips[0]);
             Clip[] targetSequences = clips.Skip(1).Select(x => new Clip(x)).ToArray();
             Clip[] resultSequences = new Clip[targetSequences.Count()];
 
             if (options.RatchetValues.Length > 0)
             {
+                options.Mode = RatchetMode.Pitch; // force pitch-mode if manual values are entered
                 controlSequence.Notes = new SortedList<NoteEvent>();
                 var y = 0;
                 var targetSeq = targetSequences[0];
-                foreach (var value in options.RatchetValues)
+                var clampedValues = options.RatchetValues.Select(x => Math.Clamp(x, 1, 20)).ToArray(); // absolute max is 20 when ratchets are manually specified. Control range is set to 10 unless higher ratchet values than 10 are specified.
+                foreach (var value in clampedValues)
                 {
                     controlSequence.Add(
                         new NoteEvent(options.Mode == RatchetMode.Pitch ? value : targetSeq.Notes[y % targetSeq.Count].Pitch, 
@@ -81,6 +86,7 @@ namespace Mutate4l.Commands
                             targetSeq.Notes[y % targetSeq.Count].Duration,
                             options.Mode == RatchetMode.Velocity ? value : targetSeq.Notes[y % targetSeq.Count].Velocity)
                     );
+                    y++;
                 }
             }
             else
@@ -102,6 +108,11 @@ namespace Mutate4l.Commands
                     {
                         controlMin = min - min % 12;
                         controlMax = max + 12 - max % 12;
+                    }
+                    if (options.RatchetValues.Length > 0) // override controlrange logic if ratchets are manually specified
+                    {
+                        controlMin = 1;
+                        controlMax = Math.Max(10, options.RatchetValues.Max());
                     }
                     targetRange = Math.Max(controlMax - controlMin, 1);
                 }

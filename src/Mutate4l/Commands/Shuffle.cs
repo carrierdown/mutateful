@@ -31,19 +31,26 @@ namespace Mutate4l.Commands
                 return new ProcessResultArray<Clip>("No -by clip or shuffle values specified.");
             }
 
-            int[] shuffleValues = options.ShuffleValues.Length == 0
-                ? options.By.Notes.Select(x => x.Pitch).ToArray()
-                : options.ShuffleValues;
-
             ClipUtilities.Monophonize(options.By);
             var targetClips = new Clip[clips.Length];
+
+            int[] shuffleValues;
+            if (options.ShuffleValues.Length == 0)
+            {
+                int minPitch = options.By.Notes.Min(x => x.Pitch);
+                shuffleValues = options.By.Notes.Select(x => x.Pitch - minPitch).ToArray();
+            }
+            else
+            {
+                shuffleValues = options.ShuffleValues;
+            }
 
             var c = 0;
             foreach (var clip in clips) // we only support one generated clip since these are tied to a specific clip slot. Maybe support multiple clips under the hood, but discard any additional clips when sending the output is the most flexible approach.
             {
                 clip.GroupSimultaneousNotes();
                 targetClips[c] = new Clip(clip.Length, clip.IsLooping);
-                int minPitch = shuffleValues.Min();
+                
                 var numShuffleIndexes = shuffleValues.Length;
                 if (numShuffleIndexes < clip.Notes.Count) numShuffleIndexes = clip.Notes.Count;
                 var indexes = new int[numShuffleIndexes];
@@ -53,7 +60,7 @@ namespace Mutate4l.Commands
                     // Calc shuffle indexes as long as there are notes in the source clip. If the clip to be shuffled contains more events than the source, add zero-indexes so that the rest of the sequence is produced sequentially.
                     if (i < shuffleValues.Length)
                     {
-                        indexes[i] = (int)Math.Floor(((shuffleValues[i] - minPitch - 0f) / clip.Notes.Count) * clip.Notes.Count);
+                        indexes[i] = (int)Math.Floor(((float)shuffleValues[i] / clip.Notes.Count) * clip.Notes.Count);
                     } else
                     {
                         indexes[i] = 0;

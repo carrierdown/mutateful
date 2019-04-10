@@ -16,7 +16,7 @@ namespace Mutate4l.Commands
     {
         public Clip By { get; set; } = new Clip(4, true); // Allows syntax like a1 transpose -by a2 -mode relative. This syntax makes it much clearer which clip is being affected, and which is used as the source.
 
-        public TransposeMode Mode { get; set; } = TransposeMode.Relative;
+        public TransposeMode Mode { get; set; } = TransposeMode.Absolute;
 
         [OptionInfo(type: OptionType.Default)]
         public int[] TransposeValues { get; set; } = new int[0];
@@ -38,7 +38,11 @@ namespace Mutate4l.Commands
                 return new ProcessResultArray<Clip>("No -by clip or transpose values specified.");
             }
             ClipUtilities.Monophonize(options.By);
-            int basePitch = options.By.Notes[0]?.Pitch ?? 60;
+            int basePitch = 60;
+            if (options.By.Count > 0)
+            {
+                basePitch = options.By.Notes[0].Pitch;
+            }
             if (options.Mode == TransposeMode.Absolute)
             {
                 basePitch -= basePitch % 12;

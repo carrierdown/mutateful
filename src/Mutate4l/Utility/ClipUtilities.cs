@@ -221,6 +221,7 @@ namespace Mutate4l.Utility
 
         public static void NormalizeClipLengths(params Clip[] clips)
         {
+            if (clips.Length < 2) return;
             decimal maxLength = clips.Max().Length;
             foreach (var clip in clips)
             {
