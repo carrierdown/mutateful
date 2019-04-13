@@ -42,7 +42,7 @@ namespace Mutate4l.Commands
             }
             else
             {
-                shuffleValues = options.ShuffleValues;
+                shuffleValues = options.ShuffleValues.Select(x => Math.Clamp(x, 1, 100) - 1).ToArray();
             }
 
             var c = 0;

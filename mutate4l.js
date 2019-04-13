@@ -83,11 +83,17 @@ function onInit() {
 function onSelectedClipRenamedOrChanged(arg1, arg2) {
     var clipId = arg1;
     var name = arg2 || "";
+    var clipSlot;
 
     /*if (clipId > 0) {
         var lo = new LiveAPI("id " + clipId);
         enumerateClip(getTrackNumber(lo), getClipNumber(lo), lo);
     }*/
+
+    if (name.indexOf("[") === -1 && name.indexOf("]") === -1) {
+        clipSlot = new LiveAPI("id " + clipId);
+        enumerateClip(getTrackNumber(clipSlot), getClipNumber(clipSlot) + 1, clipSlot);
+    }
 
     if (watchedClips[clipId] !== undefined && watchedClips[clipId].length !== 0) {
         var currentlyWatchedClips = watchedClips[clipId];
@@ -126,8 +132,10 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
         }
     }
     if (containsFormula(name)) {
-        var formulaSlot = new LiveAPI("id " + clipId);
-        var formula = getClipName(formulaSlot);
+        if (clipSlot === undefined) { 
+            clipSlot = new LiveAPI("id " + clipId); 
+        }
+        var formula = getClipName(clipSlot);
         var expandedFormula = expandFormulaAsBytes(formula, clipId);
         if (expandedFormula) {
             outlet(0, expandedFormula);
@@ -227,7 +235,6 @@ function getLiveObjectAtClip(trackNo, clipNo) {
 
 function getTrackNumber(liveObject) {
     var path = liveObject.path;
-    //debuglog("getTrackNumber " + path);
     var pathParts = path.split(" ");
     var trackNoIx = pathParts.indexOf("tracks");
     if (trackNoIx >= 0) {
@@ -238,7 +245,7 @@ function getTrackNumber(liveObject) {
 }
 
 function getClipNumber(liveObject) {
-    return liveObject.path;
+    var path = liveObject.path;
     var pathParts = path.split(" ");
     var clipNoIx = pathParts.indexOf("clip_slots");
     if (clipNoIx >= 0) {
