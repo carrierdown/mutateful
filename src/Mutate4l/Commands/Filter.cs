@@ -11,7 +11,7 @@ namespace Mutate4l.Commands
         public decimal Duration { get; set; } = 1 / 64m;
     }
 
-    public class Filter
+    public static class Filter
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {

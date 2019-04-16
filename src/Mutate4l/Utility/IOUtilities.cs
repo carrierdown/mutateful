@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace Mutate4l.Utility
 {
-    public class IOUtilities
+    public static class IOUtilities
     {
         public static Clip StringToClip(string data)
         {

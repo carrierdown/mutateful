@@ -7,7 +7,7 @@ using Mutate4l.Core;
 
 namespace Mutate4l.Cli
 {
-    class CliHandler
+    internal static class CliHandler
     {
         public static void Start()
         {
@@ -60,18 +60,14 @@ namespace Mutate4l.Cli
             var arguments = command.Split(' ').Skip(1);
             foreach (var arg in arguments)
             {
-                var clipReference = Parser.ResolveClipReference(arg);
-                var clip = UdpConnector.GetClip(clipReference.Item1, clipReference.Item2);
+                var (channelNo, clipNo) = Parser.ResolveClipReference(arg);
+                var clip = UdpConnector.GetClip(channelNo, clipNo);
                 Console.WriteLine($"Clip length {clip.Length}");
                 Console.WriteLine(Utility.IOUtilities.ClipToString(clip));
-                /*                                foreach (var note in clip.Notes)
-                                                {
-                                                    Console.WriteLine($"Note start: {note.Start} duration: {note.Duration} pitch: {note.Pitch} velocity: {note.Velocity}");
-                                                }*/
             }
         }
 
-        public static void DoSvg(string command, List<Clip> clips)
+        private static void DoSvg(string command, IEnumerable<Clip> clips)
         {
             var arguments = command.Split(' ').Skip(1);
             var options = arguments.Where(x => x.StartsWith("-"));
@@ -93,36 +89,7 @@ namespace Mutate4l.Cli
             Console.WriteLine($"number of notes: {numNotes}");
             foreach (var clip in clips)
             {
-//                Console.WriteLine(Utility.IOUtilities.ClipToString(clip));
-                var output = "<svg version=\"1.1\" baseProfile=\"full\" width=\"400\" height=\"300\" xmlns=\"http://www.w3.org/2000/svg\">";
-                var yDelta = 300m / numNotes;
-                // piano + horizontal guides
-                for (int i = 0; i <= numNotes; i++)
-                {
-                    bool white = i % 12 == 0 || i % 12 == 2 || i % 12 == 4 || i % 12 == 5 || i % 12 == 7 || i % 12 == 9 || i % 12 == 11;
-                    output += $"<rect style=\"fill:#{(white ? "ffffff" : "000000")};fill-opacity:1;stroke:#8e8e8e;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1\" x=\"0\" y=\"{300 - yDelta - (i * yDelta)}\" width=\"30\" height=\"{yDelta}\" />";
-                    output += $"<line x1=\"30\" x2=\"400\" y1=\"{300 - yDelta - (i * yDelta)}\" y2=\"{300 - yDelta - (i * yDelta)}\" stroke-width=\"1\" stroke=\"#bbbbbb\" />";
-                }
-                // vertical guides
-                var xDelta = 370m / clip.Length;
-                for (decimal i = 0; i < clip.Length; i += 4m / 8) // 8ths for now
-                {
-                    output += $"<line x1=\"{30 + (i * xDelta)}\" x2=\"{30 + (i * xDelta)}\" y1=\"0\" y2=\"300\" stroke-width=\"1\" stroke=\"#dddddd\" />";
-                }
-                // 16ths in dimmer colour
-                for (decimal i = 4m / 16; i < clip.Length; i += 4m / 8)
-                {
-                    output += $"<line x1=\"{30 + (i * xDelta)}\" x2=\"{30 + (i * xDelta)}\" y1=\"0\" y2=\"300\" stroke-width=\"1\" stroke=\"#eeeeee\" />";
-                }
-                foreach (var note in clip.Notes)
-                {
-                    if (note.Pitch >= startNote && note.Pitch <= startNote + numNotes)
-                    {
-                        output += $"<rect style=\"fill:#ebebbc;fill-opacity:1;stroke:#8e8e8e;stroke-width:0.52916664;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1\" x=\"{30 + (note.Start * xDelta)}\" y=\"{(startNote + numNotes - note.Pitch) * yDelta}\" width=\"{note.Duration * xDelta}\" height=\"{yDelta}\" />";
-                    }
-                }
-                output += "</svg>";
-                Console.WriteLine(output);
+                Console.WriteLine(SvgUtilities.SvgFromClip(clip, 0, 0, 370, 300, numNotes, startNote));
             }
         }
     }

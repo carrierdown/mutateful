@@ -11,7 +11,7 @@ namespace Mutate4l.Commands
         public decimal[] Lengths { get; set; } = new decimal[] { 2 };
     }
 
-    public class Take
+    public static class Take
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {

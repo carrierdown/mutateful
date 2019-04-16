@@ -4,7 +4,7 @@ using Mutate4l.Core;
 
 namespace Mutate4l.Commands
 {
-    public class Concat
+    public static class Concat
     {
         public static ProcessResultArray<Clip> Apply(params Clip[] clips)
         {

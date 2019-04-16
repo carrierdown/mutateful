@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Mutate4l.IO
 {
-    public class OscHandler
+    public static class OscHandler
     {
         public static string GetOscStringKey(string input)
         {

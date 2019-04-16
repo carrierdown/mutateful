@@ -24,7 +24,7 @@ namespace Mutate4l.Commands
         Time
     }
 
-    public class Interleave
+    public static class Interleave
     {
         public static ProcessResultArray<Clip> Apply(Command command, ClipMetaData metadata, params Clip[] clips)
         {

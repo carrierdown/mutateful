@@ -6,7 +6,7 @@ using Mutate4l.Core;
 
 namespace Mutate4l.Cli
 {
-    public class Parser
+    public static class Parser
     {
         public static Tuple<int, int> ResolveClipReference(string reference)
         {
@@ -92,7 +92,7 @@ namespace Mutate4l.Cli
             return new ProcessResult<ChainedCommand>(chainedCommand);
         }
 
-        public static Command ParseTokensToCommand(IEnumerable<Token> tokens)
+        private static Command ParseTokensToCommand(IEnumerable<Token> tokens)
         {
             var command = new Command();
             

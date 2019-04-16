@@ -9,7 +9,7 @@ namespace Mutate4l.Commands
         public decimal Factor { get; set; } = 1.0m;
     }
 
-    public class Relength
+    public static class Relength
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {

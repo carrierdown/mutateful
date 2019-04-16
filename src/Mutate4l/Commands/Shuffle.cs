@@ -15,7 +15,7 @@ namespace Mutate4l.Commands
         public int[] ShuffleValues { get; set; } = new int[0];
     }
 
-    public class Shuffle
+    public static class Shuffle
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {

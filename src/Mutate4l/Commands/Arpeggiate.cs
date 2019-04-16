@@ -19,7 +19,7 @@ namespace Mutate4l.Commands
         // Could add shaping here as well - easein/out etc..
     }
 
-    public class Arpeggiate
+    public static class Arpeggiate
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {

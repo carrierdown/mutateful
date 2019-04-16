@@ -4,7 +4,7 @@ using Mutate4l.Core;
 
 namespace Mutate4l.Commands
 {
-    public class Monophonize
+    public static class Monophonize
     {
         public static ProcessResultArray<Clip> Apply(params Clip[] clips)
         {

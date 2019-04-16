@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Mutate4l.Cli
 {
-    public class OptionParser
+    public static class OptionParser
     {
         public static (bool Success, string Message) TryParseOptions<T>(Command command, out T result) where T : new()
         {
@@ -33,10 +33,10 @@ namespace Mutate4l.Cli
                     return (false, $"No corresponding entity found for {property.Name}");
                 }
 
-                OptionInfo defaultAttribute = property.GetCustomAttributes(false)
+                OptionInfo defaultAttribute = property
+                    .GetCustomAttributes(false)
                     .Select(a => (OptionInfo)a)
-                    .Where(a => a.Type == OptionType.Default)
-                    .FirstOrDefault();
+                    .FirstOrDefault(a => a.Type == OptionType.Default);
 
                 if (defaultAttribute != null && command.DefaultOptionValues.Count > 0)
                 {
@@ -90,65 +90,64 @@ namespace Mutate4l.Cli
             }
             else
             {
-                // handle single value
-                if (type == TokenType.MusicalDivision && property.PropertyType == typeof(decimal))
+                switch (type)
                 {
-                    return new ProcessResultArray<object>(new object[] { Utilities.MusicalDivisionToDecimal(tokens[0].Value) });
-                }
-                else if (type == TokenType.Decimal && property.PropertyType == typeof(decimal))
-                {
-                    return new ProcessResultArray<object>(new object[] { decimal.Parse(tokens[0].Value) });
-                }
-                else if (type == TokenType.Decimal && property.PropertyType == typeof(int))
-                {
-                    return new ProcessResultArray<object>(new object[] { (decimal)int.Parse(tokens[0].Value) });
-                }
-                else if (type == TokenType.Number && property.PropertyType == typeof(int))
-                {
-                    // todo: extract this logic so that it can be used in the list version below as well
-                    var rangeInfo = property.GetCustomAttributes(false)
-                        .Select(a => (OptionInfo)a)
-                        .Where(a => a.MaxNumberValue != null && a.MinNumberValue != null).FirstOrDefault();
-                    int value = int.Parse(tokens[0].Value);
-                    if (value > rangeInfo?.MaxNumberValue)
+                    // handle single value
+                    case TokenType.MusicalDivision when property.PropertyType == typeof(decimal):
+                        return new ProcessResultArray<object>(new object[] { Utilities.MusicalDivisionToDecimal(tokens[0].Value) });
+                    case TokenType.Decimal when property.PropertyType == typeof(decimal):
+                        return new ProcessResultArray<object>(new object[] { decimal.Parse(tokens[0].Value) });
+                    case TokenType.Decimal when property.PropertyType == typeof(int):
+                        return new ProcessResultArray<object>(new object[] { (decimal)int.Parse(tokens[0].Value) });
+                    case TokenType.Number when property.PropertyType == typeof(int):
                     {
-                        value = (int)rangeInfo.MaxNumberValue;
+                        // todo: extract this logic so that it can be used in the list version below as well
+                        var rangeInfo = property
+                            .GetCustomAttributes(false)
+                            .Select(a => (OptionInfo)a).FirstOrDefault(a => a.MaxNumberValue != null && a.MinNumberValue != null);
+                        int value = int.Parse(tokens[0].Value);
+                        if (value > rangeInfo?.MaxNumberValue)
+                        {
+                            value = (int)rangeInfo.MaxNumberValue;
+                        }
+                        if (value < rangeInfo?.MinNumberValue)
+                        {
+                            value = (int)rangeInfo.MinNumberValue;
+                        }
+                        return new ProcessResultArray<object>(new object[] { value });
                     }
-                    if (value < rangeInfo?.MinNumberValue)
+                    default:
                     {
-                        value = (int)rangeInfo.MinNumberValue;
+                        if (property.PropertyType.IsEnum)
+                        {
+                            var result = new object();
+                            if (Enum.TryParse(property.PropertyType, tokens[0].Value, true, out result))
+                            {
+                                return new ProcessResultArray<object>(new object[] { result });
+                            }
+                            else
+                            {
+                                return new ProcessResultArray<object>($"Enum {property.Name} does not support value {tokens[0].Value}");
+                            }
+                        }
+                        else switch (type)
+                        {
+                            case TokenType.MusicalDivision when property.PropertyType == typeof(decimal[]):
+                            {
+                                decimal[] values = tokens.Select(t => Utilities.MusicalDivisionToDecimal(t.Value)).ToArray();
+                                return new ProcessResultArray<object>(new object[] { values });
+                            }
+                            case TokenType.InlineClip when property.PropertyType == typeof(Clip):
+                                return new ProcessResultArray<object>(new object[] { tokens[0].Clip });
+                            case TokenType.Number when property.PropertyType == typeof(int[]):
+                            {
+                                int[] values = tokens.Select(t => int.Parse(t.Value)).ToArray();
+                                return new ProcessResultArray<object>(new object[] { values });
+                            }
+                            default:
+                                return new ProcessResultArray<object>($"Invalid combination. Token of type {type.ToString()} and property of type {property.PropertyType.Name} are not compatible.");
+                        }
                     }
-                    return new ProcessResultArray<object>(new object[] { value });
-                }
-                else if (property.PropertyType.IsEnum)
-                {
-                    object result = new object();
-                    if (Enum.TryParse(property.PropertyType, tokens[0].Value, true, out result))
-                    {
-                        return new ProcessResultArray<object>(new object[] { result });
-                    }
-                    else
-                    {
-                        return new ProcessResultArray<object>($"Enum {property.Name} does not support value {tokens[0].Value}");
-                    }
-                }
-                else if (type == TokenType.MusicalDivision && property.PropertyType == typeof(decimal[]))
-                {
-                    decimal[] values = tokens.Select(t => Utilities.MusicalDivisionToDecimal(t.Value)).ToArray();
-                    return new ProcessResultArray<object>(new object[] { values });
-                }
-                else if (type == TokenType.InlineClip && property.PropertyType == typeof(Clip))
-                {
-                    return new ProcessResultArray<object>(new object[] { tokens[0].Clip });
-                }
-                else if (type == TokenType.Number && property.PropertyType == typeof(int[]))
-                {
-                    int[] values = tokens.Select(t => int.Parse(t.Value)).ToArray();
-                    return new ProcessResultArray<object>(new object[] { values });
-                }
-                else
-                {
-                    return new ProcessResultArray<object>($"Invalid combination. Token of type {type.ToString()} and property of type {property.PropertyType.Name} are not compatible.");
                 }
             }
         }

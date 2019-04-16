@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Mutate4l.Utility
 {
-    public class ClipUtilities
+    public static class ClipUtilities
     {
         public static IEnumerable<NoteEvent> RescaleNotes(List<NoteEvent> notes, decimal factor)
         {

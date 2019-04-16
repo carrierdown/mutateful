@@ -23,7 +23,7 @@ namespace Mutate4l.Commands
     }
 
     // also needed: a transpose function (rangetranspose?) transposing all notes contained within the bounds of the respective note in the control clip
-    public class Transpose
+    public static class Transpose
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
