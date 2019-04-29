@@ -9,6 +9,8 @@ namespace Mutate4l.Commands
     {
         [OptionInfo(OptionType.Default)]
         public decimal Duration { get; set; } = 1 / 64m;
+
+        public bool Invert { get; set; }
     }
 
     public static class Filter
@@ -23,6 +25,7 @@ namespace Mutate4l.Commands
             return Apply(options, clips);
         }
 
+
         public static ProcessResultArray<Clip> Apply(FilterOptions options, params Clip[] clips)
         {
             var processedClips = new Clip[clips.Length];
@@ -32,7 +35,11 @@ namespace Mutate4l.Commands
                 var clip = clips[c];
                 var processedClip = new Clip(clip.Length, clip.IsLooping);
 
-                processedClip.Notes = clip.Notes.Where(x => x.Duration > options.Duration).ToSortedList();
+                processedClip.Notes = (options.Invert) ?
+
+                    clip.Notes.Where(x => x.Duration < options.Duration).ToSortedList() :
+
+                    clip.Notes.Where(x => x.Duration > options.Duration).ToSortedList();
 
                 processedClips[c] = processedClip;
             }

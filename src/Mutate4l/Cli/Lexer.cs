@@ -56,6 +56,7 @@ namespace Mutate4l.Cli
             { "-duration", Duration },
             { "-enablemask", EnableMask },
             { "-factor", Factor },
+            { "-invert", Invert },
             { "-lengths", Lengths },
             { "-max", Max },
             { "-min", Min },
