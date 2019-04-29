@@ -37,6 +37,7 @@
         Duration,
         EnableMask,
         Factor,
+        Invert,
         Lengths,
         Max,
         Min,
