@@ -38,7 +38,6 @@ namespace Mutate4l.Commands
                 processedClip.Notes = (options.Invert) ?
 
                     clip.Notes.Where(x => x.Duration < options.Duration).ToSortedList() :
-
                     clip.Notes.Where(x => x.Duration > options.Duration).ToSortedList();
 
                 processedClips[c] = processedClip;
