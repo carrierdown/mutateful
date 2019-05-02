@@ -107,16 +107,17 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
             var referredIds = formulaToReferredIds(formula);
             //debuglog("attempting to find id ", clipId, " in referred ids: ", referredIds);
             if (referredIds.indexOf(clipId) >= 0) {
-                debuglog("found current clip in referring formula - all is well");
+                debuglogExt("found current clip in referring formula - all is well");
                 var expandedFormula = expandFormulaAsBytes(formula, id);
                 if (expandedFormula) {
                     debuglog("send expandedFormula", expandedFormula);
-                    outlet(0, expandedFormula);
+                    //outlet(0, expandedFormula);
+                    messageQueue[messageQueue.length] = expandedFormula;
                 } else {
-                    debuglog("Unable to expand formula for track " + (i + 1) + " clip " + (s + 1) + " - check syntax", expandedFormula);
+                    debuglogExt("Unable to expand formula for track " + (i + 1) + " clip " + (s + 1) + " - check syntax", expandedFormula);
                 }
             } else {
-                debuglog("could not find current clip in referring formula");
+                debuglogExt("could not find current clip in referring formula");
                 indexesToRemove.push(id);
             }
         }
@@ -138,9 +139,10 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
         var formula = getClipName(clipSlot);
         var expandedFormula = expandFormulaAsBytes(formula, clipId);
         if (expandedFormula) {
-            outlet(0, expandedFormula);
+            //outlet(0, expandedFormula);
+            messageQueue[messageQueue.length] = expandedFormula;
         } else {
-            debuglog("Unable to expand formula - check syntax: " + formula);
+            debuglogExt("Unable to expand formula - check syntax: " + formula);
         }
     }
 }
@@ -215,17 +217,17 @@ function getLiveObjectAtClip(trackNo, clipNo) {
     var liveObject = new LiveAPI("live_set tracks " + trackNo);
 
     if (!liveObject) {
-        debuglog('Invalid liveObject, exiting...');
+        debuglogExt('Invalid liveObject, exiting...');
         return;
     }
     if (!isMidiTrack(liveObject)) {
-        debuglog('Not a midi track!');
+        debuglogExt('Not a midi track!');
         return;
     }
     liveObject.goto("live_set tracks " + trackNo + " clip_slots " + clipNo);
 
     if (!hasClip(liveObject)) {
-        debuglog("No clip present at track: " + trackNo + 1 + " clip: " + clipNo + 1);
+        debuglogExt("No clip present at track: " + trackNo + 1 + " clip: " + clipNo + 1);
         return;
     }
     liveObject.goto("live_set tracks " + trackNo + " clip_slots " + clipNo + " clip");
@@ -283,7 +285,7 @@ function setClip(trackNo, clipNo, dataString) {
     var pathCurrentClip = pathCurrentClipHolder + " clip";
     var liveObject = new LiveAPI(pathCurrentTrack);
     if (!isMidiTrack(liveObject)) {
-        debuglog('Not a midi track!');
+        debuglogExt('Not a midi track!');
     }
     var clipLength = data[0];
     var looping = data[1];
@@ -432,7 +434,7 @@ function enumerate() {
 
 function enumerateClip(trackNo, clipNo, liveObject) {
     var existingName = getClipName(liveObject);
-    debuglogExt("existingName", existingName);
+    //debuglogExt("existingName", existingName);
     var newName = "";
     var clipRefString = String.fromCharCode(65 + trackNo) + clipNo;
     var startBracketIx = existingName.indexOf("[");
@@ -442,7 +444,7 @@ function enumerateClip(trackNo, clipNo, liveObject) {
     } else {
         newName = "[" + clipRefString + "] " + existingName;
     }
-    debuglogExt(startBracketIx, endBracketIx, newName);
+    //debuglogExt(startBracketIx, endBracketIx, newName);
     liveObject.set("name",  newName);
 }
 
@@ -503,9 +505,10 @@ function processAllClips() {
                     if (containsFormula(clipName)) {
                         var expandedFormula = expandFormulaAsBytes(clipName, liveObject.id);
                         if (expandedFormula) {
-                            outlet(0, expandedFormula);
+                            //outlet(0, expandedFormula);
+                            messageQueue[messageQueue.length] = expandedFormula;
                         } else {
-                            debuglog("Unable to expand formula for track " + (i + 1) + " clip " + (s + 1) + " - check syntax");
+                            debuglogExt("Unable to expand formula for track " + (i + 1) + " clip " + (s + 1) + " - check syntax");
                         }
                     }
                 }
@@ -573,7 +576,7 @@ function expandFormula(formula, ownId) {
             var target = resolveClipReference(part);
             var liveObjectAtClip = getLiveObjectAtClip(target.x, target.y);
             if (!liveObjectAtClip) {
-                debuglog("liveobjectatclip undefined: " + target.x + "," + target.y);
+                debuglogExt("liveobjectatclip undefined: " + target.x + "," + target.y);
                 return;
             }
 
@@ -631,7 +634,7 @@ function expandFormulaAsBytes(formula, ownId) {
                 return;
             }
             if (watchedClips[liveObjectAtClip.id] === undefined) {
-                debuglog("watchedclips at " + liveObjectAtClip.id + " set to " + ownId);
+                debuglogExt("watchedclips at " + liveObjectAtClip.id + " set to " + ownId);
                 watchedClips[liveObjectAtClip.id] = [ownId];
             } else if (watchedClips[liveObjectAtClip.id].indexOf(ownId) < 0) {
                 watchedClips[liveObjectAtClip.id].push(ownId);
@@ -709,7 +712,7 @@ function getSelectedClipAsBytes() {
     var liveObject = new LiveAPI("live_set view selected_track");
     var result = "";
     if (!liveObject) {
-        debuglog('Invalid liveObject, exiting...');
+        debuglogExt('Invalid liveObject, exiting...');
         return;
     }
     if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0) {
@@ -781,13 +784,6 @@ function isNumeric(c) {
 
 function isAlpha(c) {
     return c.length == 1 && (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-}
-
-function test() {
-    debuglogExt([100, 103, 1, [101, 102]], "ting", 10, "tang");
-    var hei = {hei:"hadet",hopp:{sommerslott:[1,2,3], sjeik: 12},fesk: 3};
-    debuglogExt(hei);
-    debuglogExt("hei", 10, 1, "tang", [11,11]);
 }
 
 function debuglogExt(/* ... args */) {

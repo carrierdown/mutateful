@@ -1,4 +1,5 @@
-﻿using Mutate4l.Cli;
+﻿using System;
+using Mutate4l.Cli;
 using Mutate4l.Core;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,19 +25,21 @@ namespace Mutate4l.Utility
         {
             if (value.IndexOf('/') >= 0)
             {
-                return (4m / int.Parse(value.Substring(value.IndexOf('/') + 1))) * (int.Parse(value.Substring(0, value.IndexOf('/'))));
+                return 4m / int.Parse(value.Substring(value.IndexOf('/') + 1)) * int.Parse(value.Substring(0, value.IndexOf('/')));
             }
-            else
-            {
-                return int.Parse(value) * 4m;
-            }
+            return int.Parse(value) * 4m;
         }
 
-        public static void Swap<T>(ref T a, ref T b)
+        public static decimal BarsBeatsSixteenthsToDecimal(string value)
         {
-            T _a = a;
-            a = b;
-            b = _a;
+            var parts = value.Split('.');
+            var parsedParts = new int[3];
+            for (var i = 0; i < parts.Length; i++)
+            {
+                parsedParts[i] = int.Parse(parts[i]);
+                if (i > 0 && parsedParts[i] > 3) parsedParts[i] = Math.Clamp(parsedParts[i], 0, 3);
+            }
+            return parsedParts[0] * 4m + parsedParts[1] + parsedParts[2] * 0.25m;
         }
 
         public static SortedList<T> ToSortedList<T>(this IEnumerable<T> list)

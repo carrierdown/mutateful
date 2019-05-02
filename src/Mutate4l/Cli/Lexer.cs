@@ -18,12 +18,6 @@ namespace Mutate4l.Cli
             { ':', Colon }
         };
 
-        private Dictionary<string, TokenType> DoubleOperators = new Dictionary<string, TokenType>
-        {
-            { "=>", Destination },
-            { "+>", AddToDestination }
-        };
-
         private Dictionary<string, TokenType> Commands = new Dictionary<string, TokenType>
         {
             { "arpeggiate", Arpeggiate },
@@ -106,16 +100,6 @@ namespace Mutate4l.Cli
             return SingleOperators.Any(o => o.Key == Buffer[pos]);
         }
 
-        private bool IsDoubleOperator(int pos)
-        {
-            if (Buffer.Length > pos + 1)
-            {
-                string nextTwoChars = $"{Buffer[pos]}{Buffer[pos + 1]}";
-                return DoubleOperators.Any(o => o.Key == nextTwoChars);
-            }
-            return false;
-        }
-
         private bool IsClipReference(int pos)
         {
             return (Buffer.Length > pos + 1 && IsAlpha(pos) && IsNumeric(pos + 1)) || Buffer[pos] == '*';
@@ -126,7 +110,7 @@ namespace Mutate4l.Cli
             if (Buffer[pos] == '[')
             {
                 int i = pos + 1;
-                while(i < Buffer.Length && (IsNumeric(Buffer[i]) || Buffer[i] == ' ' || Buffer[i] == '.' || Buffer[i] == 'e' || Buffer[i] == '-' || Buffer[i] == ',' || Buffer[i] == ':'))
+                while(i < Buffer.Length && IsNumeric(Buffer[i]))
                 {
                     i++;
                 }
@@ -140,15 +124,50 @@ namespace Mutate4l.Cli
 
         public bool IsDecimalValue(int pos)
         {
-            int i = pos;
-            int? decimalPointFoundAt = null;
+            var i = pos;
+            var decimalPointFoundAt = -1;
             while (i < Buffer.Length && (IsNumeric(Buffer[i]) || Buffer[i] == '.'))
             {
                 if (Buffer[i] == '.')
                 {
-                    if (decimalPointFoundAt == null)
+                    if (decimalPointFoundAt < 0) decimalPointFoundAt = i - pos;
+                    else return false;
+                }
+                i++;
+            }
+            if (decimalPointFoundAt < 0) return false;
+            return i > pos + decimalPointFoundAt + 1;
+        }
+
+        public bool IsMusicalDivision(int pos)
+        {
+            var i = pos;
+            var slashFoundAt = -1;
+            while (i < Buffer.Length && (IsNumeric(Buffer[i]) || Buffer[i] == '/'))
+            {
+                if (Buffer[i] == '/')
+                {
+                    if (slashFoundAt < 0) slashFoundAt = i - pos;
+                    else return false;
+                }
+                i++;
+            }
+            if (slashFoundAt < 0) return false;
+            return i > pos + slashFoundAt + 1;
+        }
+        
+        public bool IsBarsBeatsSixteenths(int pos)
+        {
+            var foundPeriods = 0;
+            var periodIxs = new int[2];
+            var i = pos;
+            while (i < Buffer.Length && (IsNumeric(Buffer[i]) || Buffer[i] == '.'))
+            {
+                if (Buffer[i] == '.')
+                {
+                    if (foundPeriods < periodIxs.Length)
                     {
-                        decimalPointFoundAt = i - pos;
+                        periodIxs[foundPeriods++] = i - pos;
                     }
                     else
                     {
@@ -157,16 +176,7 @@ namespace Mutate4l.Cli
                 }
                 i++;
             }
-            if (decimalPointFoundAt == null)
-            {
-                return false;
-            }
-            return i > (pos + decimalPointFoundAt + 1);
-        }
-
-        private bool IsMusicalDivision(int pos)
-        {
-            return Buffer.Length > pos + 2 && IsNumeric(pos) && Buffer[pos + 1] == '/' && IsNumeric(pos + 2);
+            return foundPeriods == 2 && periodIxs[1] - periodIxs[0] > 1 && periodIxs[0] > 0 && periodIxs[1] < i - pos - 1;
         }
 
         private bool IsAlpha(int pos)
@@ -193,7 +203,7 @@ namespace Mutate4l.Cli
         {
             return c >= '0' && c <= '9';
         }
-
+        
         private (bool Success, String ErrorMessage, Token Token) GetIdentifier(int pos, params Dictionary<string, TokenType>[] validValues)
         {
             string identifier = "";
@@ -247,11 +257,6 @@ namespace Mutate4l.Cli
                     char value = Buffer[Position];
                     token = new Token(SingleOperators[value], value.ToString(), Position);
                 }
-                else if (IsDoubleOperator(Position))
-                {
-                    string value = $"{Buffer[Position]}{Buffer[Position + 1]}";
-                    token = new Token(DoubleOperators[value], value, Position);
-                }
                 else if (IsClipReference(Position))
                 {
                     if (Buffer[Position] == '*')
@@ -267,11 +272,15 @@ namespace Mutate4l.Cli
                 }
                 else if (IsMusicalDivision(Position))
                 {
-                    token = new Token(MusicalDivision, GetRemainingNumericToken(Position, 3), Position);
+                    token = new Token(MusicalDivision, GetMusicalDivisionToken(Position), Position);
                 }
                 else if (IsDecimalValue(Position))
                 {
                     token = new Token(TokenType.Decimal, GetDecimalToken(Position), Position);
+                }
+                else if (IsBarsBeatsSixteenths(Position))
+                {
+                    token = new Token(BarsBeatsSixteenths, GetDecimalToken(Position), Position);
                 }
                 else if (IsNumeric(Position))
                 {
@@ -304,6 +313,7 @@ namespace Mutate4l.Cli
             return (false, true, "No more tokens available");
         }
 
+
         private string GetErroneousTokenExcerpt()
         {
             int backTrack = Math.Max(Position - 3, 0);
@@ -327,12 +337,22 @@ namespace Mutate4l.Cli
                 offset++;
             }
             return Buffer.Substring(position, offset);
-        }
-
+        }        
+        
         private string GetDecimalToken(int position)
         {
             int offset = 0;
             while (position + offset < Buffer.Length && (IsNumeric(Buffer[position + offset]) || Buffer[position + offset] == '.')) 
+            {
+                offset++;
+            }
+            return Buffer.Substring(position, offset);
+        }
+
+        private string GetMusicalDivisionToken(int position)
+        {
+            int offset = 0;
+            while (position + offset < Buffer.Length && (IsNumeric(Buffer[position + offset]) || Buffer[position + offset] == '/')) 
             {
                 offset++;
             }

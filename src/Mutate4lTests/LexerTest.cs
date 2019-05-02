@@ -31,5 +31,16 @@ namespace Mutate4lTests
             Assert.IsFalse(lex.IsDecimalValue(14));
             Assert.IsFalse(lex.IsDecimalValue(18));
         }
+
+        [TestMethod]
+        public void TestIsBarsBeatsSixteenths()
+        {
+            var lex = new Lexer("1.0.0 1.2.3.4 1..22 12.1. 4.04.7", new List<Clip>());
+            Assert.IsTrue(lex.IsBarsBeatsSixteenths(0));
+            Assert.IsFalse(lex.IsBarsBeatsSixteenths(6));
+            Assert.IsFalse(lex.IsBarsBeatsSixteenths(14));
+            Assert.IsFalse(lex.IsBarsBeatsSixteenths(20));
+            Assert.IsTrue(lex.IsBarsBeatsSixteenths(26));
+        }
     }
 }

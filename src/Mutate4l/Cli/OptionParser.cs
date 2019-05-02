@@ -1,10 +1,10 @@
-﻿using Mutate4l.Cli;
-using Mutate4l.Core;
-using Mutate4l.Utility;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Mutate4l.Core;
+using Mutate4l.Utility;
+using static Mutate4l.Cli.TokenType;
 
 namespace Mutate4l.Cli
 {
@@ -14,16 +14,14 @@ namespace Mutate4l.Cli
         {
             var options = command.Options;
             result = new T();
-            MemberInfo info = typeof(T);
             var props = result.GetType().GetProperties();
-            var togglesByGroupId = new Dictionary<int, List<TokenType>>();
 
-            // todo: better checking for whether incoming options are valid for the current options class or not
             foreach (var property in props)
             {
-                if (Enum.TryParse<TokenType>(property.Name, out TokenType option))
+                if (Enum.TryParse(property.Name, out TokenType option))
                 {
-                    if (!(option > TokenType._OptionsBegin && option < TokenType._OptionsEnd || option > TokenType._TestOptionsBegin && option < TokenType._TestOptionsEnd))
+                    if (!(option > _OptionsBegin && option < _OptionsEnd ||
+                          option > _TestOptionsBegin && option < _TestOptionsEnd))
                     {
                         return (false, $"Property {property.Name} is not a valid option or test option.");
                     }
@@ -33,120 +31,152 @@ namespace Mutate4l.Cli
                     return (false, $"No corresponding entity found for {property.Name}");
                 }
 
+                bool noImplicitCast = property
+                                          .GetCustomAttributes(false)
+                                          .Select(a => (OptionInfo) a)
+                                          .FirstOrDefault(a => a.NoImplicitCast)?.NoImplicitCast ?? false;
+                
                 OptionInfo defaultAttribute = property
                     .GetCustomAttributes(false)
-                    .Select(a => (OptionInfo)a)
+                    .Select(a => (OptionInfo) a)
                     .FirstOrDefault(a => a.Type == OptionType.Default);
 
                 if (defaultAttribute != null && command.DefaultOptionValues.Count > 0)
                 {
                     var tokens = command.DefaultOptionValues;
-                    ProcessResultArray<object> res = ExtractPropertyData(property, tokens);
+                    ProcessResultArray<object> res = ExtractPropertyData(property, tokens, noImplicitCast);
                     if (!res.Success)
                     {
                         return (false, res.ErrorMessage);
                     }
+
                     property.SetMethod?.Invoke(result, res.Result);
                     continue;
                 }
-
-                var attributes = property.GetCustomAttributes(false)
-                    .Select(a => (OptionInfo)a)
-                    .Where(a => a.Type == OptionType.AllOrSpecified)
-                    .ToArray(); //.GroupBy(p => p.GroupId).Select(g => new OptionGroup(g.S))
 
                 // handle value properties
                 if (options.ContainsKey(option))
                 {
                     var tokens = options[option];
-                    ProcessResultArray<object> res = ExtractPropertyData(property, tokens);
+                    ProcessResultArray<object> res = ExtractPropertyData(property, tokens, noImplicitCast);
                     if (!res.Success)
                     {
                         return (false, res.ErrorMessage);
                     }
+
                     property.SetMethod?.Invoke(result, res.Result);
                 }
             }
+
             return (true, "");
         }
 
-        public static ProcessResultArray<object> ExtractPropertyData(PropertyInfo property, List<Token> tokens)
+        public static ProcessResultArray<object> ExtractPropertyData(PropertyInfo property, List<Token> tokens,
+            bool noImplicitCast = false)
         {
             TokenType? type = tokens.FirstOrDefault()?.Type;
-            if (!tokens.All(t => t.Type == type))
-            {
-                return new ProcessResultArray<object>("Invalid option values: Values for a single option need to be of the same type.");
-            }
+
             if (tokens.Count == 0)
             {
                 if (property.PropertyType == typeof(bool))
                 {
                     // handle simple bool flag
-                    return new ProcessResultArray<object>(new object[] { true });
-                } else
-                {
-                    return new ProcessResultArray<object>($"Missing property value for non-bool parameter: {property.Name}");
+                    return new ProcessResultArray<object>(new object[] {true});
                 }
+
+                return new ProcessResultArray<object>($"Missing property value for non-bool parameter: {property.Name}");
             }
-            else
+
+            switch (type)
             {
-                switch (type)
+                // handle single value
+                case MusicalDivision when property.PropertyType == typeof(decimal) && !noImplicitCast:
+                    return new ProcessResultArray<object>(new object[] {Utilities.MusicalDivisionToDecimal(tokens[0].Value)});
+                case BarsBeatsSixteenths when property.PropertyType == typeof(decimal) && !noImplicitCast:
+                    return new ProcessResultArray<object>(new object[] {Utilities.BarsBeatsSixteenthsToDecimal(tokens[0].Value)});
+                case TokenType.Decimal when property.PropertyType == typeof(decimal):
+                    return new ProcessResultArray<object>(new object[] {decimal.Parse(tokens[0].Value)});
+                case Number when property.PropertyType == typeof(decimal) && !noImplicitCast:
+                    return new ProcessResultArray<object>(new object[] {Utilities.MusicalDivisionToDecimal(tokens[0].Value)});
+                case TokenType.Decimal when property.PropertyType == typeof(int) && !noImplicitCast:
+                    return new ProcessResultArray<object>(new object[] {(decimal) int.Parse(tokens[0].Value)});
+                case Number when property.PropertyType == typeof(int):
                 {
-                    // handle single value
-                    case TokenType.MusicalDivision when property.PropertyType == typeof(decimal):
-                        return new ProcessResultArray<object>(new object[] { Utilities.MusicalDivisionToDecimal(tokens[0].Value) });
-                    case TokenType.Decimal when property.PropertyType == typeof(decimal):
-                        return new ProcessResultArray<object>(new object[] { decimal.Parse(tokens[0].Value) });
-                    case TokenType.Decimal when property.PropertyType == typeof(int):
-                        return new ProcessResultArray<object>(new object[] { (decimal)int.Parse(tokens[0].Value) });
-                    case TokenType.Number when property.PropertyType == typeof(int):
+                    // todo: extract this logic so that it can be used in the list version below as well
+                    var rangeInfo = property
+                        .GetCustomAttributes(false)
+                        .Select(a => (OptionInfo) a)
+                        .FirstOrDefault(a => a.MaxNumberValue != null && a.MinNumberValue != null);
+                    int value = int.Parse(tokens[0].Value);
+                    if (value > rangeInfo?.MaxNumberValue)
                     {
-                        // todo: extract this logic so that it can be used in the list version below as well
-                        var rangeInfo = property
-                            .GetCustomAttributes(false)
-                            .Select(a => (OptionInfo)a).FirstOrDefault(a => a.MaxNumberValue != null && a.MinNumberValue != null);
-                        int value = int.Parse(tokens[0].Value);
-                        if (value > rangeInfo?.MaxNumberValue)
-                        {
-                            value = (int)rangeInfo.MaxNumberValue;
-                        }
-                        if (value < rangeInfo?.MinNumberValue)
-                        {
-                            value = (int)rangeInfo.MinNumberValue;
-                        }
-                        return new ProcessResultArray<object>(new object[] { value });
+                        value = (int) rangeInfo.MaxNumberValue;
                     }
-                    default:
+
+                    if (value < rangeInfo?.MinNumberValue)
                     {
-                        if (property.PropertyType.IsEnum)
+                        value = (int) rangeInfo.MinNumberValue;
+                    }
+
+                    return new ProcessResultArray<object>(new object[] {value});
+                }
+
+                default:
+                {
+                    if (property.PropertyType.IsEnum)
+                    {
+                        if (Enum.TryParse(property.PropertyType, tokens[0].Value, true, out object result))
                         {
-                            var result = new object();
-                            if (Enum.TryParse(property.PropertyType, tokens[0].Value, true, out result))
-                            {
-                                return new ProcessResultArray<object>(new object[] { result });
-                            }
-                            else
-                            {
-                                return new ProcessResultArray<object>($"Enum {property.Name} does not support value {tokens[0].Value}");
-                            }
+                            return new ProcessResultArray<object>(new[] {result});
                         }
-                        else switch (type)
+
+                        return new ProcessResultArray<object>($"Enum {property.Name} does not support value {tokens[0].Value}");
+                    }
+
+                    if (property.PropertyType == typeof(decimal[]) && !noImplicitCast &&
+                        tokens.All(t => t.Type == Number || t.Type == MusicalDivision || t.Type == TokenType.Decimal || t.Type == BarsBeatsSixteenths))
+                    {
+                        // handle implicit cast from number or MusicalDivision to decimal
+                        decimal[] values = tokens.Select(t =>
                         {
-                            case TokenType.MusicalDivision when property.PropertyType == typeof(decimal[]):
-                            {
-                                decimal[] values = tokens.Select(t => Utilities.MusicalDivisionToDecimal(t.Value)).ToArray();
-                                return new ProcessResultArray<object>(new object[] { values });
-                            }
-                            case TokenType.InlineClip when property.PropertyType == typeof(Clip):
-                                return new ProcessResultArray<object>(new object[] { tokens[0].Clip });
-                            case TokenType.Number when property.PropertyType == typeof(int[]):
-                            {
-                                int[] values = tokens.Select(t => int.Parse(t.Value)).ToArray();
-                                return new ProcessResultArray<object>(new object[] { values });
-                            }
-                            default:
-                                return new ProcessResultArray<object>($"Invalid combination. Token of type {type.ToString()} and property of type {property.PropertyType.Name} are not compatible.");
+                            if (t.Type == MusicalDivision || t.Type == Number) return Utilities.MusicalDivisionToDecimal(t.Value);
+                            if (t.Type == BarsBeatsSixteenths) return Utilities.BarsBeatsSixteenthsToDecimal(t.Value);
+                            return decimal.Parse(t.Value);
+                        }).ToArray();
+                        return new ProcessResultArray<object>(new object[] {values});
+                    }
+
+                    if (tokens.Any(t => t.Type != type))
+                    {
+                        return new ProcessResultArray<object>("Invalid option values: Values for a single option need to be of the same type.");
+                    }
+
+                    switch (type)
+                    {
+                        case MusicalDivision when property.PropertyType == typeof(decimal[]) && !noImplicitCast:
+                        {
+                            decimal[] values = tokens.Select(t => Utilities.MusicalDivisionToDecimal(t.Value)).ToArray();
+                            return new ProcessResultArray<object>(new object[] {values});
+                        }                        
+                        case BarsBeatsSixteenths when property.PropertyType == typeof(decimal[]) && !noImplicitCast:
+                        {
+                            decimal[] values = tokens.Select(t => Utilities.BarsBeatsSixteenthsToDecimal(t.Value)).ToArray();
+                            return new ProcessResultArray<object>(new object[] {values});
                         }
+                        case TokenType.Decimal when property.PropertyType == typeof(decimal[]):
+                        {
+                            decimal[] values = tokens.Select(t => decimal.Parse(t.Value)).ToArray();
+                            return new ProcessResultArray<object>(new object[] {values});
+                        }
+                        case InlineClip when property.PropertyType == typeof(Clip):
+                            return new ProcessResultArray<object>(new object[] {tokens[0].Clip});
+                        case Number when property.PropertyType == typeof(int[]):
+                        {
+                            int[] values = tokens.Select(t => int.Parse(t.Value)).ToArray();
+                            return new ProcessResultArray<object>(new object[] {values});
+                        }
+                        default:
+                            return new ProcessResultArray<object>($"Invalid combination. Token of type {type.ToString()} and property of type {property.PropertyType.Name} are not compatible.");
                     }
                 }
             }

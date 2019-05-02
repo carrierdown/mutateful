@@ -81,6 +81,7 @@
         Decimal,
         InlineClip,
         MusicalDivision,
+        BarsBeatsSixteenths,
         Number,
         _ValuesEnd,
 

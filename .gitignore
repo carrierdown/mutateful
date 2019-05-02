@@ -18,6 +18,7 @@
 bld/
 [Bb]in/
 [Oo]bj/
+Properties/
 
 .idea/
 compiled/
