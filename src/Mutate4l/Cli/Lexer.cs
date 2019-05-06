@@ -83,6 +83,7 @@ namespace Mutate4l.Cli
             { "easeinout", EaseInOut },
             { "event", Event },
             { "linear", Linear },
+            { "overwrite", Overwrite },
             { "pitch", Pitches },
             { "relative", Relative },
             { "rhythm", Rhythm },

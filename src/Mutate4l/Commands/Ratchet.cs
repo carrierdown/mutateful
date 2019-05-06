@@ -34,8 +34,8 @@ namespace Mutate4l.Commands
 
         public Shape Shape { get; set; } = Shape.Linear;
 
-        [OptionInfo(min: 0, max: 100)]
-        public int Strength { get; set; } = 100;
+//        [OptionInfo(min: 0, max: 100)]
+        public decimal Strength { get; set; } = 1;
 
         public bool VelocityToStrength { get; set; }
 
@@ -149,7 +149,7 @@ namespace Mutate4l.Commands
             int i = 0;
             foreach (var targetSequence in targetSequences)
             {
-                resultSequences[i++] = DoRatchet(controlSequence, targetSequence, options.Strength / 100f, options.VelocityToStrength, options.Shape, options.Mode);
+                resultSequences[i++] = DoRatchet(controlSequence, targetSequence, Math.Clamp((float)options.Strength, 0, 1), options.VelocityToStrength, options.Shape, options.Mode);
             }
 
             return new ProcessResultArray<Clip>(resultSequences);

@@ -37,7 +37,8 @@ namespace Mutate4l.Commands
             {
                 return new ProcessResultArray<Clip>("No -by clip or transpose values specified.");
             }
-            ClipUtilities.Monophonize(options.By);
+            //todo: maybe allow -mono option to monophonize by-clip
+            //ClipUtilities.Monophonize(options.By);
             int basePitch = 60;
             if (options.By.Count > 0)
             {

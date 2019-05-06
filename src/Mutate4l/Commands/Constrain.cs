@@ -23,6 +23,8 @@ namespace Mutate4l.Commands
         public Clip By { get; set; }
 
         public bool Strict { get; set; }
+        
+        // add option to constrain to pitch based on position, so that events occuring for instance during a chord are constrained to this only. If no events are available in the given span, the entire clip is used instead.
     }
 
     // constrain: first clip timing and/or pitch is replicated on all following clips. Position is optionally scaled with the Strength parameter.
