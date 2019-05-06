@@ -633,6 +633,10 @@ function expandFormulaAsBytes(formula, ownId) {
                 debuglog("liveobjectatclip undefined: " + target.x + "," + target.y);
                 return;
             }
+            if (liveObjectAtClip.id == ownId) {
+                debuglogExt("Recursive reference detected: A formula cannot reference itself.");
+                return;
+            }
             if (watchedClips[liveObjectAtClip.id] === undefined) {
                 debuglogExt("watchedclips at " + liveObjectAtClip.id + " set to " + ownId);
                 watchedClips[liveObjectAtClip.id] = [ownId];
