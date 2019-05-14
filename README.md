@@ -29,18 +29,20 @@ More usage examples will follow. In the meantime, star this repo and/or follow m
 
 Basic syntax: [ClipReference #1](#parameter-types) ... [ClipReference #N](#parameter-types) commandname -parameter1 value -parameter2 value
 
-Command | Parameters (default values in **bold**) | Description | Example
+Command | Parameters (default values in **bold**) | Description
 --- | --- | --- | ---
-arpeggiate | -by <[ClipReference](#parameter-types)> -removeoffset -rescale <[Number](#parameter-types) in range 1-10> | |
-constrain | -by <[ClipReference](#parameter-types)> -mode **pitch**&#124;rhythm&#124;both -strength <[Number](#parameter-types) in range 1-**100**> | |
-filter | -duration <[MusicalDivision](#parameter-types): **1/64**> | |
-interleave | -chunkchords -mode event&#124;time -ranges <list of [MusicalDivision](#parameter-types)> -repeats <list of [Number](#parameter-types)> -skip -solo | |
-monophonize | | |
-ratchet | -autoscale -by [ClipReference](#parameter-types) -mode velocity&#124;pitch -shape **linear**&#124;easeinout&#124;easein -strength <[Number](#parameter-types) in range 0-**100**> -velocitytostrength | |
-relength | -factor <[Number](#parameter-types) in range 1-10> | |
-shuffle | -by [ClipReference](#parameter-types) | |
-slice | list of [MusicalDivision](#parameter-types) | |
-transpose | -by [ClipReference](#parameter-types) -mode absolute&#124;relative&#124;overwrite | |
+arpeggiate | -by <[ClipReference](#parameter-types)> -removeoffset -rescale <[Number](#parameter-types) in range 1-10> | Arpeggiates the given clip by another clip (could also be itself)
+concat | | Concatenates the given clips into one clip.
+constrain | -by <[ClipReference](#parameter-types)> -mode **pitch**&#124;rhythm&#124;both -strength <[Number](#parameter-types) in range 1-**100**> |
+filter | -duration <[MusicalDivision](#parameter-types): **1/64**> -invert | Filters out notes shorter than the length specified (default 1/64). Works the other way round if -invert is specified. 
+interleave | -chunkchords -mode event&#124;time -ranges <list of [MusicalDivision](#parameter-types)> -repeats <list of [Number](#parameter-types)> -skip -solo |
+monophonize | | Removes any overlapping notes. Often useful on control clips, which often work best when there are no overlapping events.
+ratchet | <ratchet values e.g. 1 2 3 4 (if not specifying -by parameter)> -autoscale -by [ClipReference](#parameter-types) -mode velocity&#124;pitch -shape **linear**&#124;easeinout&#124;easein&#124;easeout -strength <[Decimal](#parameter-types) in range 0.0-**1.0**> -velocitytostrength |
+relength | -factor <[Decimal](#parameter-types) in range 0.0-**1.0**> |
+resize | -factor <[Decimal](#parameter-types) in range 0.0-**1.0**> |
+shuffle | <shuffle indexes e.g. 1 2 3 4 (if not specifying -by parameter)> -by [ClipReference](#parameter-types) |
+slice | list of [MusicalDivision](#parameter-types) |
+transpose | -by [ClipReference](#parameter-types) -mode absolute&#124;relative&#124;overwrite |
 
 ## Parameter types
 
