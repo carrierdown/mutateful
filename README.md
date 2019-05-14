@@ -30,19 +30,19 @@ More usage examples will follow. In the meantime, star this repo and/or follow m
 Basic syntax: [ClipReference #1](#parameter-types) ... [ClipReference #N](#parameter-types) commandname -parameter1 value -parameter2 value
 
 Command | Parameters (default values in **bold**) | Description
---- | --- | --- | ---
+--- | --- | ---
 arpeggiate | -by <[ClipReference](#parameter-types)> -removeoffset -rescale <[Number](#parameter-types) in range 1-10> | Arpeggiates the given clip by another clip (could also be itself)
 concat | | Concatenates the given clips into one clip.
 constrain | -by <[ClipReference](#parameter-types)> -mode **pitch**&#124;rhythm&#124;both -strength <[Number](#parameter-types) in range 1-**100**> |
 filter | -duration <[MusicalDivision](#parameter-types): **1/64**> -invert | Filters out notes shorter than the length specified (default 1/64). Works the other way round if -invert is specified. 
 interleave | -chunkchords -mode event&#124;time -ranges <list of [MusicalDivision](#parameter-types)> -repeats <list of [Number](#parameter-types)> -skip -solo |
 monophonize | | Removes any overlapping notes. Often useful on control clips, which often work best when there are no overlapping events.
-ratchet | <ratchet values e.g. 1 2 3 4 (if not specifying -by parameter)> -autoscale -by [ClipReference](#parameter-types) -mode velocity&#124;pitch -shape **linear**&#124;easeinout&#124;easein&#124;easeout -strength <[Decimal](#parameter-types) in range 0.0-**1.0**> -velocitytostrength |
+ratchet | <ratchet values e.g. 1 2 3 4> -autoscale -by [ClipReference](#parameter-types) -mode velocity&#124;pitch -shape **linear**&#124;easeinout&#124;easein&#124;easeout -strength <[Decimal](#parameter-types) in range 0.0-**1.0**> -velocitytostrength |
 relength | -factor <[Decimal](#parameter-types) in range 0.0-**1.0**> |
 resize | -factor <[Decimal](#parameter-types) in range 0.0-**1.0**> |
-shuffle | <shuffle indexes e.g. 1 2 3 4 (if not specifying -by parameter)> -by [ClipReference](#parameter-types) |
+shuffle | <shuffle indexes e.g. 1 2 3 4> -by [ClipReference](#parameter-types) |
 slice | list of [MusicalDivision](#parameter-types) |
-transpose | -by [ClipReference](#parameter-types) -mode absolute&#124;relative&#124;overwrite |
+transpose | <transpose values, e.g. 0 -12 12> -by [ClipReference](#parameter-types) -mode absolute&#124;relative&#124;overwrite |
 
 ## Parameter types
 
@@ -50,5 +50,6 @@ Type | Description
 --- | ---
 ClipReference | Cells in the session view are referenced like they would be in a spreadsheet, i.e. tracks are assigned letters (A-Z) and clip rows are assigned numbers (1-N). Example: track 1 clip 1 becomes A1, track 2 clip 3 becomes B3.
 MusicalDivision | These are commonly used in sequencer software to denote musical divisions like quarter notes, eight notes and so on. Examples: quarter note = 1/4, eight note = 1/8.
-Number | Whole number (integer) from 0 and upwards
+Number | Whole number (integer), either negative or positive
+Decimal | Decimal number, from 0.0 and upwards
 
