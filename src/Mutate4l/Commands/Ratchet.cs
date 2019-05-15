@@ -62,7 +62,11 @@ namespace Mutate4l.Commands
         // If only one clip is specified, clip will be both control and target sequence
         public static ProcessResultArray<Clip> Apply(RatchetOptions options, params Clip[] clips)
         {
-            ClipUtilities.NormalizeClipLengths((options.By != null ? clips.Prepend(options.By).ToArray() : clips));
+            if (options.By != null)
+            {
+                clips = clips.Prepend(options.By).ToArray();
+            }
+            ClipUtilities.NormalizeClipLengths(clips);
             if (clips.Length < 2)
             {
                 clips = new Clip[] { clips[0], clips[0] };

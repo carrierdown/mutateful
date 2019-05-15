@@ -814,6 +814,7 @@ function debuglog(/* ... args */) {
 
 function processQueue() {
     if (messageQueue.length === 0) return;
+    // todo - enhancement: remove duplicate formulas, sending only the most recent one if several exist for the same cell
     outlet(0, messageQueue[0]);
     messageQueue.shift();
 }
