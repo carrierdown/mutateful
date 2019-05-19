@@ -13,6 +13,7 @@ namespace Mutate4l.Cli
         {
             while (true)
             {
+                bool dumpThisSession = false;
                 var result = UdpConnector.WaitForData();
                 if (UdpConnector.IsString(result))
                 {
@@ -22,36 +23,39 @@ namespace Mutate4l.Cli
                 }
                 (List<Clip> clips, string formula, ushort id, byte trackNo) = UdpConnector.DecodeData(result);
                 Console.WriteLine($"Received {clips.Count} clips and formula: {formula}");
-                if (formula.Contains("dump"))
+                if (formula.EndsWith(" dump"))
                 {
-                    Console.WriteLine($"Dumping data for clips:");
-                    foreach (var clip in clips)
-                    {
-                        Console.WriteLine(IOUtilities.ClipToString(clip));
-                    }
-                    continue;
+                    Console.WriteLine("Dumping data for raw input");
+                    Utilities.DumpByteArrayToConsole(result.Take(result.Length - 5).ToArray(), "input"); // chop off " dump" in raw data...
+                    formula = formula.Substring(0, formula.Length - 5); // ...and formula
+                    dumpThisSession = true;
                 }
 
                 if (formula.Contains("svg"))
                 {
                     Console.WriteLine("Dumping SVG for clips");
-                    foreach (var clip in clips)
+                    DoSvg(formula, clips);
+                    continue;
+                }
+                var chainedCommandWrapper = Parser.ParseFormulaToChainedCommand(formula, clips, new ClipMetaData(id, trackNo));
+                if (!chainedCommandWrapper.Success)
+                {
+                    Console.WriteLine(chainedCommandWrapper.ErrorMessage);
+                    continue;
+                }
+                var processedClipWrapper = ClipProcessor.ProcessChainedCommand(chainedCommandWrapper.Result);
+                if (processedClipWrapper.Success && processedClipWrapper.Result.Length > 0)
+                {
+                    var processedClip = processedClipWrapper.Result[0];
+                    byte[] clipData = IOUtilities.GetClipAsBytes(chainedCommandWrapper.Result.TargetMetaData.Id, processedClip).ToArray();
+                    if (dumpThisSession)
                     {
-                        DoSvg(formula, clips);
+                        Utilities.DumpByteArrayToConsole(clipData, "output");
                     }
-                    continue;
+                    UdpConnector.SetClipAsBytesById(clipData);
                 }
-                var structuredCommand = Parser.ParseFormulaToChainedCommand(formula, clips, new ClipMetaData(id, trackNo));
-                if (!structuredCommand.Success)
-                {
-                    Console.WriteLine(structuredCommand.ErrorMessage);
-                    continue;
-                }
-                var status = ClipProcessor.ProcessChainedCommand(structuredCommand.Result);
-                if (!status.Success)
-                {
-                    Console.WriteLine(status.ErrorMessage);
-                }
+                else
+                    Console.WriteLine($"Error applying formula: {processedClipWrapper.ErrorMessage}");
             }
         }
 

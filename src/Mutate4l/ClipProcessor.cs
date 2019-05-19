@@ -4,21 +4,22 @@ using Mutate4l.Core;
 using Mutate4l.IO;
 using System.Linq;
 using Mutate4l.Commands.Experimental;
+using Mutate4l.Utility;
 
 namespace Mutate4l
 {
     public static class ClipProcessor
     {
-        public static Result ProcessChainedCommand(ChainedCommand chainedCommand)
+        public static ProcessResultArray<Clip> ProcessChainedCommand(ChainedCommand chainedCommand)
         {
             Clip[] sourceClips = chainedCommand.SourceClips.Where(c => c.Notes.Count > 0).ToArray();
             if (sourceClips.Length < 1)
             {
-                return new Result("No clips or empty clips specified. Aborting.");
+                return new ProcessResultArray<Clip>("No clips or empty clips specified. Aborting.");
             }
 
-            Clip[] currentSourceClips = sourceClips;
-            ProcessResultArray<Clip> resultContainer = new ProcessResultArray<Clip>("No commands specified");
+            var currentSourceClips = sourceClips;
+            var resultContainer = new ProcessResultArray<Clip>("No commands specified");
             foreach (var command in chainedCommand.Commands)
             {
                 resultContainer = ProcessCommand(command, currentSourceClips, chainedCommand.TargetMetaData);
@@ -27,14 +28,7 @@ namespace Mutate4l
                 else
                     break;
             }
-            if (resultContainer.Success && resultContainer.Result.Length > 0)
-            {
-                UdpConnector.SetClipAsBytesById(chainedCommand.TargetMetaData.Id, resultContainer.Result[0]);
-            }
-            else
-                return new Result(resultContainer.ErrorMessage, "Error applying formula");
-
-            return new Result(resultContainer.Success, resultContainer.ErrorMessage);
+            return resultContainer;
         }
 
         public static ProcessResultArray<Clip> ProcessCommand(Command command, Clip[] clips, ClipMetaData targetMetadata)

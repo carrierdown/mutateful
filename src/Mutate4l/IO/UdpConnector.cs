@@ -75,39 +75,12 @@ namespace Mutate4l.IO
             }
         }
 
-        public static void SetClipAsBytesById(ushort id, Clip clip)
+        public static void SetClipAsBytesById(byte[] clipData)
         {
-            /*
-                Return format:
-
-                2 bytes (id)
-                4 bytes (clip length - float)
-                1 byte (loop state - 1/0 for on/off)
-                2 bytes (number of notes)
-                    1 byte  (pitch)
-                    4 bytes (start - float)
-                    4 bytes (duration - float)
-                    1 byte  (velocity)
-
-                Above block repeated N times
-            */
-            var result = new List<byte>(2 + 4 + 1 + 2 + (10 * clip.Notes.Count));
-            result.AddRange(BitConverter.GetBytes(id));
-            result.AddRange(BitConverter.GetBytes((Single)clip.Length));
-            result.Add((byte)(clip.IsLooping ? 1 : 0));
-            result.AddRange(BitConverter.GetBytes((ushort)clip.Notes.Count));
-
-            foreach (var note in clip.Notes)
-            {
-                result.Add((byte)note.Pitch);
-                result.AddRange(BitConverter.GetBytes((Single)note.Start));
-                result.AddRange(BitConverter.GetBytes((Single)note.Duration));
-                result.Add((byte)note.Velocity);
-            }
             using (var udpClient = new UdpClient())
             {
-                udpClient.Send(result.ToArray(), result.Count, "localhost", SendPort);
-                Console.WriteLine($"Sent {result.Count} bytes over UDP");
+                udpClient.Send(clipData, clipData.Length, "localhost", SendPort);
+                Console.WriteLine($"Sent {clipData.Length} bytes over UDP");
             }
         }
 

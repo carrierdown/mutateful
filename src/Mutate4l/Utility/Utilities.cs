@@ -46,5 +46,17 @@ namespace Mutate4l.Utility
         {
             return new SortedList<T>(list);
         }
+
+        public static void DumpByteArrayToConsole(byte[] result, string varName)
+        {
+            Console.Write($"byte[] {varName} = {{");
+            for (var i = 0; i < result.Length; i++)
+            {
+                var res = result[i];
+                Console.Write($"{res}{(i == result.Length - 1 ? "" : ", ")}");
+            }
+            Console.Write("};" + Environment.NewLine);
+
+        }
     }
 }
