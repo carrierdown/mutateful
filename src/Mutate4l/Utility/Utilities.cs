@@ -3,6 +3,7 @@ using Mutate4l.Cli;
 using Mutate4l.Core;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Mutate4l.Utility
 {
@@ -47,16 +48,15 @@ namespace Mutate4l.Utility
             return new SortedList<T>(list);
         }
 
-        public static void DumpByteArrayToConsole(byte[] result, string varName)
+        public static string GetByteArrayContentsAsString(byte[] result)
         {
-            Console.Write($"byte[] {varName} = {{");
+            var sb = new StringBuilder();
             for (var i = 0; i < result.Length; i++)
             {
                 var res = result[i];
-                Console.Write($"{res}{(i == result.Length - 1 ? "" : ", ")}");
+                sb.Append($"{res}{(i == result.Length - 1 ? "" : ", ")}");
             }
-            Console.Write("};" + Environment.NewLine);
-
+            return sb.ToString();
         }
     }
 }

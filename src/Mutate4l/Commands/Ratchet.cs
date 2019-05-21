@@ -155,7 +155,7 @@ namespace Mutate4l.Commands
 
             for (var i = 0; i < targetSequence.Notes.Count; i++)
             {
-                AddRatchets(result, targetSequence.Notes[i], ratchetValues[i % targetSequence.Count], scaleWithVelocity, curvePoints, scaleFactor);
+                AddRatchets(result, targetSequence.Notes[i], ratchetValues[i % ratchetValues.Count], scaleWithVelocity, curvePoints, scaleFactor);
             }
             return result;
         }
