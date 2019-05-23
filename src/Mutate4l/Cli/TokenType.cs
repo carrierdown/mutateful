@@ -70,6 +70,7 @@
         Event,
         Linear,
         Overwrite,
+        Velocity,
         Pitches, // todo: Quickfix to avoid conflict with Pitch. Need to find a better solution here...
         Relative,
         Rhythm,

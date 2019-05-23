@@ -52,7 +52,7 @@ namespace Mutate4l.Commands
 
         public static ProcessResultArray<Clip> Apply(RatchetOptions options, params Clip[] clips)
         {
-            options.Strength = Math.Clamp(0, 1, options.Strength);
+            options.Strength = Math.Clamp(options.Strength, 0, 1);
             if (options.By != null)
             {
                 clips = clips.Prepend(options.By).ToArray();

@@ -32,7 +32,7 @@ namespace Mutate4l.Commands
 
             foreach (var clip in clips)
             {
-                var processedClip = new Clip(duration - start, clip.IsLooping);
+                var processedClip = new Clip(duration, clip.IsLooping);
                 processedClip.Notes.AddRange(ClipUtilities.GetSplitNotesInRangeAtPosition(start, start + duration, clip.Notes, 0));
                 processedClips[i++] = processedClip;
             }

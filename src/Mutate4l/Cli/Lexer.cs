@@ -85,6 +85,7 @@ namespace Mutate4l.Cli
             { "linear", Linear },
             { "overwrite", Overwrite },
             { "pitch", Pitches },
+            { "velocity", Velocity },
             { "relative", Relative },
             { "rhythm", Rhythm },
             { "time", Time }
