@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9FE9B675-A765-4FCA-94C9-D4C2E8D2257E}"
 	ProjectSection(SolutionItems) = preProject
 		..\README.md = ..\README.md
+		..\mutate4l.js = ..\mutate4l.js
 	EndProjectSection
 EndProject
 Global

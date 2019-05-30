@@ -136,7 +136,7 @@ namespace Mutate4l.IO
 
         public static bool IsString(byte[] result)
         {
-            return (result.Length > 4 && result[0] == 127 && result[1] == 126 && result[2] == 125 && result[3] == 124);
+            return result.Length > 4 && result[0] == 127 && result[1] == 126 && result[2] == 125 && result[3] == 124;
         }
 
         public static string GetText(byte[] data)

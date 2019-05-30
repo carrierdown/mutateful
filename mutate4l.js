@@ -10,7 +10,7 @@ var nameCallback = new ObservableCallback(-1);
 var notesCallback = new ObservableCallback(-1);
 var watchedClips = [];
 var messageQueue = [];
-var stringMessageHeader = [127,126,125,124];
+var stringMessageHeader = [0,127,126,125,124]; // note: index #0 is removed prior to sending, as it's used for duplicate removal of formulas using their live id
 
 // constants
 var SIZE_OF_ONE_NOTE_IN_BYTES = 1 /* pitch */ + 4 /* start */ + 4 /* duration */ + 1 /* velocity */;
@@ -85,11 +85,6 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
     var name = arg2 || "";
     var clipSlot;
 
-    /*if (clipId > 0) {
-        var lo = new LiveAPI("id " + clipId);
-        enumerateClip(getTrackNumber(lo), getClipNumber(lo), lo);
-    }*/
-
     if (name.indexOf("[") === -1 && name.indexOf("]") === -1) {
         clipSlot = new LiveAPI("id " + clipId);
         enumerateClip(getTrackNumber(clipSlot), getClipNumber(clipSlot) + 1, clipSlot);
@@ -111,8 +106,7 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
                 var expandedFormula = expandFormulaAsBytes(formula, id);
                 if (expandedFormula) {
                     debuglog("send expandedFormula", expandedFormula);
-                    //outlet(0, expandedFormula);
-                    messageQueue[messageQueue.length] = expandedFormula;
+                    addFormulaToQueue(id, formula, expandedFormula);
                 } else {
                     debuglogExt("Unable to expand formula for track " + (i + 1) + " clip " + (s + 1) + " - check syntax", expandedFormula);
                 }
@@ -139,8 +133,7 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
         var formula = getClipName(clipSlot);
         var expandedFormula = expandFormulaAsBytes(formula, clipId);
         if (expandedFormula) {
-            //outlet(0, expandedFormula);
-            messageQueue[messageQueue.length] = expandedFormula;
+            addFormulaToQueue(clipId, formula, expandedFormula);
         } else {
             debuglogExt("Unable to expand formula - check syntax: " + formula);
         }
@@ -505,8 +498,7 @@ function processAllClips() {
                     if (containsFormula(clipName)) {
                         var expandedFormula = expandFormulaAsBytes(clipName, liveObject.id);
                         if (expandedFormula) {
-                            //outlet(0, expandedFormula);
-                            messageQueue[messageQueue.length] = expandedFormula;
+                            addFormulaToQueue(liveObject.id, clipName, expandedFormula);
                         } else {
                             debuglogExt("Unable to expand formula for track " + (i + 1) + " clip " + (s + 1) + " - check syntax");
                         }
@@ -812,10 +804,32 @@ function debuglog(/* ... args */) {
     post(result + "\r\n");
 }
 
+function addFormulaToQueue(id, formulaAsText, formulaAsBytes) {
+    if (formulaAsBytes.length > 16384) {
+        debuglogExt("Dropping formula " + formula + " since it takes up more than the maximum allowed packet size of 16384 bytes. This will be fixed in a later version of mutate4l, but for now, use shorter and/or fewer clips per formula.");
+        return;
+    }
+    var found = false;
+    // search message queue from formulas starting with same id. If found, we replace it with the new one. Otherwise, add to the end of the list.
+    for (var i = messageQueue.length - 1; i >= 0; i--) {
+        if (messageQueue[i].length > 0 && messageQueue[i][0] === id) {
+            var bytesWithId = [id];
+            messageQueue[i] = bytesWithId.concat(formulaAsBytes);
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        var bytesWithId = [id];
+        messageQueue[messageQueue.length] = bytesWithId.concat(formulaAsBytes);
+    }
+}
+
 function processQueue() {
     if (messageQueue.length === 0) return;
-    // todo - enhancement: remove duplicate formulas, sending only the most recent one if several exist for the same cell
-    outlet(0, messageQueue[0]);
+    var dataToSend = messageQueue[0];
+    dataToSend.shift(); // remove first item of data, since this is used only for duplicate removal in addFormulaToQueue
+    outlet(0, dataToSend);
     messageQueue.shift();
 }
 
