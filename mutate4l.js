@@ -39,40 +39,57 @@ function replaceAt(string, index, replace) {
 function ObservableCallback(id) {
     this.id = id;
     this.name = "<not set>";
+    this.skipFirstNotesCallback = true;
+    this.skipFirstNameCallback = true;
 }
 
 ObservableCallback.prototype.getCallback = function() {
     var self = this;
     return {
         onNameChanged: function(arg) {
+            // debuglogExt("onNameChanged", arg);
             var name = "";
-            if (arg.indexOf("name") >= 0) {
-                name = arg[arg.indexOf("name") + 1];
-                // quirk: name is contained in "" if it contains spaces, otherwise not
-                if (name.indexOf("\"") === 0) {
-                    name = name.substr(1, name.length - 2);
-                }
+            if (arg.indexOf("name") < 0) {
+                return;
             }
-            //debuglog("name " + name + " self.name " + self.name);
-            if (name.length > 0 && self.name !== name) {
+            name = arg[arg.indexOf("name") + 1];
+            // quirk: name is contained in "" if it contains spaces, otherwise not
+            if (name.indexOf("\"") === 0) {
+                name = name.substr(1, name.length - 2);
+            }
+            // debuglogExt("name [" + name + "] self.name [" + self.name + "]");
+            if (!self.skipFirstNameCallback && name.length > 0 && self.name !== name) {
                 //debuglog("Name changed! cb called with ", arg, " on id: ", self.id);
                 self.name = name;
                 //debuglog("outletting to onSelectedClipRenamedOrChanged: ", self.id, name);
                 outlet(2, ["onSelectedClipRenamedOrChanged", parseInt(self.id, 10), name]);
             }
+            self.skipFirstNameCallback = false;
+            if (name.length === 0) {
+                outlet(2, ["onSelectedClipWithoutName", parseInt(self.id, 10), name]);
+            }
         },
         onNotesChanged: function(arg) {
+            /*
+             typically called twice with this data from ableton:
+             onNotesChanged [id, 112]
+             onNotesChanged [notes, bang]
+             */
+            // debuglogExt("onNotesChanged", arg, "skipFirstNotesCallback?", self.skipFirstNotesCallback);
+            
             if (arg.indexOf("notes") >= 0) {
-                ////debuglog("Notes changed!");
-                outlet(2, ["onSelectedClipRenamedOrChanged", parseInt(self.id, 10)]);
+                if (!self.skipFirstNotesCallback) {
+                    outlet(2, ["onSelectedClipRenamedOrChanged", parseInt(self.id, 10)]);
+                }
+                self.skipFirstNotesCallback = false;
             }
         }
     };
-}
+};
 
 ObservableCallback.prototype.setLiveApi = function(api) {
     this.api = api;
-}
+};
 
 function onInit() {
     selectedClipObserver = new LiveAPI(onSelectedClipChanged, "live_set view");
@@ -80,15 +97,18 @@ function onInit() {
     processAllClips();
 }
 
-function onSelectedClipRenamedOrChanged(arg1, arg2) {
-    var clipId = arg1;
-    var name = arg2 || "";
-    var clipSlot;
-
+function onSelectedClipWithoutName(clipId, maybeName) {
+    var name = maybeName || "";
     if (name.indexOf("[") === -1 && name.indexOf("]") === -1) {
         clipSlot = new LiveAPI("id " + clipId);
         enumerateClip(getTrackNumber(clipSlot), getClipNumber(clipSlot) + 1, clipSlot);
     }
+}
+
+function onSelectedClipRenamedOrChanged(arg1, arg2) {
+    var clipId = arg1;
+    var name = arg2 || "";
+    var clipSlot;
 
     if (watchedClips[clipId] !== undefined && watchedClips[clipId].length !== 0) {
         var currentlyWatchedClips = watchedClips[clipId];
@@ -144,17 +164,19 @@ function updateObserversOnClipChange(rawId) {
     var id = "id " + rawId;
     clipNameObserver.property = "";
     clipNameObserver = null;
+    nameCallback.name = getClipNameFromId(rawId);
+    nameCallback.id = rawId;
+    nameCallback.skipFirstNameCallback = true; // quirk: see below
     clipNameObserver = new LiveAPI(nameCallback.getCallback().onNameChanged, id);
-    nameCallback.id = clipNameObserver.id;
-    nameCallback.name = getClipName(clipNameObserver);
     clipNameObserver.property = "name";
     nameCallback.setLiveApi(clipNameObserver);
     
     clipContentsObserver.property = "";
     clipContentsObserver = null;
+    notesCallback.name = getClipNameFromId(rawId);
+    notesCallback.id = rawId;
+    notesCallback.skipFirstNotesCallback = true; // quirk: When a new observer is hooked up, the callback fires immediately even though no change occurred. We work around this with this variable.
     clipContentsObserver = new LiveAPI(notesCallback.getCallback().onNotesChanged, id);
-    notesCallback.id = clipContentsObserver.id;
-    notesCallback.name = getClipName(clipContentsObserver);
     clipContentsObserver.property = "notes";
     notesCallback.setLiveApi(clipContentsObserver);
 }
@@ -170,6 +192,10 @@ function getClipName(liveObject) {
     var clipName = liveObject.get("name");
     if (!clipName.length || clipName.length === 0) return "";
     return clipName[0] + ""; // if name is numeric, the live api turns it into a number instead of a string, so we need to coerce it.
+}
+
+function getClipNameFromId(id) {
+    return getClipName(new LiveAPI("id " + id));
 }
 
 function getClipLength(liveObject) {
