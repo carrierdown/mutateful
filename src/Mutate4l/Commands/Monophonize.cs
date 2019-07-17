@@ -6,6 +6,8 @@ namespace Mutate4l.Commands
 {
     public static class Monophonize
     {
+        // TODO: Add option to cut overlapping events, so that more of the original clip is preserved
+        
         public static ProcessResultArray<Clip> Apply(params Clip[] clips)
         {
             var processedClips = new List<Clip>();

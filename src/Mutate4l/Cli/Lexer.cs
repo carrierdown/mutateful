@@ -20,46 +20,45 @@ namespace Mutate4l.Cli
 
         private Dictionary<string, TokenType> Commands = new Dictionary<string, TokenType>
         {
-            { "arpeggiate", Arpeggiate },
-            { "concat", Concat },
-            { "constrain", Constrain },
-            { "filter", Filter },
-            { "il", Interleave },
-            { "ilvt", InterleaveEvent },
-            { "interleave", Interleave },
-            { "interleavevent", InterleaveEvent },
-            { "monophonize", Monophonize },
-            { "ratchet", Ratchet },
-            { "relength", Relength },
+            { "arpeggiate", Arpeggiate }, { "arp", Arpeggiate },
+            { "concat", Concat }, { "cat", Concat },
+            { "constrain", Constrain }, { "const", Constrain },
+            { "filter", Filter }, { "flt", Filter },
+            { "il", Interleave }, { "ilv", Interleave }, { "interleave", Interleave },
+            { "ilvt", InterleaveEvent }, { "ilev", InterleaveEvent }, { "interleavevent", InterleaveEvent }, { "interleaveevent", InterleaveEvent },
+            { "monophonize", Monophonize }, { "mono", Monophonize },
+            { "ratchet", Ratchet }, { "rat", Ratchet },
+            { "relength", Relength }, { "relen", Relength },
             { "resize", Resize },
             { "scan", Scan },
-            { "shuffle", Shuffle },
+            { "shuffle", Shuffle }, { "shfl", Shuffle },
             { "slice", Slice },
             { "take", Take },
-            { "transpose", Transpose }
+            { "transpose", Transpose }, { "tran", Transpose }
         };
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
         {
-            { "-autoscale", AutoScale },
+            { "-autoscale", AutoScale }, { "-auto", AutoScale },
             { "-by", By },
-            { "-chunkchords", ChunkChords },
+            { "-chunkchords", ChunkChords }, { "-chunk", ChunkChords },
             { "-controlmax", ControlMax },
             { "-controlmin", ControlMin },
-            { "-count", Count },
-            { "-duration", Duration },
+            { "-count", Count }, { "-cnt", Count },
+            { "-duration", Duration }, { "-dur", Duration },
             { "-enablemask", EnableMask },
             { "-factor", Factor },
             { "-invert", Invert },
-            { "-lengths", Lengths },
+            { "-inv", Invert },
+            { "-lengths", Lengths }, { "-lens", Lengths },
             { "-max", Max },
             { "-min", Min },
             { "-mode", Mode },
             { "-pitch", Pitch },
             { "-ranges", Ranges },
             { "-ratchetvalues", RatchetValues },
-            { "-removeoffset", RemoveOffset },
-            { "-repeats", Repeats },
+            { "-removeoffset", RemoveOffset }, { "-remoff", RemoveOffset },
+            { "-repeats", Repeats }, { "-rep", Repeats },
             { "-rescale", Rescale },
             { "-shape", Shape },
             { "-shufflevalues", ShuffleValues },
@@ -69,7 +68,7 @@ namespace Mutate4l.Cli
             { "-strength", Strength },
             { "-strict", Strict },
             { "-transposevalues", TransposeValues },
-            { "-velocitytostrength", VelocityToStrength },
+            { "-velocitytostrength", VelocityToStrength }, { "-veltostr", VelocityToStrength },
             { "-window", Window },
             { "-with", With }
         };
@@ -314,7 +313,6 @@ namespace Mutate4l.Cli
             }
             return (false, true, "No more tokens available");
         }
-
 
         private string GetErroneousTokenExcerpt()
         {
