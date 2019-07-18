@@ -2,7 +2,7 @@
 using System.Linq;
 using Mutate4l.Core;
 
-namespace Mutate4l.Commands
+namespace Mutate4l.Commands.ToBeImplemented
 {
     // todo: implement
     public class Intersect

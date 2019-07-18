@@ -38,5 +38,11 @@ namespace Mutate4l.Core
             MinNumberValue = min;
             MaxNumberValue = max;
         }
+
+        public OptionInfo(int min, int max, OptionType type) : this(0, type)
+        {
+            MinNumberValue = min;
+            MaxNumberValue = max;
+        }
     }
 }
