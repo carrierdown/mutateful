@@ -25,7 +25,7 @@ namespace Mutate4l.Utility
         //   [    ----]----
         public static bool CrossesEndOfInterval(this NoteEvent note, decimal start, decimal end)
         {
-            return note.Start >= start && (note.Start + note.Duration) > end;
+            return note.Start >= start && note.Start < end && (note.Start + note.Duration) > end;
         }
 
         //   [ -------]??

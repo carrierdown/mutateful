@@ -60,6 +60,9 @@ namespace Mutate4l
                     options.Mode = InterleaveMode.Event;
                     resultContainer = Interleave.Apply(options, targetMetadata, clips);
                     break;
+                case TokenType.Mask:
+                    resultContainer = Mask.Apply(command, clips);
+                    break;
                 case TokenType.Monophonize:
                     resultContainer = Monophonize.Apply(clips);
                     break;
@@ -74,6 +77,9 @@ namespace Mutate4l
                     break;
                 case TokenType.Scan:
                     resultContainer = Scan.Apply(command, clips);
+                    break;
+                case TokenType.SetLength:
+                    resultContainer = SetLength.Apply(command, clips);
                     break;
                 case TokenType.Shuffle:
                     resultContainer = Shuffle.Apply(command, clips);

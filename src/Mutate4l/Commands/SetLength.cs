@@ -1,12 +1,12 @@
 using Mutate4l.Cli;
 using Mutate4l.Core;
 
-namespace Mutate4l.Commands.ToBeImplemented
+namespace Mutate4l.Commands
 {
     public class SetLengthOptions
     {
         [OptionInfo(type: OptionType.Default)]
-        public decimal[] Lengths { get; set; } = new[] {0.25m};
+        public decimal[] Lengths { get; set; } = {0.25m};
     }
     
     // Simple command to set length of all notes to specified value(s). If more values are specified, they are cycled through.

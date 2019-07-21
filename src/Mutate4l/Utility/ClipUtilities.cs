@@ -45,7 +45,7 @@ namespace Mutate4l.Utility
             }
             return clip;
         }
-
+        
         public static List<NoteEvent> GetNotesInRangeAtPosition(decimal start, decimal end, SortedList<NoteEvent> notes, decimal position)
         {
             var results = new List<NoteEvent>();
