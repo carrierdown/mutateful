@@ -21,6 +21,7 @@
         Resize,
         Scan,
         SetLength,
+        SetRhythm,
         Shuffle,
         Slice,
         Sustain,

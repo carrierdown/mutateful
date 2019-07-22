@@ -6,9 +6,6 @@ namespace Mutate4l.Commands
 {
     public class SetRhythmOptions
     {
-        [OptionInfo(0, 127, type:OptionType.Default)]
-        public int[] Pitches { get; set; }
-        
         public Clip By { get; set; }
     }
     

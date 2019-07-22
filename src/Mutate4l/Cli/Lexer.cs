@@ -33,6 +33,7 @@ namespace Mutate4l.Cli
             { "resize", Resize },
             { "scan", Scan },
             { "setlength", SetLength }, { "length", SetLength }, { "len", SetLength },
+            { "setrhythm", SetRhythm }, { "rhythm", SetRhythm }, { "rm", SetRhythm },
             { "shuffle", Shuffle }, { "shfl", Shuffle },
             { "slice", Slice },
             { "take", Take },

@@ -96,6 +96,9 @@ namespace Mutate4l
                 case TokenType.SetLength:
                     resultContainer = SetLength.Apply(command, clips);
                     break;
+                case TokenType.SetRhythm:
+                    resultContainer = SetRhythm.Apply(command, clips);
+                    break;
                 case TokenType.Shuffle:
                     resultContainer = Shuffle.Apply(command, clips);
                     break;
