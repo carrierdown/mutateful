@@ -1,4 +1,5 @@
-﻿using Mutate4l.Cli;
+﻿using System.Collections.Generic;
+using Mutate4l.Cli;
 using Mutate4l.Commands;
 using Mutate4l.Core;
 using Mutate4l.IO;
@@ -20,13 +21,27 @@ namespace Mutate4l
 
             var currentSourceClips = sourceClips;
             var resultContainer = new ProcessResultArray<Clip>("No commands specified");
+            var warnings = new List<string>();
             foreach (var command in chainedCommand.Commands)
             {
                 resultContainer = ProcessCommand(command, currentSourceClips, chainedCommand.TargetMetaData);
                 if (resultContainer.Success)
+                {
                     currentSourceClips = resultContainer.Result;
+                    if (resultContainer.WarningMessage.Length > 0)
+                    {
+                        warnings.Add(resultContainer.WarningMessage);
+                    }
+                }
                 else
+                {
                     break;
+                }
+            }
+
+            if (warnings.Count > 0)
+            {
+                resultContainer = new ProcessResultArray<Clip>(resultContainer.Success, resultContainer.Result, resultContainer.ErrorMessage, string.Join(System.Environment.NewLine, warnings));
             }
             return resultContainer;
         }

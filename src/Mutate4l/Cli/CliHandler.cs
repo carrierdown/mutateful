@@ -49,6 +49,13 @@ namespace Mutate4l.Cli
                 }
 
                 var processedClipWrapper = ClipProcessor.ProcessChainedCommand(chainedCommandWrapper.Result);
+
+                if (processedClipWrapper.WarningMessage.Length > 0)
+                {
+                    Console.WriteLine($"Warnings were generated:{System.Environment.NewLine}" +
+                                      $"{processedClipWrapper.WarningMessage}");
+                }
+
                 if (processedClipWrapper.Success && processedClipWrapper.Result.Length > 0)
                 {
                     var processedClip = processedClipWrapper.Result[0];
