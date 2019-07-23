@@ -58,5 +58,16 @@ namespace Mutate4l.Utility
             }
             return sb.ToString();
         }
+
+        public static decimal RoundUpToNearestSixteenth(decimal val)
+        {
+            var numSixteenths = val / 0.25m;
+            var numSixteenthsFloored = (int) Math.Floor(numSixteenths);
+            if (numSixteenths - numSixteenthsFloored > 0)
+            {
+                numSixteenthsFloored += 1;
+            }
+            return numSixteenthsFloored * 0.25m;
+        }
     }
 }

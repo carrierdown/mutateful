@@ -92,6 +92,17 @@ namespace Mutate4lTests
             Assert.AreEqual(2, clip1.Notes.Count);
         }
 
+        [TestMethod]
+        public void TestRoundUpToNearestSixteenth()
+        {
+            var val = 1.22m;
+            Assert.AreEqual(1.25m, Utilities.RoundUpToNearestSixteenth(val));
+            val = 1.25m;
+            Assert.AreEqual(1.25m, Utilities.RoundUpToNearestSixteenth(val));
+            val = 0.51m;
+            Assert.AreEqual(0.75m, Utilities.RoundUpToNearestSixteenth(val));
+        }
+
         //[TestMethod]
         public void MyTestMethod()
         {

@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using Mutate4l.Cli;
 using Mutate4l.Core;
+using Mutate4l.Utility;
 
 namespace Mutate4l.Commands
 {
@@ -42,17 +44,31 @@ namespace Mutate4l.Commands
             for (var i = 1; i < clips.Length; i++)
             {
                 var clip = clips[i];
-                var resultClip = new Clip(clip.Length, clip.IsLooping);
-                decimal offset = 0;
+                var resultClip = new Clip(0, clip.IsLooping);
 
                 foreach (var note in clip.Notes)
                 {
                     var byNote = byClip.Notes[byIndex % byClip.Count];
-                    offset = (byIndex / byClip.Count) * byClip.Length;
-                    resultClip.Add(new NoteEvent(note.Pitch, offset + byNote.Start, byNote.Duration, note.Velocity));
+
+                    // special case: add silence between start of clip and first note, but only the first time, since subsequent silences are handled by DurationUntilNextNote
+                    if (resultClip.Length == 0 && byIndex == 0)
+                    {
+                        resultClip.Length = byNote.Start;
+                    }
+                    
+                    resultClip.Add(new NoteEvent(note.Pitch, resultClip.Length, byNote.Duration, note.Velocity));
+                    resultClip.Length += byClip.DurationUntilNextNote(byIndex % byClip.Count);
                     byIndex++;
                 }
-                resultClip.Length += offset; 
+                
+                // stacked/overlapping notes will lead to incorrect final length of clip, so check if this is the case
+                var latestNoteEnd = resultClip.Notes.Max(x => x.End);
+                if (latestNoteEnd > resultClip.Length)
+                {
+                    resultClip.Length = latestNoteEnd;
+                }
+                
+                resultClip.Length = Utilities.RoundUpToNearestSixteenth(resultClip.Length); // quantize clip length to nearest 1/16, or Live won't accept it
                 resultClips[resultClipIx++] = resultClip;
             }
 
