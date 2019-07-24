@@ -24,11 +24,11 @@ namespace Mutate4l.Core
         public ClipReference ClipReference { get; set; }
         public decimal EndDelta
         {
-            get { return Length - Math.Clamp(Notes[Notes.Count - 1].Start, 0, Length) + Notes[0].Start; }
+            get { return Length - Math.Clamp(Notes[Count - 1].Start, 0, Length) + Notes[0].Start; }
         }
         public decimal EndDeltaSilent
         {
-            get { return Length - Math.Clamp(Notes[Notes.Count - 1].End, 0, Length) + Notes[0].Start; }
+            get { return Length - Math.Clamp(Notes[Count - 1].End, 0, Length) + Notes[0].Start; }
         }
         public bool SelectionActive { get; private set; }
 
@@ -74,16 +74,33 @@ namespace Mutate4l.Core
         public decimal DurationUntilNextNote(int index)
         {
             // todo: warn if index > Notes.Count - 1
-            if (index >= Notes.Count - 1)
+            if (index >= Count - 1)
                 return EndDelta;
             else
                 return Notes[index + 1].Start - Notes[index].Start;
+        }
+        
+        public decimal DurationUntilNextNoteOrEndOfClip(int index)
+        {
+            // todo: warn if index > Notes.Count - 1
+            if (index >= Count - 1)
+                return Length - Math.Clamp(Notes[Count - 1].Start, 0, Length);
+            else
+                return Notes[index + 1].Start - Notes[index].Start;
+        }
+
+        public decimal DurationBetweenNotes(int start, int end)
+        {
+            var endTime = end >= Count ? Length : Notes[end].Start;
+            var startTime = start >= Count ? Length : Notes[start].Start;
+
+            return endTime - startTime;
         }
 
         // useful when the length of an event has changed and you want to consider only the interval of silence (if any) preceding the next event
         public decimal SilentDurationUntilNextNote(int index)
         {
-            if (index >= Notes.Count - 1)
+            if (index >= Count - 1)
                 return EndDeltaSilent;
             var silentDuration = Notes[index + 1].Start - Notes[index].End;
             return silentDuration > 0 ? silentDuration : 0;
@@ -93,7 +110,7 @@ namespace Mutate4l.Core
         public int RelativePitch(int index)
         {
             if (Notes.Count == 0) return 0;
-            return Notes[Math.Clamp(index, 0, Notes.Count)].Pitch - Notes[0].Pitch;
+            return Notes[Math.Clamp(index, 0, Count)].Pitch - Notes[0].Pitch;
         }
 
         /*        public NoteInfo GetNextNoteInfo()

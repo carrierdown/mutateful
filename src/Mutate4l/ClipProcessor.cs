@@ -75,6 +75,9 @@ namespace Mutate4l
                     options.Mode = InterleaveMode.Event;
                     resultContainer = Interleave.Apply(options, targetMetadata, clips);
                     break;
+                case TokenType.Legato:
+                    resultContainer = Legato.Apply(clips);
+                    break;
                 case TokenType.Mask:
                     resultContainer = Mask.Apply(command, clips);
                     break;

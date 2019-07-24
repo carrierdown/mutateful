@@ -14,6 +14,7 @@
         Filter,
         Interleave,
         InterleaveEvent,
+        Legato,
         Mask,
         Monophonize,
         Ratchet,

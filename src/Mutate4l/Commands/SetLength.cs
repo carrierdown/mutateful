@@ -29,7 +29,7 @@ namespace Mutate4l.Commands
             var i = 0;
             foreach (var clip in clips)
             {
-                var resultClip = new Clip(clips[i].Count, clips[i].IsLooping);
+                var resultClip = new Clip(clips[i].Length, clips[i].IsLooping);
                 var lengthCounter = 0;
                 foreach (var note in clip.Notes)
                 {
