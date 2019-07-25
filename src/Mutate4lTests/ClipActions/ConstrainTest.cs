@@ -28,11 +28,7 @@ namespace Mutate4lTests.ClipActions
                     new NoteEvent(81, 4, .5m, 100)  // A
                 }
             };
-            var options = new ConstrainOptions()
-            {
-                Mode = ConstrainMode.Pitch
-            };
-            var resultObj = Constrain.Apply(options, clip1, clip2);
+            var resultObj = Constrain.Apply(new ConstrainOptions(), clip1, clip2);
             Assert.IsTrue(resultObj.Success);
             var result = resultObj.Result[0];
             Assert.AreEqual(48, result.Notes[0].Pitch);

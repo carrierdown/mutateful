@@ -2,6 +2,8 @@
 {
     public class Morph
     {
+        // Will probably be replaced by Quantize in conjunction with new Loop-functionality. Not planned for v1.
+        
         /* To be implemented...
          * Morphs between two clips over a specified number of iterations.
          * Notes that only exist in one clip are faded in/out using velocity

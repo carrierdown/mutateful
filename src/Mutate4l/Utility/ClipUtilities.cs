@@ -222,10 +222,10 @@ namespace Mutate4l.Utility
         public static void NormalizeClipLengths(params Clip[] clips)
         {
             if (clips.Length < 2) return;
-            decimal maxLength = clips.Max().Length;
+            decimal maxLength = clips.Max(x => x.Length);
             foreach (var clip in clips)
             {
-                if (clip.Length < maxLength)
+                if (clip.Length < maxLength) // todo: replace with call to EnlargeClipByLooping. Might change behaviour a bit since the new function also cuts events that are too long.
                 {
                     decimal loopLength = clip.Length;
                     decimal currentLength = loopLength;
@@ -253,6 +253,40 @@ namespace Mutate4l.Utility
             }
         }
 
+        public static void EnlargeClipByLooping(Clip clip, decimal newLength)
+        {
+            if (newLength < clip.Length) return;
+            
+            var loopLength = clip.Length;
+            var currentLength = loopLength;
+            var notesToAdd = new List<NoteEvent>();
+
+            while (currentLength < newLength)
+            {
+                foreach (var note in clip.Notes)
+                {
+                    if (note.Start + currentLength < newLength)
+                    {
+                        var noteToAdd = new NoteEvent(note)
+                        {
+                            Start = note.Start + currentLength
+                        };
+                        if (note.End + currentLength > newLength)
+                        {
+                            noteToAdd.Duration = newLength - noteToAdd.Start;
+                            // don't exit here as there might be more stacked/clustered notes that also fit
+                        }
+                        notesToAdd.Add(noteToAdd);
+                    } else {
+                        break;
+                    }
+                }
+                currentLength += loopLength;
+            }
+            clip.Length = newLength;
+            clip.Notes.AddRange(notesToAdd);
+        }
+        
         public static Clip Monophonize(Clip clip)
         {
             if (clip.Notes.Count < 2) return clip;

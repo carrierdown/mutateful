@@ -17,6 +17,7 @@
         Legato,
         Mask,
         Monophonize,
+        Quantize,
         Ratchet,
         Relength,
         Resize,

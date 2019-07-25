@@ -2,24 +2,11 @@
 using Mutate4l.Utility;
 using System.Linq;
 using Mutate4l.Cli;
-using static Mutate4l.Commands.ConstrainMode;
 
 namespace Mutate4l.Commands
 {
-    public enum ConstrainMode
-    {
-        Pitch,
-        Rhythm,
-        Both
-    }
-
     public class ConstrainOptions
     {
-        public ConstrainMode Mode { get; set; } = Pitch;
-
-        [OptionInfo(min: 1, max: 100)]
-        public int Strength { get; set; } = 100;
-
         public Clip By { get; set; }
 
         public bool Strict { get; set; }
@@ -32,7 +19,7 @@ namespace Mutate4l.Commands
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
-            (var success, var msg) = OptionParser.TryParseOptions(command, out ConstrainOptions options);
+            var (success, msg) = OptionParser.TryParseOptions(command, out ConstrainOptions options);
             if (!success)
             {
                 return new ProcessResultArray<Clip>(msg);
@@ -48,9 +35,9 @@ namespace Mutate4l.Commands
             }
             ClipUtilities.NormalizeClipLengths(clips);
             if (clips.Length < 2) return new ProcessResultArray<Clip>(clips);
-            Clip masterClip = clips[0];
-            Clip[] slaveClips = clips.Skip(1).ToArray();
-            Clip[] processedClips = slaveClips.Select(c => new Clip(c.Length, c.IsLooping)).ToArray();
+            var masterClip = clips[0];
+            var slaveClips = clips.Skip(1).ToArray();
+            var processedClips = slaveClips.Select(c => new Clip(c.Length, c.IsLooping)).ToArray();
 
             for (var i = 0; i < slaveClips.Length; i++)
             {
@@ -58,18 +45,9 @@ namespace Mutate4l.Commands
                 foreach (var note in slaveClip.Notes)
                 {
                     var constrainedNote = new NoteEvent(note);
-                    if (options.Mode == Pitch || options.Mode == Both)
-                    {
-                        if (options.Strict)
-                            constrainedNote.Pitch = ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes);
-                        else
-                            constrainedNote.Pitch = ClipUtilities.FindNearestNotePitchInSetMusical(note, masterClip.Notes);
-                    }
-                    if (options.Mode == Rhythm || options.Mode == Both)
-                    {
-                        var newStart = ClipUtilities.FindNearestNoteStartInSet(note, masterClip.Notes);
-                        constrainedNote.Start += (newStart - constrainedNote.Start) * (options.Strength / 100);
-                    }
+                    constrainedNote.Pitch = options.Strict ? 
+                        ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes) : 
+                        ClipUtilities.FindNearestNotePitchInSetMusical(note, masterClip.Notes);
                     processedClips[i].Notes.Add(constrainedNote);
                 }
             }

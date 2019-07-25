@@ -29,6 +29,7 @@ namespace Mutate4l.Cli
             { "legato", Legato }, { "leg", Legato },
             { "mask", Mask}, { "msk", Mask },
             { "monophonize", Monophonize }, { "mono", Monophonize },
+            { "quantize", Quantize }, { "qnt", Quantize },
             { "ratchet", Ratchet }, { "rat", Ratchet },
             { "relength", Relength }, { "relen", Relength },
             { "resize", Resize },

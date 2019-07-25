@@ -10,9 +10,6 @@ namespace Mutate4l.Commands.ToBeImplemented
 
     public class Magnetify
     {
-        // To be implemented...
-        /*public static ProcessResultArray<Clip> Apply(MagnetifyOptions options, params Clip[] clips)
-        {
-        }*/
+        // Will probably be replaced by Quantize. Currently not planned for v1.
     }
 }
