@@ -23,6 +23,7 @@ namespace Mutate4l.Cli
             { "arpeggiate", Arpeggiate }, { "arp", Arpeggiate },
             { "concat", Concat }, { "cat", Concat },
             { "constrain", Constrain }, { "const", Constrain },
+            { "crop", Crop },
             { "filter", Filter }, { "flt", Filter },
             { "il", Interleave }, { "interleave", Interleave },
             { "ilev", InterleaveEvent }, { "interleaveevent", InterleaveEvent },
@@ -37,6 +38,7 @@ namespace Mutate4l.Cli
             { "setlength", SetLength }, { "length", SetLength }, { "len", SetLength },
             { "setrhythm", SetRhythm }, { "rhythm", SetRhythm }, { "rm", SetRhythm },
             { "shuffle", Shuffle }, { "shfl", Shuffle },
+            { "skip", Skip }, { "skp", Skip },
             { "slice", Slice },
             { "take", Take },
             { "transpose", Transpose }, { "tran", Transpose }
@@ -44,18 +46,21 @@ namespace Mutate4l.Cli
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
         {
+            { "-amount", Amount }, { "amt", Amount },
             { "-autoscale", AutoScale }, { "-auto", AutoScale },
             { "-by", By },
             { "-chunkchords", ChunkChords }, { "-chunk", ChunkChords },
             { "-controlmax", ControlMax },
             { "-controlmin", ControlMin },
             { "-count", Count }, { "-cnt", Count },
+            { "-divisions", Divisions }, { "-div", Divisions },
             { "-duration", Duration }, { "-dur", Duration },
             { "-enablemask", EnableMask },
             { "-factor", Factor },
             { "-invert", Invert },
             { "-inv", Invert },
             { "-lengths", Lengths }, { "-lens", Lengths },
+            { "-magnetic", Magnetic }, { "-mag", Magnetic },
             { "-max", Max },
             { "-min", Min },
             { "-mode", Mode },
@@ -73,6 +78,7 @@ namespace Mutate4l.Cli
             { "-strength", Strength },
             { "-strict", Strict },
             { "-transposevalues", TransposeValues },
+            { "-threshold", Threshold }, { "-thres", Threshold },
             { "-velocitytostrength", VelocityToStrength }, { "-veltostr", VelocityToStrength },
             { "-window", Window },
             { "-with", With }

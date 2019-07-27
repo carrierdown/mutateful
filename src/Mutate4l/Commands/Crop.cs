@@ -5,17 +5,17 @@ using Mutate4l.Utility;
 namespace Mutate4l.Commands
 {
     // Extracts a region of the current clips, effectively cropping them. If two params, start - duration is used, otherwise 0 - duration.
-    public class TakeOptions
+    public class CropOptions
     {
         [OptionInfo(type: OptionType.Default)]
         public decimal[] Lengths { get; set; } = new decimal[] { 2 };
     }
 
-    public static class Take
+    public static class Crop
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
-            (var success, var msg) = OptionParser.TryParseOptions(command, out TakeOptions options);
+            (var success, var msg) = OptionParser.TryParseOptions(command, out CropOptions options);
             if (!success)
             {
                 return new ProcessResultArray<Clip>(msg);
@@ -23,7 +23,7 @@ namespace Mutate4l.Commands
             return Apply(options, clips);
         }
 
-        public static ProcessResultArray<Clip> Apply(TakeOptions options, params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(CropOptions options, params Clip[] clips)
         {
             var processedClips = new Clip[clips.Length];
             var start = options.Lengths.Length > 1 ? options.Lengths[0] : 0;

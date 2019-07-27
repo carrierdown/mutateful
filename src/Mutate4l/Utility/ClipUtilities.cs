@@ -129,6 +129,27 @@ namespace Mutate4l.Utility
                 }
             }
             return haystack[nearestIndex].Start;
+        }        
+        
+        public static decimal FindNearestNoteStartInDecimalSet(NoteEvent needle, decimal[] haystack)
+        {
+            var nearestIndex = 0;
+            decimal? nearestDelta = null;
+
+            for (int i = 0; i < haystack.Length; i++)
+            {
+                if (nearestDelta == null)
+                {
+                    nearestDelta = Math.Abs(needle.Start - haystack[i]);
+                }
+                decimal currentDelta = Math.Abs(needle.Start - haystack[i]);
+                if (currentDelta < nearestDelta)
+                {
+                    nearestDelta = currentDelta;
+                    nearestIndex = i;
+                }
+            }
+            return haystack[nearestIndex];
         }
 
         // Simple algorithm for finding nearest note in a list of note events

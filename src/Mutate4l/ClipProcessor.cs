@@ -60,6 +60,9 @@ namespace Mutate4l
                 case TokenType.Constrain:
                     resultContainer = Constrain.Apply(command, clips);
                     break;
+                case TokenType.Crop:
+                    resultContainer = Crop.Apply(command, clips);
+                    break;
                 case TokenType.Filter:
                     resultContainer = Filter.Apply(command, clips);
                     break;
@@ -84,6 +87,9 @@ namespace Mutate4l
                 case TokenType.Monophonize:
                     resultContainer = Monophonize.Apply(clips);
                     break;
+                case TokenType.Quantize:
+                    resultContainer = Quantize.Apply(command, clips);
+                    break;
                 case TokenType.Ratchet:
                     resultContainer = Ratchet.Apply(command, clips);
                     break;
@@ -107,9 +113,6 @@ namespace Mutate4l
                     break;
                 case TokenType.Slice:
                     resultContainer = Slice.Apply(command, clips);
-                    break;
-                case TokenType.Take:
-                    resultContainer = Take.Apply(command, clips);
                     break;
                 case TokenType.Transpose:
                     resultContainer = Transpose.Apply(command, clips);
