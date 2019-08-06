@@ -68,7 +68,7 @@ namespace Mutate4l.Cli
 
                     if (generateSvgDoc)
                     {
-                        GenerateSvgDoc(formula, clips, processedClip);
+                        GenerateSvgDoc(formula, clips, processedClip, 882, 300);
                     }
                     UdpConnector.SetClipAsBytesById(clipData);
                 }
@@ -77,20 +77,48 @@ namespace Mutate4l.Cli
             }
         }
 
-        private static void GenerateSvgDoc(string formula, List<Clip> clips, Clip resultClip)
+        private static void GenerateSvgDoc(string formula, List<Clip> clips, Clip resultClip, int width, int height)
         {
-            for (var i = 0; i < clips.Count; i++)
+            var padding = 10;
+            var resultClipWidth = width / 2 - padding;
+            var sourceClipWidth = resultClipWidth;
+            var sourceClipHeight = height / 2;
+
+            if (clips.Count > 2)
+            {
+                sourceClipWidth = resultClipWidth / 2;
+            }
+            
+            var output = $"<svg version=\"1.1\" baseProfile=\"full\" width=\"{width}\" height=\"{height}\" " +
+                         "xmlns=\"http://www.w3.org/2000/svg\">" + Environment.NewLine;
+            var x = 0;
+            var y = 0;
+            var highestNote = (clips.Max(c => c.Notes.Max(d => d.Pitch)) + 4) & 0x7F; // Leave 3 notes on each side
+            var lowestNote = (clips.Min(c => c.Notes.Min(d => d.Pitch)) - 3) & 0x7F; // as padding, and clamp to 0-127 range
+            var numNotes = highestNote - lowestNote + 1;
+            
+            for (var i = 0; i < Math.Min(4, clips.Count); i++)
             {
                 var clip = clips[i];
-                using (var file = File.AppendText($"Generated{DateTime.Now.Ticks}-clip0{i}.svg"))
+                output += SvgUtilities.ClipToSvg(clip, x, y, sourceClipWidth, sourceClipHeight, numNotes, lowestNote, highestNote);
+                y += sourceClipHeight;
+                if (i == 1)
                 {
-                    file.Write(SvgUtilities.SvgFromClip(clip, 0, 0, 370, 160));
+                    x += sourceClipWidth;
+                    y = 0;
                 }
             }
 
-            using (var file = File.AppendText($"Generated{DateTime.Now.Ticks}-result.svg"))
+            y = 0;
+            highestNote = (resultClip.Notes.Max(c => c.Pitch) + 4) & 0x7F; 
+            lowestNote = (resultClip.Notes.Min(c => c.Pitch) - 3) & 0x7F; 
+            numNotes = highestNote - lowestNote + 1;
+            output += SvgUtilities.ClipToSvg(resultClip, width - resultClipWidth, y, resultClipWidth, height, numNotes, lowestNote, highestNote);
+            output += "</svg>";
+
+            using (var file = File.AppendText($"Generated{DateTime.Now.Ticks}-clip.svg"))
             {
-                file.Write(SvgUtilities.SvgFromClip(resultClip, 0, 0, 370, 160));
+                file.Write(output);
             }
         }
 
