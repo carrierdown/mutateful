@@ -22,6 +22,9 @@ namespace Mutate4l.Core
         public decimal Length { get; set; }
         public bool IsLooping { get; set; }
         public ClipReference ClipReference { get; set; }
+      
+        public string RawClipReference { get; set; }
+        
         public decimal EndDelta
         {
             get { return Length - Math.Clamp(Notes[Count - 1].Start, 0, Length) + Notes[0].Start; }

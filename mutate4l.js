@@ -635,7 +635,6 @@ function expandFormulaAsBytes(formula, ownId) {
     }
     var parts = formula.split(" "),
         clipDataBuffer = [],
-        clipData,
         transformedPart,
         numberOfClips = 0, 
         y,
@@ -668,7 +667,7 @@ function expandFormulaAsBytes(formula, ownId) {
             for (var z = 0; z < clipData.length; z++) {
                 clipDataBuffer[clipDataBuffer.length] = clipData[z];
             }
-            transformedPart = "[" + numberOfClips + "]" + (i < parts.length - 1 ? " " : "");
+            transformedPart = "[<" + part + ">" + numberOfClips + "]" + (i < parts.length - 1 ? " " : "");
             numberOfClips++;
         } else {
             transformedPart = part + (i < parts.length - 1 ? " " : "");
