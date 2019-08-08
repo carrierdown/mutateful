@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Mutate4l.Core;
@@ -19,7 +21,7 @@ namespace Mutate4l.Utility
         
         private static int PianoRollWidth { get; } = 30;
 
-        public static string SvgFromClip(Clip clip, int x, int y, int width, int height)
+        /*public static string SvgFromClip(Clip clip, int x, int y, int width, int height)
         {
             var highestNote = Math.Clamp(clip.Notes.Max(c => c.Pitch) + 4, 0, 127); // Leave 3 notes on each side
             var lowestNote = Math.Clamp(clip.Notes.Min(c => c.Pitch) - 3, 0, 127); // as padding
@@ -31,6 +33,51 @@ namespace Mutate4l.Utility
             output += ClipToSvg(clip, x, y, width, height, numNotes, lowestNote, highestNote);
             output += "</svg>";
             return output;
+        }*/
+
+        public static void GenerateSvgDoc(string formula, List<Clip> clips, Clip resultClip, int width, int height)
+        {
+            var padding = 8;
+            var resultClipWidth = (width - padding) / 2;
+            var sourceClipWidth = resultClipWidth;
+            var sourceClipHeight = (height - padding) / 2;
+
+            if (clips.Count > 2)
+            {
+                sourceClipWidth = resultClipWidth / 2;
+            }
+
+            var output = new StringBuilder($"<svg version=\"1.1\" baseProfile=\"full\" width=\"{width}\" height=\"{height}\" " +
+                                           "xmlns=\"http://www.w3.org/2000/svg\">" + Environment.NewLine);
+            var x = 0;
+            var y = 0;
+            var highestNote = (clips.Max(c => c.Notes.Max(d => d.Pitch)) + 4) & 0x7F; // Leave 3 notes on each side
+            var lowestNote = (clips.Min(c => c.Notes.Min(d => d.Pitch)) - 3) & 0x7F; // as padding, and clamp to 0-127 range
+            var numNotes = highestNote - lowestNote + 1;
+            
+            for (var i = 0; i < Math.Min(4, clips.Count); i++)
+            {
+                var clip = clips[i];
+                output.Append(ClipToSvg(clip, x, y, sourceClipWidth, sourceClipHeight, numNotes, lowestNote, highestNote));
+                y += sourceClipHeight + padding;
+                if (i == 1)
+                {
+                    x += sourceClipWidth + padding;
+                    y = 0;
+                }
+            }
+
+            y = 0;
+            highestNote = (resultClip.Notes.Max(c => c.Pitch) + 4) & 0x7F; 
+            lowestNote = (resultClip.Notes.Min(c => c.Pitch) - 3) & 0x7F; 
+            numNotes = highestNote - lowestNote + 1;
+            output.Append(ClipToSvg(resultClip, width - resultClipWidth, y, resultClipWidth, height, numNotes, lowestNote, highestNote));
+            output.Append("</svg>");
+
+            using (var file = File.AppendText($"Generated{DateTime.Now.Ticks}-clip.svg"))
+            {
+                file.Write(output.ToString());
+            }
         }
 
         public static string ClipToSvg(Clip clip, int x, int y, int width, int height, int numNotes, int lowestNote, int highestNote)
@@ -75,13 +122,16 @@ namespace Mutate4l.Utility
             {
                 if (note.Pitch >= lowestNote && note.Pitch <= highestNote)
                 {
-                    output.Append("<rect style=\"fill:{NoteFill};stroke:{NoteStroke};stroke-width:0.5;stroke-miterlimit:4\" " +
-                              "x=\"{Math.Round(x + PianoRollWidth + (note.Start * xDelta))}\" y=\"{Math.Round(y + (highestNote - note.Pitch) * yDelta)}\" " +
-                              "width=\"{Math.Round(note.Duration * xDelta)}\" height=\"{Math.Round(yDelta)}\" />" + Environment.NewLine);
+                    output.Append($"<rect style=\"fill:{NoteFill};stroke:{NoteStroke};stroke-width:0.5;stroke-miterlimit:4\" " +
+                              $"x=\"{Math.Round(x + PianoRollWidth + (note.Start * xDelta))}\" y=\"{Math.Round(y + (highestNote - note.Pitch) * yDelta)}\" " +
+                              $"width=\"{Math.Round(note.Duration * xDelta)}\" height=\"{Math.Round(yDelta)}\" />" + Environment.NewLine);
                 }
             }
 
-            output.Append($"<text x=\"185\" y=\"140\" fill=\"black\" font-family=\"Consolas\" font-size=\"16\">{clip.RawClipReference}</text>");
+            if (!string.IsNullOrEmpty(clip.RawClipReference))
+            {
+                output.Append($"<text x=\"{x + width - (width / 8)}\" y=\"{y + height - (height / 8)}\" fill=\"black\" font-family=\"Consolas\" font-size=\"16\">{clip.RawClipReference.ToUpper()}</text>");
+            }
 
             return output.ToString();
         }
