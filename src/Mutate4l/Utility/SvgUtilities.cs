@@ -18,6 +18,9 @@ namespace Mutate4l.Utility
         private const string PianoKeyWhiteFill = "#ffffff";
         private const string PianoKeyBlackFill = "#000000";
         private const string PianoKeyStroke = "#8e8e8e";
+        private const string FontFamily = "Helvetica, Consolas, Arial, Sans";
+        private const int HeaderHeight = 20;
+        private const int TextBaselineOffset = 4;
         
         private static int PianoRollWidth { get; } = 30;
 
@@ -37,10 +40,11 @@ namespace Mutate4l.Utility
 
         public static void GenerateSvgDoc(string formula, List<Clip> clips, Clip resultClip, int width, int height)
         {
+            var contentHeight = height - HeaderHeight;
             var padding = 8;
             var resultClipWidth = (width - padding) / 2;
             var sourceClipWidth = resultClipWidth;
-            var sourceClipHeight = (height - padding) / 2;
+            var sourceClipHeight = (contentHeight - padding) / 2;
 
             if (clips.Count > 2)
             {
@@ -49,8 +53,12 @@ namespace Mutate4l.Utility
 
             var output = new StringBuilder($"<svg version=\"1.1\" baseProfile=\"full\" width=\"{width}\" height=\"{height}\" " +
                                            "xmlns=\"http://www.w3.org/2000/svg\">" + Environment.NewLine);
+
+            output.Append($"<text x=\"{0}\" y=\"{HeaderHeight - TextBaselineOffset}\" fill=\"black\" font-family=\"{FontFamily}\" font-size=\"16\">Source clips</text>" +
+                          $"<text x=\"{width - resultClipWidth}\" y=\"{HeaderHeight - TextBaselineOffset}\" fill=\"black\" font-family=\"{FontFamily}\" font-size=\"16\">Result</text>");
+            
             var x = 0;
-            var y = 0;
+            var y = HeaderHeight;
             var highestNote = (clips.Max(c => c.Notes.Max(d => d.Pitch)) + 4) & 0x7F; // Leave 3 notes on each side
             var lowestNote = (clips.Min(c => c.Notes.Min(d => d.Pitch)) - 3) & 0x7F; // as padding, and clamp to 0-127 range
             var numNotes = highestNote - lowestNote + 1;
@@ -63,15 +71,15 @@ namespace Mutate4l.Utility
                 if (i == 1)
                 {
                     x += sourceClipWidth + padding;
-                    y = 0;
+                    y = HeaderHeight;
                 }
             }
 
-            y = 0;
+            y = HeaderHeight;
             highestNote = (resultClip.Notes.Max(c => c.Pitch) + 4) & 0x7F; 
             lowestNote = (resultClip.Notes.Min(c => c.Pitch) - 3) & 0x7F; 
             numNotes = highestNote - lowestNote + 1;
-            output.Append(ClipToSvg(resultClip, width - resultClipWidth, y, resultClipWidth, height, numNotes, lowestNote, highestNote));
+            output.Append(ClipToSvg(resultClip, width - resultClipWidth, y, resultClipWidth, contentHeight, numNotes, lowestNote, highestNote));
             output.Append("</svg>");
 
             using (var file = File.AppendText($"Generated{DateTime.Now.Ticks}-clip.svg"))
@@ -130,7 +138,7 @@ namespace Mutate4l.Utility
 
             if (!string.IsNullOrEmpty(clip.RawClipReference))
             {
-                output.Append($"<text x=\"{x + width - (width / 8)}\" y=\"{y + height - (height / 8)}\" fill=\"black\" font-family=\"Consolas\" font-size=\"16\">{clip.RawClipReference.ToUpper()}</text>");
+                output.Append($"<text x=\"{x + width - Math.Round(width / 12f)}\" y=\"{y + height - Math.Round(height / 18f)}\" fill=\"black\" font-family=\"{FontFamily}\" font-size=\"16\">{clip.RawClipReference.ToUpper()}</text>");
             }
 
             return output.ToString();
