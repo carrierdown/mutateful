@@ -22,7 +22,7 @@ namespace Mutate4l.Cli
         {
             { "arpeggiate", Arpeggiate }, { "arp", Arpeggiate },
             { "concat", Concat }, { "cat", Concat },
-            { "constrain", Constrain }, { "const", Constrain },
+            { "scale", Scale }, { "constrain", Scale },
             { "crop", Crop },
             { "filter", Filter }, { "flt", Filter },
             { "il", Interleave }, { "interleave", Interleave },

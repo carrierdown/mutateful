@@ -5,7 +5,7 @@ using Mutate4l.Cli;
 
 namespace Mutate4l.Commands
 {
-    public class ConstrainOptions
+    public class ScaleOptions
     {
         public Clip By { get; set; }
 
@@ -16,11 +16,11 @@ namespace Mutate4l.Commands
 
     // constrain: first clip timing and/or pitch is replicated on all following clips. Position is optionally scaled with the Strength parameter.
     // rename to scale?
-    public static class Constrain
+    public static class Scale
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
-            var (success, msg) = OptionParser.TryParseOptions(command, out ConstrainOptions options);
+            var (success, msg) = OptionParser.TryParseOptions(command, out ScaleOptions options);
             if (!success)
             {
                 return new ProcessResultArray<Clip>(msg);
@@ -28,7 +28,7 @@ namespace Mutate4l.Commands
             return Apply(options, clips);
         }
 
-        public static ProcessResultArray<Clip> Apply(ConstrainOptions options, params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(ScaleOptions options, params Clip[] clips)
         {
             if (options.By != null)
             {

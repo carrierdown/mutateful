@@ -57,9 +57,6 @@ namespace Mutate4l
                 case TokenType.Concat:
                     resultContainer = Concat.Apply(clips);
                     break;
-                case TokenType.Constrain:
-                    resultContainer = Constrain.Apply(command, clips);
-                    break;
                 case TokenType.Crop:
                     resultContainer = Crop.Apply(command, clips);
                     break;
@@ -99,6 +96,9 @@ namespace Mutate4l
                 case TokenType.Resize:
                     resultContainer = Resize.Apply(command, clips);
                     break;
+                case TokenType.Scale:
+                    resultContainer = Scale.Apply(command, clips);
+                    break;
                 case TokenType.Scan:
                     resultContainer = Scan.Apply(command, clips);
                     break;
@@ -118,7 +118,6 @@ namespace Mutate4l
                     resultContainer = Transpose.Apply(command, clips);
                     break;
                 default:
-                    // todo: error here
                     return new ProcessResultArray<Clip>($"Unsupported command {command.Id}");
             }
             return resultContainer;
