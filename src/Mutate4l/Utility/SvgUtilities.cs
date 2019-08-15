@@ -21,22 +21,7 @@ namespace Mutate4l.Utility
         private const string FontFamily = "Helvetica, Consolas, Arial, Sans";
         private const int HeaderHeight = 20;
         private const int TextBaselineOffset = 4;
-        
-        private static int PianoRollWidth { get; } = 30;
-
-        /*public static string SvgFromClip(Clip clip, int x, int y, int width, int height)
-        {
-            var highestNote = Math.Clamp(clip.Notes.Max(c => c.Pitch) + 4, 0, 127); // Leave 3 notes on each side
-            var lowestNote = Math.Clamp(clip.Notes.Min(c => c.Pitch) - 3, 0, 127); // as padding
-            var numNotes = highestNote - lowestNote + 1;
-
-            var output = "<svg version=\"1.1\" baseProfile=\"full\" width=\"{width}\" height=\"{height}\" " +
-                         "xmlns=\"http://www.w3.org/2000/svg\">" + Environment.NewLine;
-
-            output += ClipToSvg(clip, x, y, width, height, numNotes, lowestNote, highestNote);
-            output += "</svg>";
-            return output;
-        }*/
+        private const int PianoRollWidth = 30;
 
         public static void GenerateSvgDoc(string formula, List<Clip> clips, Clip resultClip, int width, int height)
         {
