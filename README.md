@@ -10,9 +10,12 @@
 >
 > &mdash; Matt Black, co-founder of Ninja Tune & Coldcut.
 
-### See it in action
+## Concept
+`mutate4l` reimagines Ableton Live's session view as a spreadsheet-like live coding setup. You add formulas to dynamically shuffle, arpeggiate, constrain scale, retrigger, and otherwise transform clips in myriad ways. Formulas operate on other clips (and in some cases input specified textually) to produce new clips. Unlike most experimental sequencers, `mutate4l` leverages Live's built-in sequencing functionality, allowing you to use and existing midi-based clip as a source of fresh inspiration.
 
-<table cellpadding="0" cellspacing="0" style="border:none;"><tr><td><a href="https://www.youtube.com/watch?v=YNI9ZxhSkWQ"><img alt="mutate4l demo video 1" src="https://img.youtube.com/vi/YNI9ZxhSkWQ/0.jpg" width="250"><p>Demo #1: concat, constrain, transpose</p></a></td><td><a href="https://www.youtube.com/watch?v=bGMBDap1-ko"><img alt="mutate4l demo video 2" src="https://img.youtube.com/vi/bGMBDap1-ko/0.jpg" width="250"><p>Demo #2: ratchet, shuffle, interleave</p></a></td></tr></table>
+- TODO: Insert annotated Live screenshot showing the anatomy of a command
+
+Formulas are composed of one or more commands operating on one or more clips. Most commands have various options that can be set depending on your specific needs. They range from simple things like filtering out all notes with a length shorter than a given interval, to more esoteric things like arpeggiating one clip based on another, or creating glitchy beats by adding ratcheting/retrigging to specific notes.
 
 ## Examples
 
@@ -24,12 +27,13 @@ This example shows the simplest possible use of the interleave command, which ca
 
 ![Alt text](./assets/Generated637012367962797269-clip.svg)  
 
-## Concept
-`mutate4l` reimagines Ableton Live's session view as a spreadsheet, enabling you to transform and create new clips dynamically whenever a source clip is changed. It can be compared to a lightweight live coding setup right inside Ableton Live. You can add formulas to shuffle, arpeggiate, constrain, scale, retrigger, and otherwise transform clips in myriad ways. Unlike most experimental sequencers however, `mutate4l` leverages Live's own clip sequencer and thus allows you to use any existing midi clip as a source of new inspiration. 
+## See it in action
 
-Formulas are composed of one or more commands operating on one or more clips. Most commands have various options that can be set depending on your specific needs. They range from simple things like filtering out all notes with a length shorter than a given interval, to more esoteric things like arpeggiating one clip based on another, or even fractalizing a clip by arpeggiating it with itself.
+<table cellpadding="0" cellspacing="0" style="border:none;"><tr><td><a href="https://www.youtube.com/watch?v=YNI9ZxhSkWQ"><img alt="mutate4l demo video 1" src="https://img.youtube.com/vi/YNI9ZxhSkWQ/0.jpg" width="250"><p>Demo #1: concat, constrain, transpose</p></a></td><td><a href="https://www.youtube.com/watch?v=bGMBDap1-ko"><img alt="mutate4l demo video 2" src="https://img.youtube.com/vi/bGMBDap1-ko/0.jpg" width="250"><p>Demo #2: ratchet, shuffle, interleave</p></a></td></tr></table>
 
-The easiest way to understand what `mutate4l` does is by comparing it to a traditional spreadsheet. Let's say you have two numbers that you'd like to multiply. You put one number in cell `A1`, another in `A2`, and in `A3` you enter the following (very simple) formula: `=a1 * a2`. Cell `A3` will then contain the result of this operation, and will update automatically whenever `A1` or `A2` changes. 
+## Quick introduction
+
+The easiest way to understand what `mutate4l` does is by comparing it to a traditional spreadsheet. Let's say you have two numbers that you'd like to multiply. You put one number in cell `A1`, another in `A2`, and in `A3` you enter the following (very simple) formula: `=A1 * A2`. Cell `A3` will then contain the result of this operation, and will update automatically whenever `A1` or `A2` changes. 
 
 `mutate4l` works the same way, only with more musically interesting commands. For instance, you could shuffle the contents of clip `A1` using the contents of another clip, e.g. `A2`. The pitch values of the various notes in clip `A2` would then be used to shuffle the order of notes in `A1`. Similar to the example above, we would like the result to be inserted into clip `A3`, but instead of using a spreadsheet command we will use the following `mutate4l` formula: `=A1 shuffle -by A2`. In this example, `A1` is a *source clip* (i.e. the clip that will be transformed), and `A2` is the *control clip* (i.e. the clip that controls the transformation). The latter could be omitted, in which case clip `A1` would be shuffled using itself as the control clip. The formula for this would simply be `=A1 shuffle`. In the more technical documentation below, clip locations like `A1`, `A2` and so on are referred to as a `ClipReference`.
 
