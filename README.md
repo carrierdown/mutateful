@@ -14,6 +14,14 @@
 
 <table cellpadding="0" cellspacing="0" style="border:none;"><tr><td><a href="https://www.youtube.com/watch?v=YNI9ZxhSkWQ"><img alt="mutate4l demo video 1" src="https://img.youtube.com/vi/YNI9ZxhSkWQ/0.jpg" width="250"><p>Demo #1: concat, constrain, transpose</p></a></td><td><a href="https://www.youtube.com/watch?v=bGMBDap1-ko"><img alt="mutate4l demo video 2" src="https://img.youtube.com/vi/bGMBDap1-ko/0.jpg" width="250"><p>Demo #2: ratchet, shuffle, interleave</p></a></td></tr></table>
 
+## Examples
+
+### Interleaving clips together
+This example shows the simplest possible use of the interleave command, which can interleave two or more clips in various ways.
+
+#### Command: `=b1 c1 interleave -mode event`
+##### Can be shortened to `=b1 c1 ilev`
+
 ![Alt text](./assets/Generated637012367962797269-clip.svg)  
 
 ## Concept
