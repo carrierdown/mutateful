@@ -111,8 +111,14 @@ namespace Mutate4l
                 case TokenType.Shuffle:
                     resultContainer = Shuffle.Apply(command, clips);
                     break;
+                case TokenType.Skip:
+                    resultContainer = Skip.Apply(command, clips);
+                    break;
                 case TokenType.Slice:
                     resultContainer = Slice.Apply(command, clips);
+                    break;
+                case TokenType.Take:
+                    resultContainer = Take.Apply(command, clips);
                     break;
                 case TokenType.Transpose:
                     resultContainer = Transpose.Apply(command, clips);
