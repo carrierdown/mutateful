@@ -1,3 +1,4 @@
+using System;
 using Mutate4l.Cli;
 using Mutate4l.Core;
 
@@ -26,6 +27,14 @@ namespace Mutate4l.Commands
         {
             var resultClips = new Clip[clips.Length];
 
+            // Normalize take values (typical input range: 1 - N, while 0 - N is used internally)
+            for (var ix = 0; ix < options.TakeCounts.Length; ix++)
+            {
+                ref var takeCount = ref options.TakeCounts[ix];
+                if (takeCount < 1) takeCount = 1;
+                takeCount--;
+            }
+
             var i = 0;
             foreach (var clip in clips)
             {
@@ -44,15 +53,13 @@ namespace Mutate4l.Commands
                         var note = new NoteEvent(clip.Notes[noteIx]) {Start = currentPos};
                         currentPos += clip.DurationUntilNextNote(noteIx);
                         resultClip.Add(note);
-                        noteIx++;
-                        currentTake = options.TakeCounts[takeIx % options.TakeCounts.Length];
+                        currentTake = options.TakeCounts[++takeIx % options.TakeCounts.Length];
                     }
                     else
                     {
                         currentTake--;
                     }
                     noteIx++;
-                    takeIx++;
                 }
                 resultClips[i] = resultClip;
                 i++;
