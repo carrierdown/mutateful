@@ -8,7 +8,7 @@ namespace Mutate4l.Commands
         [OptionInfo(type: OptionType.Default)]
         public int[] SkipCounts { get; set; } = {2};
     }
-    
+        
     public static class Skip
     {
         // Create a new clip based on skipping every # note from another clip
@@ -44,15 +44,13 @@ namespace Mutate4l.Commands
                         var note = new NoteEvent(clip.Notes[noteIx]) {Start = currentPos};
                         currentPos += clip.DurationUntilNextNote(noteIx);
                         resultClip.Add(note);
-                        noteIx++;
+                        currentSkip--;
                     }
                     else
                     {
-                        currentSkip = options.SkipCounts[skipIx % options.SkipCounts.Length];
+                        currentSkip = options.SkipCounts[++skipIx % options.SkipCounts.Length];
                     }
                     noteIx++;
-                    currentSkip--;
-                    skipIx++;
                 }
                 resultClips[i] = resultClip;
                 i++;
