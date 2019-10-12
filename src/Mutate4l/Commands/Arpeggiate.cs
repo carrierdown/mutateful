@@ -12,13 +12,14 @@ namespace Mutate4l.Commands
         [OptionInfo(min: 1, max: 10)]
         public int Rescale { get; set; } = 2; // todo: make it a percentage of the arpclip instead? With possibility of scaling the number of events further based on the duration of the current event compared to the longest event in the clip.
 
-        public bool RemoveOffset = true;
+        public bool RemoveOffset { get; set; } = true;
 
         public Clip By { get; set; }
 
         // Could add shaping here as well - easein/out etc..
     }
 
+    // # desc: Arpeggiates the given clip using another clip, or itself.
     public static class Arpeggiate
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)

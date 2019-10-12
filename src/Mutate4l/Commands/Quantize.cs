@@ -21,7 +21,7 @@ namespace Mutate4l.Commands
         public Clip By { get; set; } // for quantizing based on another clip (possibly very similar to constrain -start?)
     }
     
-    public class Quantize
+    public static class Quantize
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
