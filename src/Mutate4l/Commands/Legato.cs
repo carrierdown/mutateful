@@ -2,7 +2,7 @@ using Mutate4l.Core;
 
 namespace Mutate4l.Commands
 {
-    public class Legato
+    public static class Legato
     {
         public static ProcessResultArray<Clip> Apply(params Clip[] clips)
         {
