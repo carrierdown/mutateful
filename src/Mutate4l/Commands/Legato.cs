@@ -4,6 +4,7 @@ namespace Mutate4l.Commands
 {
     public static class Legato
     {
+        // # desc: Removes silence between notes. Basically the same as the built-in legato function in Live, but often useful in the context of a mutate4l formula as well.
         public static ProcessResultArray<Clip> Apply(params Clip[] clips)
         {
             var resultClips = new Clip[clips.Length];

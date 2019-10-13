@@ -14,13 +14,14 @@ namespace Mutate4l.Commands
         [OptionInfo(type: OptionType.Default)]
         public decimal[] Divisions { get; set; } = { 0.25m };
 
-        public decimal Threshold { get; set; } = 0.125m; // to be added
+//        public decimal Threshold { get; set; } = 0.125m; // to be added
 
-        public decimal Magnetic { get; set; } = 0; // to be added
+//        public decimal Magnetic { get; set; } = 0; // to be added
         
         public Clip By { get; set; } // for quantizing based on another clip (possibly very similar to constrain -start?)
     }
     
+    // # desc: Quantizes a clip by the specified amount against a regular or irregular set of divisions, or even against the timings of another clip. 
     public static class Quantize
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)

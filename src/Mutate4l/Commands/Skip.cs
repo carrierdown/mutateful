@@ -9,9 +9,9 @@ namespace Mutate4l.Commands
         public int[] SkipCounts { get; set; } = {2};
     }
         
+    // # desc: Creates a new clip by skipping every # note from another clip. If more than one skip value is specified, they are cycled through.
     public static class Skip
     {
-        // Create a new clip based on skipping every # note from another clip
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
             var (success, msg) = OptionParser.TryParseOptions(command, out SkipOptions options);

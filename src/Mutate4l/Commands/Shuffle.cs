@@ -15,6 +15,7 @@ namespace Mutate4l.Commands
         public int[] ShuffleValues { get; set; } = new int[0];
     }
 
+    // # desc: Shuffles the order of notes by a list of numbers of arbitrary length, or by another clip. When another clip is specified, the relative pitch of each note is used to determine the shuffle order.
     public static class Shuffle
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)

@@ -4,6 +4,7 @@ using Mutate4l.Core;
 
 namespace Mutate4l.Commands
 {
+    // # desc: Makes the clip monophonic by removing any overlapping notes. Lower notes have precedence over higher notes.
     public static class Monophonize
     {
         // TODO: Add option to cut overlapping events, so that more of the original clip is preserved

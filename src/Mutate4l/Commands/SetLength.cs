@@ -9,7 +9,7 @@ namespace Mutate4l.Commands
         public decimal[] Lengths { get; set; } = {0.25m};
     }
     
-    // Simple command to set length of all notes to specified value(s). If more values are specified, they are cycled through.
+    // # desc: Sets the length of all notes to the specified value(s). When more values are specified, they are cycled through.
     public static class SetLength
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)

@@ -11,6 +11,7 @@ namespace Mutate4l.Commands
         public decimal[] Lengths { get; set; } = new decimal[] { 2 };
     }
 
+    // # desc: Crops a clip to the desired length, or within the desired region.
     public static class Crop
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
