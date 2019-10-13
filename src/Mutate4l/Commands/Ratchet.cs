@@ -42,6 +42,7 @@ namespace Mutate4l.Commands
         public int[] RatchetValues { get; set; } = new int[0];
     }
 
+    // # desc: Creates retriggers/ratchets in the current clip, based on a sequence of passed in values or another clip. The ratchets produced can be scaled and shaped in various ways.
     public static class Ratchet
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)

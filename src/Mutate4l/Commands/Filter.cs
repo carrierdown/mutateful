@@ -13,6 +13,7 @@ namespace Mutate4l.Commands
         public bool Invert { get; set; }
     }
 
+    // # desc: Filters out notes shorter than the length specified (default 1/64). If -invert is specified, notes longer than the specified length are removed.
     public static class Filter
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
@@ -24,7 +25,6 @@ namespace Mutate4l.Commands
             }
             return Apply(options, clips);
         }
-
 
         public static ProcessResultArray<Clip> Apply(FilterOptions options, params Clip[] clips)
         {

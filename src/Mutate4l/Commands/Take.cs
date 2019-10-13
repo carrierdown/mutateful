@@ -10,9 +10,9 @@ namespace Mutate4l.Commands
         public int[] TakeCounts { get; set; } = {2};
     }
     
+    // # desc: Creates a new clip by taking every # note from another clip. If more than one skip value is specified, they are cycled through.
     public static class Take
     {
-        // Create a new clip based on taking every # note from another clip
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
             var (success, msg) = OptionParser.TryParseOptions(command, out TakeOptions options);

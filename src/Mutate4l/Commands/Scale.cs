@@ -14,6 +14,7 @@ namespace Mutate4l.Commands
         // add option to constrain to pitch based on position, so that events occuring for instance during a chord are constrained to this only. If no events are available in the given span, the entire clip is used instead.
     }
 
+    // # desc: Uses a clip passed in via the -by parameter as a scale to which the current clip is made to conform. If -strict is specified, notes are made to follow both the current pitch and octave of the closest matching note. 
     // constrain: first clip timing and/or pitch is replicated on all following clips. Position is optionally scaled with the Strength parameter.
     // rename to scale?
     public static class Scale

@@ -13,6 +13,7 @@ namespace Mutate4l.Commands
                                      // the clip, effectively inversing the passed in clip.
     }
     
+    // # desc: Creates a masking clip which is used to remove or shorten notes not overlapping with the mask clip. If no -by clip is specified, a sustained note is used instead, effectively inversing the clip rhythmically.  
     public static class Mask
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)

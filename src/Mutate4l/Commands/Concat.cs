@@ -6,6 +6,7 @@ namespace Mutate4l.Commands
 {
     public static class Concat
     {
+        // # desc: Concatenates two or more clips together.
         public static ProcessResultArray<Clip> Apply(params Clip[] clips)
         {
             Clip resultClip = new Clip(clips.Select(c => c.Length).Sum(), true);

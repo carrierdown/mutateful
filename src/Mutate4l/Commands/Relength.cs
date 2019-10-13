@@ -9,6 +9,7 @@ namespace Mutate4l.Commands
         public decimal Factor { get; set; } = 1.0m;
     }
 
+    // # desc: Changes the length of all notes in a clip by multiplying their lengths with the specified factor.
     public static class Relength
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)

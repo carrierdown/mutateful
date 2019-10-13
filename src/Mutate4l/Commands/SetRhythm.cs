@@ -11,9 +11,9 @@ namespace Mutate4l.Commands
         public Clip By { get; set; }
     }
     
+    // # desc: Retains pitch and velocity from the current clip while changing the timing and duration to match the clip specified in the -by parameter.
     public static class SetRhythm
     {
-        // Combines two clips by taking the timing and durations from one clip and the pitch/velocity from another
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
             var (success, msg) = OptionParser.TryParseOptions(command, out SetRhythmOptions options);
