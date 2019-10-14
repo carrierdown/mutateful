@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace DocGeneration
@@ -22,6 +23,15 @@ namespace DocGeneration
             var srcFiles = Directory.EnumerateFiles(Path.Join(Environment.CurrentDirectory, @"..\..\..\..\Mutate4l\Commands\"));
             var commandReference = new StringBuilder();
 
+            foreach (var srcFile in srcFiles)
+            {
+                var (enumName, enumValues) = ExtractEnumData(srcFile);
+                if (enumName.Length > 0)
+                {
+                    ParameterTypes.Add(enumName, string.Join("&#124;", enumValues));
+                }
+            }
+            
             foreach (var srcFile in srcFiles)
             {
                 commandReference.Append(GetCommandReferenceRow(File.ReadAllLines(srcFile)));
@@ -91,10 +101,22 @@ namespace DocGeneration
             var formattedOptions = new List<string>();
             foreach (var key in options.Keys)
             {
+                var prepend = false;
                 var (type, info) = options[key];
-                formattedOptions.Add(FormatOptionName(key));
+                if (info.Contains("OptionType.Default"))
+                {
+                    prepend = true;
+                }
+                else
+                {
+                    formattedOptions.Add(FormatOptionName(key));
+                }
                 var formattedType = FormatTypeDescription(type);
-                if (formattedType.Length > 0) formattedOptions.Add(formattedType);
+                if (formattedType.Length > 0)
+                {
+                    if (prepend) formattedOptions.Insert(0, formattedType);
+                    else formattedOptions.Add(formattedType);
+                }
             }
 
             output
@@ -105,11 +127,50 @@ namespace DocGeneration
             return output.ToString();
         }
 
+        private static (string, List<string>) ExtractEnumData(string filename)
+        {
+            var enumName = "";
+            var enumValues = new List<string>();
+            var lines = File.ReadAllLines(filename);
+
+            var inEnumBlock = false;
+            foreach (var line in lines)
+            {
+                if (inEnumBlock)
+                {
+                    if (line.Trim() == "}")
+                    {
+                        break;
+                    }
+
+                    if (!(line.Trim() == "{" || line.Trim() == "}" || line.Trim().StartsWith("/")))
+                    {
+                        var cleanedLine = line.Trim(' ', ',');
+                        if (line.Contains("/"))
+                        {
+                            cleanedLine = line.Substring(0, line.IndexOf('/')).Trim(' ', ',');
+                        }
+                        enumValues.Add(cleanedLine);
+                    }
+                }
+                if (line.Contains(" enum "))
+                {
+                    var parts = line.Split(' ').ToArray();
+                    
+                    if (parts.Length > 3) enumName = parts[Array.IndexOf(parts, "enum") + 1];
+                    inEnumBlock = true;
+                }
+                
+            }
+
+            return (enumName, enumValues);
+        }
+        
         private static bool IsComment(string line)
         {
             var trimmedLine = line.Trim();
             var slashIx = trimmedLine.IndexOf('/');
-            return slashIx >= 0 && trimmedLine[slashIx + 1] == '/';
+            return slashIx == 0 && trimmedLine[slashIx + 1] == '/';
         }
         
         private static string FormatOptionName(string option)
