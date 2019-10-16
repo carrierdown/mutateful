@@ -14,7 +14,7 @@ namespace Mutate4l.Commands
 
     public class TransposeOptions
     {
-        public Clip By { get; set; } = new Clip(4, true); // Allows syntax like a1 transpose -by a2 -mode relative. This syntax makes it much clearer which clip is being affected, and which is used as the source.
+        public Clip By { get; set; } // Allows syntax like a1 transpose -by a2 -mode relative. This syntax makes it much clearer which clip is being affected, and which is used as the source.
 
         public TransposeMode Mode { get; set; } = TransposeMode.Absolute;
 
@@ -34,7 +34,7 @@ namespace Mutate4l.Commands
 
         public static ProcessResultArray<Clip> Apply(TransposeOptions options, params Clip[] clips)
         {
-            if (options.By.Count == 0 && options.TransposeValues.Length == 0)
+            if (options.By?.Count == 0 && options.TransposeValues.Length == 0)
             {
                 return new ProcessResultArray<Clip>("No -by clip or transpose values specified.");
             }

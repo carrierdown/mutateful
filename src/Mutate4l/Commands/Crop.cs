@@ -8,7 +8,7 @@ namespace Mutate4l.Commands
     public class CropOptions
     {
         [OptionInfo(type: OptionType.Default)]
-        public decimal[] Lengths { get; set; } = new decimal[] { 2 };
+        public decimal[] Lengths { get; set; } = { 2 };
     }
 
     // # desc: Crops a clip to the desired length, or within the desired region.

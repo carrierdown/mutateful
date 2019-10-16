@@ -1,14 +1,14 @@
-﻿using Mutate4l.Core;
-using Mutate4l.Utility;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Mutate4l.Cli;
+using Mutate4l.Core;
+using Mutate4l.Utility;
 
 namespace Mutate4l.Commands
 {
     public class SliceOptions
     {
         [OptionInfo(type: OptionType.Default)]
-        public decimal[] Lengths { get; set; } = new decimal[] { .25m };
+        public decimal[] Lengths { get; set; } = { 1/16m };
     }
 
     // # desc: Slices a clip (i.e. cutting any notes) at a regular or irregular set of divisions.

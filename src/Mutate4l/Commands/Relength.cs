@@ -6,7 +6,7 @@ namespace Mutate4l.Commands
     public class RelengthOptions
     {
         [OptionInfo(type: OptionType.Default, noImplicitCast: true)]
-        public decimal Factor { get; set; } = 1.0m;
+        public decimal/*ActualDecimal*/ Factor { get; set; } = 1.0m;
     }
 
     // # desc: Changes the length of all notes in a clip by multiplying their lengths with the specified factor.

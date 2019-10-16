@@ -8,7 +8,7 @@ namespace Mutate4l.Commands
     public class FilterOptions
     {
         [OptionInfo(OptionType.Default)]
-        public decimal Duration { get; set; } = 1 / 64m;
+        public decimal Duration { get; set; } = 1/64m;
 
         public bool Invert { get; set; }
     }
