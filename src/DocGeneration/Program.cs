@@ -154,12 +154,18 @@ namespace DocGeneration
                 if (formattedType.Length > 0)
                 {
                     if (prepend) formattedOptions.Insert(0, formattedType);
-                    else formattedOptions.Add(formattedType);
+                    else
+                    {
+                        if (formattedOptions.Count > 0)
+                            formattedOptions[formattedOptions.Count - 1] += " " + formattedType;
+                        else 
+                            formattedOptions.Add(formattedType);
+                    }
                 }
             }
 
             output
-                .Append(string.Join(' ', formattedOptions))
+                .Append(string.Join("<br>", formattedOptions))
                 .Append(" | ")
                 .Append(commandDescription)
                 .Append(Environment.NewLine);
