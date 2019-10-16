@@ -6,22 +6,29 @@ using System.Text;
 
 namespace DocGeneration
 {
+    /*
+     * Source code scraper which generates docs from the Command classes
+     *
+     * Special keywords/tokens used:
+     * '// # desc:' Used to signify description for a command
+     * '/* ActualDecimal *\/' When appearing right next to a decimal declaration, signifies that a decimal is the intended type, rather than a musical division, which is otherwise assumed 
+     */
     internal static class Program
     {
         private static Dictionary<string, string> ParameterTypes = new Dictionary<string, string>
         {
-            {"Clip","<[ClipReference](#parameter-types)>"}, 
+            {"Clip","<[Clip reference](#parameter-types)>"}, 
             {"int", "<[Number](#parameter-types)>"}, 
             {"int[]", "<list of [Number](#parameter-types)>"}, 
             {"bool", ""},
-            {"decimal", "<[MusicalDivision](#parameter-types)>"},
-            {"decimal[]", "<list of [MusicalDivision](#parameter-types)>"}
+            {"decimal", "<[Musical fraction](#parameter-types)>"},
+            {"decimal[]", "<list of [Musical fraction](#parameter-types)>"},
+            {"decimal/*ActualDecimal*/", "<[Decimal number](#parameter-types)>"},
+            {"decimal[]/*ActualDecimal*/", "<list of [Decimal number](#parameter-types)>"}
         };
         
         private static void Main(string[] args)
         {
-            // todo: default values, decimal when not used as MusicalDivision
-            
             var srcFiles = Directory.EnumerateFiles(Path.Join(Environment.CurrentDirectory, @"..\..\..\..\Mutate4l\Commands\"));
             var commandReference = new StringBuilder();
 
@@ -118,7 +125,7 @@ namespace DocGeneration
                             }
                         }
 
-                        if (defaultValue.Contains('m') && defaultValue.Contains('.'))
+                        if (defaultValue.Contains('m') && (defaultValue.Contains('.') || defaultValue.Contains('/')))
                         {
                             defaultValue = defaultValue.Substring(0, defaultValue.Length - 1);
                         }
@@ -226,9 +233,23 @@ namespace DocGeneration
             if (ParameterTypes.ContainsKey(type))
             {
                 result = ParameterTypes[type];
-                if (@default.Length > 0 && @default != "true" && @default != "false")
+                if (@default.Length > 0) 
                 {
-                    result = result.Trim('>') + ": " + @default + ">";
+                    if (@default.IndexOf('.') > 0 /* If it starts with . it's a number */ && @default.Length > 1 && @default[1] >= 'a' && @default[1] <= 'z')
+                    {
+                        // enum
+                        @default = @default.Substring(@default.IndexOf('.') + 1);
+                    }
+
+                    if (result.Contains(@default))
+                    {
+                        var defaultIx = result.IndexOf(@default, StringComparison.InvariantCultureIgnoreCase);
+                        result = result.Insert(defaultIx + @default.Length, "**").Insert(defaultIx, "**");
+                    }
+                    else if (@default != "true" && @default != "false")
+                    {
+                        result = result.Trim('>') + ": **" + @default + "**>";
+                    }
                 }
             }
             return result;

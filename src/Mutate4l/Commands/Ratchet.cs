@@ -34,7 +34,7 @@ namespace Mutate4l.Commands
 
         public Shape Shape { get; set; } = Shape.Linear;
 
-        public decimal Strength { get; set; } = 1;
+        public decimal/*ActualDecimal*/ Strength { get; set; } = 1.0m;
 
         public bool VelocityToStrength { get; set; }
 

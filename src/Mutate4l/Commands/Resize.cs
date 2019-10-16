@@ -6,7 +6,7 @@ namespace Mutate4l.Commands
     public class ResizeOptions
     {
         [OptionInfo(type: OptionType.Default, noImplicitCast: true)]
-        public decimal Factor { get; set; } = 1.0m;
+        public decimal/*ActualDecimal*/ Factor { get; set; } = 1.0m;
     }
 
     // # desc: Resizes the current clip based on the specified factor (i.e. 0.5 halves the size of the clip, effectively doubling its tempo)

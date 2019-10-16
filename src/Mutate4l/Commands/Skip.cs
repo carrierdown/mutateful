@@ -6,7 +6,7 @@ namespace Mutate4l.Commands
     public class SkipOptions
     {
         [OptionInfo(type: OptionType.Default)]
-        public int[] SkipCounts { get; set; } = {2};
+        public int[] SkipCounts { get; set; } = { 2 };
     }
         
     // # desc: Creates a new clip by skipping every # note from another clip. If more than one skip value is specified, they are cycled through.

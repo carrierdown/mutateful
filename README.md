@@ -51,37 +51,38 @@ Since the session view in Ableton Live presents clips in a spreadsheet-like grid
 
 Full documentation of all commands will follow at a later date. In the meantime, star this repo and/or follow me at [twitter.com/KnUpland](https://twitter.com/KnUpland) for updates.
 
-## Commands cheat sheet
+## Quick command reference
 
 Basic syntax: [ClipReference #1](#parameter-types) ... [ClipReference #N](#parameter-types) commandname -parameter1 value -parameter2 value
 
 Command | Parameters (default values in **bold**) | Description
 --- | --- | ---
-arpeggiate | -rescale <[Number](#parameter-types)> -removeoffset -by <[ClipReference](#parameter-types)> | Arpeggiates the given clip using another clip, or itself.
+arpeggiate | -rescale <[Number](#parameter-types): **2**> -removeoffset -by <[Clip reference](#parameter-types)> | Arpeggiates the given clip using another clip, or itself.
 concat |  | Concatenates two or more clips together.
-crop | <list of [MusicalDivision](#parameter-types)> | Crops a clip to the desired length, or within the desired region.
-filter | <[MusicalDivision](#parameter-types)> -invert | Filters out notes shorter than the length specified (default 1/64). If -invert is specified, notes longer than the specified length are removed.
-interleave | -chunkchords -solo -mode Event&#124;Time -ranges <list of [MusicalDivision](#parameter-types)> -repeats <list of [Number](#parameter-types)> -skip | Combines notes from two or more clips in an interleaved fashion.
+crop | <list of [Musical fraction](#parameter-types): **2**> | Crops a clip to the desired length, or within the desired region.
+filter | <[Musical fraction](#parameter-types): **1/64**> -invert | Filters out notes shorter than the length specified (default 1/64). If -invert is specified, notes longer than the specified length are removed.
+interleave | -chunkchords -solo -mode Event&#124;**Time** -ranges <list of [Musical fraction](#parameter-types): **1**> -repeats <list of [Number](#parameter-types): **1**> -skip | Combines notes from two or more clips in an interleaved fashion.
 legato |  | Removes silence between notes. Basically the same as the built-in legato function in Live, but often useful in the context of a mutate4l formula as well.
-mask | -by <[ClipReference](#parameter-types)> | Creates a masking clip which is used to remove or shorten notes not overlapping with the mask clip. If no -by clip is specified, a sustained note is used instead, effectively inversing the clip rhythmically.
+mask | -by <[Clip reference](#parameter-types)> | Creates a masking clip which is used to remove or shorten notes not overlapping with the mask clip. If no -by clip is specified, a sustained note is used instead, effectively inversing the clip rhythmically.
 monophonize |  | Makes the clip monophonic by removing any overlapping notes. Lower notes have precedence over higher notes.
-quantize | <list of [MusicalDivision](#parameter-types)> -amount <[MusicalDivision](#parameter-types)> -by <[ClipReference](#parameter-types)> | Quantizes a clip by the specified amount against a regular or irregular set of divisions, or even against the timings of another clip.
-ratchet | <list of [Number](#parameter-types)> -autoscale -by <[ClipReference](#parameter-types)> -mode -shape Linear&#124;EaseInOut&#124;EaseIn&#124;EaseOut -strength <[MusicalDivision](#parameter-types)> -velocitytostrength | Creates retriggers/ratchets in the current clip, based on a sequence of passed in values or another clip. The ratchets produced can be scaled and shaped in various ways.
-relength | <[MusicalDivision](#parameter-types)> | Changes the length of all notes in a clip by multiplying their lengths with the specified factor.
-resize | <[MusicalDivision](#parameter-types)> | Resizes the current clip based on the specified factor (i.e. 0.5 halves the size of the clip, effectively doubling its tempo)
-scale | -by <[ClipReference](#parameter-types)> -strict | Uses a clip passed in via the -by parameter as a scale to which the current clip is made to conform. If -strict is specified, notes are made to follow both the current pitch and octave of the closest matching note.
-setlength | <list of [MusicalDivision](#parameter-types)> | Sets the length of all notes to the specified value(s). When more values are specified, they are cycled through.
-setrhythm | -by <[ClipReference](#parameter-types)> | Retains pitch and velocity from the current clip while changing the timing and duration to match the clip specified in the -by parameter.
-shuffle | <list of [Number](#parameter-types)> -by <[ClipReference](#parameter-types)> | Shuffles the order of notes by a list of numbers of arbitrary length, or by another clip. When another clip is specified, the relative pitch of each note is used to determine the shuffle order.
-skip | <list of [Number](#parameter-types)> | Creates a new clip by skipping every # note from another clip. If more than one skip value is specified, they are cycled through.
-slice | <list of [MusicalDivision](#parameter-types)> | Slices a clip (i.e. cutting any notes) at a regular or irregular set of divisions.
-take | <list of [Number](#parameter-types)> | Creates a new clip by taking every # note from another clip. If more than one skip value is specified, they are cycled through.
+quantize | <list of [Musical fraction](#parameter-types): **1/16**> -amount <[Decimal number](#parameter-types): **1.0**> -by <[Clip reference](#parameter-types)> | Quantizes a clip by the specified amount against a regular or irregular set of divisions, or even against the timings of another clip.
+ratchet | <list of [Number](#parameter-types)> -autoscale -by <[Clip reference](#parameter-types)> -mode Velocity&#124;**Pitch** -shape **Linear**&#124;EaseInOut&#124;EaseIn&#124;EaseOut -strength <[Decimal number](#parameter-types): **1.0**> -velocitytostrength | Creates retriggers/ratchets in the current clip, based on a sequence of passed in values or another clip. The ratchets produced can be scaled and shaped in various ways.
+relength | <[Decimal number](#parameter-types): **1.0**> | Changes the length of all notes in a clip by multiplying their lengths with the specified factor.
+resize | <[Decimal number](#parameter-types): **1.0**> | Resizes the current clip based on the specified factor (i.e. 0.5 halves the size of the clip, effectively doubling its tempo)
+scale | -by <[Clip reference](#parameter-types)> -strict | Uses a clip passed in via the -by parameter as a scale to which the current clip is made to conform. If -strict is specified, notes are made to follow both the current pitch and octave of the closest matching note.
+setlength | <list of [Musical fraction](#parameter-types): **1/16**> | Sets the length of all notes to the specified value(s). When more values are specified, they are cycled through.
+setrhythm | -by <[Clip reference](#parameter-types)> | Retains pitch and velocity from the current clip while changing the timing and duration to match the clip specified in the -by parameter.
+shuffle | <list of [Number](#parameter-types)> -by <[Clip reference](#parameter-types)> | Shuffles the order of notes by a list of numbers of arbitrary length, or by another clip. When another clip is specified, the relative pitch of each note is used to determine the shuffle order.
+skip | <list of [Number](#parameter-types): **2**> | Creates a new clip by skipping every # note from another clip. If more than one skip value is specified, they are cycled through.
+slice | <list of [Musical fraction](#parameter-types): **1/16**> | Slices a clip (i.e. cutting any notes) at a regular or irregular set of divisions.
+take | <list of [Number](#parameter-types): **2**> | Creates a new clip by taking every # note from another clip. If more than one skip value is specified, they are cycled through.
+transpose | <list of [Number](#parameter-types)> -by <[Clip reference](#parameter-types)> -mode **Absolute**&#124;Relative&#124;Overwrite | Transposes the notes in a clip based on either a set of passed-in values, or another clip.
 
 ## Parameter types
 
 Type | Description
 --- | ---
-ClipReference | Cells in the session view are referenced like they would be in a spreadsheet, i.e. tracks are assigned letters (A-Z) and clip rows are assigned numbers (1-N). Example: track 1 clip 1 becomes A1, track 2 clip 3 becomes B3.
-MusicalDivision | These are commonly used in sequencer software to denote musical divisions like quarter notes, eight notes and so on. Examples: quarter note = 1/4, eight note = 1/8.
+Clip reference | Cells in the session view are referenced like they would be in a spreadsheet, i.e. tracks are assigned letters (A-Z) and clip rows are assigned numbers (1-N). Example: track 1 clip 1 becomes A1, track 2 clip 3 becomes B3.
+Musical fraction | These are commonly used in sequencer software to denote musical fractions like quarter notes, eight notes and so on. Examples: quarter note = 1/4, eighth note = 1/8.
 Number | Whole number (integer), either negative or positive
-Decimal | Decimal number, from 0.0 and upwards
+Decimal number | Decimal number, from 0.0 and upwards

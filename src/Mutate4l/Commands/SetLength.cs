@@ -6,7 +6,7 @@ namespace Mutate4l.Commands
     public class SetLengthOptions
     {
         [OptionInfo(type: OptionType.Default)]
-        public decimal[] Lengths { get; set; } = {0.25m};
+        public decimal[] Lengths { get; set; } = { 1/16m };
     }
     
     // # desc: Sets the length of all notes to the specified value(s). When more values are specified, they are cycled through.
