@@ -57,26 +57,27 @@ Basic syntax: [ClipReference #1](#parameter-types) ... [ClipReference #N](#param
 
 Command | Parameters (default values in **bold**) | Description
 --- | --- | ---
-arpeggiate | -rescale <[Number](#parameter-types): **2**><br>-removeoffset<br>-by <[Clip reference](#parameter-types)> | Arpeggiates the given clip using another clip, or itself.
+arpeggiate | &#8209;rescale&nbsp;<[Number](#parameter-types): **2**><br>&#8209;removeoffset<br>&#8209;by&nbsp;<[Clip reference](#parameter-types)> | Arpeggiates the given clip using another clip, or itself.
 concat |  | Concatenates two or more clips together.
 crop | <list of [Musical fraction](#parameter-types): **2**> | Crops a clip to the desired length, or within the desired region.
-filter | <[Musical fraction](#parameter-types): **1/64**><br>-invert | Filters out notes shorter than the length specified (default 1/64). If -invert is specified, notes longer than the specified length are removed.
-interleave | -chunkchords<br>-solo<br>-mode Event&#124;**Time**<br>-ranges <list of [Musical fraction](#parameter-types): **1**><br>-repeats <list of [Number](#parameter-types): **1**><br>-skip | Combines notes from two or more clips in an interleaved fashion.
+filter | <[Musical fraction](#parameter-types): **1/64**><br>&#8209;invert | Filters out notes shorter than the length specified (default 1/64). If -invert is specified, notes longer than the specified length are removed.
+interleave | &#8209;chunkchords<br>&#8209;solo<br>&#8209;mode&nbsp;Event&#124;**Time**<br>&#8209;ranges&nbsp;<list of [Musical fraction](#parameter-types): **1**><br>&#8209;repeats&nbsp;<list of [Number](#parameter-types): **1**><br>&#8209;skip | Combines notes from two or more clips in an interleaved fashion.
 legato |  | Removes silence between notes. Basically the same as the built-in legato function in Live, but often useful in the context of a mutate4l formula as well.
-mask | -by <[Clip reference](#parameter-types)> | Creates a masking clip which is used to remove or shorten notes not overlapping with the mask clip. If no -by clip is specified, a sustained note is used instead, effectively inversing the clip rhythmically.
+mask | &#8209;by&nbsp;<[Clip reference](#parameter-types)> | Creates a masking clip which is used to remove or shorten notes not overlapping with the mask clip. If no -by clip is specified, a sustained note is used instead, effectively inversing the clip rhythmically.
 monophonize |  | Makes the clip monophonic by removing any overlapping notes. Lower notes have precedence over higher notes.
-quantize | <list of [Musical fraction](#parameter-types): **1/16**><br>-amount <[Decimal number](#parameter-types): **1.0**><br>-by <[Clip reference](#parameter-types)> | Quantizes a clip by the specified amount against a regular or irregular set of divisions, or even against the timings of another clip.
-ratchet | <list of [Number](#parameter-types)><br>-autoscale<br>-by <[Clip reference](#parameter-types)><br>-mode Velocity&#124;**Pitch**<br>-shape **Linear**&#124;EaseInOut&#124;EaseIn&#124;EaseOut<br>-strength <[Decimal number](#parameter-types): **1.0**><br>-velocitytostrength | Creates retriggers/ratchets in the current clip, based on a sequence of passed in values or another clip. The ratchets produced can be scaled and shaped in various ways.
+quantize | <list of [Musical fraction](#parameter-types): **1/16**><br>&#8209;amount&nbsp;<[Decimal number](#parameter-types): **1.0**><br>&#8209;by&nbsp;<[Clip reference](#parameter-types)> | Quantizes a clip by the specified amount against a regular or irregular set of divisions, or even against the timings of another clip.
+ratchet | <list of [Number](#parameter-types)><br>&#8209;autoscale<br>&#8209;by&nbsp;<[Clip reference](#parameter-types)><br>&#8209;mode&nbsp;Velocity&#124;**Pitch**<br>&#8209;shape&nbsp;**Linear**&#124;EaseInOut&#124;EaseIn&#124;EaseOut<br>&#8209;strength&nbsp;<[Decimal number](#parameter-types): **1.0**><br>&#8209;velocitytostrength | Creates retriggers/ratchets in the current clip, based on a sequence of passed in values or another clip. The ratchets produced can be scaled and shaped in various ways.
 relength | <[Decimal number](#parameter-types): **1.0**> | Changes the length of all notes in a clip by multiplying their lengths with the specified factor.
 resize | <[Decimal number](#parameter-types): **1.0**> | Resizes the current clip based on the specified factor (i.e. 0.5 halves the size of the clip, effectively doubling its tempo)
-scale | -by <[Clip reference](#parameter-types)><br>-strict | Uses a clip passed in via the -by parameter as a scale to which the current clip is made to conform. If -strict is specified, notes are made to follow both the current pitch and octave of the closest matching note.
+scale | &#8209;by&nbsp;<[Clip reference](#parameter-types)><br>&#8209;strict | Uses a clip passed in via the -by parameter as a scale to which the current clip is made to conform. If -strict is specified, notes are made to follow both the current pitch and octave of the closest matching note.
 setlength | <list of [Musical fraction](#parameter-types): **1/16**> | Sets the length of all notes to the specified value(s). When more values are specified, they are cycled through.
-setrhythm | -by <[Clip reference](#parameter-types)> | Retains pitch and velocity from the current clip while changing the timing and duration to match the clip specified in the -by parameter.
-shuffle | <list of [Number](#parameter-types)><br>-by <[Clip reference](#parameter-types)> | Shuffles the order of notes by a list of numbers of arbitrary length, or by another clip. When another clip is specified, the relative pitch of each note is used to determine the shuffle order.
+setrhythm | &#8209;by&nbsp;<[Clip reference](#parameter-types)> | Retains pitch and velocity from the current clip while changing the timing and duration to match the clip specified in the -by parameter.
+shuffle | <list of [Number](#parameter-types)><br>&#8209;by&nbsp;<[Clip reference](#parameter-types)> | Shuffles the order of notes by a list of numbers of arbitrary length, or by another clip. When another clip is specified, the relative pitch of each note is used to determine the shuffle order.
 skip | <list of [Number](#parameter-types): **2**> | Creates a new clip by skipping every # note from another clip. If more than one skip value is specified, they are cycled through.
 slice | <list of [Musical fraction](#parameter-types): **1/16**> | Slices a clip (i.e. cutting any notes) at a regular or irregular set of divisions.
 take | <list of [Number](#parameter-types): **2**> | Creates a new clip by taking every # note from another clip. If more than one skip value is specified, they are cycled through.
-transpose | <list of [Number](#parameter-types)><br>-by <[Clip reference](#parameter-types)><br>-mode **Absolute**&#124;Relative&#124;Overwrite | Transposes the notes in a clip based on either a set of passed-in values, or another clip.
+transpose | <list of [Number](#parameter-types)><br>&#8209;by&nbsp;<[Clip reference](#parameter-types)><br>&#8209;mode&nbsp;**Absolute**&#124;Relative&#124;Overwrite | Transposes the notes in a clip based on either a set of passed-in values, or another clip.
+
 
 ## Parameter types
 

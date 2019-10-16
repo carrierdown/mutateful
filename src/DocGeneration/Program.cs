@@ -157,7 +157,7 @@ namespace DocGeneration
                     else
                     {
                         if (formattedOptions.Count > 0)
-                            formattedOptions[formattedOptions.Count - 1] += " " + formattedType;
+                            formattedOptions[formattedOptions.Count - 1] += "&nbsp;" + formattedType;
                         else 
                             formattedOptions.Add(formattedType);
                     }
@@ -225,7 +225,7 @@ namespace DocGeneration
         
         private static string FormatOptionName(string option)
         {
-            return $"-{option.ToLower()}";
+            return $"&#8209;{option.ToLower()}";
         }
 
         private static string FormatCommandName(string command)
