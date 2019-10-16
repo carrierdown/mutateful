@@ -34,7 +34,8 @@ namespace Mutate4l.Commands
 
         public static ProcessResultArray<Clip> Apply(TransposeOptions options, params Clip[] clips)
         {
-            if (options.By?.Count == 0 && options.TransposeValues.Length == 0)
+            if (options.By == null) options.By = new Clip(4, true);
+            if (options.By.Count == 0 && options.TransposeValues.Length == 0)
             {
                 return new ProcessResultArray<Clip>("No -by clip or transpose values specified.");
             }

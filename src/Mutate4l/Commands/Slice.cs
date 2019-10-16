@@ -11,12 +11,12 @@ namespace Mutate4l.Commands
         public decimal[] Lengths { get; set; } = { 1/16m };
     }
 
-    // # desc: Slices a clip (i.e. cutting any notes) at a regular or irregular set of divisions.
+    // # desc: Slices a clip (i.e. cutting any notes) at a regular or irregular set of fractions.
     public static class Slice
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
-            (var success, var msg) = OptionParser.TryParseOptions(command, out SliceOptions options);
+            var (success, msg) = OptionParser.TryParseOptions(command, out SliceOptions options);
             if (!success)
             {
                 return new ProcessResultArray<Clip>(msg);

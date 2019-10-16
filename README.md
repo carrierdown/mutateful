@@ -17,23 +17,27 @@
 
 ### Creating an arpeggio from a sustained note and a chord
 
-`=C1 slice 1/2 transpose 0 7 slice 1/16 1/8 transpose -by B1`
+`=B1 slice 1/2 transpose 0 7 slice 1/16 1/8 transpose -by C1`
 
-This formula does the following: Start with the single sustained note contained in the clip at position `C1`. Slice it in half, keeping the first note unchanged and transposing the second note 7 semitones up (a perfect fifth). Now, slice the resulting two half-notes into a pattern alternating between 1/16 and 1/8th notes. Finally, transpose this pattern with the chord contained in the clip located at position `B1`.
+This formula does the following: Start with the single sustained note contained in the clip at position `B1`. Slice it in half, keeping the first note unchanged and transposing the second note 7 semitones up (a perfect fifth). Now, slice the resulting two half-notes into a pattern alternating between 1/16 and 1/8th notes. Finally, transpose this pattern with the chord contained in the clip located at position `C1`.
+
+![Arpeggio from note and chord](./assets/Generated637068518186284593-clip.svg)
 
 ### Interleaving two clips together
 
-`=b1 c1 interleave -mode event`
+`=B1 C1 interleave -mode event`
 
 This formula combines the notes contained in the clips located at positions B1 and C1, so that the notes from each clip are played one after the other in an alternating fashion.
 
-![Alt text](./assets/Generated637012367962797269-clip.svg)
+![Interleaving two clips](./assets/Generated637012367962797269-clip.svg)
 
 ### Turning a beat and a chord into an arpeggio
 
 `=c1 scale -by b2 -strict transpose -12 transpose 0 7 5 monophonize`
 
 This formula takes the beat contained in clip C1, transforming notes as needed so as to fit with the notes (or scale if you will) contained in clip B2. It does this in a strict manner, meaning that the resulting notes will get the same absolute pitch instead of the closest pitch in the current octave. All notes are then transposed down an octave, and are then transposed so that the resulting notes alternate between 0, 7, and 5 semitones transposition. Finally the result is made monophonic so that only one note is sounding at any given moment. 
+
+
 
 <!--
  Formulas are composed of one or more commands operating on one or more clips. Most commands have various options that can be set depending on your specific needs. They range from simple things like filtering out all notes with a length shorter than a given interval, to more esoteric things like arpeggiating one clip based on another, or creating glitchy beats by adding ratcheting/retriggering to specific notes.
