@@ -39,7 +39,9 @@ This formula adds retriggers (also called ratchets) to the beat contained in cli
 
 ![Adding retriggers](./assets/Generated637069227069985789-clip.svg)
 
-Ratchet accepts a number of other parameters to scale the resulting retriggers in various ways, including starting fast and going gradually slower towards the end of the note. This can be achieved by adding the -shape parameter and specifying EaseIn. In addition, the resulting output can be tamed slightly by adding the -strength parameter and setting it to 0.5 (i.e. 50% strength).
+Ratchet accepts a number of other parameters to scale the resulting retriggers in various ways, including starting fast and going gradually slower towards the end of the note. This can be achieved by adding the -shape parameter and specifying EaseIn. In addition, the resulting output can be tamed slightly by adding the -strength parameter and setting it to 0.5 (i.e. 50% strength):
+
+`=a4 ratchet 1 2 3 6 1 2 5 -shape easein -strength 0.5`
 
 ![Adding retriggers with shaping](./assets/Generated637069235238519840-clip.svg)
 
