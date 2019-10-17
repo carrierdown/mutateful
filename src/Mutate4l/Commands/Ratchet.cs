@@ -69,6 +69,10 @@ namespace Mutate4l.Commands
 
             if (options.RatchetValues.Length > 0)
             {
+                for (var i = 0; i < options.RatchetValues.Length; i++)
+                {
+                    if (options.RatchetValues[i] < 1) options.RatchetValues[i] = 1; // todo: should be handled by optionparser and min max values in optioninfo
+                }
                 for (var i = 0; i < targetSequences.Length; i++)
                 {
                     var targetSequence = targetSequences[i];

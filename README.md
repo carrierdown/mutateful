@@ -31,13 +31,17 @@ This formula combines the notes contained in the clips located at positions B1 a
 
 ![Interleaving two clips](./assets/Generated637012367962797269-clip.svg)
 
-### Turning a beat and a chord into an arpeggio
+### Adding retriggers/glitches to a beat
 
-`=c1 scale -by b2 -strict transpose -12 transpose 0 7 5 monophonize`
+`=A4 ratchet 1 2 3 6 1 2 5`
 
-This formula takes the beat contained in clip C1, transforming notes as needed so as to fit with the notes (or scale if you will) contained in clip B2. It does this in a strict manner, meaning that the resulting notes will get the same absolute pitch instead of the closest pitch in the current octave. All notes are then transposed down an octave, and are then transposed so that the resulting notes alternate between 0, 7, and 5 semitones transposition. Finally the result is made monophonic so that only one note is sounding at any given moment. 
+This formula adds retriggers (also called ratchets) to the beat contained in clip A4. The numbers specify the retrigger amount for each note encountered in the clip, meaning that the first note in the clip will be kept as is, the second one will be sliced in two, and so on. When the last number is reached it will loop back to the beginning if there are still note events left in the clip. 
 
+![Adding retriggers](./assets/Generated637069227069985789-clip.svg)
 
+Ratchet accepts a number of other parameters to scale the resulting retriggers in various ways, including starting fast and going gradually slower towards the end of the note. This can be achieved by adding the -shape parameter and specifying EaseIn. In addition, the resulting output can be tamed slightly by adding the -strength parameter and setting it to 0.5 (i.e. 50% strength).
+
+![Adding retriggers with shaping](./assets/Generated637069235238519840-clip.svg)
 
 <!--
  Formulas are composed of one or more commands operating on one or more clips. Most commands have various options that can be set depending on your specific needs. They range from simple things like filtering out all notes with a length shorter than a given interval, to more esoteric things like arpeggiating one clip based on another, or creating glitchy beats by adding ratcheting/retriggering to specific notes.
