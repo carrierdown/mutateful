@@ -27,23 +27,23 @@ This formula does the following: Start with the single sustained note contained 
 
 `=B1 C1 interleave -mode event`
 
-This formula combines the notes contained in the clips located at positions B1 and C1, so that the notes from each clip are played one after the other in an alternating fashion.
+This formula combines the notes contained in the clips located at positions `B1` and `C1`, so that the notes from each clip are played one after the other in an alternating fashion.
 
 ![Interleaving two clips](./assets/Generated637012367962797269-clip.svg)
 
-### Adding retriggers/glitches to a beat
+### Adding retriggering to a beat
 
 `=A4 ratchet 1 2 3 6 1 2 5`
 
-This formula adds retriggers (also called ratchets) to the beat contained in clip A4. The numbers specify the retrigger amount for each note encountered in the clip, meaning that the first note in the clip will be kept as is, the second one will be sliced in two, and so on. When the last number is reached it will loop back to the beginning if there are still note events left in the clip. 
+This formula adds retriggering (also called ratchets) to the beat contained in clip `A4`. The numbers specify the retrigger amount for each note encountered in the clip. In this case, the first note in the clip will be divided into one (i.e. it will be kept as is), the second one will be divided into two, and so on. When the last number is reached it will loop back to the beginning if there are still unprocessed note events left in the clip. 
 
-![Adding retriggers](./assets/Generated637069227069985789-clip.svg)
+![Adding retriggering](./assets/Generated637069227069985789-clip.svg)
 
-Ratchet accepts a number of other parameters to scale the resulting retriggers in various ways, including starting fast and going gradually slower towards the end of the note. This can be achieved by adding the -shape parameter and specifying EaseIn. In addition, the resulting output can be tamed slightly by adding the -strength parameter and setting it to 0.5 (i.e. 50% strength):
+Ratchet accepts a number of other parameters to scale the resulting retriggers in various ways, including starting fast and going gradually slower towards the end of the note. This can be achieved by adding the `-shape` parameter and specifying EaseIn (the default is Linear). In addition, the resulting output can be tamed slightly by adding the `-strength` parameter and setting it to 0.5 (i.e. 50% strength):
 
 `=a4 ratchet 1 2 3 6 1 2 5 -shape easein -strength 0.5`
 
-![Adding retriggers with shaping](./assets/Generated637069235238519840-clip.svg)
+![Adding retriggering with shaping](./assets/Generated637069235238519840-clip.svg)
 
 <!--
  Formulas are composed of one or more commands operating on one or more clips. Most commands have various options that can be set depending on your specific needs. They range from simple things like filtering out all notes with a length shorter than a given interval, to more esoteric things like arpeggiating one clip based on another, or creating glitchy beats by adding ratcheting/retriggering to specific notes.
