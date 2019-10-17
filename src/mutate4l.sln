@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		..\README.md = ..\README.md
 		..\mutate4l.js = ..\mutate4l.js
+		..\assets\Generated637012367962797269-clip.svg = ..\assets\Generated637012367962797269-clip.svg
+		..\assets\Generated637068518186284593-clip.svg = ..\assets\Generated637068518186284593-clip.svg
+		..\assets\Generated637069227069985789-clip.svg = ..\assets\Generated637069227069985789-clip.svg
+		..\assets\mu4l-walkthrough.gif = ..\assets\mu4l-walkthrough.gif
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocGeneration", "DocGeneration\DocGeneration.csproj", "{5D1EB757-1464-4295-BB08-8900AACB550A}"

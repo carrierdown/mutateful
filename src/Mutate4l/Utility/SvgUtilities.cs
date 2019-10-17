@@ -29,8 +29,13 @@ namespace Mutate4l.Utility
             var padding = 8;
             var resultClipWidth = (width - padding) / 2;
             var sourceClipWidth = resultClipWidth;
-            var sourceClipHeight = (contentHeight - padding) / 2;
+            var sourceClipHeight = contentHeight;
 
+            if (clips.Count > 1)
+            {
+                sourceClipHeight -= padding;
+                sourceClipHeight /= 2;
+            }
             if (clips.Count > 2)
             {
                 sourceClipWidth = resultClipWidth / 2;

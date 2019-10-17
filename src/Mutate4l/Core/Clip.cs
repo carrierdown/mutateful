@@ -49,6 +49,8 @@ namespace Mutate4l.Core
                 var clonedNote = new NoteEvent(note);
                 Notes.Add(clonedNote);
             }
+            ClipReference = clip.ClipReference;
+            RawClipReference = clip.RawClipReference;
         }
 
         public void Add(NoteEvent noteEvent)
