@@ -27,21 +27,23 @@ This formula does the following: Start with the single sustained note contained 
 
 `=B1 C1 interleave -mode event`
 
-This formula combines the notes contained in the clips located at positions B1 and C1, so that the notes from each clip are played one after the other in an alternating fashion.
+This formula combines the notes contained in the clips located at positions `B1` and `C1`, so that the notes from each clip are played one after the other in an alternating fashion.
 
 ![Interleaving two clips](./assets/Generated637012367962797269-clip.svg)
 
-### Adding retriggers/glitches to a beat
+### Adding retriggering to a beat
 
 `=A4 ratchet 1 2 3 6 1 2 5`
 
-This formula adds retriggers (also called ratchets) to the beat contained in clip A4. The numbers specify the retrigger amount for each note encountered in the clip, meaning that the first note in the clip will be kept as is, the second one will be sliced in two, and so on. When the last number is reached it will loop back to the beginning if there are still note events left in the clip. 
+This formula adds retriggering (also called ratchets) to the beat contained in clip `A4`. The numbers specify the retrigger amount for each note encountered in the clip. In this case, the first note in the clip will be divided into one (i.e. it will be kept as is), the second one will be divided into two, and so on. When the last number is reached it will loop back to the beginning if there are still unprocessed note events left in the clip. 
 
-![Adding retriggers](./assets/Generated637069227069985789-clip.svg)
+![Adding retriggering](./assets/Generated637069227069985789-clip.svg)
 
-Ratchet accepts a number of other parameters to scale the resulting retriggers in various ways, including starting fast and going gradually slower towards the end of the note. This can be achieved by adding the -shape parameter and specifying EaseIn. In addition, the resulting output can be tamed slightly by adding the -strength parameter and setting it to 0.5 (i.e. 50% strength).
+Ratchet accepts a number of other parameters to scale the resulting retriggers in various ways, including starting fast and going gradually slower towards the end of the note. This can be achieved by adding the `-shape` parameter and specifying EaseIn (the default is Linear). In addition, the resulting output can be tamed slightly by adding the `-strength` parameter and setting it to 0.5 (i.e. 50% strength):
 
-![Adding retriggers with shaping](./assets/Generated637069235238519840-clip.svg)
+`=a4 ratchet 1 2 3 6 1 2 5 -shape easein -strength 0.5`
+
+![Adding retriggering with shaping](./assets/Generated637069235238519840-clip.svg)
 
 <!--
  Formulas are composed of one or more commands operating on one or more clips. Most commands have various options that can be set depending on your specific needs. They range from simple things like filtering out all notes with a length shorter than a given interval, to more esoteric things like arpeggiating one clip based on another, or creating glitchy beats by adding ratcheting/retriggering to specific notes.
@@ -57,11 +59,7 @@ The easiest way to understand what `mutate4l` does is by comparing it to a tradi
 
 Since the session view in Ableton Live presents clips in a spreadsheet-like grid, `mutate4l` works the same way, only with more musically interesting commands. For instance, you could shuffle the contents of clip `A1` using the contents of clip `A2`. The pitch values of the various notes in clip `A2` would then be used to shuffle the order of notes in `A1`. Similar to the example above, we would like the result to be inserted into clip `A3`, but instead of using a spreadsheet command we will use a `mutate4l` command, as follows: `=A1 shuffle -by A2`. In this example, `A1` is a *source clip* (i.e. the clip that will be transformed), and `A2` is the *control clip* (i.e. the clip that controls the transformation). The latter could be omitted, in which case clip `A1` would be shuffled using itself as the control clip. The formula for this would simply be `=A1 shuffle`.
 
-Full documentation of all commands will follow at a later date. In the meantime, star this repo and/or follow me at [twitter.com/KnUpland](https://twitter.com/KnUpland) for updates.
-
 ## Quick command reference
-
-Basic syntax: [ClipReference #1](#parameter-types) ... [ClipReference #N](#parameter-types) commandname -parameter1 value -parameter2 value
 
 Command | Parameters (default values in **bold**) | Description
 --- | --- | ---
@@ -86,7 +84,6 @@ slice | <list of [Musical fraction](#parameter-types): **1/16**> | Slices a clip
 take | <list of [Number](#parameter-types): **2**> | Creates a new clip by taking every # note from another clip. If more than one skip value is specified, they are cycled through.
 transpose | <list of [Number](#parameter-types)><br>&#8209;by&nbsp;<[Clip reference](#parameter-types)><br>&#8209;mode&nbsp;**Absolute**&#124;Relative&#124;Overwrite | Transposes the notes in a clip based on either a set of passed-in values, or another clip.
 
-
 ## Parameter types
 
 Type | Description
@@ -95,3 +92,5 @@ Clip reference | Cells in the session view are referenced like they would be in 
 Musical fraction | These are commonly used in sequencer software to denote musical fractions like quarter notes, eight notes and so on. Examples: quarter note = 1/4, eighth note = 1/8.
 Number | Whole number (integer), either negative or positive
 Decimal number | Decimal number, from 0.0 and upwards
+
+Full documentation of all commands will follow at a later date. In the meantime, star this repo and/or follow me at [twitter.com/KnUpland](https://twitter.com/KnUpland) for updates.
