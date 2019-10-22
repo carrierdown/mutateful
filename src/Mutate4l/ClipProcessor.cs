@@ -46,8 +46,14 @@ namespace Mutate4l
             return resultContainer;
         }
 
-        public static ProcessResultArray<Clip> ProcessCommand(Command command, Clip[] clips, ClipMetaData targetMetadata)
+        public static ProcessResultArray<Clip> ProcessCommand(Command command, Clip[] incomingClips, ClipMetaData targetMetadata)
         {
+            var clips = new Clip[incomingClips.Length];
+            for (var i = 0; i < incomingClips.Length; i++)
+            {
+                clips[i] = new Clip(incomingClips[i]);
+            }
+
             ProcessResultArray<Clip> resultContainer;
             switch (command.Id)
             {

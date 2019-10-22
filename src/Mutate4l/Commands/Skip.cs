@@ -1,3 +1,4 @@
+using System.Linq;
 using Mutate4l.Cli;
 using Mutate4l.Core;
 
@@ -26,6 +27,19 @@ namespace Mutate4l.Commands
         {
             var resultClips = new Clip[clips.Length];
 
+            // Normalize skip values (typical input range: 1 - N, while 0 - N is used internally)
+            for (var ix = 0; ix < options.SkipCounts.Length; ix++)
+            {
+                ref var takeCount = ref options.SkipCounts[ix];
+                if (takeCount < 1) takeCount = 1;
+                takeCount--;
+            }
+
+            if (options.SkipCounts.All(x => x == 0))
+            {
+                return new ProcessResultArray<Clip>("The given input to skip would produce an empty clip. Aborting...");
+            }
+            
             var i = 0;
             foreach (var clip in clips)
             {
@@ -40,7 +54,7 @@ namespace Mutate4l.Commands
                 {
                     if (currentSkip > 0)
                     {
-                        if (noteIx >= clip.Count) noteIx = 0;
+                        if (noteIx >= clip.Count) noteIx %= clip.Count;
                         var note = new NoteEvent(clip.Notes[noteIx]) {Start = currentPos};
                         currentPos += clip.DurationUntilNextNote(noteIx);
                         resultClip.Add(note);

@@ -1,23 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26510.0
-MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mutate4l", "Mutate4l\Mutate4l.csproj", "{F2C13618-616B-4906-8843-2C9342C49C3A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mutate4lTests", "Mutate4lTests\Mutate4lTests.csproj", "{785E75EA-FECA-42E4-83FF-271A2F84E181}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocGeneration", "DocGeneration\DocGeneration.csproj", "{5D1EB757-1464-4295-BB08-8900AACB550A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9FE9B675-A765-4FCA-94C9-D4C2E8D2257E}"
 	ProjectSection(SolutionItems) = preProject
 		..\README.md = ..\README.md
 		..\mutate4l.js = ..\mutate4l.js
-		..\assets\Generated637012367962797269-clip.svg = ..\assets\Generated637012367962797269-clip.svg
-		..\assets\Generated637068518186284593-clip.svg = ..\assets\Generated637068518186284593-clip.svg
-		..\assets\Generated637069227069985789-clip.svg = ..\assets\Generated637069227069985789-clip.svg
 		..\assets\mu4l-walkthrough.gif = ..\assets\mu4l-walkthrough.gif
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocGeneration", "DocGeneration\DocGeneration.csproj", "{5D1EB757-1464-4295-BB08-8900AACB550A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

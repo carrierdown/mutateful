@@ -49,7 +49,7 @@ namespace Mutate4l.Commands
                 {
                     if (currentTake == 0)
                     {
-                        if (noteIx >= clip.Count) noteIx = 0;
+                        if (noteIx >= clip.Count) noteIx %= clip.Count;
                         var note = new NoteEvent(clip.Notes[noteIx]) {Start = currentPos};
                         currentPos += clip.DurationUntilNextNote(noteIx);
                         resultClip.Add(note);

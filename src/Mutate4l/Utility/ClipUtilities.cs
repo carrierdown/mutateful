@@ -17,11 +17,10 @@ namespace Mutate4l.Utility
             return notes;
         }
 
-        public static Clip SplitNotesAtEvery(Clip clp, decimal[] timespans)
+        public static Clip SplitNotesAtEvery(Clip clip, decimal[] timespans)
         {
             decimal currentPosition = 0;
             var timespanIx = 0;
-            var clip = new Clip(clp);
             while (currentPosition < clip.Length)
             {
                 int i = 0;
