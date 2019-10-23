@@ -4,7 +4,7 @@ namespace Mutate4l.Commands.ToBeImplemented
 {
     public class SetPitchOptions
     {
-        [OptionInfo(0, 127, type:OptionType.Default)]
+        [OptionInfo(OptionType.Default, 0, 127)]
         public int[] Pitches { get; set; }
         
         public Clip By { get; set; }

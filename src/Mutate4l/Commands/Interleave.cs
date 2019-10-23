@@ -10,10 +10,17 @@ namespace Mutate4l.Commands
     {
         public bool ChunkChords { get; set; } = true; // Process notes having the exact same start times as a single event. Only applies to event mode.
 //        public int[] EnableMask { get; set; } = new int[] { 1 }; // Deprecated. Allows specifying a sequence of numbers to use as a mask for whether the note should be included or omitted. E.g. 1 0 will alternately play and omit every even/odd note. Useful when combining two or more clips but you want to retain only the notes for the current track. In this scenario you would have several formulas that are the same except having different masks.
+        
         public bool Solo { get; set; } = false; // A quicker and more convenient way to control what enablemask is usually made to do - soloing the events from the current channel only.
+        
         public InterleaveMode Mode { get; set; } = Time;
+        
+        [OptionInfo(1/512f)]
         public decimal[] Ranges { get; set; } = { 1 };
+
+        [OptionInfo(1)]
         public int[] Repeats { get; set; } = { 1 };
+        
         public bool Skip { get; set; } = false; // Whether to skip events at the corresponding location in other clips
         // todo: public decimal[] ScaleFactors { get; set; } = new decimal[] { 1 }; // Scaling is done after slicing, but prior to interleaving
     }

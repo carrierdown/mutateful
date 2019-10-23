@@ -6,7 +6,7 @@ namespace Mutate4l.Commands
 {
     public class SkipOptions
     {
-        [OptionInfo(type: OptionType.Default)]
+        [OptionInfo(type: OptionType.Default, 1)]
         public int[] SkipCounts { get; set; } = { 2 };
     }
         
@@ -30,9 +30,7 @@ namespace Mutate4l.Commands
             // Normalize skip values (typical input range: 1 - N, while 0 - N is used internally)
             for (var ix = 0; ix < options.SkipCounts.Length; ix++)
             {
-                ref var takeCount = ref options.SkipCounts[ix];
-                if (takeCount < 1) takeCount = 1;
-                takeCount--;
+                options.SkipCounts[ix]--;
             }
 
             if (options.SkipCounts.All(x => x == 0))

@@ -71,7 +71,7 @@ namespace Mutate4l.Cli
             return (true, "");
         }
 
-        public static ProcessResultArray<object> ExtractPropertyData(PropertyInfo property, List<Token> tokens,
+        private static ProcessResultArray<object> ExtractPropertyData(PropertyInfo property, List<Token> tokens,
             bool noImplicitCast = false)
         {
             TokenType? type = tokens.FirstOrDefault()?.Type;
@@ -87,38 +87,33 @@ namespace Mutate4l.Cli
                 return new ProcessResultArray<object>($"Missing property value for non-bool parameter: {property.Name}");
             }
 
+            var rangeInfo = property
+                .GetCustomAttributes(false)
+                .Select(a => (OptionInfo) a)
+                .FirstOrDefault(a => a.MaxNumberValue != null || a.MinNumberValue != null || a.MinDecimalValue != null || a.MaxDecimalValue != null);
+
             switch (type)
             {
                 // handle single value
                 case MusicalDivision when property.PropertyType == typeof(decimal) && !noImplicitCast:
+                case Number when property.PropertyType == typeof(decimal) && !noImplicitCast:
                     return new ProcessResultArray<object>(new object[] {Utilities.MusicalDivisionToDecimal(tokens[0].Value)});
                 case BarsBeatsSixteenths when property.PropertyType == typeof(decimal) && !noImplicitCast:
                     return new ProcessResultArray<object>(new object[] {Utilities.BarsBeatsSixteenthsToDecimal(tokens[0].Value)});
                 case TokenType.Decimal when property.PropertyType == typeof(decimal):
-                    return new ProcessResultArray<object>(new object[] {decimal.Parse(tokens[0].Value)});
-                case Number when property.PropertyType == typeof(decimal) && !noImplicitCast:
-                    return new ProcessResultArray<object>(new object[] {Utilities.MusicalDivisionToDecimal(tokens[0].Value)});
+                    return new ProcessResultArray<object>(new object[] {ClampIfSpecified(decimal.Parse(tokens[0].Value), rangeInfo)});
                 case TokenType.Decimal when property.PropertyType == typeof(int) && !noImplicitCast:
-                    return new ProcessResultArray<object>(new object[] {(decimal) int.Parse(tokens[0].Value)});
+                    return new ProcessResultArray<object>(new object[] {ClampIfSpecified((decimal) int.Parse(tokens[0].Value), rangeInfo)});
                 case Number when property.PropertyType == typeof(int):
                 {
-                    // todo: extract this logic so that it can be used in the list version below as well
-                    var rangeInfo = property
-                        .GetCustomAttributes(false)
-                        .Select(a => (OptionInfo) a)
-                        .FirstOrDefault(a => a.MaxNumberValue != null && a.MinNumberValue != null);
-                    int value = int.Parse(tokens[0].Value);
-                    if (value > rangeInfo?.MaxNumberValue)
+                    if (int.TryParse(tokens[0].Value, out int value))
                     {
-                        value = (int) rangeInfo.MaxNumberValue;
+                        return new ProcessResultArray<object>(new object[]
+                        {
+                            ClampIfSpecified(value, rangeInfo)
+                        });
                     }
-
-                    if (value < rangeInfo?.MinNumberValue)
-                    {
-                        value = (int) rangeInfo.MinNumberValue;
-                    }
-
-                    return new ProcessResultArray<object>(new object[] {value});
+                    return new ProcessResultArray<object>($"Unable to parse value {tokens[0].Value} for parameter {property.Name}");
                 }
 
                 default:
@@ -141,7 +136,7 @@ namespace Mutate4l.Cli
                         {
                             if (t.Type == MusicalDivision || t.Type == Number) return Utilities.MusicalDivisionToDecimal(t.Value);
                             if (t.Type == BarsBeatsSixteenths) return Utilities.BarsBeatsSixteenthsToDecimal(t.Value);
-                            return decimal.Parse(t.Value);
+                            return ClampIfSpecified(decimal.Parse(t.Value), rangeInfo);
                         }).ToArray();
                         return new ProcessResultArray<object>(new object[] {values});
                     }
@@ -165,14 +160,14 @@ namespace Mutate4l.Cli
                         }
                         case TokenType.Decimal when property.PropertyType == typeof(decimal[]):
                         {
-                            decimal[] values = tokens.Select(t => decimal.Parse(t.Value)).ToArray();
+                            decimal[] values = tokens.Select(t => ClampIfSpecified(decimal.Parse(t.Value), rangeInfo)).ToArray();
                             return new ProcessResultArray<object>(new object[] {values});
                         }
                         case InlineClip when property.PropertyType == typeof(Clip):
                             return new ProcessResultArray<object>(new object[] {tokens[0].Clip});
                         case Number when property.PropertyType == typeof(int[]):
                         {
-                            int[] values = tokens.Select(t => int.Parse(t.Value)).ToArray();
+                            int[] values = tokens.Select(t => ClampIfSpecified(int.Parse(t.Value), rangeInfo)).ToArray();
                             return new ProcessResultArray<object>(new object[] {values});
                         }
                         default:
@@ -180,6 +175,40 @@ namespace Mutate4l.Cli
                     }
                 }
             }
+        }
+
+        private static int ClampIfSpecified(int value, OptionInfo rangeInfo)
+        {
+            if (value > rangeInfo?.MaxNumberValue)
+            {
+                value = (int) rangeInfo.MaxNumberValue;
+            }
+
+            if (value < rangeInfo?.MinNumberValue)
+            {
+                value = (int) rangeInfo.MinNumberValue;
+            }
+
+            return value;
+        }
+
+        private static decimal ClampIfSpecified(decimal value, OptionInfo rangeInfo)
+        {
+            if (rangeInfo?.MinDecimalValue == null && rangeInfo?.MaxDecimalValue == null) return value;
+            
+            if (rangeInfo?.MinDecimalValue != null)
+            {
+                var minValue = (decimal) rangeInfo.MinDecimalValue;
+                if (value < minValue) value = minValue;
+            }
+
+            if (rangeInfo?.MaxDecimalValue != null)
+            {
+                var maxValue = (decimal) rangeInfo.MaxDecimalValue;
+                if (value > maxValue) value = maxValue;
+            }
+
+            return value;
         }
     }
 }

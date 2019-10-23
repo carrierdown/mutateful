@@ -5,7 +5,7 @@ namespace Mutate4l.Commands
 {
     public class SetLengthOptions
     {
-        [OptionInfo(type: OptionType.Default)]
+        [OptionInfo(type: OptionType.Default, 1/512f)]
         public decimal[] Lengths { get; set; } = { 1/16m };
     }
     

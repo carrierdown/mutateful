@@ -5,7 +5,7 @@ namespace Mutate4l.Commands
 {
     public class ResizeOptions
     {
-        [OptionInfo(type: OptionType.Default, noImplicitCast: true)]
+        [OptionInfo(type: OptionType.Default, 1/512f, noImplicitCast: true)]
         public decimal/*ActualDecimal*/ Factor { get; set; } = 1.0m;
     }
 

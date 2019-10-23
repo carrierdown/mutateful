@@ -7,7 +7,7 @@ namespace Mutate4l.Commands
 {
     public class SliceOptions
     {
-        [OptionInfo(type: OptionType.Default)]
+        [OptionInfo(type: OptionType.Default, 1/128f)]
         public decimal[] Lengths { get; set; } = { 1/16m };
     }
 

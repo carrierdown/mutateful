@@ -6,7 +6,7 @@ namespace Mutate4l.Commands
 {
     public class TakeOptions
     {
-        [OptionInfo(type: OptionType.Default)]
+        [OptionInfo(type: OptionType.Default, 1)]
         public int[] TakeCounts { get; set; } = { 2 };
     }
     
@@ -30,9 +30,7 @@ namespace Mutate4l.Commands
             // Normalize take values (typical input range: 1 - N, while 0 - N is used internally)
             for (var ix = 0; ix < options.TakeCounts.Length; ix++)
             {
-                ref var takeCount = ref options.TakeCounts[ix];
-                if (takeCount < 1) takeCount = 1;
-                takeCount--;
+                options.TakeCounts[ix]--;
             }
 
             var i = 0;

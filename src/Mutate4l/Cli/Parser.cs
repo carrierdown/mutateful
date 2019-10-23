@@ -25,33 +25,6 @@ namespace Mutate4l.Cli
             return new Tuple<int, int>(x, y);
         }
 
-        /*public static bool TryExtractMetaData(string formula, out ClipMetaData metaData)
-        {
-            int index = formula.IndexOf('{') + 1;
-            string rawMetaData = formula.Substring(index, formula.IndexOf('}') - index);
-            var metaDataPairs = rawMetaData.Split(',');
-            string[] metaDataHeaders = new string[] { "id:", "trackIx:" };
-            int succesfullyExtractedParams = 0;
-            metaData.Id = "";
-            metaData.TrackNumber = -1;
-
-            foreach (var metaDataPair in metaDataPairs)
-            {
-                int ix, value;
-                if ((ix = metaDataPair.IndexOf(metaDataHeaders[0])) >= 0)
-                {
-                    metaData.Id = metaDataPair.Substring(ix + metaDataHeaders[0].Length);
-                    succesfullyExtractedParams++;
-                }
-                else if ((ix = metaDataPair.IndexOf(metaDataHeaders[1])) >= 0 && int.TryParse(metaDataPair.Substring(ix + metaDataHeaders[1].Length), out value))
-                {
-                    metaData.TrackNumber = value;
-                    succesfullyExtractedParams++;
-                }
-            }
-            return succesfullyExtractedParams == metaDataHeaders.Length;
-        }*/
-
         public static ProcessResult<ChainedCommand> ParseFormulaToChainedCommand(string formula, List<Clip> clips, ClipMetaData metadata)
         {
             var valid = new char[] { '[', ']' }.All(c => formula.IndexOf(c) >= 0);

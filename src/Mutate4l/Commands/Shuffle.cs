@@ -11,7 +11,7 @@ namespace Mutate4l.Commands
     {
         public Clip By { get; set; } = new Clip(4, true);
 
-        [OptionInfo(type: OptionType.Default)]
+        [OptionInfo(type: OptionType.Default, 0)]
         public int[] ShuffleValues { get; set; } = new int[0];
     }
 

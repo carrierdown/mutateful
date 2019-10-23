@@ -9,9 +9,10 @@ namespace Mutate4l.Commands
 {
     public class QuantizeOptions
     {
+        [OptionInfo(0f, 1f)]
         public decimal/*ActualDecimal*/ Amount { get; set; } = 1.0m;
 
-        [OptionInfo(type: OptionType.Default)]
+        [OptionInfo(type: OptionType.Default, 1/64f)]
         public decimal[] Divisions { get; set; } = { 1/16m };
 
 //        public decimal Threshold { get; set; } = 0.125m; // to be added

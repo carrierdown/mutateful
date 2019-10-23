@@ -34,11 +34,12 @@ namespace Mutate4l.Commands
 
         public Shape Shape { get; set; } = Shape.Linear;
 
+        [OptionInfo(0f, 1f)]
         public decimal/*ActualDecimal*/ Strength { get; set; } = 1.0m;
 
         public bool VelocityToStrength { get; set; }
 
-        [OptionInfo(type: OptionType.Default)]
+        [OptionInfo(type: OptionType.Default, 1)]
         public int[] RatchetValues { get; set; } = new int[0];
     }
 

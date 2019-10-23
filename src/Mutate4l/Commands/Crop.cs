@@ -7,7 +7,7 @@ namespace Mutate4l.Commands
     // Extracts a region of the current clips, effectively cropping them. If two params, start - duration is used, otherwise 0 - duration.
     public class CropOptions
     {
-        [OptionInfo(type: OptionType.Default)]
+        [OptionInfo(type: OptionType.Default, 1/32f)]
         public decimal[] Lengths { get; set; } = { 2 };
     }
 
