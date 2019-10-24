@@ -13,6 +13,10 @@
 ## Concept
 `mutate4l` reimagines Ableton Live's session view as a spreadsheet-like live coding setup. You add formulas to dynamically shuffle, arpeggiate, constrain, scale, retrigger, and otherwise transform clips in myriad ways. Formulas operate on other clips and/or textual inputs to produce new clips. Unlike most experimental sequencers, `mutate4l` leverages Live's built-in sequencing functionality, allowing you to use any existing MIDI clip as a source of fresh inspiration.
 
+## Installing
+
+Go to the [latest release](https://github.com/carrierdown/mutate4l/releases/latest) for installation instructions and download links for Windows and OS X.
+
 ## Usage examples
 
 ### Creating an arpeggio from a sustained note and a chord
