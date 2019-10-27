@@ -1,4 +1,4 @@
-# `mutate4l`
+<h1 align="center"><img src="./assets/mutateful-logo.png" alt="mutateful"></h1>
 
 **tl;dr:** `mutate4l` enables live coding in Ableton Live's session view. Set up transformations that trigger whenever a source clip is changed, including arpeggiation, shuffling, and ratcheting/retriggering.
 
