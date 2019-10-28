@@ -3,7 +3,7 @@
 **tl;dr:** `mutateful` enables live coding in Ableton Live's session view. Set up transformations that trigger whenever a source clip is changed, including arpeggiation, shuffling, and ratcheting/retriggering.
 
 <p align="center">
-  <img src="https://github.com/carrierdown/mutateful/assets/mu4l-walkthrough.gif" alt="mutateful in action">
+  <img src="https://github.com/carrierdown/mutateful/blob/master/assets/mu4l-walkthrough.gif" alt="mutateful in action">
 </p>
 
 > With live coding being all the rage this looks like a groovy new idea to bring that excitement and its new possibilities to Ableton. I’m watching closely.
