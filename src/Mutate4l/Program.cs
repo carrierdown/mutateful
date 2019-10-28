@@ -8,12 +8,11 @@ namespace Mutate4l
     {
         private static void Main(string[] args)
         {
-            // todo: Check all clip functions for mutating operations - any mutating operations will cause problems with svg rendering.
             var customCulture = (CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
-            Console.WriteLine("Welcome to mutate4l!");
-            Console.WriteLine("Open Ableton Live, drop mutate4l-connector.amxd onto one of the tracks, and start entering formulas.");
+            Console.WriteLine("Welcome to mutateful!");
+            Console.WriteLine("Open Ableton Live, drop mutateful-connector.amxd onto one of the tracks, and start entering formulas.");
             CliHandler.Start();
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
