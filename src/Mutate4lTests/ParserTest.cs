@@ -42,6 +42,13 @@ namespace Mutate4lTests
             var result = Parser.ParseFormulaToChainedCommand("[0] interleave % fisk -by [1] -mode event", new List<Clip> {Clip1, Clip2}, new ClipMetaData(100, 0));
             Assert.IsFalse(result.Success);
         }
+        
+        [TestMethod]
+        public void TestParseInvalidInputDoubleParam()
+        {
+            var result = Parser.ParseFormulaToChainedCommand("[0] arp -by [1] -by [2]", new List<Clip> {Clip1, Clip2, Clip1}, new ClipMetaData(100, 0));
+            Assert.IsTrue(result.Success);
+        }
 
         [TestMethod]
         public void TestParseMusicalDivision()

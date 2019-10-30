@@ -89,7 +89,10 @@ namespace Mutate4l.Cli
                     {
                         values.Add(tokensAsList[i++]);
                     }
-                    command.Options.Add(type, values);
+                    if (!command.Options.ContainsKey(type))
+                    {
+                        command.Options.Add(type, values);
+                    }
                 }
                 else 
                 {
