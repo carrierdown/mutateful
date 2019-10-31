@@ -34,7 +34,7 @@ namespace Mutate4l.IO
 
             using (var udpClient = new UdpClient(ReceivePort))
             {
-                udpClient.Send(message, message.Length, "localhost", SendPort);
+                udpClient.Send(message, message.Length, "127.0.0.1", SendPort);
                 result = udpClient.Receive(ref endPoint);
             }
             var data = Encoding.ASCII.GetString(result);

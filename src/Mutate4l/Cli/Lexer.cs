@@ -157,7 +157,7 @@ namespace Mutate4l.Cli
         {
             var i = pos;
             var slashFoundAt = -1;
-            while (i < Buffer.Length && (IsNumeric(Buffer[i]) || Buffer[i] == '/'))
+            while (i < Buffer.Length && (IsNumeric(Buffer[i]) || (Buffer[i] == '/' && i > pos)))
             {
                 if (Buffer[i] == '/')
                 {

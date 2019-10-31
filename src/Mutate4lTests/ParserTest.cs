@@ -44,6 +44,13 @@ namespace Mutate4lTests
         }
         
         [TestMethod]
+        public void TestParseInvalidInput2()
+        {
+            var result = Parser.ParseFormulaToChainedCommand("[0] slice /16", new List<Clip> {Clip1, Clip2}, new ClipMetaData(100, 0));
+            Assert.IsFalse(result.Success);
+        }
+        
+        [TestMethod]
         public void TestParseInvalidInputDoubleParam()
         {
             var result = Parser.ParseFormulaToChainedCommand("[0] arp -by [1] -by [2]", new List<Clip> {Clip1, Clip2, Clip1}, new ClipMetaData(100, 0));

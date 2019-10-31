@@ -52,7 +52,15 @@ namespace Mutate4l.Cli
                     continue;
                 }
 
-                var processedClipWrapper = ClipProcessor.ProcessChainedCommand(chainedCommandWrapper.Result);
+                ProcessResultArray<Clip> processedClipWrapper;
+                try
+                {
+                    processedClipWrapper = ClipProcessor.ProcessChainedCommand(chainedCommandWrapper.Result);
+                }
+                catch (Exception e)
+                {
+                    processedClipWrapper = new ProcessResultArray<Clip>($"{formula}. Please check your syntax. Exception: {e.Message}");
+                }
 
                 if (processedClipWrapper.WarningMessage.Length > 0)
                 {

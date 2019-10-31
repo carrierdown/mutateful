@@ -65,7 +65,7 @@ namespace Mutate4l.Cli
                 }
             }
             commandTokensLists.Add(activeCommandTokenList); // add last command token list
-            var commands = commandTokensLists.Select(x => ParseTokensToCommand(x)).ToList();
+            var commands = commandTokensLists.Select(ParseTokensToCommand).ToList();
 
             var chainedCommand = new ChainedCommand(commands, sourceClips, metadata);
             return new ProcessResult<ChainedCommand>(chainedCommand);
