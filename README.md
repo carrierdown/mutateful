@@ -100,3 +100,17 @@ Number | Whole number (integer), either negative or positive
 Decimal number | Decimal number, from 0.0 and upwards
 
 Full documentation of all commands will follow at a later date. In the meantime, star this repo and/or follow me at [twitter.com/KnUpland](https://twitter.com/KnUpland) for updates.
+
+## Compiling from source
+
+### Pre-requisites
+
+- Git
+- .NET Core 3 SDK
+
+### Building
+
+Using the command line/terminal, navigate to the src folder inside the mutateful repository and run:
+
+Windows: `dotnet publish -c Release`
+MacOS / OS X: `dotnet publish -c Release /p:RuntimeIdentifier=osx-x64 /p:PublishTrimmed=false`
