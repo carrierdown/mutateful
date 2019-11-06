@@ -30,7 +30,7 @@ namespace Mutate4l.Cli
             { "legato", Legato }, { "leg", Legato },
             { "mask", Mask},
             { "monophonize", Monophonize }, { "mono", Monophonize },
-            { "prepad", PrePad }, { "pp", PrePad },
+            { "padding", Padding }, { "pad", Padding },  { "p", Padding },
             { "quantize", Quantize }, { "qnt", Quantize },
             { "ratchet", Ratchet }, { "rat", Ratchet },
             { "relength", Relength }, { "relen", Relength },

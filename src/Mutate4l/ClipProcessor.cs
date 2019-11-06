@@ -90,8 +90,8 @@ namespace Mutate4l
                 case TokenType.Monophonize:
                     resultContainer = Monophonize.Apply(clips);
                     break;
-                case TokenType.PrePad:
-                    resultContainer = PrePad.Apply(command, clips);
+                case TokenType.Padding:
+                    resultContainer = Padding.Apply(command, clips);
                     break;
                 case TokenType.Quantize:
                     resultContainer = Quantize.Apply(command, clips);

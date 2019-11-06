@@ -17,7 +17,7 @@
         Legato,
         Mask,
         Monophonize,
-        PrePad,
+        Padding,
         Quantize,
         Ratchet,
         Relength,
