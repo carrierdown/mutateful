@@ -4,14 +4,14 @@ using Mutate4l.Utility;
 
 namespace Mutate4l.Commands
 {
-    // Extracts a region of the current clips, effectively cropping them. If two params, start - duration is used, otherwise 0 - duration.
+    // Extracts notes of the current clips and inserts nothing in front, effectively padding them. 
     public class PrePadOptions
     {
         [OptionInfo(type: OptionType.Default, 1/2f)]
         public decimal[] Lengths { get; set; } = { 1 };
     }
 
-    // # desc: Crops a clip to the desired length, or within the desired region.
+    // # desc: Prepads a clip with the desired length.
     public static class PrePad
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
