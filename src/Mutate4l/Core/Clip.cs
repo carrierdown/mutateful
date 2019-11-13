@@ -3,18 +3,6 @@ using System.Collections.Generic;
 
 namespace Mutate4l.Core
 {
-    public struct ClipReference
-    {
-        public int Track;
-        public int Clip;
-
-        public ClipReference(int track, int clip)
-        {
-            Track = track;
-            Clip = clip;
-        }
-    }
-
     public class Clip : IComparable<Clip>
     {
         public SortedList<NoteEvent> Notes { get; set; }
