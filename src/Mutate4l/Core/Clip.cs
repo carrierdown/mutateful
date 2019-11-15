@@ -3,38 +3,26 @@ using System.Collections.Generic;
 
 namespace Mutate4l.Core
 {
-    public struct ClipReference
-    {
-        public int Track;
-        public int Clip;
-
-        public ClipReference(int track, int clip)
-        {
-            Track = track;
-            Clip = clip;
-        }
-    }
-
     public class Clip : IComparable<Clip>
     {
         public SortedList<NoteEvent> Notes { get; set; }
-        public int Count { get { return Notes.Count; } }
+        public int Count => Notes.Count;
         public decimal Length { get; set; }
         public bool IsLooping { get; set; }
         public ClipReference ClipReference { get; set; }
       
         public string RawClipReference { get; set; }
         
-        public decimal EndDelta
-        {
-            get { return Length - Math.Clamp(Notes[Count - 1].Start, 0, Length) + Notes[0].Start; }
-        }
-        public decimal EndDeltaSilent
-        {
-            get { return Length - Math.Clamp(Notes[Count - 1].End, 0, Length) + Notes[0].Start; }
-        }
+        public decimal EndDelta => Length - Math.Clamp(Notes[^1].Start, 0, Length) + Notes[0].Start;
+
+        public decimal EndDeltaSilent => Length - Math.Clamp(Notes[^1].End, 0, Length) + Notes[0].Start;
+
         public bool SelectionActive { get; private set; }
 
+        private static Clip EmptyField;
+
+        public static Clip Empty => EmptyField ??= new Clip(4, true);
+        
         public Clip(decimal length, bool isLooping)
         {
             Notes = new SortedList<NoteEvent>();
@@ -89,7 +77,7 @@ namespace Mutate4l.Core
         {
             // todo: warn if index > Notes.Count - 1
             if (index >= Count - 1)
-                return Length - Math.Clamp(Notes[Count - 1].Start, 0, Length);
+                return Length - Math.Clamp(Notes[^1].Start, 0, Length);
             else
                 return Notes[index + 1].Start - Notes[index].Start;
         }
