@@ -8,6 +8,10 @@ namespace Mutate4l.Core
         public Clip[] SourceClips { get; }
         public ClipMetaData TargetMetaData { get; }
 
+        private static ChainedCommand EmptyField;
+
+        public static ChainedCommand Empty => EmptyField ??= new ChainedCommand();
+        
         public ChainedCommand(List<Command> commands, Clip[] sourceClips, ClipMetaData targetMetadata)
         {
             Commands = commands;
@@ -15,6 +19,11 @@ namespace Mutate4l.Core
             TargetMetaData = targetMetadata;
         }
 
-        public ChainedCommand() { }
+        private ChainedCommand()
+        {
+            Commands = new List<Command>();
+            SourceClips = new Clip[0];
+            TargetMetaData = new ClipMetaData();
+        }
     }
 }

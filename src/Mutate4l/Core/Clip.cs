@@ -23,6 +23,10 @@ namespace Mutate4l.Core
         }
         public bool SelectionActive { get; private set; }
 
+        private static Clip EmptyField;
+
+        public static Clip Empty => EmptyField ??= new Clip(4, true);
+        
         public Clip(decimal length, bool isLooping)
         {
             Notes = new SortedList<NoteEvent>();
