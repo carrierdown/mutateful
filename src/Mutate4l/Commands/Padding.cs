@@ -8,16 +8,20 @@ namespace Mutate4l.Commands
     // An optional second argument enforces an abritrary total duration;
     public class PaddingOptions
     {
-        [OptionInfo(type: OptionType.Default, 1/2f)]
-        public decimal[] Lengths { get; set; } = { 2 };
+        [OptionInfo(type: OptionType.Default, 4 / 128f)]
+        public decimal PadAmount { get; set; } = 2;
+
+        public decimal Length { get; set; } = -1;
+        
+        public bool Post { get; set; } // If specified, adds padding to the end of the clip instead
     }
 
-    // # desc: Prepads a clip with the desired length. Optionally with an abritrary total duration.
+    // # desc: Adds silence (i.e. padding) at the start of a clip, or at the end of a clip if -post is specified. If -length is specified, padding is calculated so that the total length of the clip matches this. If length is shorter than the current clip length, the clip is cropped instead.
     public static class Padding
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
-            (var success, var msg) = OptionParser.TryParseOptions(command, out PaddingOptions options);
+            var (success, msg) = OptionParser.TryParseOptions(command, out PaddingOptions options);
             if (!success)
             {
                 return new ProcessResultArray<Clip>(msg);
@@ -27,21 +31,37 @@ namespace Mutate4l.Commands
 
         public static ProcessResultArray<Clip> Apply(PaddingOptions options, params Clip[] clips)
         {
-            var processedClips = new Clip[clips.Length];         
-            var i = 0;
-            foreach (var clip in clips)
-            {
-                var duration = options.Lengths.Length > 1 ? options.Lengths[1] : options.Lengths[0] + clip.Length;
-                var processedClip = new Clip(duration, clip.IsLooping);
-  
-                processedClip.Notes.AddRange(ClipUtilities.GetSplitNotesInRangeAtPosition(0, duration, clip.Notes, 0));
+            var processedClips = new Clip[clips.Length];
 
-                foreach (var item in processedClip.Notes)
+            for (var i = 0; i < clips.Length; i++)
+            {
+                var clip = new Clip(clips[i]);
+                var padAmount = options.PadAmount;
+                if (options.Length > 0)
                 {
-                    item.Start += options.Lengths[0];
+                    if (options.Length > clip.Length)
+                    {
+                        padAmount = options.Length - clip.Length;
+                    }
+                    else if (options.Length < clip.Length)
+                    {
+                        processedClips[i] = Crop.CropClip(clip, 0, options.Length);
+                        continue;
+                    }
                 }
-                processedClips[i++] = processedClip;
+
+                clip.Length += padAmount;
+                if (!options.Post)
+                {
+                    foreach (var noteEvent in clip.Notes)
+                    {
+                        noteEvent.Start += padAmount;
+                    }
+                }
+
+                processedClips[i] = clip;
             }
+
             return new ProcessResultArray<Clip>(processedClips);
         }
     }
