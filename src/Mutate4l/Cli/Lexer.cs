@@ -34,6 +34,7 @@ namespace Mutate4l.Cli
             { "quantize", Quantize }, { "qnt", Quantize },
             { "ratchet", Ratchet }, { "rat", Ratchet },
             { "relength", Relength }, { "relen", Relength },
+            { "remap", Remap }, 
             { "resize", Resize },
             { "scan", Scan },
             { "setlength", SetLength }, { "length", SetLength }, { "len", SetLength },
@@ -84,6 +85,7 @@ namespace Mutate4l.Cli
             { "-takecounts", TakeCounts	},
             { "-transposevalues", TransposeValues },
             { "-threshold", Threshold }, { "-thres", Threshold },
+            { "-to", To},
             { "-velocitytostrength", VelocityToStrength }, { "-veltostr", VelocityToStrength },
             { "-window", Window },
             { "-with", With }

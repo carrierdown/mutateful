@@ -102,6 +102,9 @@ namespace Mutate4l
                 case TokenType.Relength:
                     resultContainer = Relength.Apply(command, clips);
                     break;
+                case TokenType.Remap:
+                    resultContainer = Remap.Apply(command, clips);
+                    break;
                 case TokenType.Resize:
                     resultContainer = Resize.Apply(command, clips);
                     break;
