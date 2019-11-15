@@ -33,11 +33,16 @@ namespace Mutate4l.Commands
 
             foreach (var clip in clips)
             {
-                var processedClip = new Clip(duration, clip.IsLooping);
-                processedClip.Notes.AddRange(ClipUtilities.GetSplitNotesInRangeAtPosition(start, start + duration, clip.Notes, 0));
-                processedClips[i++] = processedClip;
+                processedClips[i++] = CropClip(clip, start, duration);
             }
             return new ProcessResultArray<Clip>(processedClips);
+        }
+
+        public static Clip CropClip(Clip clip, decimal start, decimal duration)
+        {
+            var processedClip = new Clip(duration, clip.IsLooping);
+            processedClip.Notes.AddRange(ClipUtilities.GetSplitNotesInRangeAtPosition(start, start + duration, clip.Notes, 0));
+            return processedClip;
         }
     }
 }
