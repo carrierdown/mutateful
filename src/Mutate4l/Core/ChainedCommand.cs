@@ -19,7 +19,7 @@ namespace Mutate4l.Core
             TargetMetaData = targetMetadata;
         }
 
-        private ChainedCommand()
+        public ChainedCommand()
         {
             Commands = new List<Command>();
             SourceClips = new Clip[0];
