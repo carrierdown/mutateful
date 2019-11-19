@@ -62,6 +62,7 @@ namespace Mutate4l.Cli
             { "-invert", Invert },
             { "-inv", Invert },
             { "-length", Length }, { "-len", Length },
+            { "-lengths", Lengths }, { "-lens", Lengths },
             { "-magnetic", Magnetic }, { "-mag", Magnetic },
             { "-max", Max },
             { "-min", Min },

@@ -49,6 +49,7 @@
         Factor,
         Invert,
         Length,
+        Lengths,
         Magnetic,
         Max,
         Min,

@@ -43,6 +43,7 @@ namespace Mutate4l.Commands
                 var destIx = 0f;
                 foreach (var sourcePitch in sourcePitches)
                 {
+                    // future improvement: any notes being stuck together on the same pitch should first shorten existing notes if overlaps occur
                     map[sourcePitch] = destPitches[(int)Math.Floor(destIx)];
                     destIx += inc;
                 }
