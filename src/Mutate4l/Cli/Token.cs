@@ -9,9 +9,15 @@ namespace Mutate4l.Cli
         public string Value { get; }
         public int Position { get; }
         public Clip Clip { get; }
-
+        public OperatorType OperatorType { get; }
+        public string[] Values { get; }
+        
         public Token(TokenType type, string value, int position)
         {
+            Values = new string[0];
+            Clip = Clip.Empty;
+            OperatorType = OperatorType.None;
+
             Type = type;
             Value = value;
             Position = position;
@@ -22,9 +28,16 @@ namespace Mutate4l.Cli
             Clip = clip;
         }
 
+        public Token(TokenType type, int position, OperatorType operatorType, string[] values) : this(type, "", position)
+        {
+            OperatorType = operatorType;
+            Values = values;
+        }
+
         public bool IsClipReference => Type == TokenType.ClipReference;
         public bool IsOption => Type > _OptionsBegin && Type < _OptionsEnd;
         public bool IsCommand => Type > _CommandsBegin && Type < _CommandsEnd;
+        public bool IsOperatorToken => OperatorType != OperatorType.None;
         public bool IsOptionValue => (Type > _EnumValuesBegin && Type < _EnumValuesEnd) || (Type > _ValuesBegin && Type < _ValuesEnd);
     }
 }
