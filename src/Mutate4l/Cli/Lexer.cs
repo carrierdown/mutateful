@@ -120,7 +120,7 @@ namespace Mutate4l.Cli
 
         private bool IsSingleOperator(int pos)
         {
-            return SingleOperators.Any(o => o.Key == Buffer[pos]);
+            return SingleOperators.Any(o => o.Key == Buffer[pos]) || IsRepeatOperator(pos);
         }
 
         private bool IsRepeatOperator(int pos)

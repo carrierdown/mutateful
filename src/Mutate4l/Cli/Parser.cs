@@ -79,27 +79,35 @@ namespace Mutate4l.Cli
 
             var processedTokens = new List<Token>(tokens.Length);
             var i = 0;
-            while (i < tokens.Length)
+            while (i + 1 < tokens.Length)
             {
-                if (i + 1 < tokens.Length)
+                if (tokens[i + 1].Type >= TokenType._OperatorsBegin && tokens[i + 1].Type <= TokenType._OperatorsEnd)
                 {
-                    if (tokens[i + 1].Type >= TokenType._OperatorsBegin && tokens[i + 1].Type >= TokenType._OperatorsEnd)
+                    var token = tokens[i + 1];
+                    switch (token.Type)
                     {
-                        var token = tokens[i + 1];
-                        switch (token.Type)
-                        {
-                            case TokenType.RepeatOperator when (i + 2 < tokens.Length && tokens[i].Type == tokens[i + 2].Type):
-                                processedTokens.Add(new Token(tokens[i].Type, tokens[i].Position, OperatorType.Repeat, new []{ tokens[i].Value, tokens[i + 2].Value}));
-                                i += 3;
-                                break;
-                            default:
-                                return new ProcessResultArray<Token>("Error resolving operator x");
-                        }
+                        case TokenType.RepeatOperator when (i + 2 < tokens.Length && tokens[i].Type == tokens[i + 2].Type):
+                            var valueToRepeat = tokens[i].Value;
+                            if (int.TryParse(tokens[i + 2].Value, out var repeatCount))
+                            {
+                                for (var index = 0; index < repeatCount; index++)
+                                {
+                                    processedTokens.Add(new Token(tokens[index].Type, valueToRepeat, tokens[index].Position));
+                                }
+                            }
+                            else
+                            {
+                                return new ProcessResultArray<Token>($"Unable to parse repeat operator. Tokens: {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
+                            }
+                            i += 3;
+                            break;
+                        default:
+                            return new ProcessResultArray<Token>($"Error resolving operator {tokens[i + 1].Value}");
                     }
-                    else
-                    {
-                        processedTokens.Add(tokens[i++]);
-                    }
+                }
+                else
+                {
+                    processedTokens.Add(tokens[i++]);
                 }
             }
             return new ProcessResultArray<Token>(processedTokens.ToArray());
