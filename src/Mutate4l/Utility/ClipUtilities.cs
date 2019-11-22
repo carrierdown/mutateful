@@ -64,9 +64,9 @@ namespace Mutate4l.Utility
             List<NoteEvent> results = new List<NoteEvent>();
             foreach (var note in notes)
             {
-                if ((note.Start + note.Duration) < start) continue;
+                if (note.End < start) continue;
                 if (note.Start > end) break;
-                if (note.InsideInterval(start, end))
+                if (note.InsideIntervalInclusive(start, end))
                 {
                     AddNote(new NoteEvent(note.Pitch, note.Start - start + position, note.Duration, note.Velocity), results);
                 }
@@ -74,11 +74,11 @@ namespace Mutate4l.Utility
                 {
                     AddNote(new NoteEvent(note.Pitch, position, end - start, note.Velocity), results);
                 }
-                else if (note.CrossesStartOfInterval(start, end))
+                else if (note.CrossesStartOfIntervalInclusive(start, end))
                 {
                     AddNote(new NoteEvent(note.Pitch, position, (note.Start + note.Duration) - start, note.Velocity), results);
                 }
-                else if (note.CrossesEndOfInterval(start, end)) {
+                else if (note.CrossesEndOfIntervalInclusive(start, end)) {
                     AddNote(new NoteEvent(note.Pitch, note.Start - start + position, end - note.Start, note.Velocity), results);
                 }
             }
@@ -319,11 +319,8 @@ namespace Mutate4l.Utility
             {
                 i++;
                 if (notesToRemove.Contains(note)) continue;
-                var overlappingNotes = clip.Notes.Skip(i).Where(x => x.StartsInsideInterval(note.Start, note.End)).ToList();
-                foreach (var overlappingNote in overlappingNotes)
-                {
-                    notesToRemove.Add(overlappingNote);
-                }
+                var overlappingNotes = clip.Notes.Skip(i).Where(x => x.StartsInsideIntervalInclusive(note.Start, note.End)).ToList();
+                notesToRemove.AddRange(overlappingNotes);
             }
             foreach (var note in clip.Notes)
             {
@@ -334,6 +331,31 @@ namespace Mutate4l.Utility
             }
             clip.Notes = result;
             return clip;
+        }
+
+        public static void AddNoteCutting(Clip clip, NoteEvent noteToAdd)
+        {
+            var collidingNotes = clip.Notes.Where(x => x.Pitch == noteToAdd.Pitch && noteToAdd.StartsInsideInterval(x.Start, x.End)).ToArray();
+            if (collidingNotes.Length > 0)
+            {
+                foreach (var note in collidingNotes)
+                {
+                    if (note.Start == noteToAdd.Start && noteToAdd.Duration > note.Duration) // largest note wins in the case of a collision
+                    {
+                        clip.Notes.RemoveAt(clip.Notes.IndexOf(note));
+                    }
+                    else
+                    {
+                        note.Duration = noteToAdd.Start - note.Start;
+                    }
+                }
+            }
+            clip.Notes.Add(noteToAdd);
+        }
+
+        public static Clip[] CreateEmptyPlaceholderClips(IEnumerable<Clip> clips)
+        {
+            return clips.Where(x => x.Count > 0).Select(x => new Clip(x.Length, x.IsLooping)).ToArray();
         }
     }
 }

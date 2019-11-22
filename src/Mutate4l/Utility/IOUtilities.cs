@@ -76,6 +76,7 @@ namespace Mutate4l.Utility
 
             foreach (var note in clip.Notes)
             {
+                if (note.Velocity == 0) continue;
                 result.Add((byte)note.Pitch);
                 result.AddRange(BitConverter.GetBytes((Single)note.Start));
                 result.AddRange(BitConverter.GetBytes((Single)note.Duration));

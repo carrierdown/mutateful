@@ -10,7 +10,7 @@ namespace Mutate4l.Core
         private decimal StartField;
 
         public int Pitch {
-            get { return Math.Clamp(PitchField, 0, 127); }
+            get => Math.Clamp(PitchField, 0, 127);
             set {
                 if (HasChildren)
                 {
@@ -23,7 +23,10 @@ namespace Mutate4l.Core
 
         public decimal Duration { get; set; }
 
-        public int Velocity { get { return Math.Clamp(VelocityField, 1, 127); } set { VelocityField = value; } }
+        public int Velocity { 
+            get => Math.Clamp(VelocityField, 0, 127);
+            set => VelocityField = value;
+        }
 
         public decimal End => Start + Duration;
 
@@ -31,20 +34,11 @@ namespace Mutate4l.Core
 
         public List<NoteEvent> Children { get; set; }
 
-        public bool HasChildren
-        {
-            get
-            {
-                return Children?.Count > 0;
-            }
-        }
+        public bool HasChildren => Children?.Count > 0;
 
         public decimal Start
         {
-            get
-            {
-                return StartField;
-            }
+            get => StartField;
             set
             {
                 StartField = value;

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Mutate4l.Cli;
 using Mutate4l.Commands;
 using Mutate4l.Core;
@@ -11,6 +12,55 @@ namespace Mutate4l
 {
     public static class ClipProcessor
     {
+        public static ProcessResultArray<Clip> ProcessCommand(Command command, Clip[] incomingClips, ClipMetaData targetMetadata)
+        {
+            var clips = new Clip[incomingClips.Length];
+            for (var i = 0; i < incomingClips.Length; i++)
+            {
+                clips[i] = new Clip(incomingClips[i]);
+            }
+
+            return command.Id switch
+            {
+                TokenType.Arpeggiate => Arpeggiate.Apply(command, clips),
+                TokenType.Concat => Concat.Apply(clips),
+                TokenType.Crop => Crop.Apply(command, clips),
+                TokenType.Filter => Filter.Apply(command, clips),
+                TokenType.Interleave => Interleave.Apply(command, targetMetadata, clips),
+                TokenType.Legato => Legato.Apply(clips),
+                TokenType.Mask => Mask.Apply(command, clips),
+                TokenType.Monophonize => Monophonize.Apply(clips),
+                TokenType.Padding => Padding.Apply(command, clips),
+                TokenType.Quantize => Quantize.Apply(command, clips),
+                TokenType.Ratchet => Ratchet.Apply(command, clips),
+                TokenType.Relength => Relength.Apply(command, clips),
+                TokenType.Remap => Remap.Apply(command, clips),
+                TokenType.Resize => Resize.Apply(command, clips),
+                TokenType.Scale => Scale.Apply(command, clips),
+                TokenType.Scan => Scan.Apply(command, clips),
+                TokenType.SetLength => SetLength.Apply(command, clips),
+                TokenType.SetPitch => SetPitch.Apply(command, clips),
+                TokenType.SetRhythm => SetRhythm.Apply(command, clips),
+                TokenType.Shuffle => Shuffle.Apply(command, clips),
+                TokenType.Skip => Skip.Apply(command, clips),
+                TokenType.Slice => Slice.Apply(command, clips),
+                TokenType.Take => Take.Apply(command, clips),
+                TokenType.Transpose => Transpose.Apply(command, clips),
+                TokenType.InterleaveEvent => ((Func<ProcessResultArray<Clip>>) (() =>
+                {
+                    var (success, msg) = OptionParser.TryParseOptions(command, out InterleaveOptions options);
+                    if (!success)
+                    {
+                        return new ProcessResultArray<Clip>(msg);
+                    }
+
+                    options.Mode = InterleaveMode.Event;
+                    return Interleave.Apply(options, targetMetadata, clips);
+                }))(),
+                _ => new ProcessResultArray<Clip>($"Unsupported command {command.Id}")
+            };
+        }
+
         public static ProcessResultArray<Clip> ProcessChainedCommand(ChainedCommand chainedCommand)
         {
             Clip[] sourceClips = chainedCommand.SourceClips.Where(c => c.Notes.Count > 0).ToArray();
@@ -42,101 +92,6 @@ namespace Mutate4l
             if (warnings.Count > 0)
             {
                 resultContainer = new ProcessResultArray<Clip>(resultContainer.Success, resultContainer.Result, resultContainer.ErrorMessage, string.Join(System.Environment.NewLine, warnings));
-            }
-            return resultContainer;
-        }
-
-        public static ProcessResultArray<Clip> ProcessCommand(Command command, Clip[] incomingClips, ClipMetaData targetMetadata)
-        {
-            var clips = new Clip[incomingClips.Length];
-            for (var i = 0; i < incomingClips.Length; i++)
-            {
-                clips[i] = new Clip(incomingClips[i]);
-            }
-
-            ProcessResultArray<Clip> resultContainer;
-            switch (command.Id)
-            {
-                case TokenType.Arpeggiate:
-                    resultContainer = Arpeggiate.Apply(command, clips);
-                    break;
-                case TokenType.Concat:
-                    resultContainer = Concat.Apply(clips);
-                    break;
-                case TokenType.Crop:
-                    resultContainer = Crop.Apply(command, clips);
-                    break;
-                case TokenType.Filter:
-                    resultContainer = Filter.Apply(command, clips);
-                    break;
-                case TokenType.Interleave:
-                    resultContainer = Interleave.Apply(command, targetMetadata, clips); 
-                    break;
-                case TokenType.InterleaveEvent:
-                    var (success, msg) = OptionParser.TryParseOptions(command, out InterleaveOptions options);
-                    if (!success)
-                    {
-                        return new ProcessResultArray<Clip>(msg);
-                    }
-                    options.Mode = InterleaveMode.Event;
-                    resultContainer = Interleave.Apply(options, targetMetadata, clips);
-                    break;
-                case TokenType.Legato:
-                    resultContainer = Legato.Apply(clips);
-                    break;
-                case TokenType.Mask:
-                    resultContainer = Mask.Apply(command, clips);
-                    break;
-                case TokenType.Monophonize:
-                    resultContainer = Monophonize.Apply(clips);
-                    break;
-                case TokenType.Padding:
-                    resultContainer = Padding.Apply(command, clips);
-                    break;
-                case TokenType.Quantize:
-                    resultContainer = Quantize.Apply(command, clips);
-                    break;
-                case TokenType.Ratchet:
-                    resultContainer = Ratchet.Apply(command, clips);
-                    break;
-                case TokenType.Relength:
-                    resultContainer = Relength.Apply(command, clips);
-                    break;
-                case TokenType.Remap:
-                    resultContainer = Remap.Apply(command, clips);
-                    break;
-                case TokenType.Resize:
-                    resultContainer = Resize.Apply(command, clips);
-                    break;
-                case TokenType.Scale:
-                    resultContainer = Scale.Apply(command, clips);
-                    break;
-                case TokenType.Scan:
-                    resultContainer = Scan.Apply(command, clips);
-                    break;
-                case TokenType.SetLength:
-                    resultContainer = SetLength.Apply(command, clips);
-                    break;
-                case TokenType.SetRhythm:
-                    resultContainer = SetRhythm.Apply(command, clips);
-                    break;
-                case TokenType.Shuffle:
-                    resultContainer = Shuffle.Apply(command, clips);
-                    break;
-                case TokenType.Skip:
-                    resultContainer = Skip.Apply(command, clips);
-                    break;
-                case TokenType.Slice:
-                    resultContainer = Slice.Apply(command, clips);
-                    break;
-                case TokenType.Take:
-                    resultContainer = Take.Apply(command, clips);
-                    break;
-                case TokenType.Transpose:
-                    resultContainer = Transpose.Apply(command, clips);
-                    break;
-                default:
-                    return new ProcessResultArray<Clip>($"Unsupported command {command.Id}");
             }
             return resultContainer;
         }

@@ -67,16 +67,16 @@ namespace Mutate4l.Commands
                 {
                     var note = clipToMask.Notes[i];
                     var clonedNote = new NoteEvent(note);
-                    if (maskNote.CrossesStartOfInterval(clonedNote.Start, clonedNote.End))
+                    if (maskNote.CrossesStartOfIntervalInclusive(clonedNote.Start, clonedNote.End))
                     {
                         note.Duration = maskNote.End - note.Start;
                         note.Start = maskNote.End;
                     }
-                    else if (maskNote.CrossesEndOfInterval(clonedNote.Start, clonedNote.End))
+                    else if (maskNote.CrossesEndOfIntervalInclusive(clonedNote.Start, clonedNote.End))
                     {
                         note.Duration -= note.End - maskNote.Start;
                     }
-                    else if (maskNote.InsideInterval(clonedNote.Start, clonedNote.End))
+                    else if (maskNote.InsideIntervalInclusive(clonedNote.Start, clonedNote.End))
                     {
                         note.Duration = maskNote.Start - note.Start;
                         note.Pitch = maskNote.Pitch;

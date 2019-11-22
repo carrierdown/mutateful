@@ -8,8 +8,7 @@ namespace Mutate4l.Commands
     public enum TransposeMode
     {
         Absolute, // pitch is transposed relative to an absolute base pitch of 60 (C4)
-        Relative, // pitch is transposed relative to the first note in the transposing clip
-        Overwrite // pitch is set to the notes in the transposing clip
+        Relative // pitch is transposed relative to the first note in the transposing clip
     }
 
     public class TransposeOptions
@@ -39,8 +38,6 @@ namespace Mutate4l.Commands
             {
                 return new ProcessResultArray<Clip>("No -by clip or transpose values specified.");
             }
-            //todo: maybe allow -mono option to monophonize by-clip
-            //ClipUtilities.Monophonize(options.By);
             int basePitch = 60;
             if (options.By.Count > 0)
             {
@@ -62,33 +59,19 @@ namespace Mutate4l.Commands
                 transposeValues = options.TransposeValues;
             } else
             {
-                transposeValues = options.By.Notes.Select(x => 
-                    options.Mode == TransposeMode.Overwrite ? 
-                        x.Pitch : 
-                        x.Pitch - basePitch
-                ).ToArray();
+                transposeValues = options.By.Notes.Select(x => x.Pitch - basePitch).ToArray();
             }
 
             foreach (var clip in clips)
             {
                 clip.GroupSimultaneousNotes();
-                if (options.Mode == TransposeMode.Overwrite)
+                for (var i = 0; i < clip.Count; i++)
                 {
-                    for (var i = 0; i < clip.Count; i++)
-                    {
-                        clip.Notes[i].Pitch = transposeValues[i % transposeValues.Length];
-                    }
-                }
-                else
-                {
-                    for (var i = 0; i < clip.Count; i++)
-                    {
-                        clip.Notes[i].Pitch += transposeValues[i % transposeValues.Length];
-                    }
+                    clip.Notes[i].Pitch += transposeValues[i % transposeValues.Length];
                 }
                 clip.Flatten();
             }
-            return new ProcessResultArray<Clip>(clips); // currently destructive
+            return new ProcessResultArray<Clip>(clips);
         }
     }
 }

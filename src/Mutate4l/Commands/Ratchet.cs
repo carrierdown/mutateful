@@ -176,7 +176,7 @@ namespace Mutate4l.Commands
                 // treating these modes the same for now - but can optionally match pitch as well when RatchetMode.Velocity is set
 //                if (mode == RatchetMode.Pitch)
 //                {
-                var targetNotes = targetSequence.Notes.Where(x => x.StartsInsideInterval(controlNote.Start, controlNote.End) && x.Start != -1).ToList();
+                var targetNotes = targetSequence.Notes.Where(x => x.StartsInsideIntervalInclusive(controlNote.Start, controlNote.End) && x.Start != -1).ToList();
 //                } else // velocity - pitch need to be taken into account as well
 //                {
 //                    targetNotes = targetSequence.Notes.Where(x => x.StartsInsideInterval(controlNote.Start, controlNote.End) && x.Pitch == controlNote.Pitch).ToList();
