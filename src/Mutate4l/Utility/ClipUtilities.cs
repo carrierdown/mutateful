@@ -355,7 +355,7 @@ namespace Mutate4l.Utility
 
         public static Clip[] CreateEmptyPlaceholderClips(IEnumerable<Clip> clips)
         {
-            return clips.Where(x => x.Count > 0).Select(x => new Clip(x.Length, x.IsLooping)).ToArray();
+            return clips.Select(x => new Clip(x.Length, x.IsLooping)).ToArray();
         }
     }
 }

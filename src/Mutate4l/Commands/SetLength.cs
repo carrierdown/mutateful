@@ -1,5 +1,6 @@
 using Mutate4l.Cli;
 using Mutate4l.Core;
+using Mutate4l.Utility;
 
 namespace Mutate4l.Commands
 {
@@ -24,20 +25,19 @@ namespace Mutate4l.Commands
 
         public static ProcessResultArray<Clip> Apply(SetLengthOptions options, params Clip[] clips)
         {
-            var resultClips = new Clip[clips.Length];
-
-            var i = 0;
-            foreach (var clip in clips)
+            var resultClips = ClipUtilities.CreateEmptyPlaceholderClips(clips);
+            for (var index = 0; index < clips.Length; index++)
             {
-                var resultClip = new Clip(clips[i].Length, clips[i].IsLooping);
+                var clip = clips[index];
+                var resultClip = resultClips[index];
                 var lengthCounter = 0;
                 foreach (var note in clip.Notes)
                 {
-                    resultClip.Add(new NoteEvent(note.Pitch, note.Start, options.Lengths[lengthCounter++ % options.Lengths.Length], note.Velocity));
+                    ClipUtilities.AddNoteCutting(resultClip, new NoteEvent(note)
+                    {
+                        Duration = options.Lengths[lengthCounter++ % options.Lengths.Length]
+                    });
                 }
-
-                resultClips[i] = resultClip;
-                i++;
             }
             return new ProcessResultArray<Clip>(resultClips);
         }

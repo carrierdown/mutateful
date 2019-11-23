@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Mutate4l.Cli;
 using Mutate4l.Core;
+using Mutate4l.Utility;
 
 namespace Mutate4l.Commands
 {
@@ -26,14 +27,18 @@ namespace Mutate4l.Commands
 
         public static ProcessResultArray<Clip> Apply(RemapOptions options, params Clip[] clips)
         {
-            foreach (var clip in clips)
+            var resultClips = ClipUtilities.CreateEmptyPlaceholderClips(clips);
+
+            for (var i = 0; i < clips.Length; i++)
             {
+                var clip = clips[i];
+                var resultClip = resultClips[i];
                 var sourcePitches = clip.Notes.Select(x => x.Pitch).Distinct().OrderBy(x => x).ToList();
-                var destPitches = options.To.Count > 0 ? 
-                    options.To.Notes.Select(x => x.Pitch).Distinct().OrderBy(x => x).ToList() : 
-                    Enumerable.Range(36, Math.Min(sourcePitches.Count, 128 - 36)).ToList();
+                var destPitches = options.To.Count > 0
+                    ? options.To.Notes.Select(x => x.Pitch).Distinct().OrderBy(x => x).ToList()
+                    : Enumerable.Range(36, Math.Min(sourcePitches.Count, 128 - 36)).ToList();
                 var inc = 1f;
-                
+
                 if (destPitches.Count < sourcePitches.Count)
                 {
                     inc = (float) destPitches.Count / sourcePitches.Count;
@@ -43,18 +48,17 @@ namespace Mutate4l.Commands
                 var destIx = 0f;
                 foreach (var sourcePitch in sourcePitches)
                 {
-                    // future improvement: any notes being stuck together on the same pitch should first shorten existing notes if overlaps occur
-                    map[sourcePitch] = destPitches[(int)Math.Floor(destIx)];
+                    map[sourcePitch] = destPitches[(int) Math.Floor(destIx)];
                     destIx += inc;
                 }
 
                 foreach (var note in clip.Notes)
                 {
-                    note.Pitch = map[note.Pitch];
+                    var remappedNote = new NoteEvent(note) { Pitch = map[note.Pitch] };
+                    ClipUtilities.AddNoteCutting(resultClip, remappedNote);
                 }
             }
-
-            return new ProcessResultArray<Clip>(clips);
+            return new ProcessResultArray<Clip>(resultClips);
         }
     }
 }
