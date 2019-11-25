@@ -33,7 +33,9 @@ namespace Mutate4l.Cli
             var lexer = new Lexer(formula, clips);
             var result = lexer.GetTokens();
             if (!result.Success) return new ProcessResult<ChainedCommand>(result.ErrorMessage);
-            Token[] commandTokens = result.Result;
+            var resolvedTokens = ResolveOperators(result.Result);
+            if (!resolvedTokens.Success) return new ProcessResult<ChainedCommand>(resolvedTokens.ErrorMessage);
+            Token[] commandTokens = resolvedTokens.Result;
             var commandTokensLists = new List<List<Token>>();
             var activeCommandTokenList = new List<Token>();
             var sourceClips = commandTokens.TakeWhile(x => x.Type == TokenType.InlineClip).Select(x => x.Clip).ToArray();
@@ -69,6 +71,46 @@ namespace Mutate4l.Cli
 
             var chainedCommand = new ChainedCommand(commands, sourceClips, metadata);
             return new ProcessResult<ChainedCommand>(chainedCommand);
+        }
+
+        private static ProcessResultArray<Token> ResolveOperators(Token[] tokens)
+        {
+            if (!tokens.Any(x => x.IsOperatorToken)) return new ProcessResultArray<Token>(tokens);
+
+            var processedTokens = new List<Token>(tokens.Length);
+            var i = 0;
+            while (i < tokens.Length)
+            {
+                if (i + 1 < tokens.Length && tokens[i + 1].Type >= TokenType._OperatorsBegin && tokens[i + 1].Type <= TokenType._OperatorsEnd)
+                {
+                    var token = tokens[i + 1];
+                    switch (token.Type)
+                    {
+                        case TokenType.RepeatOperator when (i + 2 < tokens.Length && tokens[i].Type == TokenType.Number):
+                            var valueToRepeat = tokens[i].Value;
+                            if (int.TryParse(tokens[i + 2].Value, out var repeatCount))
+                            {
+                                for (var index = 0; index < repeatCount; index++)
+                                {
+                                    processedTokens.Add(new Token(tokens[i].Type, valueToRepeat, tokens[i].Position));
+                                }
+                            }
+                            else
+                            {
+                                return new ProcessResultArray<Token>($"Unable to parse repeat operator. Tokens: {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
+                            }
+                            i += 3;
+                            break;
+                        default:
+                            return new ProcessResultArray<Token>($"Error resolving operator with tokens {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
+                    }
+                }
+                else
+                {
+                    processedTokens.Add(tokens[i++]);
+                }
+            }
+            return new ProcessResultArray<Token>(processedTokens.ToArray());
         }
 
         private static Command ParseTokensToCommand(IEnumerable<Token> tokens)

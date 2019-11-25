@@ -3,9 +3,6 @@
     public enum TokenType
     {
         NoToken,
-        CommandName,
-        OptionHeader,
-        OptionValue,
 
         _CommandsBegin,
         Arpeggiate,
@@ -105,10 +102,13 @@
         Number,
         _ValuesEnd,
 
-        Colon,
-        Destination,
-        AddToDestination,
-        Unset,
+        _OperatorsBegin,
+        RangeOperator,
+        AlternationOperator,
+        EmptyOperator,
+        RepeatOperator,
+        FillOperator,
+        _OperatorsEnd,
 
         _TestOptionsBegin,
         DecimalValue,

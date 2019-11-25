@@ -15,7 +15,10 @@ namespace Mutate4l.Cli
 
         private Dictionary<char, TokenType> SingleOperators = new Dictionary<char, TokenType>
         {
-            { ':', Colon }
+            { ':', RangeOperator },
+            { '\'', AlternationOperator },
+            { '_', EmptyOperator },
+            { '*', FillOperator }
         };
 
         private Dictionary<string, TokenType> Commands = new Dictionary<string, TokenType>
@@ -119,7 +122,12 @@ namespace Mutate4l.Cli
 
         private bool IsSingleOperator(int pos)
         {
-            return SingleOperators.Any(o => o.Key == Buffer[pos]);
+            return SingleOperators.Any(o => o.Key == Buffer[pos]) || IsRepeatOperator(pos);
+        }
+
+        private bool IsRepeatOperator(int pos)
+        {
+            return pos + 1 < Buffer.Length && !IsAlpha(pos + 1) && (Buffer[pos] == 'x' || Buffer[pos] == 'X');
         }
 
         private bool IsClipReference(int pos)
@@ -277,7 +285,14 @@ namespace Mutate4l.Cli
                 if (IsSingleOperator(Position))
                 {
                     char value = Buffer[Position];
-                    token = new Token(SingleOperators[value], value.ToString(), Position);
+                    if (SingleOperators.ContainsKey(value))
+                    {
+                        token = new Token(SingleOperators[value], value.ToString(), Position);
+                    }
+                    else
+                    {
+                        token = new Token(TokenType.RepeatOperator, "x", Position);
+                    }
                 }
                 else if (IsClipReference(Position))
                 {

@@ -74,8 +74,6 @@ namespace Mutate4l.Cli
         private static ProcessResultArray<object> ExtractPropertyData(PropertyInfo property, List<Token> tokens,
             bool noImplicitCast = false)
         {
-            TokenType? type = tokens.FirstOrDefault()?.Type;
-
             if (tokens.Count == 0)
             {
                 if (property.PropertyType == typeof(bool))
@@ -86,6 +84,8 @@ namespace Mutate4l.Cli
 
                 return new ProcessResultArray<object>($"Missing property value for non-bool parameter: {property.Name}");
             }
+
+            TokenType type = tokens[0].Type;
 
             var rangeInfo = property
                 .GetCustomAttributes(false)
@@ -104,6 +104,8 @@ namespace Mutate4l.Cli
                     return new ProcessResultArray<object>(new object[] {ClampIfSpecified(decimal.Parse(tokens[0].Value), rangeInfo)});
                 case TokenType.Decimal when property.PropertyType == typeof(int) && !noImplicitCast:
                     return new ProcessResultArray<object>(new object[] {ClampIfSpecified((decimal) int.Parse(tokens[0].Value), rangeInfo)});
+                case InlineClip when property.PropertyType == typeof(Clip):
+                    return new ProcessResultArray<object>(new object[] {tokens[0].Clip});
                 case Number when property.PropertyType == typeof(int):
                 {
                     if (int.TryParse(tokens[0].Value, out int value))
@@ -163,8 +165,6 @@ namespace Mutate4l.Cli
                             decimal[] values = tokens.Select(t => ClampIfSpecified(decimal.Parse(t.Value), rangeInfo)).ToArray();
                             return new ProcessResultArray<object>(new object[] {values});
                         }
-                        case InlineClip when property.PropertyType == typeof(Clip):
-                            return new ProcessResultArray<object>(new object[] {tokens[0].Clip});
                         case Number when property.PropertyType == typeof(int[]):
                         {
                             int[] values = tokens.Select(t => ClampIfSpecified(int.Parse(t.Value), rangeInfo)).ToArray();
