@@ -283,7 +283,14 @@ namespace Mutate4l.Cli
                 if (IsSingleOperator(Position))
                 {
                     char value = Buffer[Position];
-                    token = new Token(SingleOperators[value], value.ToString(), Position);
+                    if (SingleOperators.ContainsKey(value))
+                    {
+                        token = new Token(SingleOperators[value], value.ToString(), Position);
+                    }
+                    else
+                    {
+                        token = new Token(TokenType.RepeatOperator, "x", Position);
+                    }
                 }
                 else if (IsClipReference(Position))
                 {

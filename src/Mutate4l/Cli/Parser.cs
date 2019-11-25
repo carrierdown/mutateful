@@ -79,20 +79,20 @@ namespace Mutate4l.Cli
 
             var processedTokens = new List<Token>(tokens.Length);
             var i = 0;
-            while (i + 1 < tokens.Length)
+            while (i < tokens.Length)
             {
-                if (tokens[i + 1].Type >= TokenType._OperatorsBegin && tokens[i + 1].Type <= TokenType._OperatorsEnd)
+                if (i + 1 < tokens.Length && tokens[i + 1].Type >= TokenType._OperatorsBegin && tokens[i + 1].Type <= TokenType._OperatorsEnd)
                 {
                     var token = tokens[i + 1];
                     switch (token.Type)
                     {
-                        case TokenType.RepeatOperator when (i + 2 < tokens.Length && tokens[i].Type == tokens[i + 2].Type):
+                        case TokenType.RepeatOperator when (i + 2 < tokens.Length && tokens[i].Type == TokenType.Number):
                             var valueToRepeat = tokens[i].Value;
                             if (int.TryParse(tokens[i + 2].Value, out var repeatCount))
                             {
                                 for (var index = 0; index < repeatCount; index++)
                                 {
-                                    processedTokens.Add(new Token(tokens[index].Type, valueToRepeat, tokens[index].Position));
+                                    processedTokens.Add(new Token(tokens[i].Type, valueToRepeat, tokens[i].Position));
                                 }
                             }
                             else
@@ -102,7 +102,7 @@ namespace Mutate4l.Cli
                             i += 3;
                             break;
                         default:
-                            return new ProcessResultArray<Token>($"Error resolving operator {tokens[i + 1].Value}");
+                            return new ProcessResultArray<Token>($"Error resolving operator with tokens {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
                     }
                 }
                 else
