@@ -82,19 +82,13 @@ namespace Mutate4l.Cli
             var valueBlockStartIx = -1;
             while (i < tokens.Length)
             {
-                if (valueBlockStartIx < 0)
+                if (tokens[i].IsPureValue || tokens[i].IsOperatorToken)
                 {
-                    if (tokens[i].IsPureValue || tokens[i].IsOperatorToken)
-                    {
-                        valueBlockStartIx = i;
-                    }
+                    valueBlockStartIx = valueBlockStartIx < 0 ? i : valueBlockStartIx;
                 }
                 else
                 {
-                    if (!tokens[i].IsPureValue && !tokens[i].IsOperatorToken)
-                    {
-                        valueBlockStartIx = -1;
-                    }
+                    valueBlockStartIx = -1;
                 }
 
                 if (i + 1 < tokens.Length && tokens[i + 1].IsOperatorToken && valueBlockStartIx >= 0)
@@ -117,12 +111,24 @@ namespace Mutate4l.Cli
                             }
                             i += 3;
                             break;
-                        case TokenType.AlternationOperator when i + 2 < tokens.Length:
+                        // todo: token or similar construct needs concept of current value and all values, and whether all values have been produced or not
+/*                        case TokenType.AlternationOperator when i + 2 < tokens.Length:
+                            if (!(tokens[i].IsPureValue && tokens[i + 2].IsPureValue)) return new ProcessResultArray<Token>($"Unable to parse alternation operator. Tokens: {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
                             var ix = 0;
                             while (tokens[valueBlockStartIx + ix].IsPureValue || tokens[valueBlockStartIx + ix].IsOperatorToken) ix++;
                             var valueBlockEndIx = valueBlockStartIx + ix;
-                            // -> here
-                            break;
+                            ix = i + 3;
+                            var valuesToAlternate = new List<string>();
+                            valuesToAlternate.Add(tokens[i].Value);     // [n]'n
+                            valuesToAlternate.Add(tokens[i + 2].Value); // n'[n]
+                            while (ix + 1 < valueBlockEndIx && tokens[ix].Type == TokenType.AlternationOperator && tokens[ix + 1].IsPureValue)
+                            {
+                                valuesToAlternate.Add(tokens[ix + 1].Value);
+                                ix += 2;
+                            }
+                            processedTokens.Add(new Token(TokenType.AlternationOperator, tokens[i].Position, OperatorType.Alternation, valuesToAlternate));
+                            
+                            break;*/
                         default:
                             return new ProcessResultArray<Token>($"Error resolving operator with tokens {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
                     }
