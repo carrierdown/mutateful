@@ -25,29 +25,30 @@ namespace Mutate4l.Cli
         {
             { "arpeggiate", Arpeggiate }, { "arp", Arpeggiate },
             { "concat", Concat }, { "cat", Concat },
-            { "scale", Scale }, { "constrain", Scale /* Alias for previous name for scale */ },
             { "crop", Crop },
             { "filter", Filter }, { "flt", Filter },
-            { "il", Interleave }, { "interleave", Interleave },
-            { "ilev", InterleaveEvent }, { "interleaveevent", InterleaveEvent },
+            { "interleave", Interleave }, { "il", Interleave },
+            { "interleaveevent", InterleaveEvent }, { "ilev", InterleaveEvent },
             { "legato", Legato }, { "leg", Legato },
             { "mask", Mask},
             { "monophonize", Monophonize }, { "mono", Monophonize },
             { "padding", Padding }, { "pad", Padding },  { "p", Padding },
-            { "quantize", Quantize }, { "qnt", Quantize },
+            { "quantize", Quantize }, { "qnt", Quantize }, { "q", Quantize },
             { "ratchet", Ratchet }, { "rat", Ratchet },
-            { "relength", Relength }, { "relen", Relength },
-            { "remap", Remap }, 
-            { "resize", Resize },
+            { "relength", Relength }, { "relen", Relength },{ "rl", Relength },
+            { "remap", Remap },  /* ideal namespace might be { "rm", Remap } but collision with SetRhythm */
+            { "resize", Resize }, { "rs", Resize },
+            { "scale", Scale }, { "constrain", Scale /* N.B. Alias for previous name for scale */ }, { "cs", Scale },
             { "scan", Scan },
             { "setlength", SetLength }, { "length", SetLength }, { "len", SetLength },
-            { "setpitch", SetPitch }, { "pitch", SetPitch },
-            { "setrhythm", SetRhythm }, { "rhythm", SetRhythm }, { "rm", SetRhythm },
+            { "setpitch", SetPitch }, { "pitch", SetPitch }, { "sp", SetPitch },
+            { "setrhythm", SetRhythm }, { "rhythm", SetRhythm }, { "rm", SetRhythm },  { "sr", SetRhythm }, /* Consider standardising 'set's to prefix with s? */
             { "shuffle", Shuffle }, { "shf", Shuffle },
             { "skip", Skip },
             { "slice", Slice },
             { "take", Take },
-            { "transpose", Transpose }, { "tran", Transpose }
+            { "transpose", Transpose }, { "tran", Transpose },{ "tp", Transpose },
+            { "velocityScale", VelocityScale },  { "vel", VelocityScale }, { "vs", VelocityScale }, { "v", VelocityScale }
         };
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
