@@ -39,6 +39,9 @@ namespace Mutate4l.Cli
         public bool IsCommand => Type > _CommandsBegin && Type < _CommandsEnd;
         public bool IsOperatorToken => Type > _OperatorsBegin && Type < _OperatorsEnd;
         public bool HasOperatorType => OperatorType != OperatorType.None;
-        public bool IsOptionValue => (Type > _EnumValuesBegin && Type < _EnumValuesEnd) || (Type > _ValuesBegin && Type < _ValuesEnd);
+        public bool IsOptionValue => IsEnumValue || IsValue;
+        public bool IsEnumValue => Type > _EnumValuesBegin && Type < _EnumValuesEnd;
+        public bool IsValue => Type > _ValuesBegin && Type < _ValuesEnd;
+        public bool IsPureValue => Type > _ValuesBegin && Type < _PureValuesEnd;
     }
 }

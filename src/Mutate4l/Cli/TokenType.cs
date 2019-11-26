@@ -94,12 +94,13 @@
         _EnumValuesEnd,
 
         _ValuesBegin,
-        ClipReference,
-        Decimal,
-        InlineClip,
-        MusicalDivision,
         BarsBeatsSixteenths,
+        Decimal,
+        MusicalDivision,
         Number,
+        _PureValuesEnd,
+        ClipReference,
+        InlineClip,
         _ValuesEnd,
 
         _OperatorsBegin,

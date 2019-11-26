@@ -79,14 +79,30 @@ namespace Mutate4l.Cli
 
             var processedTokens = new List<Token>(tokens.Length);
             var i = 0;
+            var valueBlockStartIx = -1;
             while (i < tokens.Length)
             {
-                if (i + 1 < tokens.Length && tokens[i + 1].Type >= TokenType._OperatorsBegin && tokens[i + 1].Type <= TokenType._OperatorsEnd)
+                if (valueBlockStartIx < 0)
                 {
-                    var token = tokens[i + 1];
-                    switch (token.Type)
+                    if (tokens[i].IsPureValue || tokens[i].IsOperatorToken)
                     {
-                        case TokenType.RepeatOperator when (i + 2 < tokens.Length && tokens[i].Type == TokenType.Number):
+                        valueBlockStartIx = i;
+                    }
+                }
+                else
+                {
+                    if (!tokens[i].IsPureValue && !tokens[i].IsOperatorToken)
+                    {
+                        valueBlockStartIx = -1;
+                    }
+                }
+
+                if (i + 1 < tokens.Length && tokens[i + 1].IsOperatorToken && valueBlockStartIx >= 0)
+                {
+                    switch (tokens[i + 1].Type)
+                    {
+                        case TokenType.RepeatOperator when i + 2 < tokens.Length && tokens[i].Type == TokenType.Number:
+                            if (!tokens[i + 2].IsPureValue) return new ProcessResultArray<Token>($"Expected a pure value (number or musical fraction) following repeat operator, but found {tokens[i + 2].Value}");
                             var valueToRepeat = tokens[i].Value;
                             if (int.TryParse(tokens[i + 2].Value, out var repeatCount))
                             {
@@ -100,6 +116,12 @@ namespace Mutate4l.Cli
                                 return new ProcessResultArray<Token>($"Unable to parse repeat operator. Tokens: {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
                             }
                             i += 3;
+                            break;
+                        case TokenType.AlternationOperator when i + 2 < tokens.Length:
+                            var ix = 0;
+                            while (tokens[valueBlockStartIx + ix].IsPureValue || tokens[valueBlockStartIx + ix].IsOperatorToken) ix++;
+                            var valueBlockEndIx = valueBlockStartIx + ix;
+                            // -> here
                             break;
                         default:
                             return new ProcessResultArray<Token>($"Error resolving operator with tokens {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
