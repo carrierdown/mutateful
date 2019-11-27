@@ -35,7 +35,7 @@ namespace Mutate4l.Cli
             if (!result.Success) return new ProcessResult<ChainedCommand>(result.ErrorMessage);
             var resolvedTokens = ResolveOperators(result.Result);
             if (!resolvedTokens.Success) return new ProcessResult<ChainedCommand>(resolvedTokens.ErrorMessage);
-            Token[] commandTokens = resolvedTokens.Result;
+            Token[] commandTokens = ApplyOperators(resolvedTokens.Result);
             var commandTokensLists = new List<List<Token>>();
             var activeCommandTokenList = new List<Token>();
             var sourceClips = commandTokens.TakeWhile(x => x.Type == TokenType.InlineClip).Select(x => x.Clip).ToArray();
@@ -73,7 +73,12 @@ namespace Mutate4l.Cli
             return new ProcessResult<ChainedCommand>(chainedCommand);
         }
 
-        private static ProcessResultArray<Token> ResolveOperators(Token[] tokens)
+        private static Token[] ApplyOperators(Token[] tokens)
+        {
+            return tokens;
+        }
+
+        public static ProcessResultArray<Token> ResolveOperators(Token[] tokens)
         {
             if (!tokens.Any(x => x.IsOperatorToken)) return new ProcessResultArray<Token>(tokens);
 
@@ -84,7 +89,7 @@ namespace Mutate4l.Cli
             {
                 if (tokens[i].IsPureValue || tokens[i].IsOperatorToken)
                 {
-                    valueBlockStartIx = valueBlockStartIx < 0 ? i : valueBlockStartIx;
+                    if (valueBlockStartIx < 0) valueBlockStartIx = i;
                 }
                 else
                 {
@@ -111,13 +116,13 @@ namespace Mutate4l.Cli
                             }
                             i += 3;
                             break;
-                        // todo: token or similar construct needs concept of current value and all values, and whether all values have been produced or not
-/*                        case TokenType.AlternationOperator when i + 2 < tokens.Length:
+                        case TokenType.AlternationOperator when i + 2 < tokens.Length:
                             if (!(tokens[i].IsPureValue && tokens[i + 2].IsPureValue)) return new ProcessResultArray<Token>($"Unable to parse alternation operator. Tokens: {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
-                            var ix = 0;
-                            while (tokens[valueBlockStartIx + ix].IsPureValue || tokens[valueBlockStartIx + ix].IsOperatorToken) ix++;
-                            var valueBlockEndIx = valueBlockStartIx + ix;
-                            ix = i + 3;
+                            var numPureValuesOrOps = 0;
+                            // todo: can be simplified/moved partially to ApplyOperators
+                            while (valueBlockStartIx + numPureValuesOrOps < tokens.Length && (tokens[valueBlockStartIx + numPureValuesOrOps].IsPureValue || tokens[valueBlockStartIx + numPureValuesOrOps].IsOperatorToken)) numPureValuesOrOps++;
+                            var valueBlockEndIx = valueBlockStartIx + numPureValuesOrOps;
+                            var ix = i + 3;
                             var valuesToAlternate = new List<string>();
                             valuesToAlternate.Add(tokens[i].Value);     // [n]'n
                             valuesToAlternate.Add(tokens[i + 2].Value); // n'[n]
@@ -126,9 +131,9 @@ namespace Mutate4l.Cli
                                 valuesToAlternate.Add(tokens[ix + 1].Value);
                                 ix += 2;
                             }
-                            processedTokens.Add(new Token(TokenType.AlternationOperator, tokens[i].Position, OperatorType.Alternation, valuesToAlternate));
-                            
-                            break;*/
+                            processedTokens.Add(new Token(TokenType.AlternationOperator, tokens[i].Position, OperatorType.Alternation, valuesToAlternate.ToArray()));
+                            i = ix; 
+                            break;
                         default:
                             return new ProcessResultArray<Token>($"Error resolving operator with tokens {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
                     }

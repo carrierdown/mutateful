@@ -42,5 +42,16 @@ namespace Mutate4lTests
             Assert.IsFalse(lex.IsBarsBeatsSixteenths(20));
             Assert.IsTrue(lex.IsBarsBeatsSixteenths(26));
         }
+
+        [TestMethod]
+        public void TestOperatorResolving()
+        {
+            var lexer = new Lexer("shuffle 1 2'3 4 5'6'7 8", new List<Clip>());
+            var result = lexer.GetTokens();
+            Assert.IsTrue(result.Success);
+            var resolvedTokens = Parser.ResolveOperators(result.Result);
+            Assert.IsTrue(resolvedTokens.Success);
+            Assert.IsTrue(resolvedTokens.Result.Length > 0);
+        }
     }
 }

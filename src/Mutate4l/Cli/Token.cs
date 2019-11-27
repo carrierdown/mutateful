@@ -10,8 +10,28 @@ namespace Mutate4l.Cli
         public int Position { get; }
         public Clip Clip { get; }
         public OperatorType OperatorType { get; }
-        public string[] Values { get; }
-        
+        private string[] Values { get; }
+
+        private int CurrentIndex = 0;
+        public bool AllValuesFetched = false;
+
+        public string NextValue
+        {
+            get
+            {
+                if (Values.Length > 0)
+                {
+                    var val = Values[CurrentIndex++ % Values.Length];
+                    if (!AllValuesFetched)
+                    {
+                        if (CurrentIndex >= Values.Length) AllValuesFetched = true;
+                    }
+                    return val;
+                }
+                return Value;
+            }
+        }
+
         public Token(TokenType type, string value, int position)
         {
             Values = new string[0];
