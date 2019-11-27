@@ -30,6 +30,7 @@
         Sustain,
         Take,
         Transpose,
+        VelocityScale,
 
         _OptionsBegin,
         Skip,     // Need to find a better way of supporting token names that can signify both options and commands. Time to stop using an enum for this I guess. For now we have this quick fix though. 

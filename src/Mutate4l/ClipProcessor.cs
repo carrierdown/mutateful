@@ -46,6 +46,7 @@ namespace Mutate4l
                 TokenType.Slice => Slice.Apply(command, clips),
                 TokenType.Take => Take.Apply(command, clips),
                 TokenType.Transpose => Transpose.Apply(command, clips),
+                TokenType.VelocityScale => VelocityScale.Apply(command, clips),
                 TokenType.InterleaveEvent => ((Func<ProcessResultArray<Clip>>) (() =>
                 {
                     var (success, msg) = OptionParser.TryParseOptions(command, out InterleaveOptions options);
