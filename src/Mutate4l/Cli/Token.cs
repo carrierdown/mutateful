@@ -10,37 +10,35 @@ namespace Mutate4l.Cli
         public int Position { get; }
         public Clip Clip { get; }
         public OperatorType OperatorType { get; }
-        private string[] Values { get; }
-
-        private int CurrentIndex = 0;
-        public bool AllValuesFetched = false;
-
-        public string NextValue
+        public bool AllValuesFetched { get; private set; }
+        public ChildToken NextValue
         {
             get
             {
-                if (Values.Length > 0)
+                if (HasChildren)
                 {
-                    var val = Values[CurrentIndex++ % Values.Length];
+                    var val = Children[CurrentIndex++ % Children.Length];
                     if (!AllValuesFetched)
                     {
-                        if (CurrentIndex >= Values.Length) AllValuesFetched = true;
+                        if (CurrentIndex >= Children.Length) AllValuesFetched = true;
                     }
                     return val;
                 }
-                else
-                {
-                    AllValuesFetched = true;
-                }
-                return Value;
+                AllValuesFetched = true;
+                return ValueAsChildToken;
             }
         }
+        
+        private readonly ChildToken[] Children;
+        private readonly ChildToken ValueAsChildToken;
+        private int CurrentIndex;
 
         public Token(TokenType type, string value, int position)
         {
-            Values = new string[0];
+            Children = new ChildToken[0];
             Clip = Clip.Empty;
             OperatorType = OperatorType.None;
+            ValueAsChildToken = new ChildToken(type, value);
 
             Type = type;
             Value = value;
@@ -52,12 +50,13 @@ namespace Mutate4l.Cli
             Clip = clip;
         }
 
-        public Token(TokenType type, int position, OperatorType operatorType, string[] values) : this(type, "", position)
+        public Token(TokenType type, int position, OperatorType operatorType, ChildToken[] children) : this(type, "", position)
         {
             OperatorType = operatorType;
-            Values = values;
+            Children = children;
         }
 
+        public bool HasChildren => Children.Length > 0;
         public bool IsClipReference => Type == TokenType.ClipReference;
         public bool IsOption => Type > _OptionsBegin && Type < _OptionsEnd;
         public bool IsCommand => Type > _CommandsBegin && Type < _CommandsEnd;

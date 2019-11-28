@@ -73,7 +73,7 @@ namespace Mutate4l.Cli
             return new ProcessResult<ChainedCommand>(chainedCommand);
         }
 
-        private static Token[] ApplyOperators(Token[] tokens)
+        public static Token[] ApplyOperators(Token[] tokens)
         {
             var processedTokens = new List<Token>(tokens.Length);
             var i = 0;
@@ -109,7 +109,8 @@ namespace Mutate4l.Cli
                         {
                             foreach (var token in tokensInBlock)
                             {
-                                //processedTokens.Add(new Token(token.Type, token.NextValue));token.NextValue);
+                                var nextToken = token.NextValue;
+                                processedTokens.Add(new Token(nextToken.Type, nextToken.Value, token.Position));
                             }
                         }
                     }
@@ -117,8 +118,7 @@ namespace Mutate4l.Cli
                 }
                 i++;
             }
-
-            return tokens;
+            return processedTokens.ToArray();
         }
 
         private static bool IsBlockLevelOperator(TokenType type)
@@ -131,25 +131,16 @@ namespace Mutate4l.Cli
             };
         }
 
+        // Processes single entity operators such as repeat, and pre-processes block level operators such as alternate
         public static ProcessResultArray<Token> ResolveOperators(Token[] tokens)
         {
             if (!tokens.Any(x => x.IsOperatorToken)) return new ProcessResultArray<Token>(tokens);
 
             var processedTokens = new List<Token>(tokens.Length);
             var i = 0;
-            var valueBlockStartIx = -1;
             while (i < tokens.Length)
             {
-                if (tokens[i].IsPureValue || tokens[i].IsOperatorToken)
-                {
-                    if (valueBlockStartIx < 0) valueBlockStartIx = i;
-                }
-                else
-                {
-                    valueBlockStartIx = -1;
-                }
-
-                if (i + 1 < tokens.Length && tokens[i + 1].IsOperatorToken && valueBlockStartIx >= 0)
+                if (i + 1 < tokens.Length && tokens[i + 1].IsOperatorToken)
                 {
                     switch (tokens[i + 1].Type)
                     {
@@ -171,18 +162,14 @@ namespace Mutate4l.Cli
                             break;
                         case TokenType.AlternationOperator when i + 2 < tokens.Length:
                             if (!(tokens[i].IsPureValue && tokens[i + 2].IsPureValue)) return new ProcessResultArray<Token>($"Unable to parse alternation operator. Tokens: {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
-                            var numPureValuesOrOps = 0;
-                            // todo: can be simplified/moved partially to ApplyOperators
-                            while (valueBlockStartIx + numPureValuesOrOps < tokens.Length && (tokens[valueBlockStartIx + numPureValuesOrOps].IsPureValue || tokens[valueBlockStartIx + numPureValuesOrOps].IsOperatorToken)) numPureValuesOrOps++;
-                            var valueBlockEndIx = valueBlockStartIx + numPureValuesOrOps;
                             var ix = i + 3;
-                            var valuesToAlternate = new List<string>();
+                            var valuesToAlternate = new List<ChildToken>();
                             // todo: extract to more general function for extracting values interspersed with operators
-                            valuesToAlternate.Add(tokens[i].Value);     // [n]'n
-                            valuesToAlternate.Add(tokens[i + 2].Value); // n'[n]
-                            while (ix + 1 < valueBlockEndIx && tokens[ix].Type == TokenType.AlternationOperator && tokens[ix + 1].IsPureValue)
+                            valuesToAlternate.Add(new ChildToken(tokens[i].Type, tokens[i].Value));         // [n]'n
+                            valuesToAlternate.Add(new ChildToken(tokens[i + 2].Type, tokens[i + 2].Value)); // n'[n]
+                            while (ix + 1 < tokens.Length && tokens[ix].Type == TokenType.AlternationOperator && tokens[ix + 1].IsPureValue)
                             {
-                                valuesToAlternate.Add(tokens[ix + 1].Value);
+                                valuesToAlternate.Add(new ChildToken(tokens[ix + 1].Type, tokens[ix + 1].Value));
                                 ix += 2;
                             }
                             processedTokens.Add(new Token(TokenType.AlternationOperator, tokens[i].Position, OperatorType.Alternation, valuesToAlternate.ToArray()));

@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.Cli;
 using System.Collections.Generic;
+using System.Linq;
 using Mutate4l.Core;
 
 namespace Mutate4lTests
@@ -52,6 +53,8 @@ namespace Mutate4lTests
             var resolvedTokens = Parser.ResolveOperators(result.Result);
             Assert.IsTrue(resolvedTokens.Success);
             Assert.IsTrue(resolvedTokens.Result.Length > 0);
+            var fullyResolvedTokens = Parser.ApplyOperators(resolvedTokens.Result);
+            Assert.IsTrue(fullyResolvedTokens.Select(x => x.Value).SequenceEqual(new [] {"1", "2", "4", "5", "8", "1", "3", "4", "6", "8", "1", "2", "4", "7", "8"}));
         }
     }
 }
