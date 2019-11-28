@@ -28,6 +28,10 @@ namespace Mutate4l.Cli
                     }
                     return val;
                 }
+                else
+                {
+                    AllValuesFetched = true;
+                }
                 return Value;
             }
         }

@@ -75,7 +75,60 @@ namespace Mutate4l.Cli
 
         private static Token[] ApplyOperators(Token[] tokens)
         {
+            var processedTokens = new List<Token>(tokens.Length);
+            var i = 0;
+            var valueBlockStartIx = -1;
+            while (i < tokens.Length)
+            {
+                if (tokens[i].IsPureValue || tokens[i].IsOperatorToken)
+                {
+                    if (valueBlockStartIx < 0) valueBlockStartIx = i;
+                }
+                else
+                {
+                    valueBlockStartIx = -1;
+                }
+
+                // Operators are processed for each block of pure values and operators, since they can operate on the entire block of values
+                if (valueBlockStartIx >= 0)
+                {
+                    var ix = 0;
+                    var containsBlockLevelOperators = false;
+                    while (valueBlockStartIx + ix < tokens.Length && (tokens[valueBlockStartIx + ix].IsPureValue || tokens[valueBlockStartIx + ix].IsOperatorToken))
+                    {
+                        if (IsBlockLevelOperator(tokens[valueBlockStartIx + ix].Type)) containsBlockLevelOperators = true;
+                        ix++;
+                    }
+                    var valueBlockEndIx = valueBlockStartIx + ix;
+
+                    if (containsBlockLevelOperators)
+                    {
+                        var tokensInBlock = new List<Token>();
+                        for (var y = valueBlockStartIx; y < valueBlockEndIx; y++) tokensInBlock.Add(tokens[y]);
+                        while (tokensInBlock.All(x => x.AllValuesFetched != true))
+                        {
+                            foreach (var token in tokensInBlock)
+                            {
+                                //processedTokens.Add(new Token(token.Type, token.NextValue));token.NextValue);
+                            }
+                        }
+                    }
+                    i = valueBlockEndIx;
+                }
+                i++;
+            }
+
             return tokens;
+        }
+
+        private static bool IsBlockLevelOperator(TokenType type)
+        {
+            return type switch
+            {
+                TokenType.AlternationOperator => true,
+                TokenType.RangeOperator => true,
+                _ => false
+            };
         }
 
         public static ProcessResultArray<Token> ResolveOperators(Token[] tokens)
@@ -124,6 +177,7 @@ namespace Mutate4l.Cli
                             var valueBlockEndIx = valueBlockStartIx + numPureValuesOrOps;
                             var ix = i + 3;
                             var valuesToAlternate = new List<string>();
+                            // todo: extract to more general function for extracting values interspersed with operators
                             valuesToAlternate.Add(tokens[i].Value);     // [n]'n
                             valuesToAlternate.Add(tokens[i + 2].Value); // n'[n]
                             while (ix + 1 < valueBlockEndIx && tokens[ix].Type == TokenType.AlternationOperator && tokens[ix + 1].IsPureValue)
