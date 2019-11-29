@@ -1,4 +1,5 @@
-﻿using Mutate4l.Core;
+﻿using System;
+using Mutate4l.Core;
 using static Mutate4l.Cli.TokenType;
 
 namespace Mutate4l.Cli
@@ -10,28 +11,36 @@ namespace Mutate4l.Cli
         public int Position { get; }
         public Clip Clip { get; }
         public OperatorType OperatorType { get; }
-        public bool AllValuesFetched { get; private set; }
+
+        public bool AllValuesFetched => CurrentIndex >= Children.Length;
+
         public ChildToken NextValue
         {
             get
             {
+                if (OperatorType == OperatorType.Alternation) Console.WriteLine("Getting next value");
                 if (HasChildren)
                 {
+                    if (OperatorType == OperatorType.Alternation) Console.WriteLine($"Has children, currentIndex {CurrentIndex}, allvaluesfetched {AllValuesFetched}");
                     var val = Children[CurrentIndex++ % Children.Length];
-                    if (!AllValuesFetched)
-                    {
-                        if (CurrentIndex >= Children.Length) AllValuesFetched = true;
-                    }
+                    if (OperatorType == OperatorType.Alternation) Console.WriteLine($"Has children, currentIndex {CurrentIndex}, allvaluesfetched {AllValuesFetched}, val {val.Value}");
                     return val;
                 }
-                AllValuesFetched = true;
                 return ValueAsChildToken;
             }
         }
         
         private readonly ChildToken[] Children;
         private readonly ChildToken ValueAsChildToken;
-        private int CurrentIndex;
+        private int CurrentIndexField;
+        private int CurrentIndex
+        {
+            get => CurrentIndexField;
+            set
+            {
+                CurrentIndexField = value;
+            }
+        }
 
         public Token(TokenType type, string value, int position)
         {
@@ -45,6 +54,17 @@ namespace Mutate4l.Cli
             Position = position;
         }
 
+        public Token(Token token)
+        {
+            Children = token.Children;
+            Clip = token.Clip;
+            OperatorType = token.OperatorType;
+            ValueAsChildToken = token.ValueAsChildToken;
+            Type = token.Type;
+            Value = token.Value;
+            Position = token.Position;
+        }
+        
         public Token(TokenType type, string value, Clip clip, int position) : this(type, value, position)
         {
             Clip = clip;
