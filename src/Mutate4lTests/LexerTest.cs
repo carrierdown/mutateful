@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.Cli;
 using System.Collections.Generic;
+using System.Linq;
 using Mutate4l.Core;
 
 namespace Mutate4lTests
@@ -41,6 +42,19 @@ namespace Mutate4lTests
             Assert.IsFalse(lex.IsBarsBeatsSixteenths(14));
             Assert.IsFalse(lex.IsBarsBeatsSixteenths(20));
             Assert.IsTrue(lex.IsBarsBeatsSixteenths(26));
+        }
+
+        [TestMethod]
+        public void TestOperatorResolving()
+        {
+            var lexer = new Lexer("shuffle 1 2'3 4 5'6'7 8", new List<Clip>());
+            var result = lexer.GetTokens();
+            Assert.IsTrue(result.Success);
+            var resolvedTokens = Parser.ResolveOperators(result.Result);
+            Assert.IsTrue(resolvedTokens.Success);
+            Assert.IsTrue(resolvedTokens.Result.Length > 0);
+            var fullyResolvedTokens = Parser.ApplyOperators(resolvedTokens.Result);
+            Assert.IsTrue(fullyResolvedTokens.Select(x => x.Value).SequenceEqual(new [] {"shuffle", "1", "2", "4", "5", "8", "1", "3", "4", "6", "8", "1", "2", "4", "7", "8"}));
         }
     }
 }
