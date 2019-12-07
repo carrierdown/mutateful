@@ -36,16 +36,16 @@ namespace Mutate4l.Cli
             { "quantize", Quantize }, { "qnt", Quantize }, { "q", Quantize },
             { "ratchet", Ratchet }, { "rat", Ratchet },
             { "relength", Relength }, { "relen", Relength },{ "rl", Relength },
-            { "remap", Remap },  /* ideal namespace might be { "rm", Remap } but collision with SetRhythm */
+            { "remap", Remap },  { "rm", Remap },
             { "resize", Resize }, { "rs", Resize },
-            { "scale", Scale }, { "constrain", Scale /* N.B. Alias for previous name for scale */ }, { "cs", Scale },
+            { "scale", Scale }, { "constrain", Scale /* Note: Alias for previous name for scale */ }, { "scl", Scale },
             { "scan", Scan },
-            { "setlength", SetLength }, { "length", SetLength }, { "len", SetLength },
+            { "setlength", SetLength }, { "length", SetLength }, { "len", SetLength }, { "sl", SetLength },
             { "setpitch", SetPitch }, { "pitch", SetPitch }, { "sp", SetPitch },
-            { "setrhythm", SetRhythm }, { "rhythm", SetRhythm }, { "rm", SetRhythm },  { "sr", SetRhythm }, /* Consider standardising 'set's to prefix with s? */
+            { "setrhythm", SetRhythm }, { "rhythm", SetRhythm }, { "sr", SetRhythm }, /* Consider standardising 'set's to prefix with s? */
             { "shuffle", Shuffle }, { "shf", Shuffle },
             { "skip", Skip },
-            { "slice", Slice },
+            { "slice", Slice }, { "slc", Slice },
             { "take", Take },
             { "transpose", Transpose }, { "tran", Transpose },{ "tp", Transpose },
             { "velocityScale", VelocityScale },  { "vel", VelocityScale }, { "vs", VelocityScale }, { "v", VelocityScale }
