@@ -14,33 +14,11 @@ namespace Mutate4l.Cli
 
         public bool AllValuesFetched => CurrentIndex >= Children.Length;
 
-        public ChildToken NextValue
-        {
-            get
-            {
-                if (OperatorType == OperatorType.Alternation) Console.WriteLine("Getting next value");
-                if (HasChildren)
-                {
-                    if (OperatorType == OperatorType.Alternation) Console.WriteLine($"Has children, currentIndex {CurrentIndex}, allvaluesfetched {AllValuesFetched}");
-                    var val = Children[CurrentIndex++ % Children.Length];
-                    if (OperatorType == OperatorType.Alternation) Console.WriteLine($"Has children, currentIndex {CurrentIndex}, allvaluesfetched {AllValuesFetched}, val {val.Value}");
-                    return val;
-                }
-                return ValueAsChildToken;
-            }
-        }
+        public ChildToken NextValue => HasChildren ? Children[CurrentIndex++ % Children.Length] : ValueAsChildToken;
         
         private readonly ChildToken[] Children;
         private readonly ChildToken ValueAsChildToken;
-        private int CurrentIndexField;
-        private int CurrentIndex
-        {
-            get => CurrentIndexField;
-            set
-            {
-                CurrentIndexField = value;
-            }
-        }
+        private int CurrentIndex;
 
         public Token(TokenType type, string value, int position)
         {

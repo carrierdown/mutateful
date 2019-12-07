@@ -54,7 +54,7 @@ namespace Mutate4lTests
             Assert.IsTrue(resolvedTokens.Success);
             Assert.IsTrue(resolvedTokens.Result.Length > 0);
             var fullyResolvedTokens = Parser.ApplyOperators(resolvedTokens.Result);
-            Assert.IsTrue(fullyResolvedTokens.Select(x => x.Value).SequenceEqual(new [] {"1", "2", "4", "5", "8", "1", "3", "4", "6", "8", "1", "2", "4", "7", "8"}));
+            Assert.IsTrue(fullyResolvedTokens.Select(x => x.Value).SequenceEqual(new [] {"shuffle", "1", "2", "4", "5", "8", "1", "3", "4", "6", "8", "1", "2", "4", "7", "8"}));
         }
     }
 }

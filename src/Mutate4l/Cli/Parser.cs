@@ -104,7 +104,7 @@ namespace Mutate4l.Cli
                     if (containsBlockLevelOperators)
                     {
                         var tokensInBlock = new List<Token>();
-                        for (var y = valueBlockStartIx; y < valueBlockEndIx; y++) tokensInBlock.Add(new Token(tokens[y]));
+                        for (var y = valueBlockStartIx; y < valueBlockEndIx; y++) tokensInBlock.Add(tokens[y]);
                         while (tokensInBlock.Any(x => x.AllValuesFetched == false))
                         {
                             foreach (var token in tokensInBlock)
@@ -113,9 +113,11 @@ namespace Mutate4l.Cli
                                 processedTokens.Add(new Token(nextToken.Type, nextToken.Value, token.Position));
                             }
                         }
+                        i = valueBlockEndIx;
+                        continue;
                     }
-                    i = valueBlockEndIx;
                 }
+                processedTokens.Add(tokens[i]);
                 i++;
             }
             return processedTokens.ToArray();
