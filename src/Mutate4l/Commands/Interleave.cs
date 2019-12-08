@@ -27,6 +27,7 @@ namespace Mutate4l.Commands
 
     public enum InterleaveMode
     {
+        NotSpecified,
         Event,
         Time
     }
@@ -34,12 +35,16 @@ namespace Mutate4l.Commands
     // # desc: Combines notes from two or more clips in an interleaved fashion.
     public static class Interleave
     {
-        public static ProcessResultArray<Clip> Apply(Command command, ClipMetaData metadata, params Clip[] clips)
+        public static ProcessResultArray<Clip> Apply(Command command, ClipMetaData metadata, Clip[] clips, InterleaveMode mode)
         {
             var (success, msg) = OptionParser.TryParseOptions(command, out InterleaveOptions options);
             if (!success)
             {
                 return new ProcessResultArray<Clip>(msg);
+            }
+            if (mode != NotSpecified)
+            {
+                options.Mode = mode;
             }
             return Apply(options, metadata, clips);
         }

@@ -37,7 +37,7 @@ namespace Mutate4lTests
                    new NoteEvent(64, 1.5m, .5m, 100),
                 }
             };
-            ClipUtilities.NormalizeClipLengths(clip1, clip2, clip3);
+            ClipUtilities.NormalizeClipLengths(new [] {clip1, clip2, clip3});
             Assert.AreEqual(clip1.Notes[0].Start, 0);
             Assert.AreEqual(clip1.Notes[1].Start, .4m);
             Assert.AreEqual(clip1.Notes[2].Start, 1);

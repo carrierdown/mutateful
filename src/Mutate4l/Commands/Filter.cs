@@ -18,7 +18,7 @@ namespace Mutate4l.Commands
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {
-            (var success, var msg) = OptionParser.TryParseOptions(command, out FilterOptions options);
+            var (success, msg) = OptionParser.TryParseOptions(command, out FilterOptions options);
             if (!success)
             {
                 return new ProcessResultArray<Clip>(msg);

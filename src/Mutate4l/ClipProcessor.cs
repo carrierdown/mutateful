@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Mutate4l.Cli;
 using Mutate4l.Commands;
 using Mutate4l.Core;
-using Mutate4l.IO;
 using System.Linq;
 using Mutate4l.Commands.Experimental;
-using Mutate4l.Utility;
 
 namespace Mutate4l
 {
@@ -26,8 +23,10 @@ namespace Mutate4l
                 TokenType.Concat => Concat.Apply(clips),
                 TokenType.Crop => Crop.Apply(command, clips),
                 TokenType.Filter => Filter.Apply(command, clips),
-                TokenType.Interleave => Interleave.Apply(command, targetMetadata, clips),
+                TokenType.Interleave => Interleave.Apply(command, targetMetadata, clips, InterleaveMode.NotSpecified),
+                TokenType.InterleaveEvent => Interleave.Apply(command, targetMetadata, clips, InterleaveMode.Event),
                 TokenType.Legato => Legato.Apply(clips),
+                TokenType.Loop => Loop.Apply(command, clips),
                 TokenType.Mask => Mask.Apply(command, clips),
                 TokenType.Monophonize => Monophonize.Apply(clips),
                 TokenType.Padding => Padding.Apply(command, clips),
@@ -47,17 +46,6 @@ namespace Mutate4l
                 TokenType.Take => Take.Apply(command, clips),
                 TokenType.Transpose => Transpose.Apply(command, clips),
                 TokenType.VelocityScale => VelocityScale.Apply(command, clips),
-                TokenType.InterleaveEvent => ((Func<ProcessResultArray<Clip>>) (() =>
-                {
-                    var (success, msg) = OptionParser.TryParseOptions(command, out InterleaveOptions options);
-                    if (!success)
-                    {
-                        return new ProcessResultArray<Clip>(msg);
-                    }
-
-                    options.Mode = InterleaveMode.Event;
-                    return Interleave.Apply(options, targetMetadata, clips);
-                }))(),
                 _ => new ProcessResultArray<Clip>($"Unsupported command {command.Id}")
             };
         }

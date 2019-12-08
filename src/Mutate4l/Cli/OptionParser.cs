@@ -95,6 +95,8 @@ namespace Mutate4l.Cli
             switch (type)
             {
                 // handle single value
+                case Number when property.PropertyType == typeof(decimal) && noImplicitCast:
+                    return new ProcessResultArray<object>(new object[] {ClampIfSpecified(decimal.Parse(tokens[0].Value), rangeInfo)});
                 case MusicalDivision when property.PropertyType == typeof(decimal) && !noImplicitCast:
                 case Number when property.PropertyType == typeof(decimal) && !noImplicitCast:
                     return new ProcessResultArray<object>(new object[] {Utilities.MusicalDivisionToDecimal(tokens[0].Value)});

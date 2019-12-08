@@ -12,6 +12,7 @@
         Interleave,
         InterleaveEvent,
         Legato,
+        Loop,
         Mask,
         Monophonize,
         Padding,

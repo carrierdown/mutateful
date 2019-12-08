@@ -240,38 +240,12 @@ namespace Mutate4l.Utility
             return (nearestDelta, nearestIxs.ToArray(), octaves.ToArray());
         }
 
-        public static void NormalizeClipLengths(params Clip[] clips)
+        public static void NormalizeClipLengths(Clip[] clips)
         {
             if (clips.Length < 2) return;
-            decimal maxLength = clips.Max(x => x.Length);
+            var newLength = clips.Max(x => x.Length);
             foreach (var clip in clips)
-            {
-                if (clip.Length < maxLength) // todo: replace with call to EnlargeClipByLooping. Might change behaviour a bit since the new function also cuts events that are too long.
-                {
-                    decimal loopLength = clip.Length;
-                    decimal currentLength = loopLength;
-
-                    var notesToAdd = new List<NoteEvent>();
-                    while (currentLength < maxLength)
-                    {
-                        foreach (var note in clip.Notes)
-                        {
-                            if (note.Start + currentLength < maxLength)
-                            {
-                                notesToAdd.Add(new NoteEvent(note)
-                                {
-                                    Start = note.Start + currentLength
-                                });
-                            } else {
-                                break;
-                            }
-                        }
-                        currentLength += loopLength;
-                    }
-                    clip.Length = maxLength;
-                    clip.Notes.AddRange(notesToAdd);
-                }
-            }
+                EnlargeClipByLooping(clip, newLength);
         }
 
         public static void EnlargeClipByLooping(Clip clip, decimal newLength)

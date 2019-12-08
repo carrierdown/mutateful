@@ -30,6 +30,7 @@ namespace Mutate4l.Cli
             { "interleave", Interleave }, { "il", Interleave },
             { "interleaveevent", InterleaveEvent }, { "ilev", InterleaveEvent },
             { "legato", Legato }, { "leg", Legato },
+            { "loop", Loop},
             { "mask", Mask},
             { "monophonize", Monophonize }, { "mono", Monophonize },
             { "padding", Padding }, { "pad", Padding },  { "p", Padding },
@@ -42,7 +43,7 @@ namespace Mutate4l.Cli
             { "scan", Scan },
             { "setlength", SetLength }, { "length", SetLength }, { "len", SetLength }, { "sl", SetLength },
             { "setpitch", SetPitch }, { "pitch", SetPitch }, { "sp", SetPitch },
-            { "setrhythm", SetRhythm }, { "rhythm", SetRhythm }, { "sr", SetRhythm }, /* Consider standardising 'set's to prefix with s? */
+            { "setrhythm", SetRhythm }, { "rhythm", SetRhythm }, { "sr", SetRhythm },
             { "shuffle", Shuffle }, { "shf", Shuffle },
             { "skip", Skip },
             { "slice", Slice }, { "slc", Slice },
