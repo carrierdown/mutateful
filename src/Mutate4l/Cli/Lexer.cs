@@ -16,7 +16,7 @@ namespace Mutate4l.Cli
         private Dictionary<char, TokenType> SingleOperators = new Dictionary<char, TokenType>
         {
             { ':', RangeOperator },
-            { '\'', AlternationOperator },
+            { '|', AlternationOperator },
             { '_', EmptyOperator },
             { '*', FillOperator }
         };
