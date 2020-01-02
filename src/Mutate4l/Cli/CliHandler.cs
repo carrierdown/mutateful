@@ -3,6 +3,8 @@ using Mutate4l.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using Mutate4l.Core;
 
 namespace Mutate4l.Cli
@@ -12,8 +14,11 @@ namespace Mutate4l.Cli
         public const string UnitTestDirective = " test";
         public const string SvgDocDirective = " doc";
 
+        
         public static void Start()
         {
+  
+            /*
             while (true)
             {
                 var generateUnitTest = false;
@@ -88,6 +93,7 @@ namespace Mutate4l.Cli
                 else
                     Console.WriteLine($"Error applying formula: {processedClipWrapper.ErrorMessage}");
             }
+        */
         }
     }
 }
