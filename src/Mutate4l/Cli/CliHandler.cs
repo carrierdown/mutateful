@@ -14,7 +14,7 @@ namespace Mutate4l.Cli
         public const string UnitTestDirective = " test";
         public const string SvgDocDirective = " doc";
 
-        public static byte[] HandleData(byte[] inputData)
+        public static byte[] HandleInput(byte[] inputData)
         {
             var generateUnitTest = false;
             var generateSvgDoc = false;
