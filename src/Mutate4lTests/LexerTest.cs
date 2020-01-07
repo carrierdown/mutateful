@@ -47,7 +47,7 @@ namespace Mutate4lTests
         [TestMethod]
         public void TestOperatorResolving()
         {
-            var lexer = new Lexer("shuffle 1 2'3 4 5'6'7", new List<Clip>());
+            var lexer = new Lexer("shuffle 1 2|3 4 5|6|7", new List<Clip>());
             var result = lexer.GetTokens();
             Assert.IsTrue(result.Success);
             var resolvedTokens = Parser.ResolveOperators(result.Result);
