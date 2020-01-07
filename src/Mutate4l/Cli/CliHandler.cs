@@ -3,8 +3,6 @@ using Mutate4l.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
 using Mutate4l.Core;
 
 namespace Mutate4l.Cli

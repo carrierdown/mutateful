@@ -1,14 +1,10 @@
 ﻿using Mutate4l.Cli;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using Mutate4l.Core;
 using Mutate4l.IO;
 
 namespace Mutate4l
