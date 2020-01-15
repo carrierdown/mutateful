@@ -8,13 +8,8 @@ namespace Mutate4l.Core
         
         public ChainedCommand ChainedCommand { get; }
 
-        private static ClipSlot EmptyField;
+        public static readonly ClipSlot Empty = new ClipSlot("", Clip.Empty, ChainedCommand.Empty);
         
-        public static ClipSlot Empty
-        {
-            get { return EmptyField ??= new ClipSlot("", Clip.Empty, ChainedCommand.Empty); }
-        }
-
         public ClipSlot(string name, Clip clip, ChainedCommand command)
         {
             Name = name;

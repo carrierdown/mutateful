@@ -18,7 +18,6 @@ namespace Mutate4l.Core
     
     public class ClipSet
     {
-        // might be an idea to have an empty ClipSlot which is what you get by default if asking for an undefined clipreference. This also means that current state for a delete command could simply be ClipSlot.Empty.
         private Dictionary<ClipReference, ClipSlot> ClipSlots { get; }
 
         public ClipSlot this[ClipReference clipRef] => ClipSlots[clipRef];
