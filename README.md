@@ -17,7 +17,7 @@
 
 Go to the [latest release](https://github.com/carrierdown/mutateful/releases/latest) for installation instructions and download links for Windows and OS X.
 
-[![Join the chat at https://gitter.im/mutateful/community](https://badges.gitter.im/mutateful/community.svg)](https://gitter.im/mutateful/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+<!--[![Join the chat at https://gitter.im/mutateful/community](https://badges.gitter.im/mutateful/community.svg)](https://gitter.im/mutateful/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)-->
 
 ## Usage examples
 
