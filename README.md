@@ -104,6 +104,8 @@ Musical fraction | These are commonly used in sequencer software to denote music
 Number | Whole number (integer), either negative or positive
 Decimal number | Decimal number, from 0.0 and upwards
 
+## Full documentation
+
 I've started adding more in-depth documentation in our [wiki](https://github.com/carrierdown/mutateful/wiki). There's still a long way to go, though.
 
 Be sure to star this repo and/or follow me at [twitter.com/KnUpland](https://twitter.com/KnUpland) for updates.
