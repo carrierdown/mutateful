@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DocGeneration
 {
@@ -26,12 +27,20 @@ namespace DocGeneration
             {"decimal/*ActualDecimal*/", "<[Decimal number](#parameter-types)>"},
             {"decimal[]/*ActualDecimal*/", "<list of [Decimal number](#parameter-types)>"}
         };
+
+        private static Regex CommandAliasesRegex;
+
+        private static string[] LexerLines;
         
         private static void Main(string[] args)
         {
+            CommandAliasesRegex = new Regex(@"(?<="")\b[a-z]*");
             var srcFiles = Directory.EnumerateFiles(Path.Join(Environment.CurrentDirectory, @"..\..\..\..\Mutate4l\Commands\"));
             var commandReference = new StringBuilder();
 
+            var lexerLines = File.ReadAllLines(@"..\..\..\..\Mutate4l\Cli\Lexer.cs");
+            LexerLines = lexerLines.SkipWhile(x => !x.Contains(" Commands ")).TakeWhile(x => !x.Contains("};")).ToArray();
+            
             foreach (var srcFile in srcFiles)
             {
                 var enums = ExtractEnumData(srcFile);
@@ -58,6 +67,7 @@ namespace DocGeneration
             var options = new Dictionary<string, (string, string, string)>();
             var optionInfo = "";
             var commandName = "";
+            var commandNameWithAliases = "";
             var commandDescription = "";
 
             foreach (var line in lines)
@@ -82,6 +92,10 @@ namespace DocGeneration
                     if (parts.Length < 4) continue;
                     commandName = parts[3];
                 }
+
+                var matchingLexerLine = LexerLines.FirstOrDefault(x => x.Contains(commandName)) ?? "";
+                var matches = CommandAliasesRegex.Matches(matchingLexerLine);
+                commandNameWithAliases = string.Join("<br>", matches.Select(x => x.Value));
 
                 if (inOptionsBlock && line.Trim() == "}")
                 {
@@ -135,8 +149,7 @@ namespace DocGeneration
                 }
             }
 
-//            Console.WriteLine($"Command: {commandName}");
-            var output = new StringBuilder(FormatCommandName(commandName)).Append(" | ");
+            var output = new StringBuilder(commandNameWithAliases).Append(" | ");
             var formattedOptions = new List<string>();
             foreach (var key in options.Keys)
             {
@@ -157,7 +170,7 @@ namespace DocGeneration
                     else
                     {
                         if (formattedOptions.Count > 0)
-                            formattedOptions[formattedOptions.Count - 1] += "&nbsp;" + formattedType;
+                            formattedOptions[^1] += "&nbsp;" + formattedType;
                         else 
                             formattedOptions.Add(formattedType);
                     }
@@ -226,11 +239,6 @@ namespace DocGeneration
         private static string FormatOptionName(string option)
         {
             return $"&#8209;{option.ToLower()}";
-        }
-
-        private static string FormatCommandName(string command)
-        {
-            return command.ToLower();
         }
 
         private static string FormatTypeDescription(string type, string @default)
