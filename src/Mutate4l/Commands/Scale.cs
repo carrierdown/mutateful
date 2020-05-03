@@ -49,7 +49,7 @@ namespace Mutate4l.Commands
                     {
                         masterNotes = masterClip.Notes.Where(x => x.InsideIntervalInclusive(note.Start, note.End)).ToSortedList();
                     }
-                    if (masterNotes.Count == 0) masterNotes = slaveClip.Notes;
+                    if (masterNotes.Count == 0) masterNotes = masterClip.Notes;
                     
                     var constrainedNote = new NoteEvent(note);
                     constrainedNote.Pitch = options.Strict ? 
