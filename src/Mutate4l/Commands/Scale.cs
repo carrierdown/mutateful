@@ -11,12 +11,10 @@ namespace Mutate4l.Commands
 
         public bool Strict { get; set; }
         
-        // add option to constrain to pitch based on position, so that events occuring for instance during a chord are constrained to this only. If no events are available in the given span, the entire clip is used instead.
+        public bool PositionAware { get; set; } // constrains to pitch based on position, so that events occuring for instance during a chord are constrained to this only. If no events are available in the given span, the entire clip is used instead.
     }
 
     // # desc: Uses a clip passed in via the -by parameter as a scale to which the current clip is made to conform. If -strict is specified, notes are made to follow both the current pitch and octave of the closest matching note. 
-    // constrain: first clip timing and/or pitch is replicated on all following clips. Position is optionally scaled with the Strength parameter.
-    // rename to scale?
     public static class Scale
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
@@ -40,16 +38,23 @@ namespace Mutate4l.Commands
             var masterClip = clips[0];
             var slaveClips = clips.Skip(1).ToArray();
             var processedClips = slaveClips.Select(c => new Clip(c.Length, c.IsLooping)).ToArray();
-
+            
             for (var i = 0; i < slaveClips.Length; i++)
             {
                 var slaveClip = slaveClips[i];
                 foreach (var note in slaveClip.Notes)
                 {
+                    var masterNotes = SortedList<NoteEvent>.Empty;
+                    if (options.PositionAware)
+                    {
+                        masterNotes = masterClip.Notes.Where(x => x.InsideIntervalInclusive(note.Start, note.End)).ToSortedList();
+                    }
+                    if (masterNotes.Count == 0) masterNotes = slaveClip.Notes;
+                    
                     var constrainedNote = new NoteEvent(note);
                     constrainedNote.Pitch = options.Strict ? 
-                        ClipUtilities.FindNearestNotePitchInSet(note, masterClip.Notes) : 
-                        ClipUtilities.FindNearestNotePitchInSetMusical(note, masterClip.Notes);
+                        ClipUtilities.FindNearestNotePitchInSet(note, masterNotes) : 
+                        ClipUtilities.FindNearestNotePitchInSetMusical(note, masterNotes);
                     processedClips[i].Notes.Add(constrainedNote);
                 }
             }

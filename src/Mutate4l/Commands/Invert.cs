@@ -6,11 +6,11 @@ namespace Mutate4l.Commands
 {
     public class InvertOptions
     {
-        [OptionInfo(type: OptionType.Default, 1/512f, noImplicitCast: true)]
-        public decimal/*ActualDecimal*/ Factor { get; set; } = 1.0m;
+        [OptionInfo(type: OptionType.Default, 0)]
+        public int Position { get; set; } = 1;
     }
 
-    // # desc: Resizes the current clip based on the specified factor (i.e. 0.5 halves the size of the clip, effectively doubling its tempo)
+    // # desc: Inverts the contents of the current clip the specified number of times. For each inversion, all notes with the currently lowest pitch value are moved one octave up.
     public static class Invert
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
@@ -23,7 +23,10 @@ namespace Mutate4l.Commands
         {
             foreach (var clip in clips)
             {
-                DoInvert(clip);
+                for (var i = 0; i < options.Position; i++)
+                {
+                    DoInvert(clip);
+                }
             }
 
             return new ProcessResultArray<Clip>(clips);

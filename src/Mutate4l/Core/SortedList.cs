@@ -13,6 +13,8 @@ namespace Mutate4l.Core
         public bool IsReadOnly => ((IList<T>)_list).IsReadOnly;
 
         public T this[int index] { get => _list[index]; }
+        
+        public static SortedList<T> Empty = new SortedList<T>();
 
         public SortedList(IComparer<T> comparer = null)
         {

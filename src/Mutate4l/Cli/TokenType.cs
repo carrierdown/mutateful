@@ -34,6 +34,7 @@
         VelocityScale,
 
         _OptionsBegin,
+        Invert,
         Skip,     // Need to find a better way of supporting token names that can signify both options and commands. Time to stop using an enum for this I guess. For now we have this quick fix though. 
         _CommandsEnd,
         Amount,
@@ -47,7 +48,6 @@
         Duration,
         EnableMask,
         Factor,
-        Invert,
         Length,
         Lengths,
         Magnetic,
@@ -57,6 +57,8 @@
         PadAmount,
         Pitch,
         PitchValues,
+        Position,
+        PositionAware,
         Post,
         Ranges,
         RatchetValues,
