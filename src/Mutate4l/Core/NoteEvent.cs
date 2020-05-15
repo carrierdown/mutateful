@@ -9,8 +9,9 @@ namespace Mutate4l.Core
         private int VelocityField;
         private decimal StartField;
 
-        public int Pitch {
-            get => Math.Clamp(PitchField, 0, 127);
+        public int Pitch
+        {
+            get => PitchField & 0x7F;
             set {
                 if (HasChildren)
                 {
@@ -24,7 +25,7 @@ namespace Mutate4l.Core
         public decimal Duration { get; set; }
 
         public int Velocity { 
-            get => Math.Clamp(VelocityField, 0, 127);
+            get => VelocityField & 0x7F;
             set => VelocityField = value;
         }
 

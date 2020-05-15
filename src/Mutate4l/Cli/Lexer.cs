@@ -116,7 +116,16 @@ namespace Mutate4l.Cli
             { "velocity", Velocity },
             { "relative", Relative },
             { "rhythm", Rhythm },
-            { "time", Time }
+            { "time", Time },
+            { "major", Major },
+            { "minor", Minor },
+            { "ionian", Ionian },
+            { "dorian", Dorian },
+            { "phrygian", Phrygian },
+            { "lydian", Lydian },
+            { "mixolydian", Mixolydian },
+            { "aeolian", Aeolian },
+            { "locrian", Locrian }
         };
 
         public Lexer(string buffer, List<Clip> clips)
