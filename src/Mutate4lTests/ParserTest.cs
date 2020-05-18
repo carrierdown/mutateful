@@ -26,6 +26,14 @@ namespace Mutate4lTests
                 new NoteEvent(63, 3, .5m, 100), // D#
                 new NoteEvent(81, 4, .5m, 100)  // A
             }
+        };        
+        private Clip Clip3 = new Clip(4, true) {
+            Notes = new SortedList<NoteEvent>()
+            {
+                new NoteEvent(47, 0, .5m, 100), // F
+                new NoteEvent(63, 3, .5m, 100), // A
+                new NoteEvent(81, 4, .5m, 100)  // E
+            }
         };
 
         [TestMethod]
@@ -101,6 +109,13 @@ namespace Mutate4lTests
             command = Parser.ParseFormulaToChainedCommand("[0] resize 0.5", new List<Clip> { Clip1 }, new ClipMetaData(100, 0));
             (success, _) = OptionParser.TryParseOptions(command.Result.Commands.First(), out ResizeOptions _);
             Assert.IsTrue(success);
+        }
+
+        [TestMethod]
+        public void TestNestedStatements()
+        {
+            var command = Parser.ParseFormulaToChainedCommand("[0] scale -by ([0] tran 1)", new List<Clip> { Clip1, Clip3 }, new ClipMetaData(100, 0));
+            Assert.IsTrue(command.Success);
         }
 
 //        [TestMethod]

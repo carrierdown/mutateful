@@ -123,6 +123,11 @@
         RepeatOperator,
         FillOperator,
         _OperatorsEnd,
+        
+        _NestingConstructsBegin,
+        LeftParenthesis,
+        RightParenthesis,
+        _NestingConstructsEnd,
 
         _TestOptionsBegin,
         DecimalValue,

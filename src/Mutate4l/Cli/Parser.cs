@@ -33,9 +33,11 @@ namespace Mutate4l.Cli
             var lexer = new Lexer(formula, clips);
             var result = lexer.GetTokens();
             if (!result.Success) return new ProcessResult<ChainedCommand>(result.ErrorMessage);
-            var resolvedTokens = ResolveOperators(result.Result);
-            if (!resolvedTokens.Success) return new ProcessResult<ChainedCommand>(resolvedTokens.ErrorMessage);
-            Token[] commandTokens = ApplyOperators(resolvedTokens.Result);
+            var nestingResolvedTokens = ResolveNestedStatements(result.Result);
+            if (!nestingResolvedTokens.Success) return new ProcessResult<ChainedCommand>(nestingResolvedTokens.ErrorMessage);
+            var operatorsResolvedTokens = ResolveOperators(result.Result);
+            if (!operatorsResolvedTokens.Success) return new ProcessResult<ChainedCommand>(operatorsResolvedTokens.ErrorMessage);
+            Token[] commandTokens = ApplyOperators(operatorsResolvedTokens.Result);
             var commandTokensLists = new List<List<Token>>();
             var activeCommandTokenList = new List<Token>();
             var sourceClips = commandTokens.TakeWhile(x => x.Type == TokenType.InlineClip).Select(x => x.Clip).ToArray();
@@ -133,6 +135,33 @@ namespace Mutate4l.Cli
             };
         }
 
+        public static ProcessResultArray<Token> ResolveNestedStatements(Token[] tokens)
+        {
+            // if (!tokens.Any(x => x.IsOperatorToken)) return new ProcessResultArray<Token>(tokens);
+
+            var processedTokens = new List<Token>(tokens.Length);
+            var i = 0;
+            var currentBlock = new List<Token>();
+            var inBlock = false;
+            while (i < tokens.Length)
+            {
+                if (inBlock)
+                {
+                    
+                }
+                else if (tokens[i].Type == TokenType.LeftParenthesis)
+                {
+                    inBlock = true; // todo: rewrite to use AST-like structure instead. Also makes proper operator resolving possible.
+                }
+                else
+                {
+                    processedTokens.Add(tokens[i]);
+                    i++;
+                }
+            }
+            return new ProcessResultArray<Token>(processedTokens.ToArray());        
+        }
+        
         // Processes single entity operators such as repeat, and pre-processes block level operators such as alternate
         public static ProcessResultArray<Token> ResolveOperators(Token[] tokens)
         {
