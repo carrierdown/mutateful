@@ -1,5 +1,6 @@
 ﻿using Mutate4l.Utility;
 using System.Collections.Generic;
+using System.Linq;
 using Mutate4l.Core;
 
 namespace Mutate4l.Commands
@@ -11,12 +12,42 @@ namespace Mutate4l.Commands
         
         public static ProcessResultArray<Clip> Apply(params Clip[] clips)
         {
-            var processedClips = new List<Clip>();
-            foreach (var clip in clips)
+            var resultClips = ClipUtilities.CreateEmptyPlaceholderClips(clips);
+
+            for (var i = 0; i < clips.Length; i++)
             {
-                processedClips.Add(ClipUtilities.Monophonize(clip));
+                var clip = clips[i];
+                var resultClip = resultClips[i];
+                foreach (var note in clip.Notes)
+                {
+                    var newNote = new NoteEvent(note);
+                    AddNoteCutting(resultClip, newNote);
+                }
             }
-            return new ProcessResultArray<Clip>(processedClips.ToArray());
+
+            return new ProcessResultArray<Clip>(resultClips);
         }
+
+        private static void AddNoteCutting(Clip clip, NoteEvent noteToAdd)
+        {
+            var collidingNotes = clip.Notes.Where(x => noteToAdd.StartsInsideInterval(x.Start, x.End)).ToArray();
+            if (collidingNotes.Length > 0)
+            {
+                foreach (var note in collidingNotes)
+                {
+                    if (note.Start == noteToAdd.Start && noteToAdd.Duration > note.Duration) // largest note wins in the case of a collision
+                    {
+                        clip.Notes.RemoveAt(clip.Notes.IndexOf(note));
+                    }
+                    else
+                    {
+                        // todo: maybe add extra logic to add back previous note if it spans the length of the note being added currently
+                        note.Duration = noteToAdd.Start - note.Start;
+                    }
+                }
+            }
+            clip.Notes.Add(noteToAdd);
+        }
+
     }
 }

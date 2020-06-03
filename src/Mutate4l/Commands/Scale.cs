@@ -47,7 +47,7 @@ namespace Mutate4l.Commands
                     var masterNotes = SortedList<NoteEvent>.Empty;
                     if (options.PositionAware)
                     {
-                        masterNotes = masterClip.Notes.Where(x => x.InsideIntervalInclusive(note.Start, note.End)).ToSortedList();
+                        masterNotes = masterClip.Notes.Where(x => x.StartsInsideIntervalInclusive(note.Start, note.End) || x.CoversInterval(note.Start, note.End)).ToSortedList();
                     }
                     if (masterNotes.Count == 0) masterNotes = masterClip.Notes;
                     

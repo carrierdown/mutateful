@@ -39,7 +39,7 @@ namespace Mutate4l.Cli
             var commandTokensLists = new List<List<Token>>();
             var activeCommandTokenList = new List<Token>();
             var sourceClips = commandTokens.TakeWhile(x => x.Type == TokenType.InlineClip).Select(x => x.Clip).ToArray();
-            var tokensToProcess = commandTokens.Skip(sourceClips.Count()).ToArray();
+            var tokensToProcess = commandTokens.Skip(sourceClips.Length).ToArray();
 
             if (tokensToProcess.Length == 0) 
             {

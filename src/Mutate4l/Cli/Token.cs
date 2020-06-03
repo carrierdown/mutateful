@@ -56,8 +56,8 @@ namespace Mutate4l.Cli
 
         public bool HasChildren => Children.Length > 0;
         public bool IsClipReference => Type == TokenType.ClipReference;
-        public bool IsOption => Type > _OptionsBegin && Type < _OptionsEnd;
-        public bool IsCommand => Type > _CommandsBegin && Type < _CommandsEnd;
+        public bool IsOption => Type > _OptionsBegin && Type < _OptionsEnd && Value.StartsWith('-');
+        public bool IsCommand => Type > _CommandsBegin && Type < _CommandsEnd && !Value.StartsWith('-');
         public bool IsOperatorToken => Type > _OperatorsBegin && Type < _OperatorsEnd;
         public bool HasOperatorType => OperatorType != OperatorType.None;
         public bool IsOptionValue => IsEnumValue || IsValue;

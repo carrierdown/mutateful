@@ -35,6 +35,7 @@ namespace Mutate4l.Commands
             {
                 return new ProcessResultArray<Clip>(clips, $"SetRhythm: Skipped command because it needs 2 clips, and {clips.Length} were passed in.");
             }
+            ClipUtilities.NormalizeClipLengths(clips);
             
             var resultClips = new Clip[clips.Length - 1];
             var byClip = clips[0];
