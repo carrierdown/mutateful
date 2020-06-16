@@ -25,12 +25,12 @@ namespace Mutate4l.Commands
                 }
             }
 
-            return new ProcessResultArray<Clip>(resultClips);
+            return Filter.Apply(new FilterOptions(), resultClips);
         }
 
         private static void AddNoteCutting(Clip clip, NoteEvent noteToAdd)
         {
-            var collidingNotes = clip.Notes.Where(x => noteToAdd.StartsInsideInterval(x.Start, x.End)).ToArray();
+            var collidingNotes = clip.Notes.Where(x => noteToAdd.StartsInsideIntervalInclusive(x.Start, x.End)).ToArray();
             if (collidingNotes.Length > 0)
             {
                 foreach (var note in collidingNotes)

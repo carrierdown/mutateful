@@ -33,7 +33,7 @@ namespace Mutate4l.IO
             await foreach (byte[] values in ReceiveUdpDataAsync(udpClient).ConfigureAwait(false))
             {
                 // this should trigger some event that notifies the state of mutateful and possibly triggers a re-evaluation of any formulas (should take into account whether the received data is for a complete clip or just partial)
-                Console.WriteLine($"Received datagram of size {values.Length}");
+                // Console.WriteLine($"Received datagram of size {values.Length}");
                 var result = processFunction(values);
                 // var result = CliHandler.HandleData(values);
                 if (result.Length > 0)

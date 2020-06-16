@@ -47,7 +47,6 @@ ObservableCallback.prototype.getCallback = function() {
     var self = this;
     return {
         onNameChanged: function(arg) {
-            // debuglogExt("onNameChanged", arg);
             var name = "";
             if (arg.indexOf("name") < 0) {
                 return;
@@ -57,12 +56,16 @@ ObservableCallback.prototype.getCallback = function() {
             if (name.indexOf("\"") === 0) {
                 name = name.substr(1, name.length - 2);
             }
-            // debuglogExt("name [" + name + "] self.name [" + self.name + "]");
-            if (!self.skipFirstNameCallback && name.length > 0 && self.name !== name) {
-                //debuglog("Name changed! cb called with ", arg, " on id: ", self.id);
-                self.name = name;
-                //debuglog("outletting to onSelectedClipRenamedOrChanged: ", self.id, name);
-                outlet(2, ["onSelectedClipRenamedOrChanged", parseInt(self.id, 10), name]);
+            if (name.length > 0) {
+
+                if (self.name === name) {
+                    // clip was probably copied
+                    outlet(2, ["onSelectedClipWasCopied", parseInt(self.id, 10), name]);
+                } else {
+                    // name of selected clip changed
+                    self.name = name;
+                    outlet(2, ["onSelectedClipRenamedOrChanged", parseInt(self.id, 10), name]);
+                }
             }
             self.skipFirstNameCallback = false;
             if (name.length === 0) {
@@ -75,8 +78,6 @@ ObservableCallback.prototype.getCallback = function() {
              onNotesChanged [id, 112]
              onNotesChanged [notes, bang]
              */
-            // debuglogExt("onNotesChanged", arg, "skipFirstNotesCallback?", self.skipFirstNotesCallback);
-            
             if (arg.indexOf("notes") >= 0) {
                 if (!self.skipFirstNotesCallback) {
                     outlet(2, ["onSelectedClipRenamedOrChanged", parseInt(self.id, 10)]);
@@ -98,11 +99,19 @@ function onInit() {
 }
 
 function onSelectedClipWithoutName(clipId, maybeName) {
+    //debuglog("onSelectedClipWithoutName", maybeName);
     var name = maybeName || "";
     if (name.indexOf("[") === -1 && name.indexOf("]") === -1) {
         clipSlot = new LiveAPI("id " + clipId);
         enumerateClip(getTrackNumber(clipSlot), getClipNumber(clipSlot) + 1, clipSlot);
     }
+}
+
+function onSelectedClipWasCopied(clipId, maybeName) {
+    //debuglog("onSelectedClipWasCopied", maybeName);
+    var name = maybeName || "";
+    clipSlot = new LiveAPI("id " + clipId);
+    enumerateClip(getTrackNumber(clipSlot), getClipNumber(clipSlot) + 1, clipSlot);
 }
 
 function onSelectedClipRenamedOrChanged(arg1, arg2) {
@@ -122,10 +131,10 @@ function onSelectedClipRenamedOrChanged(arg1, arg2) {
             var referredIds = formulaToReferredIds(formula);
             //debuglog("attempting to find id ", clipId, " in referred ids: ", referredIds);
             if (referredIds.indexOf(clipId) >= 0) {
-                debuglogExt("found current clip in referring formula - all is well");
+                debuglogExt("found current clip in referring formula");
                 var expandedFormula = expandFormulaAsBytes(formula, id);
                 if (expandedFormula) {
-                    debuglog("send expandedFormula", expandedFormula);
+                    //debuglog("send expandedFormula", expandedFormula);
                     addFormulaToQueue(id, formula, expandedFormula);
                 } else {
                     debuglogExt("Unable to expand formula for track " + (i + 1) + " clip " + (s + 1) + " - check syntax", expandedFormula);
@@ -352,7 +361,7 @@ function getNormalizedFloatValue(val) {
 }
 
 function setClipFromBytes(/* ... arguments */) {
-    debuglog("setClipFromBytes called");
+    //debuglog("setClipFromBytes called");
     if (arguments.length < 9) {
         post("Error - expected bigger payload");
     }
@@ -453,9 +462,9 @@ function enumerate() {
 
 function enumerateClip(trackNo, clipNo, liveObject) {
     var existingName = getClipName(liveObject);
-    //debuglogExt("existingName", existingName);
     var newName = "";
     var clipRefString = String.fromCharCode(65 + trackNo) + clipNo;
+    if (existingName.indexOf("[" + clipRefString + "]") >= 0) return;
     var startBracketIx = existingName.indexOf("[");
     var endBracketIx = existingName.indexOf("]", startBracketIx);
     if (startBracketIx >= 0 && endBracketIx >= 0) {
@@ -463,7 +472,6 @@ function enumerateClip(trackNo, clipNo, liveObject) {
     } else {
         newName = "[" + clipRefString + "] " + existingName;
     }
-    //debuglogExt(startBracketIx, endBracketIx, newName);
     liveObject.set("name",  newName);
 }
 
@@ -746,7 +754,7 @@ function getSelectedClipAsBytes() {
 }
 
 function getStringAsUint8Array(value) {
-	if (value.length === 0) return;
+    if (value.length === 0) return;
     var result = new Uint8ClampedArray(value.length);
     for (var i = 0; i < value.length; i++) {
         result[i] = value.charCodeAt(i);

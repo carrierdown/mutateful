@@ -9,7 +9,7 @@ namespace Mutate4l.Commands
 {
     public class ArpeggiateOptions
     {
-        [OptionInfo(min: 1, max: 10)]
+        [OptionInfo(min: 1, max: 32)]
         public int Rescale { get; set; } = 2; // todo: make it a percentage of the arpclip instead? With possibility of scaling the number of events further based on the duration of the current event compared to the longest event in the clip.
 
         public bool RemoveOffset { get; set; } = true;
@@ -35,11 +35,11 @@ namespace Mutate4l.Commands
         // Add option to dynamically set # of events that should be rescaled to another note, probably via velocity.
         public static ProcessResultArray<Clip> Apply(ArpeggiateOptions options, params Clip[] clips)
         {
-            Clip arpSequence = ClipUtilities.Monophonize(options.By ?? clips[0]);
+            Clip arpSequence = options.By ?? clips[0];
 
             foreach (var clip in clips)
             {
-                ClipUtilities.Monophonize(clip);
+                // ClipUtilities.Monophonize(clip);
             }
             var processedClips = new List<Clip>(clips.Length);
 
