@@ -174,7 +174,7 @@ namespace Mutate4l.Cli
                                 valuesToAlternate.Add(new ChildToken(tokens[ix + 1].Type, tokens[ix + 1].Value));
                                 ix += 2;
                             }
-                            processedTokens.Add(new Token(TokenType.AlternationOperator, tokens[i].Position, OperatorType.Alternation, valuesToAlternate.ToArray()));
+                            processedTokens.Add(new Token(TokenType.AlternationOperator, tokens[i].Position, valuesToAlternate.ToArray()));
                             i = ix; 
                             break;
                         default:
@@ -222,6 +222,57 @@ namespace Mutate4l.Cli
                 }
             }
             return command;
+        }
+
+        public static List<TreeToken> CreateSyntaxTree(Token[] tokens)
+        {
+            var rootToken = new TreeToken(TokenType.Root, "", 0);
+            var insertionPoint = rootToken;
+            
+            for (var i = 0; i < tokens.Length; i++)
+            {
+                var token = tokens[i];
+                TreeToken treeToken;
+                if (i + 1 < tokens.Length && tokens[i].IsValue && tokens[i + 1].IsOperatorToken)
+                {
+                    if (insertionPoint.IsOperatorToken && 
+                        insertionPoint.Type == tokens[i + 1].Type)
+                    {
+                        insertionPoint.Children.Add(new TreeToken(tokens[i]).SetParent(insertionPoint));
+                        if (i + 1 < tokens.Length && tokens[i + 1].IsOperatorToken)
+                        {
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        treeToken = new TreeToken(tokens[i + 1]);
+                        treeToken.Children.Add(new TreeToken(tokens[i]).SetParent(treeToken));
+                        i++;
+                        insertionPoint.Children.Add(treeToken.SetParent(insertionPoint));
+                        insertionPoint = treeToken;
+                    }
+                }
+                else
+                {
+                    treeToken = new TreeToken(token);
+                    insertionPoint.Children.Add(treeToken.SetParent(insertionPoint));
+                }
+
+                if (insertionPoint.Children.Count > 2 && insertionPoint.Type == TokenType.RepeatOperator)
+                {
+                    // todo: proper error handling
+                    Console.WriteLine($"Invalid number of params at {insertionPoint.Value} {insertionPoint.Type}");
+                }
+
+                if (i > 0 && tokens[i - 1].IsOperatorToken)
+                {
+                    while (insertionPoint.IsOperatorToken)
+                        insertionPoint = insertionPoint.Parent;
+                }
+            }
+
+            return rootToken.Children;
         }
     }
 }

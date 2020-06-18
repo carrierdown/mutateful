@@ -1,7 +1,9 @@
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.Cli;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Mutate4l.Core;
 
 namespace Mutate4lTests
@@ -55,6 +57,35 @@ namespace Mutate4lTests
             Assert.IsTrue(resolvedTokens.Result.Length > 0);
             var fullyResolvedTokens = Parser.ApplyOperators(resolvedTokens.Result);
             Assert.IsTrue(fullyResolvedTokens.Select(x => x.Value).SequenceEqual(new [] {"shuffle", "1", "2", "4", "5", "1", "3", "4", "6", "1", "2", "4", "7"}));
+        }
+
+        [TestMethod]
+        public void Testing()
+        {
+            var lexer = new Lexer("shuffle 1 2|3|9x6 1 2 4x3 5|6|7 8", new List<Clip>());
+            var result = lexer.GetTokens();
+            Assert.IsTrue(result.Success);
+            var sTokens = Parser.CreateSyntaxTree(result.Result);
+            PrintSyntaxTree(sTokens);
+        }
+
+        public void PrintSyntaxTree(List<TreeToken> sTokens, int indent = 0)
+        {
+            foreach (var sToken in sTokens)
+            {
+                Console.WriteLine($"{GetIndent(indent)}{sToken.Value}");
+                if (sToken.HasChildren) PrintSyntaxTree(sToken.Children, indent + 1);
+            }
+        }
+
+        public string GetIndent(int indent)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (var i = 0; i < indent; i++)
+            {
+                sb.Append("  ");
+            }
+            return sb.ToString();
         }
     }
 }

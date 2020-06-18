@@ -1,6 +1,6 @@
 namespace Mutate4l.Cli
 {
-    public enum OperatorType
+    /*public enum OperatorType
     {
         None,
         Range,
@@ -8,5 +8,5 @@ namespace Mutate4l.Cli
         Empty,
         Repeat,
         Fill
-    }
+    }*/
 }

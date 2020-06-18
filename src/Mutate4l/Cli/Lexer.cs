@@ -305,7 +305,7 @@ namespace Mutate4l.Cli
                     }
                     else
                     {
-                        token = new Token(TokenType.RepeatOperator, "x", Position);
+                        token = new Token(RepeatOperator, "x", Position);
                     }
                 }
                 else if (IsClipReference(Position))

@@ -3,6 +3,7 @@
     public enum TokenType
     {
         NoToken,
+        Root,
 
         _CommandsBegin,
         Arpeggiate,
