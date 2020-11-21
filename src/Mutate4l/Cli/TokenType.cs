@@ -74,6 +74,7 @@
         Strength,
         Strict,
         TakeCounts,
+        Thin,
         TransposeValues,
         Threshold,
         To,

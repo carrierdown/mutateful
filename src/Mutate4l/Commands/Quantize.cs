@@ -13,7 +13,7 @@ namespace Mutate4l.Commands
         public decimal/*ActualDecimal*/ Amount { get; set; } = 1.0m;
 
         [OptionInfo(type: OptionType.Default, 1/64f)]
-        public decimal[] Divisions { get; set; } = { 1/16m };
+        public decimal[] Divisions { get; set; } = { 4/16m };
 
 //        public decimal Threshold { get; set; } = 0.125m; // to be added
 

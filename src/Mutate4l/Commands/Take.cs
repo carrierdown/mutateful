@@ -8,7 +8,10 @@ namespace Mutate4l.Commands
     {
         [OptionInfo(type: OptionType.Default, 1)]
         public int[] TakeCounts { get; set; } = { 2 };
+
+        public bool Thin { get; set; }
     }
+    // todo: Option to include silence instead of the skipped notes, effectively "thinning out" the clip
     
     // # desc: Creates a new clip by taking every # note from another clip. If more than one skip value is specified, they are cycled through.
     public static class Take
@@ -55,6 +58,7 @@ namespace Mutate4l.Commands
                     }
                     else
                     {
+                        if (options.Thin) currentPos += clip.DurationUntilNextNote(noteIx);
                         currentTake--;
                     }
                     noteIx++;

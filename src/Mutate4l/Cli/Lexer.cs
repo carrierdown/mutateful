@@ -94,6 +94,7 @@ namespace Mutate4l.Cli
             { "-strength", Strength },
             { "-strict", Strict },
             { "-takecounts", TakeCounts	},
+            { "-thin", Thin },
             { "-transposevalues", TransposeValues },
             { "-threshold", Threshold }, { "-thres", Threshold },
             { "-to", To},
