@@ -11,20 +11,9 @@ namespace Mutate4l.Cli
         public int Position { get; }
         public Clip Clip { get; }
 
-        public bool AllValuesFetched => CurrentIndex >= Children.Length;
-
-        public ChildToken NextValue => HasChildren ? Children[CurrentIndex++ % Children.Length] : ValueAsChildToken;
-        
-        private readonly ChildToken[] Children;
-        private readonly ChildToken ValueAsChildToken;
-        private int CurrentIndex;
-
         public Token(TokenType type, string value, int position)
         {
-            Children = new ChildToken[0];
             Clip = Clip.Empty;
-            ValueAsChildToken = new ChildToken(type, value);
-
             Type = type;
             Value = value;
             Position = position;
@@ -32,12 +21,18 @@ namespace Mutate4l.Cli
 
         public Token(Token token)
         {
-            Children = token.Children;
             Clip = token.Clip;
-            ValueAsChildToken = token.ValueAsChildToken;
             Type = token.Type;
             Value = token.Value;
             Position = token.Position;
+        }
+
+        public Token(TreeToken treeToken)
+        {
+            Clip = treeToken.Clip;
+            Type = treeToken.Type;
+            Value = treeToken.Value;
+            Position = treeToken.Position;
         }
         
         public Token(TokenType type, string value, Clip clip, int position) : this(type, value, position)
@@ -45,12 +40,6 @@ namespace Mutate4l.Cli
             Clip = clip;
         }
 
-        public Token(TokenType type, int position, ChildToken[] children) : this(type, "", position)
-        {
-            Children = children;
-        }
-
-        public bool HasChildren => Children.Length > 0;
         public bool IsClipReference => Type == TokenType.ClipReference;
         public bool IsOption => Type > _OptionsBegin && Type < _OptionsEnd && Value.StartsWith('-');
         public bool IsCommand => Type > _CommandsBegin && Type < _CommandsEnd && !Value.StartsWith('-');

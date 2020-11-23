@@ -46,35 +46,12 @@ namespace Mutate4lTests
             Assert.IsTrue(lex.IsBarsBeatsSixteenths(26));
         }
 
-        [TestMethod]
-        public void TestOperatorResolving()
+        public void PrintSyntaxTree(List<TreeToken> treeTokens, int indent = 0)
         {
-            var lexer = new Lexer("shuffle 1 2|3 4 5|6|7", new List<Clip>());
-            var result = lexer.GetTokens();
-            Assert.IsTrue(result.Success);
-            var resolvedTokens = Parser.ResolveOperators(result.Result);
-            Assert.IsTrue(resolvedTokens.Success);
-            Assert.IsTrue(resolvedTokens.Result.Length > 0);
-            var fullyResolvedTokens = Parser.ApplyOperators(resolvedTokens.Result);
-            Assert.IsTrue(fullyResolvedTokens.Select(x => x.Value).SequenceEqual(new [] {"shuffle", "1", "2", "4", "5", "1", "3", "4", "6", "1", "2", "4", "7"}));
-        }
-
-        [TestMethod]
-        public void Testing()
-        {
-            var lexer = new Lexer("shuffle 1 2|3|9x6 1 2 4x3 5|6|7 8", new List<Clip>());
-            var result = lexer.GetTokens();
-            Assert.IsTrue(result.Success);
-            var sTokens = Parser.CreateSyntaxTree(result.Result);
-            PrintSyntaxTree(sTokens);
-        }
-
-        public void PrintSyntaxTree(List<TreeToken> sTokens, int indent = 0)
-        {
-            foreach (var sToken in sTokens)
+            foreach (var treeToken in treeTokens)
             {
-                Console.WriteLine($"{GetIndent(indent)}{sToken.Value}");
-                if (sToken.HasChildren) PrintSyntaxTree(sToken.Children, indent + 1);
+                Console.WriteLine($"{GetIndent(indent)}{treeToken.Value}");
+                if (treeToken.HasChildren) PrintSyntaxTree(treeToken.Children, indent + 1);
             }
         }
 

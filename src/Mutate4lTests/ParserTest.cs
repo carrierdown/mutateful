@@ -103,22 +103,16 @@ namespace Mutate4lTests
             Assert.IsTrue(success);
         }
 
-//        [TestMethod]
-        /*public void TestParseTokensToCommand()
+        [TestMethod]
+        public void TestParseNestedOperators()
         {
-            Lexer lexer = new Lexer("interleave A1 C4 -ranges A1 -repeats => A2");
-            var command = Parser.ParseTokensToCommand(lexer.GetTokens());
-            Assert.AreEqual(command.Id, TokenType.Interleave);
-            Assert.AreEqual(command.Options[TokenType.Ranges].Count, 1);
-            Assert.AreEqual(command.Options[TokenType.Repeats].Count, 0);
-        }*/
+            var command = Parser.ParseFormulaToChainedCommand("[0] shuffle 1 2|3|9x6 1 2 4x3 5|6|7 8", new List<Clip> { Clip1 }, new ClipMetaData(100, 0));
+            Assert.IsTrue(command.Success);
+            Assert.AreEqual(1, command.Result.Commands.Count);
 
-        /*[TestMethod]
-        public void TestParseFormulaToCommand()
-        {
-            var command = Parser.ParseFormulaToChainedCommand("{id:456,trackIx:1} [1,0:4 1 70 0 4 100] constrain -by [0,0:4 1 70 0 0.5 100 70 0.5 0.5 100 70 1 0.5 100 70 1.5 0.5 100 70 2 0.5 100 70 2.5 0.5 100 70 3 0.5 100 70 3.5 0.5 100] -mode absolute");
-            var parsedOptions = OptionParser.ParseOptions<TransposeOptions>(command.Result.Commands[0]);
-            var i = 0;
-        }*/
+            var flattenedValues = command.Result.Commands[0].DefaultOptionValues.Select(x => int.Parse(x.Value)).ToList();
+            var expectedValues = new List<int> { 1, 2, 1, 2, 4, 4, 4, 5, 8, 1, 3, 1, 2, 4, 4, 4, 6, 8, 1, 9, 9, 9, 9, 9, 9, 1, 2, 4, 4, 4, 7 };
+            Assert.IsTrue(flattenedValues.SequenceEqual(expectedValues));
+        }
     }
 }

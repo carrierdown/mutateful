@@ -18,5 +18,12 @@
         public ProcessResult(string errorMessage, string header) : this(false, new T(), $"{header}: {errorMessage}") { }
 
         public ProcessResult(T result) : this(true, result, "") { }
+        
+        public void Deconstruct(out bool success, out T result, out string errorMessage)
+        {
+            success = Success;
+            result = Result;
+            errorMessage = ErrorMessage;
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Mutate4l.Core;
@@ -94,16 +95,17 @@ namespace Mutate4l.Cli
 
             switch (type)
             {
+                // todo: add some kind of safe guard here, for instance an upper limit on number sizes
                 // handle single value
                 case Number when property.PropertyType == typeof(decimal) && noImplicitCast:
-                    return new ProcessResultArray<object>(new object[] {ClampIfSpecified(decimal.Parse(tokens[0].Value), rangeInfo)});
+                    return new ProcessResultArray<object>(new object[] {ClampIfSpecified(decimal.Parse(tokens[0].Value, CultureInfo.InvariantCulture), rangeInfo)});
                 case MusicalDivision when property.PropertyType == typeof(decimal) && !noImplicitCast:
                 case Number when property.PropertyType == typeof(decimal) && !noImplicitCast:
                     return new ProcessResultArray<object>(new object[] {Utilities.MusicalDivisionToDecimal(tokens[0].Value)});
                 case BarsBeatsSixteenths when property.PropertyType == typeof(decimal) && !noImplicitCast:
                     return new ProcessResultArray<object>(new object[] {Utilities.BarsBeatsSixteenthsToDecimal(tokens[0].Value)});
                 case TokenType.Decimal when property.PropertyType == typeof(decimal):
-                    return new ProcessResultArray<object>(new object[] {ClampIfSpecified(decimal.Parse(tokens[0].Value), rangeInfo)});
+                    return new ProcessResultArray<object>(new object[] {ClampIfSpecified(decimal.Parse(tokens[0].Value, CultureInfo.InvariantCulture), rangeInfo)});
                 case TokenType.Decimal when property.PropertyType == typeof(int) && !noImplicitCast:
                     return new ProcessResultArray<object>(new object[] {ClampIfSpecified((decimal) int.Parse(tokens[0].Value), rangeInfo)});
                 case InlineClip when property.PropertyType == typeof(Clip):
@@ -140,7 +142,7 @@ namespace Mutate4l.Cli
                         {
                             if (t.Type == MusicalDivision || t.Type == Number) return Utilities.MusicalDivisionToDecimal(t.Value);
                             if (t.Type == BarsBeatsSixteenths) return Utilities.BarsBeatsSixteenthsToDecimal(t.Value);
-                            return ClampIfSpecified(decimal.Parse(t.Value), rangeInfo);
+                            return ClampIfSpecified(decimal.Parse(t.Value, CultureInfo.InvariantCulture), rangeInfo);
                         }).ToArray();
                         return new ProcessResultArray<object>(new object[] {values});
                     }
@@ -164,7 +166,7 @@ namespace Mutate4l.Cli
                         }
                         case TokenType.Decimal when property.PropertyType == typeof(decimal[]):
                         {
-                            decimal[] values = tokens.Select(t => ClampIfSpecified(decimal.Parse(t.Value), rangeInfo)).ToArray();
+                            decimal[] values = tokens.Select(t => ClampIfSpecified(decimal.Parse(t.Value, CultureInfo.InvariantCulture), rangeInfo)).ToArray();
                             return new ProcessResultArray<object>(new object[] {values});
                         }
                         case Number when property.PropertyType == typeof(int[]):

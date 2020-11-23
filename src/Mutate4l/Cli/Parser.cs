@@ -31,20 +31,38 @@ namespace Mutate4l.Cli
             if (!valid) return new ProcessResult<ChainedCommand>($"Invalid formula: {formula}");
 
             var lexer = new Lexer(formula, clips);
-            var result = lexer.GetTokens();
-            if (!result.Success) return new ProcessResult<ChainedCommand>(result.ErrorMessage);
-            var resolvedTokens = ResolveOperators(result.Result);
-            if (!resolvedTokens.Success) return new ProcessResult<ChainedCommand>(resolvedTokens.ErrorMessage);
-            Token[] commandTokens = ApplyOperators(resolvedTokens.Result);
-            var commandTokensLists = new List<List<Token>>();
-            var activeCommandTokenList = new List<Token>();
+            var (success, tokens, errorMessage) = lexer.GetTokens();
+            if (!success) return new ProcessResult<ChainedCommand>(errorMessage);
+
+            TreeToken syntaxTree;
+            (success, syntaxTree, errorMessage) = CreateSyntaxTree(tokens);
+            if (!success) return new ProcessResult<ChainedCommand>(errorMessage);
+
+            // remaining steps:
+            // convert any nested statements to inline clips - might involve some refactoring where parsing to commands and applying these can be done selectively and not as part of the fixed pipeline we have now
+
+            Token[] commandTokens;
+            (success, commandTokens, errorMessage) = ResolveAndFlattenSyntaxTree(syntaxTree);
+            if (!success) return new ProcessResult<ChainedCommand>(errorMessage);
+            
             var sourceClips = commandTokens.TakeWhile(x => x.Type == TokenType.InlineClip).Select(x => x.Clip).ToArray();
             var tokensToProcess = commandTokens.Skip(sourceClips.Length).ToArray();
 
-            if (tokensToProcess.Length == 0) 
+            var commandTokensLists = ExtractCommandTokensLists(tokensToProcess);
+            var commands = commandTokensLists.Select(ParseTokensToCommand).ToList();
+
+            var chainedCommand = new ChainedCommand(commands, sourceClips, metadata);
+            return new ProcessResult<ChainedCommand>(chainedCommand);
+        }
+
+        private static List<List<Token>> ExtractCommandTokensLists(Token[] tokensToProcess)
+        {
+            var commandTokensLists = new List<List<Token>>();
+            var activeCommandTokenList = new List<Token>();
+            if (tokensToProcess.Length == 0)
             {
                 // Empty command, assume concat
-                tokensToProcess = new Token[] {new Token(TokenType.Concat, "concat", 0), };
+                tokensToProcess = new Token[] {new Token(TokenType.Concat, "concat", 0),};
             }
 
             foreach (var token in tokensToProcess)
@@ -58,7 +76,7 @@ namespace Mutate4l.Cli
                     else
                     {
                         commandTokensLists.Add(activeCommandTokenList);
-                        activeCommandTokenList = new List<Token> { token };
+                        activeCommandTokenList = new List<Token> {token};
                     }
                 }
                 else
@@ -66,128 +84,21 @@ namespace Mutate4l.Cli
                     activeCommandTokenList.Add(token);
                 }
             }
+
             commandTokensLists.Add(activeCommandTokenList); // add last command token list
-            var commands = commandTokensLists.Select(ParseTokensToCommand).ToList();
-
-            var chainedCommand = new ChainedCommand(commands, sourceClips, metadata);
-            return new ProcessResult<ChainedCommand>(chainedCommand);
+            return commandTokensLists;
         }
 
-        public static Token[] ApplyOperators(Token[] tokens)
+        private static ProcessResultArray<Token> ResolveAndFlattenSyntaxTree(TreeToken syntaxTree)
         {
-            var processedTokens = new List<Token>(tokens.Length);
-            var i = 0;
-            var valueBlockStartIx = -1;
-            while (i < tokens.Length)
+            var flattenedTokens = new List<Token>();
+            while (!syntaxTree.AllValuesFetched)
             {
-                if (tokens[i].IsPureValue || tokens[i].IsOperatorToken)
-                {
-                    if (valueBlockStartIx < 0) valueBlockStartIx = i;
-                }
-                else
-                {
-                    valueBlockStartIx = -1;
-                }
-
-                // Operators are processed for each block of pure values and operators, since they can operate on the entire block of values
-                if (valueBlockStartIx >= 0)
-                {
-                    var ix = 0;
-                    var containsBlockLevelOperators = false;
-                    while (valueBlockStartIx + ix < tokens.Length && (tokens[valueBlockStartIx + ix].IsPureValue || tokens[valueBlockStartIx + ix].IsOperatorToken))
-                    {
-                        if (IsBlockLevelOperator(tokens[valueBlockStartIx + ix].Type)) containsBlockLevelOperators = true;
-                        ix++;
-                    }
-                    var valueBlockEndIx = valueBlockStartIx + ix;
-
-                    if (containsBlockLevelOperators)
-                    {
-                        var tokensInBlock = new List<Token>();
-                        for (var y = valueBlockStartIx; y < valueBlockEndIx; y++) tokensInBlock.Add(tokens[y]);
-                        while (tokensInBlock.Any(x => x.AllValuesFetched == false))
-                        {
-                            foreach (var token in tokensInBlock)
-                            {
-                                var nextToken = token.NextValue;
-                                processedTokens.Add(new Token(nextToken.Type, nextToken.Value, token.Position));
-                            }
-                        }
-                        i = valueBlockEndIx;
-                        continue;
-                    }
-                }
-                processedTokens.Add(tokens[i]);
-                i++;
+                var container = syntaxTree.NextValue;
+                if (container.Success) flattenedTokens.AddRange(container.Result);
+                else return container;
             }
-            return processedTokens.ToArray();
-        }
-
-        private static bool IsBlockLevelOperator(TokenType type)
-        {
-            return type switch
-            {
-                TokenType.AlternationOperator => true,
-                TokenType.RangeOperator => true,
-                _ => false
-            };
-        }
-
-        // Processes single entity operators such as repeat, and pre-processes block level operators such as alternate
-        public static ProcessResultArray<Token> ResolveOperators(Token[] tokens)
-        {
-            if (!tokens.Any(x => x.IsOperatorToken)) return new ProcessResultArray<Token>(tokens);
-
-            var processedTokens = new List<Token>(tokens.Length);
-            var i = 0;
-            while (i < tokens.Length)
-            {
-                if (i + 1 < tokens.Length && tokens[i + 1].IsOperatorToken)
-                {
-                    switch (tokens[i + 1].Type)
-                    {
-                        case TokenType.RepeatOperator when i + 2 < tokens.Length && tokens[i].Type == TokenType.Number:
-                            if (!tokens[i + 2].IsPureValue) return new ProcessResultArray<Token>($"Expected a pure value (number or musical fraction) following repeat operator, but found {tokens[i + 2].Value}");
-                            var valueToRepeat = tokens[i].Value;
-                            if (int.TryParse(tokens[i + 2].Value, out var repeatCount))
-                            {
-                                for (var index = 0; index < repeatCount; index++)
-                                {
-                                    processedTokens.Add(new Token(tokens[i].Type, valueToRepeat, tokens[i].Position));
-                                }
-                            }
-                            else
-                            {
-                                return new ProcessResultArray<Token>($"Unable to parse repeat operator. Tokens: {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
-                            }
-                            i += 3;
-                            break;
-                        case TokenType.AlternationOperator when i + 2 < tokens.Length:
-                            if (!(tokens[i].IsPureValue && tokens[i + 2].IsPureValue)) return new ProcessResultArray<Token>($"Unable to parse alternation operator. Tokens: {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
-                            var ix = i + 3;
-                            var valuesToAlternate = new List<ChildToken>();
-                            // todo: extract to more general function for extracting values interspersed with operators
-                            valuesToAlternate.Add(new ChildToken(tokens[i].Type, tokens[i].Value));         // [n]'n
-                            valuesToAlternate.Add(new ChildToken(tokens[i + 2].Type, tokens[i + 2].Value)); // n'[n]
-                            while (ix + 1 < tokens.Length && tokens[ix].Type == TokenType.AlternationOperator && tokens[ix + 1].IsPureValue)
-                            {
-                                valuesToAlternate.Add(new ChildToken(tokens[ix + 1].Type, tokens[ix + 1].Value));
-                                ix += 2;
-                            }
-                            processedTokens.Add(new Token(TokenType.AlternationOperator, tokens[i].Position, valuesToAlternate.ToArray()));
-                            i = ix; 
-                            break;
-                        default:
-                            return new ProcessResultArray<Token>($"Error resolving operator with tokens {tokens[i].Value}, {tokens[i + 1].Value}, {tokens[i + 2].Value}");
-                    }
-                }
-                else
-                {
-                    processedTokens.Add(tokens[i]);
-                    i++;
-                }
-            }
-            return new ProcessResultArray<Token>(processedTokens.ToArray());
+            return new ProcessResultArray<Token>(flattenedTokens.ToArray());
         }
 
         private static Command ParseTokensToCommand(IEnumerable<Token> tokens)
@@ -224,15 +135,15 @@ namespace Mutate4l.Cli
             return command;
         }
 
-        public static List<TreeToken> CreateSyntaxTree(Token[] tokens)
+        public static ProcessResult<TreeToken> CreateSyntaxTree(Token[] tokens)
         {
+            // todo: support for nested statements need to be added here as well
             var rootToken = new TreeToken(TokenType.Root, "", 0);
             var insertionPoint = rootToken;
             
             for (var i = 0; i < tokens.Length; i++)
             {
                 var token = tokens[i];
-                TreeToken treeToken;
                 if (i + 1 < tokens.Length && tokens[i].IsValue && tokens[i + 1].IsOperatorToken)
                 {
                     if (insertionPoint.IsOperatorToken && 
@@ -246,7 +157,7 @@ namespace Mutate4l.Cli
                     }
                     else
                     {
-                        treeToken = new TreeToken(tokens[i + 1]);
+                        var treeToken = new TreeToken(tokens[i + 1]);
                         treeToken.Children.Add(new TreeToken(tokens[i]).SetParent(treeToken));
                         i++;
                         insertionPoint.Children.Add(treeToken.SetParent(insertionPoint));
@@ -255,16 +166,16 @@ namespace Mutate4l.Cli
                 }
                 else
                 {
-                    treeToken = new TreeToken(token);
-                    insertionPoint.Children.Add(treeToken.SetParent(insertionPoint));
+                    insertionPoint.Children.Add(new TreeToken(token).SetParent(insertionPoint));
                 }
 
                 if (insertionPoint.Children.Count > 2 && insertionPoint.Type == TokenType.RepeatOperator)
                 {
-                    // todo: proper error handling
-                    Console.WriteLine($"Invalid number of params at {insertionPoint.Value} {insertionPoint.Type}");
+                    return new ProcessResult<TreeToken>(
+                        $"Too many operands specified for operator {insertionPoint.Type} near {insertionPoint.Children[^1]?.Value ?? insertionPoint.Value}, col {insertionPoint.Children[^1]?.Position ?? insertionPoint.Position}");
                 }
 
+                // Once we have an operator behind us we can move the insertion point up to root level again. This will not affect nested operators as tokens[i - 1] won't give us an operator token in these cases.
                 if (i > 0 && tokens[i - 1].IsOperatorToken)
                 {
                     while (insertionPoint.IsOperatorToken)
@@ -272,7 +183,7 @@ namespace Mutate4l.Cli
                 }
             }
 
-            return rootToken.Children;
+            return new ProcessResult<TreeToken>(rootToken);
         }
     }
 }
