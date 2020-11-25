@@ -46,6 +46,16 @@ namespace Mutate4lTests
             Assert.IsTrue(lex.IsBarsBeatsSixteenths(26));
         }
 
+        [TestMethod]
+        public void Testing()
+        {
+            var lexer = new Lexer("shuffle 1 2|3|9x6 1 2 4x3 5|6|7 8", new List<Clip>());
+            var result = lexer.GetTokens();
+            Assert.IsTrue(result.Success);
+            var sTokens = Parser.CreateSyntaxTree(result.Result);
+            PrintSyntaxTree(sTokens.Result.Children);
+        }
+        
         public void PrintSyntaxTree(List<TreeToken> treeTokens, int indent = 0)
         {
             foreach (var treeToken in treeTokens)

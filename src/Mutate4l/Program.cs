@@ -1,11 +1,11 @@
-﻿using Mutate4l.Cli;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Mutate4l.IO;
+using Mutate4l.State;
 
 namespace Mutate4l
 {
@@ -24,10 +24,10 @@ namespace Mutate4l
                 Console.WriteLine("Welcome to mutateful!");
                 Console.WriteLine("Open Ableton Live, drop mutateful-connector.amxd onto one of the tracks, and start entering formulas.");
                 
-                var queue = Channel.CreateUnbounded<byte[]>();
+                var queue = Channel.CreateUnbounded<InternalCommand>();
                 
                 await Task.WhenAny(
-                    UdpHandler.ProcessUdpDataAsync(udpClient, queue.Writer, CliHandler.HandleInput), 
+                    UdpHandler.ProcessUdpDataAsync(udpClient, queue.Writer), 
                     UdpHandler.SendUdpDataAsync(udpClient, queue.Reader), 
                     Task.Run(() =>
                         {

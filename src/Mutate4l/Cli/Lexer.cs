@@ -50,7 +50,7 @@ namespace Mutate4l.Cli
             { "slice", Slice }, { "slc", Slice },
             { "take", Take },
             { "transpose", Transpose }, { "tran", Transpose },{ "tp", Transpose },
-            { "velocityScale", VelocityScale },  { "vel", VelocityScale }, { "vs", VelocityScale }, { "v", VelocityScale }
+            { "velocityscale", VelocityScale },  { "vel", VelocityScale }, { "vs", VelocityScale }, { "v", VelocityScale }
         };
 
         private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>

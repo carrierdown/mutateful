@@ -13,8 +13,8 @@ namespace Mutate4l.Commands
         public Clip By { get; set; } = Clip.Empty;
     }
     
-    // Simple command to set pitch of all notes to specified value(s). If more values are specified, they are cycled through.
-    public class SetPitch
+    // # desc: Sets the pitch of all notes to the specified value(s). When more values are specified, they are cycled through.
+    public static class SetPitch
     {
         public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
         {

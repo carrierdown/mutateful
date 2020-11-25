@@ -12,7 +12,7 @@ namespace Mutate4l.Commands
         public decimal Strength { get; set; } 
     }
 
-    // # desc: Scale a clips notes' velocities. TODO: Optionally with an abritrary minimum offset.
+    // # desc: Scale a clips notes' velocities.
     public static class VelocityScale
     {
         const int FullMidiVelocityRange = 127;

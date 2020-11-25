@@ -13,7 +13,7 @@ namespace Mutate4lTests
     {
         public static void InputShouldProduceGivenOutput(byte[] input, byte[] output)
         {
-            (List<Clip> clips, string formula, ushort id, byte trackNo) = UdpConnector.DecodeData(input);
+            var (clips, formula, id, trackNo) = Decoder.DecodeData(input);
             var chainedCommandWrapper = Parser.ParseFormulaToChainedCommand(formula, clips, new ClipMetaData(id, trackNo));
             Assert.IsTrue(chainedCommandWrapper.Success);
 

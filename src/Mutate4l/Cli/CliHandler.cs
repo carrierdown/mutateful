@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Mutate4l.Core;
+using Mutate4l.State;
 
 namespace Mutate4l.Cli
 {
@@ -12,19 +13,19 @@ namespace Mutate4l.Cli
         public const string UnitTestDirective = " test";
         public const string SvgDocDirective = " doc";
 
-        public static byte[] HandleInput(byte[] inputData)
+        public static ClipSlot HandleInput(byte[] inputData)
         {
             var generateUnitTest = false;
             var generateSvgDoc = false;
 
-            if (UdpConnector.IsString(inputData))
+            if (Decoder.IsStringData(inputData))
             {
-                string text = UdpConnector.GetText(inputData);
+                string text = Decoder.GetText(inputData);
                 Console.WriteLine(text);
-                return new byte[0];
+                return ClipSlot.Empty;
             }
 
-            (List<Clip> clips, string formula, ushort id, byte trackNo) = UdpConnector.DecodeData(inputData);
+            (List<Clip> clips, string formula, ushort id, byte trackNo) = Decoder.DecodeData(inputData);
             formula = formula.Trim(' ');
             Console.WriteLine($"Received {clips.Count} clips and formula: {formula}");
             if (formula.EndsWith(UnitTestDirective))
@@ -47,7 +48,7 @@ namespace Mutate4l.Cli
             if (!chainedCommandWrapper.Success)
             {
                 Console.WriteLine(chainedCommandWrapper.ErrorMessage);
-                return new byte[0];
+                return ClipSlot.Empty;
             }
 
             ProcessResultArray<Clip> processedClipWrapper;
@@ -70,9 +71,8 @@ namespace Mutate4l.Cli
             if (processedClipWrapper.Success && processedClipWrapper.Result.Length > 0)
             {
                 var processedClip = processedClipWrapper.Result[0];
-                byte[] processedClipData = IOUtilities
-                    .GetClipAsBytes(chainedCommandWrapper.Result.TargetMetaData.Id, processedClip)
-                    .ToArray();
+                byte[] processedClipData = IOUtilities.GetClipAsBytes(chainedCommandWrapper.Result.TargetMetaData.Id, processedClip).ToArray();
+
                 if (generateUnitTest)
                 {
                     TestUtilities.AppendUnitTest(formula, inputData, processedClipData);
@@ -82,10 +82,11 @@ namespace Mutate4l.Cli
                 {
                     SvgUtilities.GenerateSvgDoc(formula, clips, processedClip, 882, 300);
                 }
-                return processedClipData;
+                ClipSlot processedClipSlot = new ClipSlot(formula, processedClip, chainedCommandWrapper.Result, id);
+                return processedClipSlot;
             }
             Console.WriteLine($"Error applying formula: {processedClipWrapper.ErrorMessage}");
-            return new byte[0];
+            return ClipSlot.Empty;
         }
 
         public static void Start()
