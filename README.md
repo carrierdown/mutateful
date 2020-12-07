@@ -19,6 +19,11 @@ Go to the [latest release](https://github.com/carrierdown/mutateful/releases/lat
 
 <!--[![Join the chat at https://gitter.im/mutateful/community](https://badges.gitter.im/mutateful/community.svg)](https://gitter.im/mutateful/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)-->
 
+
+## See it in action
+
+<table cellpadding="0" cellspacing="0" style="border:none;"><tr><td><a href="https://www.youtube.com/watch?v=PVVhnXSSHmg"><img alt="creating beat variations with mutateful" src="https://img.youtube.com/vi/PVVhnXSSHmg/0.jpg" width="250"><p>Creating beat variations</p></a></td><td><a href="https://www.youtube.com/watch?v=YNI9ZxhSkWQ"><img alt="mutateful demo video 1" src="https://img.youtube.com/vi/YNI9ZxhSkWQ/0.jpg" width="250"><p>Demo #1: concat, constrain, transpose</p></a></td><td><a href="https://www.youtube.com/watch?v=bGMBDap1-ko"><img alt="mutateful demo video 2" src="https://img.youtube.com/vi/bGMBDap1-ko/0.jpg" width="250"><p>Demo #2: ratchet, shuffle, interleave</p></a></td></tr></table>
+
 ## Usage examples
 
 ### Creating an arpeggio from a sustained note and a chord
@@ -54,10 +59,6 @@ Ratchet accepts a number of other parameters to scale the resulting retriggers i
 <!--
  Formulas are composed of one or more commands operating on one or more clips. Most commands have various options that can be set depending on your specific needs. They range from simple things like filtering out all notes with a length shorter than a given interval, to more esoteric things like arpeggiating one clip based on another, or creating glitchy beats by adding ratcheting/retriggering to specific notes.
 -->
-
-## See it in action
-
-<table cellpadding="0" cellspacing="0" style="border:none;"><tr><td><a href="https://www.youtube.com/watch?v=YNI9ZxhSkWQ"><img alt="mutateful demo video 1" src="https://img.youtube.com/vi/YNI9ZxhSkWQ/0.jpg" width="250"><p>Demo #1: concat, constrain, transpose</p></a></td><td><a href="https://www.youtube.com/watch?v=bGMBDap1-ko"><img alt="mutateful demo video 2" src="https://img.youtube.com/vi/bGMBDap1-ko/0.jpg" width="250"><p>Demo #2: ratchet, shuffle, interleave</p></a></td></tr></table>
 
 ## A musical spreadsheet
 
