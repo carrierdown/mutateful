@@ -24,6 +24,12 @@ Go to the [latest release](https://github.com/carrierdown/mutateful/releases/lat
 
 <table cellpadding="0" cellspacing="0" style="border:none;"><tr><td><a href="https://www.youtube.com/watch?v=PVVhnXSSHmg"><img alt="creating beat variations with mutateful" src="https://img.youtube.com/vi/PVVhnXSSHmg/0.jpg" width="250"><p>Creating beat variations</p></a></td><td><a href="https://www.youtube.com/watch?v=YNI9ZxhSkWQ"><img alt="mutateful demo video 1" src="https://img.youtube.com/vi/YNI9ZxhSkWQ/0.jpg" width="250"><p>Demo #1: concat, constrain, transpose</p></a></td><td><a href="https://www.youtube.com/watch?v=bGMBDap1-ko"><img alt="mutateful demo video 2" src="https://img.youtube.com/vi/bGMBDap1-ko/0.jpg" width="250"><p>Demo #2: ratchet, shuffle, interleave</p></a></td></tr></table>
 
+## A musical spreadsheet
+
+The easiest way to understand what `mutateful` does is by comparing it to a traditional spreadsheet. Let's say you have two numbers that you'd like to multiply. You put one number in cell `A1`, another in `A2`, and in `A3` you enter the following (very simple) formula: `=A1 * A2`. Cell `A3` will then contain the result of this operation, and will update automatically whenever `A1` or `A2` changes. 
+
+Since the session view in Ableton Live presents clips in a spreadsheet-like grid, `mutateful` works the same way, only with more musically interesting commands. For instance, you could shuffle the contents of clip `A1` using the contents of clip `A2`. The pitch values of the various notes in clip `A2` would then be used to shuffle the order of notes in `A1`. Similar to the example above, we would like the result to be inserted into clip `A3`, but instead of using a spreadsheet command we will use a `mutateful` command, as follows: `=A1 shuffle -by A2`. In this example, `A1` is a *source clip* (i.e. the clip that will be transformed), and `A2` is the *control clip* (i.e. the clip that controls the transformation). The latter could be omitted, in which case clip `A1` would be shuffled using itself as the control clip. The formula for this would simply be `=A1 shuffle`.
+
 ## Usage examples
 
 ### Creating an arpeggio from a sustained note and a chord
@@ -55,16 +61,6 @@ Ratchet accepts a number of other parameters to scale the resulting retriggers i
 `=a4 ratchet 1 2 3 6 1 2 5 -shape easein -strength 0.5`
 
 ![Adding retriggering with shaping](./assets/Generated637069235238519840-clip.svg)
-
-<!--
- Formulas are composed of one or more commands operating on one or more clips. Most commands have various options that can be set depending on your specific needs. They range from simple things like filtering out all notes with a length shorter than a given interval, to more esoteric things like arpeggiating one clip based on another, or creating glitchy beats by adding ratcheting/retriggering to specific notes.
--->
-
-## A musical spreadsheet
-
-The easiest way to understand what `mutateful` does is by comparing it to a traditional spreadsheet. Let's say you have two numbers that you'd like to multiply. You put one number in cell `A1`, another in `A2`, and in `A3` you enter the following (very simple) formula: `=A1 * A2`. Cell `A3` will then contain the result of this operation, and will update automatically whenever `A1` or `A2` changes. 
-
-Since the session view in Ableton Live presents clips in a spreadsheet-like grid, `mutateful` works the same way, only with more musically interesting commands. For instance, you could shuffle the contents of clip `A1` using the contents of clip `A2`. The pitch values of the various notes in clip `A2` would then be used to shuffle the order of notes in `A1`. Similar to the example above, we would like the result to be inserted into clip `A3`, but instead of using a spreadsheet command we will use a `mutateful` command, as follows: `=A1 shuffle -by A2`. In this example, `A1` is a *source clip* (i.e. the clip that will be transformed), and `A2` is the *control clip* (i.e. the clip that controls the transformation). The latter could be omitted, in which case clip `A1` would be shuffled using itself as the control clip. The formula for this would simply be `=A1 shuffle`.
 
 ## Quick command reference
 
