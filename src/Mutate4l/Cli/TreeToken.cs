@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Mutate4l.Core;
 using static Mutate4l.Cli.TokenType;
 
@@ -13,15 +15,16 @@ namespace Mutate4l.Cli
         public int Position { get; }
         public Clip Clip { get; }
 
-        public bool AllValuesFetched => CurrentIndex >= Children.Count && Children.All(x => x.AllValuesFetched);
+        public bool AllValuesFetched => CurrentIndex > 0 && CurrentIndex >= Children.Count && Children.All(x => x.AllValuesFetched);
 
-        public ProcessResultArray<Token> NextValue
+        public ProcessResultArray<Token> FlattenedValues
         {
+            // todo: test how this behaves with invalid input like e.g. 60|62 61 shuffle 1 2
             get {
-                if (Type == Root)
+                if (IsCommand)
                 {
-                    if (Children.Count == 0) return new ProcessResultArray<Token>("Error: Nothing to parse");
-                    return Children[CurrentIndex++ % Children.Count].NextValue;
+                    var tokens = new List<Token> { new Token(this) };
+                    return ResolveChildren(tokens);
                 }
                 if (IsOperatorToken)
                 {
@@ -32,14 +35,9 @@ namespace Mutate4l.Cli
                         _ => ResolveUnsupportedOperator()
                     };
                 }
-                if (IsPureValue)
-                {
-                    CurrentIndex++;
-                    return new ProcessResultArray<Token>(new [] { new Token(this) });
-                }
+                
                 CurrentIndex++;
-                if (CurrentIndex == 1) return new ProcessResultArray<Token>(new [] { new Token(this) });
-                return new ProcessResultArray<Token>(new Token[0]);
+                return new ProcessResultArray<Token>(new [] { new Token(this) });
             }
         }
 
@@ -79,7 +77,31 @@ namespace Mutate4l.Cli
         public bool IsEnumValue => Type > _EnumValuesBegin && Type < _EnumValuesEnd;
         public bool IsValue => Type > _ValuesBegin && Type < _ValuesEnd;
         public bool IsPureValue => Type > _ValuesBegin && Type < _PureValuesEnd;
-        
+
+        // todo: extract as extension methods
+        private ProcessResultArray<Token> ResolveChildren(List<Token> tokens)
+        {
+            if (Children.Count == 0)
+            {
+                CurrentIndex++;
+                return new ProcessResultArray<Token>(tokens.ToArray());
+            }
+            while (!AllValuesFetched)
+            {
+                foreach (var treeToken in Children)
+                {
+                    var res = treeToken.FlattenedValues;
+                    if (res.Success)
+                    {
+                        tokens.AddRange(res.Result);
+                        CurrentIndex++;
+                    }
+                    else return res;
+                }
+            }
+            return new ProcessResultArray<Token>(tokens.ToArray());
+        }
+
         private ProcessResultArray<Token> ResolveRepeat()
         {
             var result = new List<Token>();
@@ -88,11 +110,13 @@ namespace Mutate4l.Cli
                 return new ProcessResultArray<Token>($"Unable to resolve REPEAT expression with values {Children[0].Value} and {Children[1].Value}");
             }
             var valueToRepeat = Children[0];
-            if (int.TryParse(Children[1].Value, out var repeatCount))
+            var repCountStatus = Children[1].FlattenedValues;
+            if (!repCountStatus.Success) return repCountStatus;
+            if (int.TryParse(repCountStatus.Result[0].Value, out var repeatCount))
             {
                 for (var index = 0; index < repeatCount; index++)
                 {
-                    var res = valueToRepeat.NextValue;
+                    var res = valueToRepeat.FlattenedValues;
                     if (res.Success) result.AddRange(res.Result);
                     else return res;
                 }
@@ -104,7 +128,7 @@ namespace Mutate4l.Cli
         private ProcessResultArray<Token> ResolveAlternate()
         {
             if (Children.Count < 2) return new ProcessResultArray<Token>("Unable to resolve ALTERNATE expression: At least two values are needed.");
-            return Children[CurrentIndex++ % Children.Count].NextValue;
+            return Children[CurrentIndex++ % Children.Count].FlattenedValues;
         }
 
         private ProcessResultArray<Token> ResolveUnsupportedOperator()

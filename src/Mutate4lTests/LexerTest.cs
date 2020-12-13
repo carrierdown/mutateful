@@ -49,7 +49,7 @@ namespace Mutate4lTests
         [TestMethod]
         public void Testing()
         {
-            var lexer = new Lexer("shuffle 1 2|3|9x6 1 2 4x3 5|6|7 8", new List<Clip>());
+            var lexer = new Lexer("[0] tp 2 remap -to [0] shuffle 1 2|3|9x6 1 2 4x3 5|6|7 8", new List<Clip> {Clip.Empty, Clip.Empty});
             var result = lexer.GetTokens();
             Assert.IsTrue(result.Success);
             var sTokens = Parser.CreateSyntaxTree(result.Result);

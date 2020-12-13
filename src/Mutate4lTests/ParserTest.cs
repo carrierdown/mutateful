@@ -111,7 +111,7 @@ namespace Mutate4lTests
             Assert.AreEqual(1, command.Result.Commands.Count);
 
             var flattenedValues = command.Result.Commands[0].DefaultOptionValues.Select(x => int.Parse(x.Value)).ToList();
-            var expectedValues = new List<int> { 1, 2, 1, 2, 4, 4, 4, 5, 8, 1, 3, 1, 2, 4, 4, 4, 6, 8, 1, 9, 9, 9, 9, 9, 9, 1, 2, 4, 4, 4, 7 };
+            var expectedValues = new List<int> { 1, 2, 1, 2, 4, 4, 4, 5, 8, 1, 3, 1, 2, 4, 4, 4, 6, 8, 1, 9, 9, 9, 9, 9, 9, 1, 2, 4, 4, 4, 7, 8 };
             Assert.IsTrue(flattenedValues.SequenceEqual(expectedValues));
         }
     }

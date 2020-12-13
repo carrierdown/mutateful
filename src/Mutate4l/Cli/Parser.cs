@@ -92,11 +92,14 @@ namespace Mutate4l.Cli
         private static ProcessResultArray<Token> ResolveAndFlattenSyntaxTree(TreeToken syntaxTree)
         {
             var flattenedTokens = new List<Token>();
-            while (!syntaxTree.AllValuesFetched)
+            while (!syntaxTree.Children.All(x => x.AllValuesFetched))
             {
-                var container = syntaxTree.NextValue;
-                if (container.Success) flattenedTokens.AddRange(container.Result);
-                else return container;
+                foreach (var treeToken in syntaxTree.Children)
+                {
+                    var res = treeToken.FlattenedValues;
+                    if (res.Success) flattenedTokens.AddRange(res.Result);
+                    else return res;
+                }
             }
             return new ProcessResultArray<Token>(flattenedTokens.ToArray());
         }
@@ -138,13 +141,23 @@ namespace Mutate4l.Cli
         public static ProcessResult<TreeToken> CreateSyntaxTree(Token[] tokens)
         {
             // todo: support for nested statements need to be added here as well
+            // todo: Parameters for commands need to be nested under their respective commands, otherwise the unpacking logic won't work properly...
+            // e.g. loop 4 rat 2 3|4|5x2 6 currently leads to the 4 bleeding into the ratchet parameter list
             var rootToken = new TreeToken(TokenType.Root, "", 0);
             var insertionPoint = rootToken;
             
             for (var i = 0; i < tokens.Length; i++)
             {
                 var token = tokens[i];
-                if (i + 1 < tokens.Length && tokens[i].IsValue && tokens[i + 1].IsOperatorToken)
+                if (token.IsCommand && insertionPoint.Type != TokenType.Root)
+                {
+                    insertionPoint = insertionPoint.Parent;
+                }
+                if (i > 0 && tokens[i - 1].IsCommand && !token.IsCommand)
+                {
+                    insertionPoint = insertionPoint.Children[^1];
+                }
+                if (i + 1 < tokens.Length && token.IsValue && tokens[i + 1].IsOperatorToken)
                 {
                     if (insertionPoint.IsOperatorToken && 
                         insertionPoint.Type == tokens[i + 1].Type)
