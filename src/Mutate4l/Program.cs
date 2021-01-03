@@ -13,9 +13,9 @@ namespace Mutate4l
     {
         private static async Task Main(string[] args)
         {
-            var customCulture = (CultureInfo)Thread.CurrentThread.CurrentCulture.Clone();
-            customCulture.NumberFormat.NumberDecimalSeparator = ".";
-            Thread.CurrentThread.CurrentCulture = customCulture;
+            // var customCulture = (CultureInfo)Thread.CurrentThread.CurrentCulture.Clone();
+            // customCulture.NumberFormat.NumberDecimalSeparator = ".";
+            // Thread.CurrentThread.CurrentCulture = customCulture;
 
             var userInitiatedExit = false;
             
@@ -25,9 +25,10 @@ namespace Mutate4l
                 Console.WriteLine("Open Ableton Live, drop mutateful-connector.amxd onto one of the tracks, and start entering formulas.");
                 
                 var queue = Channel.CreateUnbounded<InternalCommand>();
+                var clipSet = new ClipSet();
                 
                 await Task.WhenAny(
-                    UdpHandler.ProcessUdpDataAsync(udpClient, queue.Writer), 
+                    UdpHandler.ProcessUdpDataAsync(udpClient, queue.Writer, clipSet), 
                     UdpHandler.SendUdpDataAsync(udpClient, queue.Reader), 
                     Task.Run(() =>
                         {

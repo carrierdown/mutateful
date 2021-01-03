@@ -10,7 +10,20 @@ var nameCallback = new ObservableCallback(-1);
 var notesCallback = new ObservableCallback(-1);
 var watchedClips = [];
 var messageQueue = [];
-var stringMessageHeader = [0,127,126,125,124]; // note: index #0 is removed prior to sending, as it's used for duplicate removal of formulas using their live id
+
+var typedDataFirstByte = 127;
+var typedDataSecondByte = 126;
+var typedDataThirdByte = 125;
+var stringDataSignifier = 124;
+var setClipDataSignifier = 255;
+var setFormulaSignifier = 254;
+var evaluateFormulasSignifier = 253;
+
+var stringMessageHeader = [0 /* dummy id which is removed prior to sending, only used for duplicate removal with clip ids for formulas and clip data */, 
+                            typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, stringDataSignifier];
+var setClipDataHeader = [typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, setClipDataSignifier];
+var setFormulaHeader = [typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, setFormulaSignifier];
+var evaluateFormulasHeader = [typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, evaluateFormulasSignifier];
 
 // constants
 var SIZE_OF_ONE_NOTE_IN_BYTES = 1 /* pitch */ + 4 /* start */ + 4 /* duration */ + 1 /* velocity */;
@@ -22,8 +35,8 @@ function floatToByteArray(value) {
     return new Uint8Array(floatValue.buffer);
 }
 
-function asciiStringToByteArray(input) {
-    var bytes = new Uint8Array(input.length);
+function asciiStringToArray(input) {
+    var bytes = [];
     for (var i = 0; i < input.length; i++)
     {
         charCode = input.charCodeAt(i);
@@ -96,6 +109,7 @@ function onInit() {
     selectedClipObserver = new LiveAPI(onSelectedClipChanged, "live_set view");
     selectedClipObserver.property = "detail_clip";
     processAllClips();
+    sendAllClipData();
 }
 
 function onSelectedClipWithoutName(clipId, maybeName) {
@@ -543,6 +557,65 @@ function processAllClips() {
     }
 }
 
+function getNumberOfScenes(liveObject) {
+    // divide by 2 since this yields an array with two entries per scene
+    return liveObject.get("scenes").length / 2;
+}
+
+function getNumberOfTracks(liveObject) {
+    // divide by 2 since this yields an array with two entries per track
+    return liveObject.get("tracks").length / 2;
+}
+
+function toRegularArray(arrayToConvert) {
+    var result = [];
+    for (var i = 0; i < arrayToConvert.length; i++) {
+        result[i] = arrayToConvert[i];
+    }
+    return result;
+}
+
+function getMetadataBytes(liveObject, numberOfInlineClips) {
+    var metaDataBytes = new Uint8Array(4 /* id - 2 bytes, track no - 1 byte, number of inline clips - 1 byte */);
+    int16ToBufferAtPos(liveObject.id, metaDataBytes, 0);
+    metaDataBytes[2] = getTrackNumber(liveObject);
+    metaDataBytes[3] = numberOfInlineClips;
+    return toRegularArray(metaDataBytes);
+}
+
+function sendAllClipData() {
+    var liveObject = new LiveAPI("live_set"),
+        numScenes = getNumberOfScenes(liveObject),
+        numTracks = getNumberOfTracks(liveObject),
+        formulaStartIndex,
+        clipName = "",
+        formulaStopIndex,
+        payload;
+
+    for (var i = 0; i < numTracks; i++) {
+        liveObject.goto("live_set tracks " + i);
+        if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0) {
+            for (var s = 0; s < numScenes; s++) {
+                liveObject.goto("live_set tracks " + i + " clip_slots " + s);
+                if (hasClip(liveObject)) {
+                    liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
+                    clipName = getClipName(liveObject);
+                    if (containsFormula(clipName)) {
+                        payload = setFormulaHeader;
+                        payload = payload.concat(getMetadataBytes(liveObject, 0));
+                        payload = payload.concat(asciiStringToArray(clipName));
+                    } else {
+                        payload = setClipDataHeader;
+                        payload = payload.concat(getMetadataBytes(liveObject, 1));
+                        payload = payload.concat(toRegularArray(getClipDataAsBytes(liveObject, i, s)));
+                    }
+                    addFormulaToQueue(liveObject.id, payload);
+                }
+            }
+        }
+    }
+}
+
 function formulaToReferredIds(formula) {
     var clipRefTester = /^([a-z]+\d+)$|^(\*)$/,
         clipRefsFound = false,
@@ -734,6 +807,7 @@ function getClipDataAsBytes(liveObject, trackNo, clipNo) {
         resultBuffer[currentNoteOffset + 9] = note.velocity;
         currentNoteOffset += SIZE_OF_ONE_NOTE_IN_BYTES;
     }
+    debuglogExt("got clip with id: ", liveObject.id);
     return resultBuffer;
 }
 
@@ -837,7 +911,7 @@ function debuglog(/* ... args */) {
     post(result + "\r\n");
 }
 
-function addFormulaToQueue(id, formulaAsText, formulaAsBytes) {
+function addFormulaToQueue(id, formulaAsBytes) {
     if (formulaAsBytes.length > 16384) {
         debuglogExt("Dropping formula " + formula + " since it takes up more than the maximum allowed packet size of 16384 bytes. This will be fixed in a later version of mutate4l, but for now, use shorter and/or fewer clips per formula.");
         return;
@@ -846,15 +920,13 @@ function addFormulaToQueue(id, formulaAsText, formulaAsBytes) {
     // search message queue from formulas starting with same id. If found, we replace it with the new one. Otherwise, add to the end of the list.
     for (var i = messageQueue.length - 1; i >= 0; i--) {
         if (messageQueue[i].length > 0 && messageQueue[i][0] === id) {
-            var bytesWithId = [id];
-            messageQueue[i] = bytesWithId.concat(formulaAsBytes);
+            messageQueue[i] = [id].concat(formulaAsBytes);
             found = true;
             break;
         }
     }
     if (!found) {
-        var bytesWithId = [id];
-        messageQueue[messageQueue.length] = bytesWithId.concat(formulaAsBytes);
+        messageQueue[messageQueue.length] = [id].concat(formulaAsBytes);
     }
 }
 

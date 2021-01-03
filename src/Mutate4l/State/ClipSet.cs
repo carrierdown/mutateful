@@ -5,7 +5,7 @@ namespace Mutate4l.State
 {
     public class ClipSet
     {
-        private Dictionary<ClipReference, ClipSlot> ClipSlots { get; }
+        private Dictionary<ClipReference, ClipSlot> ClipSlots { get; } = new Dictionary<ClipReference, ClipSlot>();
 
         public ClipSlot this[ClipReference clipRef] => ClipSlots[clipRef] ?? ClipSlot.Empty;
         
@@ -31,8 +31,13 @@ namespace Mutate4l.State
         {
             switch (command.Type)
             {
-                case InternalCommandType.SetClipSlot:
-                    
+                case InternalCommandType.SetFormula:
+                    break;
+                case InternalCommandType.SetClipData:
+                    if (command.ClipSlot.Clip != Clip.Empty)
+                    {
+                        ClipSlots[command.ClipSlot.Clip.ClipReference] = command.ClipSlot;
+                    }
                     break;
             }
         }

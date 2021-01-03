@@ -15,9 +15,9 @@ namespace Mutate4l.IO
         private const byte TypedDataThirdByte = 125;
 
         private const byte StringDataSignifier = 124;
-        private const byte SetAndEvaluateClipSlotSignifier = 255;
-        private const byte SetClipSlotSignifier = 254;
-        private const byte EvaluateClipSlotsSignifier = 253;
+        private const byte SetClipDataSignifier = 255;
+        private const byte SetFormulaSignifier = 254;
+        private const byte EvaluateFormulasSignifier = 253;
 
         public static bool IsStringData(byte[] result)
         {
@@ -34,19 +34,51 @@ namespace Mutate4l.IO
             return dataSignifier switch
             {
                 StringDataSignifier => OutputString,
-                SetAndEvaluateClipSlotSignifier => SetAndEvaluateClipSlot,
-                SetClipSlotSignifier => SetClipSlot,
-                EvaluateClipSlotsSignifier => EvaluateClipSlots,
+                SetClipDataSignifier => SetClipData,
+                SetFormulaSignifier => SetFormula,
+                EvaluateFormulasSignifier => EvaluateFormulas,
                 _ => UnknownCommand
             };
+        }
+
+        public static (bool success, int trackNo, string formula) GetFormula(byte[] data)
+        {
+            var success = data[3] == 0;
+            int trackNo = data[2];
+            var formula = Encoding.UTF8.GetString(data[4..]);
+            return (success, trackNo, success ? formula : "");
         }
         
         public static string GetText(byte[] data)
         {
             if (data.Length < 5) return "";
-            return Encoding.UTF8.GetString(data.Skip(4).ToArray());
+            return Encoding.UTF8.GetString(data[4..]);
         }
 
+        public static Clip GetSingleClip(byte[] data)
+        {
+            var offset = 0;
+            ClipReference clipReference = new ClipReference(data[offset], data[offset += 1]);
+            decimal length = (decimal)BitConverter.ToSingle(data, offset += 1);
+            bool isLooping = data[offset += 4] == 1;
+            var clip = new Clip(length, isLooping) {
+                ClipReference = clipReference
+            };
+            ushort numNotes = BitConverter.ToUInt16(data, offset += 1);
+            offset += 2;
+            for (var i = 0; i < numNotes; i++)
+            {
+                clip.Notes.Add(new NoteEvent(
+                    data[offset], 
+                    (decimal)BitConverter.ToSingle(data, offset += 1), 
+                    (decimal)BitConverter.ToSingle(data, offset += 4), 
+                    data[offset += 4])
+                );
+                offset++;
+            }
+            return clip;
+        }
+        
         public static (List<Clip> Clips, string Formula, ushort Id, byte TrackNo) DecodeData(byte[] data)
         {
             var clips = new List<Clip>();
