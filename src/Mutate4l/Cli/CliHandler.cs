@@ -13,7 +13,7 @@ namespace Mutate4l.Cli
         public const string UnitTestDirective = " test";
         public const string SvgDocDirective = " doc";
 
-        public static ClipSlot HandleInput(byte[] inputData)
+        public static LegacyClipSlot HandleInput(byte[] inputData)
         {
             var generateUnitTest = false;
             var generateSvgDoc = false;
@@ -22,7 +22,7 @@ namespace Mutate4l.Cli
             {
                 string text = Decoder.GetText(inputData);
                 Console.WriteLine(text);
-                return ClipSlot.Empty;
+                return LegacyClipSlot.Empty;
             }
 
             (List<Clip> clips, string formula, ushort id, byte trackNo) = Decoder.DecodeData(inputData);
@@ -48,7 +48,7 @@ namespace Mutate4l.Cli
             if (!chainedCommandWrapper.Success)
             {
                 Console.WriteLine(chainedCommandWrapper.ErrorMessage);
-                return ClipSlot.Empty;
+                return LegacyClipSlot.Empty;
             }
 
             ProcessResultArray<Clip> processedClipWrapper;
@@ -82,11 +82,11 @@ namespace Mutate4l.Cli
                 {
                     SvgUtilities.GenerateSvgDoc(formula, clips, processedClip, 882, 300);
                 }
-                ClipSlot processedClipSlot = new ClipSlot(formula, processedClip, chainedCommandWrapper.Result, id);
-                return processedClipSlot;
+                LegacyClipSlot processedLegacyClipSlot = new LegacyClipSlot(formula, processedClip, chainedCommandWrapper.Result, id);
+                return processedLegacyClipSlot;
             }
             Console.WriteLine($"Error applying formula: {processedClipWrapper.ErrorMessage}");
-            return ClipSlot.Empty;
+            return LegacyClipSlot.Empty;
         }
 
         public static void Start()

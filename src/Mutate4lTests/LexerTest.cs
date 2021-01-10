@@ -11,18 +11,20 @@ namespace Mutate4lTests
     [TestClass]
     public class LexerTest
     {
-        /*[TestMethod]
+        [TestMethod]
         public void TestLexer()
         {
-            Lexer lexer = new Lexer("interleave A1:C4 -ranges 1/16 -repeats 2 10  => A2");
-            var expected = new TokenType[] { Interleave, ClipReference, Colon, ClipReference, Ranges, MusicalDivision, Repeats, Number, Number, Destination, ClipReference };
+            Lexer lexer = new Lexer("A1 A2 interleave -ranges 1/16", new List<Clip>());
+            var expected = new TokenType[] { TokenType.ClipReference, TokenType.ClipReference, TokenType.Interleave, TokenType.Ranges, TokenType.MusicalDivision };
             var i = 0;
 
-            foreach (var token in lexer.GetTokens())
+            var tokensContainer = lexer.GetTokens();
+            Assert.IsTrue(tokensContainer.Success);
+            foreach (var token in tokensContainer.Result)
             {
                 Assert.AreEqual(token.Type, expected[i++]);
             }
-        }*/
+        }
 
         [TestMethod]
         public void TestIsDecimal()
@@ -47,7 +49,7 @@ namespace Mutate4lTests
         }
 
         [TestMethod]
-        public void Testing()
+        public void ShowGeneratedSyntaxTree()
         {
             var lexer = new Lexer("[0] tp 2 remap -to [0] shuffle 1 2|3|9x6 1 2 4x3 5|6|7 8", new List<Clip> {Clip.Empty, Clip.Empty});
             var result = lexer.GetTokens();

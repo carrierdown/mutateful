@@ -10,13 +10,9 @@ namespace Mutate4l.Core
         public decimal Length { get; set; }
         public bool IsLooping { get; set; }
         public ClipReference ClipReference { get; set; }
-      
         public string RawClipReference { get; set; }
-        
         public decimal EndDelta => Length - Math.Clamp(Notes[^1].Start, 0, Length) + Notes[0].Start;
-
         public decimal EndDeltaSilent => Length - Math.Clamp(Notes[^1].End, 0, Length) + Notes[0].Start;
-
         public bool SelectionActive { get; private set; }
 
         public static readonly Clip Empty = new Clip(4, true);
@@ -28,6 +24,8 @@ namespace Mutate4l.Core
             Length = length;
         }
 
+        public Clip(ClipReference clipReference) : this(4, true) { ClipReference = clipReference; }
+        
         public Clip(Clip clip) : this(clip.Length, clip.IsLooping)
         {
             foreach (var note in clip.Notes)
@@ -35,8 +33,6 @@ namespace Mutate4l.Core
                 var clonedNote = new NoteEvent(note);
                 Notes.Add(clonedNote);
             }
-            ClipReference = clip.ClipReference;
-            RawClipReference = clip.RawClipReference;
         }
 
         public void Add(NoteEvent noteEvent)
@@ -64,7 +60,6 @@ namespace Mutate4l.Core
 
         public decimal DurationUntilNextNote(int index)
         {
-            // todo: warn if index > Notes.Count - 1
             if (index >= Count - 1)
                 return EndDelta;
             else
@@ -73,11 +68,10 @@ namespace Mutate4l.Core
         
         public decimal DurationUntilNextNoteOrEndOfClip(int index)
         {
-            // todo: warn if index > Notes.Count - 1
             if (index >= Count - 1)
                 return Length - Math.Clamp(Notes[^1].Start, 0, Length);
-            else
-                return Notes[index + 1].Start - Notes[index].Start;
+
+            return Notes[index + 1].Start - Notes[index].Start;
         }
 
         public decimal DurationBetweenNotes(int start, int end)
@@ -103,21 +97,5 @@ namespace Mutate4l.Core
             if (Notes.Count == 0) return 0;
             return Notes[Math.Clamp(index, 0, Count)].Pitch - Notes[0].Pitch;
         }
-
-        /*        public NoteInfo GetNextNoteInfo()
-                {
-                    Note note;
-                    if (Index == Notes.Count - 1)
-                    {
-                        note = Notes[Index];
-                        Index = 0;
-                        Retriggered = true;
-                        return new NoteInfo { Start = note.Start, Duration = note.Duration, Pitch = note.Pitch, Velocity = note.Velocity, DurationUntilNextNote = EndDelta };
-                    }
-                    note = Notes[Index];
-                    var result = new NoteInfo { Start = note.Start, Duration = note.Duration, Pitch = note.Pitch, Velocity = note.Velocity, DurationUntilNextNote = Notes[Index + 1].Start - Notes[Index].Start };
-                    Index++;
-                    return result;
-                }*/
     }
 }

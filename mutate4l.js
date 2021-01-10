@@ -602,7 +602,7 @@ function sendAllClipData() {
                     clipName = getClipName(liveObject);
                     if (containsFormula(clipName)) {
                         payload = setFormulaHeader;
-                        payload = payload.concat(getMetadataBytes(liveObject, 0));
+                        payload = payload.concat([getTrackNumber(liveObject) & 0xFF, getClipNumber(liveObject) & 0xFF]);
                         payload = payload.concat(asciiStringToArray(clipName));
                     } else {
                         payload = setClipDataHeader;

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Channels;
+using Mutate4l.Cli;
 using Mutate4l.Core;
 using Mutate4l.State;
 using static Mutate4l.State.InternalCommandType;
@@ -41,12 +43,12 @@ namespace Mutate4l.IO
             };
         }
 
-        public static (bool success, int trackNo, string formula) GetFormula(byte[] data)
+        public static (int trackNo, int clipNo, string formula) GetFormula(byte[] data)
         {
-            var success = data[3] == 0;
-            int trackNo = data[2];
-            var formula = Encoding.UTF8.GetString(data[4..]);
-            return (success, trackNo, success ? formula : "");
+            int trackNo = data[0];
+            int clipNo = data[1];
+            var formula = Encoding.UTF8.GetString(data[2..]);
+            return (trackNo, clipNo, formula);
         }
         
         public static string GetText(byte[] data)
@@ -54,14 +56,59 @@ namespace Mutate4l.IO
             if (data.Length < 5) return "";
             return Encoding.UTF8.GetString(data[4..]);
         }
+        
+        public static void HandleTypedCommand(byte[] data, ClipSet clipSet, ChannelWriter<InternalCommand> writer)
+        {
+            switch (GetCommandType(data[3]))
+            {
+                case OutputString:
+                    var text = Decoder.GetText(data);
+                    Console.WriteLine(text);
+                    break;
+                case SetFormula:
+                    var (trackNo, clipNo, formula) = Decoder.GetFormula(data[4..]);
+                    Console.WriteLine($"Incoming formula {formula}");
+                    
+                    var parsedFormula = Parser.ParseFormula(formula);
+                    if (parsedFormula.Success)
+                    {
+                        var clipRef = new ClipReference(trackNo, clipNo);
+                        var clipSlot = new ClipSlot(formula, new Clip(clipRef), parsedFormula.Result);
+                        clipSet.ApplyInternalCommand(new InternalCommand(SetClipData, clipSlot));
+                    }
+                    break;
+                case SetClipData:
+                    Console.WriteLine("Incoming clip data");
+                    var clip = Decoder.GetSingleClip(data[4..]);
+                    if (clip != Clip.Empty)
+                    {
+                        var clipSlot = new ClipSlot("", clip, Formula.Empty);
+                        var internalCommand = new InternalCommand(SetClipData, clipSlot);
+                        clipSet.ApplyInternalCommand(internalCommand);
+                    }
+                    break;
+                case EvaluateFormulas:
+                    // - check that all ClipReferences resolve to a ClipSlot containing either formula or clipdata
+                    // - check for circular dependencies by visiting each clipslot referenced by each formula and making sure the starting clipslot is never visited again
+                    // - create dependency graph for formulas by maintaining a list of each clipslot and the clips they depend on
+                    // - walk dependency graph, processing each formula and populating referenced clips first.
+                    // - after each formula has finished processing, send resulting clip as InternalCommand of type SetClipData to ChannelWriter
+                    
+                    // - note: maybe use different id's for outgoing and incoming commands
+                    break;
+                case UnknownCommand:
+                    break;
+            }
+        }
 
         public static Clip GetSingleClip(byte[] data)
         {
             var offset = 0;
-            ClipReference clipReference = new ClipReference(data[offset], data[offset += 1]);
+            var clipReference = new ClipReference(data[offset], data[offset += 1]);
             decimal length = (decimal)BitConverter.ToSingle(data, offset += 1);
             bool isLooping = data[offset += 4] == 1;
-            var clip = new Clip(length, isLooping) {
+            var clip = new Clip(length, isLooping)
+            {
                 ClipReference = clipReference
             };
             ushort numNotes = BitConverter.ToUInt16(data, offset += 1);

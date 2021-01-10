@@ -135,6 +135,8 @@ namespace Mutate4l.Cli
             Clips = clips;
         }
 
+        public Lexer(string buffer) : this(buffer, new List<Clip>()) {}
+
         private bool IsSingleOperator(int pos)
         {
             return SingleOperators.Any(o => o.Key == Buffer[pos]) || IsRepeatOperator(pos);
@@ -295,7 +297,7 @@ namespace Mutate4l.Cli
         public (bool Success, bool Empty, string ErrorMessage) TryGetToken(out Token token)
         {
             token = NonToken;
-            while (Position < Buffer.Length) // todo: add safety net here to avoid endless loop on unrecognized input
+            while (Position < Buffer.Length)
             {
                 if (IsSingleOperator(Position))
                 {

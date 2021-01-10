@@ -10,5 +10,7 @@ namespace Mutate4l.Core
             Track = track;
             Clip = clip;
         }
+
+        public static readonly ClipReference Empty = new ClipReference(0, 0);
     }
 }

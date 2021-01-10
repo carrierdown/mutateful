@@ -25,6 +25,30 @@ namespace Mutate4l.Cli
             return new Tuple<int, int>(x, y);
         }
 
+        public static ProcessResult<Formula> ParseFormula(string formula)
+        {
+            var lexer = new Lexer(formula);
+            var (success, tokens, errorMessage) = lexer.GetTokens();
+            if (!success) return new ProcessResult<Formula>(errorMessage);
+
+            TreeToken syntaxTree;
+            (success, syntaxTree, errorMessage) = CreateSyntaxTree(tokens);
+            if (!success) return new ProcessResult<Formula>(errorMessage);
+
+            // remaining steps:
+            // convert any nested statements to inline clips - might involve some refactoring where parsing to commands and applying these can be done selectively and not as part of the fixed pipeline we have now
+
+            Token[] commandTokens;
+            (success, commandTokens, errorMessage) = ResolveAndFlattenSyntaxTree(syntaxTree);
+            if (!success) return new ProcessResult<Formula>(errorMessage);
+            
+            var commandTokensLists = ExtractCommandTokensLists(commandTokens.SkipWhile(x => x.IsClipReference).ToArray());
+            var commands = commandTokensLists.Select(ParseTokensToCommand).ToList();
+
+            var parsedFormula = new Formula(commands);
+            return new ProcessResult<Formula>(parsedFormula);
+        }
+        
         public static ProcessResult<ChainedCommand> ParseFormulaToChainedCommand(string formula, List<Clip> clips, ClipMetaData metadata)
         {
             var valid = new char[] { '[', ']' }.All(c => formula.IndexOf(c) >= 0);
@@ -37,9 +61,6 @@ namespace Mutate4l.Cli
             TreeToken syntaxTree;
             (success, syntaxTree, errorMessage) = CreateSyntaxTree(tokens);
             if (!success) return new ProcessResult<ChainedCommand>(errorMessage);
-
-            // remaining steps:
-            // convert any nested statements to inline clips - might involve some refactoring where parsing to commands and applying these can be done selectively and not as part of the fixed pipeline we have now
 
             Token[] commandTokens;
             (success, commandTokens, errorMessage) = ResolveAndFlattenSyntaxTree(syntaxTree);
