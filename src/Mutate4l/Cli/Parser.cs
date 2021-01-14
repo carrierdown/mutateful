@@ -41,11 +41,14 @@ namespace Mutate4l.Cli
             Token[] commandTokens;
             (success, commandTokens, errorMessage) = ResolveAndFlattenSyntaxTree(syntaxTree);
             if (!success) return new ProcessResult<Formula>(errorMessage);
-            
-            var commandTokensLists = ExtractCommandTokensLists(commandTokens.SkipWhile(x => x.IsClipReference).ToArray());
+
+            var allReferencedClips = commandTokens.Where(x => x.IsClipReference)
+                .Select(x => ClipReference.FromString(x.Value)).ToList();
+            var sourceClipReferences = commandTokens.TakeWhile(x => x.IsClipReference).Select(x => ClipReference.FromString(x.Value)).ToList();
+            var commandTokensLists = ExtractCommandTokensLists(commandTokens.Skip(sourceClipReferences.Count).ToArray());
             var commands = commandTokensLists.Select(ParseTokensToCommand).ToList();
 
-            var parsedFormula = new Formula(commands);
+            var parsedFormula = new Formula(commands, sourceClipReferences, allReferencedClips);
             return new ProcessResult<Formula>(parsedFormula);
         }
         

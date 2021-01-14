@@ -11,6 +11,25 @@ namespace Mutate4l.Core
             Clip = clip;
         }
 
+        public static ClipReference FromString(string clipRef)
+        {
+            var track = 0;
+            var clip = 0;
+            
+            var trackIdent = clipRef[0..1].ToLowerInvariant();
+            var clipIdent = clipRef[1..];
+
+            track = (byte) trackIdent[0] - 0x60;
+            int.TryParse(clipIdent, out clip);
+            
+            return new ClipReference(track, clip);
+        }
+
+        public override string ToString()
+        {
+            return $"{Track},{Clip}";
+        }
+
         public static readonly ClipReference Empty = new ClipReference(0, 0);
     }
 }

@@ -90,6 +90,12 @@ namespace Mutate4l.IO
                 case EvaluateFormulas:
                     // - check that all ClipReferences resolve to a ClipSlot containing either formula or clipdata
                     // - check for circular dependencies by visiting each clipslot referenced by each formula and making sure the starting clipslot is never visited again
+                    if (clipSet.AllReferencedClipsValid()/* && !clipSet.HasCircularDependencies()*/)
+                    {
+                        var clipsToProcess = clipSet.GetClipReferencesInProcessableOrder();
+                        Console.WriteLine($"Clips to process: {string.Join(", ", clipsToProcess.Result.Select(x => x.ToString()))}");
+                        
+                    }
                     // - create dependency graph for formulas by maintaining a list of each clipslot and the clips they depend on
                     // - walk dependency graph, processing each formula and populating referenced clips first.
                     // - after each formula has finished processing, send resulting clip as InternalCommand of type SetClipData to ChannelWriter
