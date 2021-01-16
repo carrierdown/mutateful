@@ -583,6 +583,23 @@ function getMetadataBytes(liveObject, numberOfInlineClips) {
     return toRegularArray(metaDataBytes);
 }
 
+function extractFormula(clipName) {
+    if (clipName.length < 5) return;
+
+    var formulaStartIndex = clipName.indexOf("=");
+    var formulaStopIndex = clipName.indexOf(";");
+    var formula = "";
+
+    if (formulaStartIndex == -1) return ""; // no valid formula
+
+    if (formulaStopIndex >= 0) {
+        formula = clipName.substring(formulaStartIndex + 1, formulaStopIndex).toLowerCase();
+    } else {
+        formula = clipName.substring(formulaStartIndex + 1).toLowerCase();
+    }
+    return formula;
+}
+
 function sendAllClipData() {
     var liveObject = new LiveAPI("live_set"),
         numScenes = getNumberOfScenes(liveObject),
@@ -601,12 +618,13 @@ function sendAllClipData() {
                     liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
                     clipName = getClipName(liveObject);
                     if (containsFormula(clipName)) {
+                        var formula = extractFormula(clipName);
+                        if (formula.length == 0) continue;
                         payload = setFormulaHeader;
                         payload = payload.concat([getTrackNumber(liveObject) & 0xFF, getClipNumber(liveObject) & 0xFF]);
-                        payload = payload.concat(asciiStringToArray(clipName));
+                        payload = payload.concat(asciiStringToArray(formula));
                     } else {
                         payload = setClipDataHeader;
-                        payload = payload.concat(getMetadataBytes(liveObject, 1));
                         payload = payload.concat(toRegularArray(getClipDataAsBytes(liveObject, i, s)));
                     }
                     addFormulaToQueue(liveObject.id, payload);
@@ -614,6 +632,7 @@ function sendAllClipData() {
             }
         }
     }
+    messageQueue[messageQueue.length] = evaluateFormulasHeader;
 }
 
 function formulaToReferredIds(formula) {

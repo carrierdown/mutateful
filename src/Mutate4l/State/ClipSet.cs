@@ -135,6 +135,6 @@ namespace Mutate4l.State
                     );
             }
             return new ProcessResult<List<ClipReference>>(sortedList.Where(x => ClipSlots[x].Formula != Formula.Empty).ToList());
-        }
+          }
     }
 }
