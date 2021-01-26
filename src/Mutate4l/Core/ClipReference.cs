@@ -19,10 +19,10 @@ namespace Mutate4l.Core
             var trackIdent = clipRef[0..1].ToLowerInvariant();
             var clipIdent = clipRef[1..];
 
-            track = (byte) trackIdent[0] - 0x60;
+            track = (byte) trackIdent[0] - 0x61;
             int.TryParse(clipIdent, out clip);
             
-            return new ClipReference(track, clip);
+            return new ClipReference(track, clip - 1);
         }
 
         public override string ToString()

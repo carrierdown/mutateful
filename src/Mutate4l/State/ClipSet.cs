@@ -6,24 +6,34 @@ namespace Mutate4l.State
 {
     public class ClipSet
     {
-        private readonly Dictionary<ClipReference, ClipSlot> ClipSlots = new Dictionary<ClipReference, ClipSlot>();
+        private readonly Dictionary<ClipReference, ClipSlot> ClipSlots = new();
         public Dictionary<ClipReference, ClipSlot>.KeyCollection ClipSlotKeys => ClipSlots.Keys;
 
-        private ClipReference InternalClipRef = new ClipReference(1, 1);
-        public ClipSlot this[ClipReference clipRef] => ClipSlots[clipRef] ?? ClipSlot.Empty;
-        
+        private ClipReference InternalClipRef = new(1, 1);
+        public ClipSlot this[ClipReference clipRef]
+        {
+            get => ClipSlots[clipRef] ?? ClipSlot.Empty;
+            set => ClipSlots[clipRef] = value;
+        }
+
         public ClipSlot this[int track, int clip]
         {
             get
             {
                 InternalClipRef.Track = track;
                 InternalClipRef.Clip = clip;
-                return ClipSlots[InternalClipRef]; 
+                return this[InternalClipRef];
+            }
+            set
+            {
+                InternalClipRef.Track = track;
+                InternalClipRef.Clip = clip;
+                ClipSlots[InternalClipRef] = value;
             }
         }
 
         // Placeholder for future use
-        public void ApplyGuiCommand(GuiCommand command)
+        /*public void ApplyGuiCommand(GuiCommand command)
         {
             switch (command.Type)
             {
@@ -47,7 +57,7 @@ namespace Mutate4l.State
                     ClipSlots[command.ClipSlot.ClipReference] = command.ClipSlot;
                     break;
             }
-        }
+        }*/
         
         public List<ClipReference> GetAllReferencedClips()
         {
@@ -121,7 +131,7 @@ namespace Mutate4l.State
                     var dependentClips = dependentClipsByClipRef[clipRef];
                     if (dependentClips.Count == 0 || sortedList.Count > 0 && dependentClips.All(x => sortedList.Contains(x)))
                     {
-                        sortedList.Add(clipRef);
+                        if (!sortedList.Contains(clipRef)) sortedList.Add(clipRef);
                         collectionChanged = true;
                     }
                 }

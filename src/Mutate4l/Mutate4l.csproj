@@ -7,6 +7,7 @@
     <PublishReadyToRun>true</PublishReadyToRun>
     <PublishSingleFile>true</PublishSingleFile>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -9,7 +9,7 @@ namespace Mutate4l.Cli
         public TokenType Type { get; }
         public string Value { get; }
         public int Position { get; }
-        public Clip Clip { get; }
+        public Clip Clip { get; set; }
 
         public Token(TokenType type, string value, int position)
         {

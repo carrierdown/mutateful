@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using Mutate4l.Core;
+using Mutate4l.State;
 
 namespace Mutate4l.Cli
 {
@@ -48,7 +49,7 @@ namespace Mutate4l.Cli
             var commandTokensLists = ExtractCommandTokensLists(commandTokens.Skip(sourceClipReferences.Count).ToArray());
             var commands = commandTokensLists.Select(ParseTokensToCommand).ToList();
 
-            var parsedFormula = new Formula(commands, sourceClipReferences, allReferencedClips);
+            var parsedFormula = new Formula(commands, sourceClipReferences, allReferencedClips, new Dictionary<ClipReference, ClipSlot>());
             return new ProcessResult<Formula>(parsedFormula);
         }
         

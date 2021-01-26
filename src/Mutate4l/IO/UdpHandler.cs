@@ -67,8 +67,9 @@ namespace Mutate4l.IO
             {
                 switch (internalCommand.Type)
                 {
-                    case InternalCommandType.SetClipData:
+                    case InternalCommandType.LiveSetClipData:
                         // new logic for updating clip data
+                        Console.WriteLine($"Got clip at [{internalCommand.ClipSlot.ClipReference}]");
                         break;
                 }
 

@@ -7,9 +7,11 @@ namespace Mutate4l.State
         UnknownCommand,
         OutputString,
         LegacyProcessClips,
-        SetFormula, // set a single clip slot without triggering evaluation
-        SetClipData, // set and trigger evaluation of a single clip slot
+        MutatefulSetFormula, // set a single clip slot without triggering evaluation
+        MutatefulSetClipData, // set and trigger evaluation of a single clip slot
         EvaluateFormulas, // trigger evaluation of one or more clipslots - arguments are a list of clipslot coordinates
+        LiveSetFormula,
+        LiveSetClipData,
     }
     
     public class InternalCommand
