@@ -1,12 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mutate4l.Core;
+﻿using Mutate4l.Core;
+using NUnit.Framework;
 
 namespace Mutate4lTests.Core
 {
-    [TestClass]
+    [TestFixture]
     public class SortedListTest
     {
-        [TestMethod]
+        [Test]
         public void TestSortedList()
         {
             var sortedList = new SortedList<NoteEvent>();
@@ -35,7 +35,7 @@ namespace Mutate4lTests.Core
             Assert.AreEqual(sortedList[9].Start, 12.5m);
         }
 
-        [TestMethod]
+        [Test]
         public void TestDuplicateEntries()
         {
             var list = new SortedList<NoteEvent>();

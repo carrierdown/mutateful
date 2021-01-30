@@ -1,14 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mutate4l.Commands;
+﻿using Mutate4l.Commands;
 using Mutate4l.Core;
 using System;
+using NUnit.Framework;
 
 namespace Mutate4lTests.ClipActions
 {
-    [TestClass]
+    [TestFixture]
     public class InterleaveTest
     {
-        [TestMethod]
+        [Test]
         public void TestInterleaveTimeRange()
         {
             var clip1 = new Clip(4, true)
@@ -44,7 +44,7 @@ namespace Mutate4lTests.ClipActions
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestInterleaveTimeRangesAndCounts()
         {
             var clip1 = new Clip(4, true)
@@ -88,7 +88,7 @@ namespace Mutate4lTests.ClipActions
             Assert.AreEqual(1, result.Notes[5].Duration);
         }
 
-        [TestMethod]
+        [Test]
         public void TestInterleaveTimeRange2()
         {
             var clip1 = new Clip(4, true)
@@ -147,7 +147,7 @@ namespace Mutate4lTests.ClipActions
             Assert.AreEqual(1, result.Notes[9].Duration);
         }
 
-        [TestMethod]
+        [Test]
         public void TestInterleaveEventCount()
         {
             var clip1 = new Clip(4, true)

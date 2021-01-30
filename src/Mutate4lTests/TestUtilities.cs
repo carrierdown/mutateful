@@ -1,11 +1,10 @@
-using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l;
 using Mutate4l.Cli;
 using Mutate4l.Core;
 using Mutate4l.IO;
 using Mutate4l.Utility;
+using NUnit.Framework;
 
 namespace Mutate4lTests
 {

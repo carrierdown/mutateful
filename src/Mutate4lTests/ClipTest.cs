@@ -1,13 +1,13 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.Core;
 using Mutate4l.Utility;
+using NUnit.Framework;
 
 namespace Mutate4lTests
 {
-    [TestClass]
+    [TestFixture]
     public class ClipTest
     {
-        [TestMethod]
+        [Test]
         public void TestGroupSimultaneousNotesAndFlattenNotes()
         {
             var clip = new Clip(4, true)

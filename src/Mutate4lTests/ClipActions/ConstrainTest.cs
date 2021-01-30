@@ -1,13 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mutate4l.Commands;
+﻿using Mutate4l.Commands;
 using Mutate4l.Core;
+using NUnit.Framework;
 
 namespace Mutate4lTests.ClipActions
 {
-    [TestClass]
+    [TestFixture]
     public class ConstrainTest
     {
-        [TestMethod]
+        [Test]
         public void TestConstrainNoteEventPitch()
         {
             var clip1 = new Clip(4, true)

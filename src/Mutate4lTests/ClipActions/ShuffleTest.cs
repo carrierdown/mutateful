@@ -1,14 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mutate4l.Commands;
+﻿using Mutate4l.Commands;
 using Mutate4l.Core;
 using Mutate4l.Utility;
+using NUnit.Framework;
 
 namespace Mutate4lTests.ClipActions
 {
-    [TestClass]
+    [TestFixture]
     public class ShuffleTest
     {
-        [TestMethod]
+        [Test]
         public void TestShuffle()
         {
             var clip = new Clip(4, true)
@@ -47,7 +47,7 @@ namespace Mutate4lTests.ClipActions
             Assert.AreEqual(70, result.Notes[5].Pitch);
         }
 
-        //[TestMethod]
+        //[Test]
         public void TestShuffleComplex()
         {
             var clip = IOUtilities.StringToClip("8 True 36 0.00000 0.25000 100 39 0.00000 0.25000 100 42 0.25000 0.25000 100 41 0.50000 0.25000 100 36 0.75000 0.25000 100 39 0.75000 0.25000 100 38 1.00000 0.25000 100 39 1.25000 0.25000 100 42 1.50000 0.25000 100 38 1.75000 0.25000 100 42 2.00000 0.25000 100 38 2.50000 0.25000 100 50 2.50000 0.75000 100 42 3.00000 0.25000 100 38 3.25000 0.25000 100 50 3.25000 0.50000 100 36 4.00000 0.25000 100 39 4.00000 0.25000 100 42 4.25000 0.25000 100 41 4.50000 0.25000 100 36 4.75000 0.25000 100 39 4.75000 0.25000 100 38 5.00000 0.25000 100 42 5.25000 0.25000 100 39 5.50000 0.25000 100 38 5.75000 0.25000 100 42 6.00000 0.25000 100 48 6.25000 0.25000 100 38 6.50000 0.25000 100 37 6.75000 0.25000 100 42 7.00000 0.25000 100 48 7.25000 0.25000 100 44 7.50000 0.25000 100 38 7.75000 0.25000 100");
@@ -63,7 +63,7 @@ namespace Mutate4lTests.ClipActions
 
         }
 
-        [TestMethod]
+        [Test]
         public void TestShuffleGrouped()
         {
             var clip = new Clip(4, true) {

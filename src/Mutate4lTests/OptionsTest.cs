@@ -1,7 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mutate4l.Cli;
+﻿using Mutate4l.Cli;
 using Mutate4l.Core;
 using System.Collections.Generic;
+using NUnit.Framework;
 
 namespace Mutate4lTests
 {
@@ -39,10 +39,10 @@ namespace Mutate4lTests
         public int[] IntValues { get; set; }
     }
 
-    [TestClass]
+    [TestFixture]
     public class OptionsTest
     {
-        [TestMethod]
+        [Test]
         public void TestValues()
         {
             var options = new Dictionary<TokenType, List<Token>>();
@@ -55,7 +55,7 @@ namespace Mutate4lTests
             Assert.IsTrue(parsedOptions.SimpleBoolFlag);
         }
 
-        [TestMethod]
+        [Test]
         public void TestMinMaxValue()
         {
             var options = new Dictionary<TokenType, List<Token>>();
@@ -68,7 +68,7 @@ namespace Mutate4lTests
             Assert.AreEqual(1, parsedOptions.IntValue);
         }
 
-        [TestMethod]
+        [Test]
         public void TestMinMaxValues()
         {
             var options = new Dictionary<TokenType, List<Token>>
@@ -97,7 +97,7 @@ namespace Mutate4lTests
             Assert.AreEqual(100, parsedOptions.IntValues[2]);
         }
 
-        [TestMethod]
+        [Test]
         public void TestListValues()
         {
             var options = new Dictionary<TokenType, List<Token>>();
@@ -108,7 +108,7 @@ namespace Mutate4lTests
             Assert.AreEqual(3, parsedOptions.IntValue.Length);
         }
 
-        [TestMethod]
+        [Test]
         public void TestEnumValues()
         {
             var options = new Dictionary<TokenType, List<Token>>();

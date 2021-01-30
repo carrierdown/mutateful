@@ -1,14 +1,14 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.Cli;
 using Mutate4l.Commands;
 using System;
 using System.Collections.Generic;
 using Mutate4l.Core;
 using System.Linq;
+using NUnit.Framework;
 
 namespace Mutate4lTests
 {
-    [TestClass]
+    [TestFixture]
     public class ParserTest
     {
         private Clip Clip1 = new Clip(4, true) {
@@ -28,7 +28,7 @@ namespace Mutate4lTests
             }
         };
 
-        [TestMethod]
+        [Test]
         public void TestResolveClipReference()
         {
             Tuple<int, int> result = Parser.ResolveClipReference("B4");
@@ -36,35 +36,35 @@ namespace Mutate4lTests
             Assert.AreEqual(result.Item2, 3);
         }
 
-        [TestMethod]
+        [Test]
         public void TestParseInvalidInput()
         {
             var result = Parser.ParseFormulaToChainedCommand("[0] interleave % fisk -by [1] -mode event", new List<Clip> {Clip1, Clip2}, new ClipMetaData(100, 0));
             Assert.IsFalse(result.Success);
         }
         
-        [TestMethod]
+        [Test]
         public void TestParseInvalidInput2()
         {
             var result = Parser.ParseFormulaToChainedCommand("[0] slice /16", new List<Clip> {Clip1, Clip2}, new ClipMetaData(100, 0));
             Assert.IsFalse(result.Success);
         }
         
-        [TestMethod]
+        [Test]
         public void TestParseInvalidInputDoubleParam()
         {
             var result = Parser.ParseFormulaToChainedCommand("[0] arp -by [1] -by [2]", new List<Clip> {Clip1, Clip2, Clip1}, new ClipMetaData(100, 0));
             Assert.IsTrue(result.Success);
         }
 
-        [TestMethod]
+        [Test]
         public void TestParseMusicalDivision()
         {
             var result = Parser.ParseFormulaToChainedCommand("[0] interleave -mode time -ranges 1/16 15/16 16/1", new List<Clip> { Clip1 }, new ClipMetaData(100, 0));
             Assert.IsTrue(result.Success);
         }
 
-        [TestMethod]
+        [Test]
         public void TestCastNumberToMusicalDivision()
         {
             var command = Parser.ParseFormulaToChainedCommand("[0] interleave -mode time -ranges 1/8 2 1 4", new List<Clip> { Clip1 }, new ClipMetaData(100, 0));
@@ -77,7 +77,7 @@ namespace Mutate4lTests
             Assert.AreEqual(16, options.Ranges[3]);
         }        
 
-        [TestMethod]
+        [Test]
         public void TestConvertBarsBeatsSixteenths()
         {
             var command = Parser.ParseFormulaToChainedCommand("[0] interleave -mode time -ranges 0.0.2 0.2.0 0.1.0 1.0.0 1.0.1", new List<Clip> { Clip1 }, new ClipMetaData(100, 0));
@@ -91,7 +91,7 @@ namespace Mutate4lTests
             Assert.AreEqual(4.25m, options.Ranges[4]);
         }        
         
-        [TestMethod]
+        [Test]
         public void TestCastNumberWhenNoImplicitCastSet()
         {
             var command = Parser.ParseFormulaToChainedCommand("[0] resize 1/8", new List<Clip> { Clip1 }, new ClipMetaData(100, 0));
@@ -103,7 +103,7 @@ namespace Mutate4lTests
             Assert.IsTrue(success);
         }
 
-        [TestMethod]
+        [Test]
         public void TestParseNestedOperators()
         {
             var command = Parser.ParseFormulaToChainedCommand("[0] shuffle 1 2|3|9x6 1 2 4x3 5|6|7 8", new List<Clip> { Clip1 }, new ClipMetaData(100, 0));

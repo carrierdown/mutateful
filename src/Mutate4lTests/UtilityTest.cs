@@ -1,14 +1,14 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mutate4l.Core;
 using Mutate4l.Utility;
 using System;
+using NUnit.Framework;
 
 namespace Mutate4lTests
 {
-    [TestClass]
+    [TestFixture]
     public class UtilityTest
     {
-        [TestMethod]
+        [Test]
         public void TestNormalizeClipLengths()
         {
             var clip1 = new Clip(1, true)
@@ -59,7 +59,7 @@ namespace Mutate4lTests
             Assert.AreEqual(clip3.Notes.Count, 4);
         }
 
-        [TestMethod]
+        [Test]
         public void TestMonophonize()
         {
             var clip1 = new Clip(1, true)
@@ -92,7 +92,7 @@ namespace Mutate4lTests
             Assert.AreEqual(2, clip1.Notes.Count);
         }
 
-        [TestMethod]
+        [Test]
         public void TestRoundUpToNearestSixteenth()
         {
             var val = 1.22m;
@@ -103,7 +103,7 @@ namespace Mutate4lTests
             Assert.AreEqual(0.75m, Utilities.RoundUpToNearestSixteenth(val));
         }
 
-        //[TestMethod]
+        //[Test]
         public void MyTestMethod()
         {
             for (var i = 10; i < 36; i += 5)

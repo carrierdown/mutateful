@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Channels;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mutate4l.Core;
 using Mutate4l.IO;
 using Mutate4l.State;
+using NUnit.Framework;
 
 namespace Mutate4lTests
 {
-    [TestClass]
+    [TestFixture]
     public class StateTest
     {
-        [TestMethod]
+        [Test]
         public void TestTwoClipsAndFormula()
         {
             var queue = Channel.CreateUnbounded<InternalCommand>();
@@ -34,7 +33,7 @@ namespace Mutate4lTests
             Assert.AreEqual(clipSet[1,2].Clip.Count, 1);
         }
 
-        [TestMethod]
+        [Test]
         public void TestEightClips()
         {
             var clipSet = new ClipSet();
