@@ -21,9 +21,9 @@ var evaluateFormulasSignifier = 253;
 
 var stringMessageHeader = [0 /* dummy id which is removed prior to sending, only used for duplicate removal with clip ids for formulas and clip data */, 
                             typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, stringDataSignifier];
-var setClipDataHeader = [typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, setClipDataSignifier];
-var setFormulaHeader = [typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, setFormulaSignifier];
-var evaluateFormulasHeader = [typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, evaluateFormulasSignifier];
+var setClipDataHeader = [0, typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, setClipDataSignifier];
+var setFormulaHeader = [0, typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, setFormulaSignifier];
+var evaluateFormulasHeader = [0, typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, evaluateFormulasSignifier];
 
 // constants
 var SIZE_OF_ONE_NOTE_IN_BYTES = 1 /* pitch */ + 4 /* start */ + 4 /* duration */ + 1 /* velocity */;
@@ -627,12 +627,12 @@ function sendAllClipData() {
                         payload = setClipDataHeader;
                         payload = payload.concat(toRegularArray(getClipDataAsBytes(liveObject, i, s)));
                     }
-                    addFormulaToQueue(liveObject.id, payload);
+                    messageQueue[messageQueue.length] = payload;
                 }
             }
         }
     }
-    messageQueue[messageQueue.length] = evaluateFormulasHeader;
+    messageQueue[messageQueue.length] = [].concat(evaluateFormulasHeader); // clone array prior to sending
 }
 
 function formulaToReferredIds(formula) {

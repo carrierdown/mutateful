@@ -28,7 +28,7 @@ namespace Mutate4l.IO
 
         public static bool IsTypedCommand(byte[] result)
         {
-            return result.Length > 4 && result[0] == TypedDataFirstByte && result[1] == TypedDataSecondByte && result[2] == TypedDataThirdByte;
+            return result.Length >= 4 && result[0] == TypedDataFirstByte && result[1] == TypedDataSecondByte && result[2] == TypedDataThirdByte;
         }
 
         public static InternalCommandType GetCommandType(byte dataSignifier)
