@@ -53,8 +53,6 @@ namespace Mutate4lTests
                 Decoder.HandleTypedCommand(clipData.ToArray(), clipSet, queue);
             }
             Decoder.HandleTypedCommand(new byte[] {127, 126, 125, 253}, clipSet, queue);
-            
-            
         }
     }
 }

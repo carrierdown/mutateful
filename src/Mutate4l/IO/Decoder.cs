@@ -12,14 +12,14 @@ namespace Mutate4l.IO
 {
     public static class Decoder
     {
-        private const byte TypedDataFirstByte = 127;
-        private const byte TypedDataSecondByte = 126;
-        private const byte TypedDataThirdByte = 125;
+        public const byte TypedDataFirstByte = 127;
+        public const byte TypedDataSecondByte = 126;
+        public const byte TypedDataThirdByte = 125;
 
-        private const byte StringDataSignifier = 124;
-        private const byte SetClipDataSignifier = 255;
-        private const byte SetFormulaSignifier = 254;
-        private const byte EvaluateFormulasSignifier = 253;
+        public const byte StringDataSignifier = 124;
+        public const byte SetClipDataSignifier = 255;
+        public const byte SetFormulaSignifier = 254;
+        public const byte EvaluateFormulasSignifier = 253;
 
         public static bool IsStringData(byte[] result)
         {
@@ -35,9 +35,9 @@ namespace Mutate4l.IO
         {
             return dataSignifier switch
             {
-                StringDataSignifier => OutputString,
-                SetClipDataSignifier => MutatefulSetClipData,
-                SetFormulaSignifier => MutatefulSetFormula,
+                StringDataSignifier => ServerOutputString,
+                SetClipDataSignifier => ServerSetClipData,
+                SetFormulaSignifier => ServerSetFormula,
                 EvaluateFormulasSignifier => EvaluateFormulas,
                 _ => UnknownCommand
             };
@@ -61,11 +61,11 @@ namespace Mutate4l.IO
         {
             switch (GetCommandType(data[3]))
             {
-                case OutputString:
+                case ServerOutputString:
                     var text = Decoder.GetText(data);
                     Console.WriteLine(text);
                     break;
-                case MutatefulSetFormula:
+                case ServerSetFormula:
                     var (trackNo, clipNo, formula) = GetFormula(data[4..]);
                     
                     var parsedFormula = Parser.ParseFormula(formula);
@@ -77,7 +77,7 @@ namespace Mutate4l.IO
                         clipSet[clipSlot.ClipReference] = clipSlot;
                     }
                     break;
-                case MutatefulSetClipData:
+                case ServerSetClipData:
                     var clip = Decoder.GetSingleClip(data[4..]);
                     Console.WriteLine($"{clip.ClipReference.Track}, {clip.ClipReference.Clip} Incoming clip data");
                     if (clip != Clip.Empty)
@@ -96,12 +96,11 @@ namespace Mutate4l.IO
                     var warningMessage = "";
                     if (failedClips.Count > 0)
                     {
-                        warningMessage = string.Join(',', failedClips.Select(x => x.ClipReference));
+                        warningMessage = $"Errors encountered while processing formulas at locations {string.Join(", ", failedClips)}";
                     }
-                    foreach (var resultClip in successfulClips)
+                    foreach (var clipRef in successfulClips)
                     {
-                        clipSet[resultClip.ClipReference].Clip = resultClip;
-                        writer.WriteAsync(new InternalCommand(LiveSetClipData, clipSet[resultClip.ClipReference]));
+                        writer.WriteAsync(new InternalCommand(ClientSetClipData, clipSet[clipRef]));
                     }
                     // - note: maybe use different id's for outgoing and incoming commands
                     break;
@@ -111,10 +110,10 @@ namespace Mutate4l.IO
         }
         
         // todo: refactor - move somewhere else
-        public static (List<Clip> successfulClips, List<Clip> failedClips) DoEvaluateFormulas(ClipSet clipSet)
+        public static (List<ClipReference> successfulClips, List<ClipReference> failedClips) DoEvaluateFormulas(ClipSet clipSet)
         {
-            var successfulClips = new List<Clip>();
-            var failedClips = new List<Clip>();
+            var successfulClips = new List<ClipReference>();
+            var failedClips = new List<ClipReference>();
 
             if (clipSet.AllReferencedClipsValid()/* && !clipSet.HasCircularDependencies()*/)
             {
@@ -149,11 +148,14 @@ namespace Mutate4l.IO
                         );
                         if (processedCommand.Success)
                         {
-                            successfulClips.Add(processedCommand.Result[0]);
+                            successfulClips.Add(clip.ClipReference);
+                            var processedClip = processedCommand.Result[0];
+                            processedClip.ClipReference = clip.ClipReference;
+                            clipSet[clip.ClipReference].Clip = processedClip;
                         }
                         else
                         {
-                            failedClips.Add(new Clip(clip.ClipReference));
+                            failedClips.Add(clip.ClipReference);
                         } 
                     }
                 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Mutate4l.Core;
 using System.Globalization;
+using Mutate4l.IO;
 
 namespace Mutate4l.Utility
 {
@@ -72,6 +73,48 @@ namespace Mutate4l.Utility
             result.AddRange(BitConverter.GetBytes(id));
             result.AddRange(BitConverter.GetBytes((Single)clip.Length));
             result.Add((byte)(clip.IsLooping ? 1 : 0));
+            result.AddRange(BitConverter.GetBytes((ushort)clip.Notes.Count));
+
+            foreach (var note in clip.Notes)
+            {
+                if (note.Velocity == 0) continue;
+                result.Add((byte)note.Pitch);
+                result.AddRange(BitConverter.GetBytes((Single)note.Start));
+                result.AddRange(BitConverter.GetBytes((Single)note.Duration));
+                result.Add((byte)note.Velocity);
+            }
+            return result;
+        }
+        
+        /*
+            GetClipAsBytes: Convert Clip to array of bytes
+
+            Format:
+
+            1 byte  (track #)
+            1 byte  (clip #)
+            4 bytes (clip length - float)
+            1 byte  (loop state - on/off)
+            2 bytes (number of notes N)
+            x bytes - note data as chunks of 10 bytes where
+                1 byte  (pitch)
+                4 bytes (start - float)
+                4 bytes (duration - float)
+                1 byte  (velocity)
+
+                Above block repeated N times
+        */
+        
+        private static List<byte> SetClipDataHeader = new() {Decoder.TypedDataFirstByte, Decoder.TypedDataSecondByte, Decoder.TypedDataThirdByte, Decoder.SetClipDataSignifier};
+        
+        public static List<byte> GetClipAsBytesV2(Clip clip)
+        {
+            var result = new List<byte>(4 + 1 + 1 + 4 + 1 + 2 + (10 * clip.Notes.Count));
+            result.AddRange(SetClipDataHeader);
+            result.Add((byte)clip.ClipReference.Track);
+            result.Add((byte)clip.ClipReference.Clip);
+            result.AddRange(BitConverter.GetBytes((Single)clip.Length));
+            result.Add(clip.IsLooping ? 1 : 0);
             result.AddRange(BitConverter.GetBytes((ushort)clip.Notes.Count));
 
             foreach (var note in clip.Notes)

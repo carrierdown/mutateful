@@ -6,8 +6,8 @@ var debuglogging = true;
 var selectedClipObserver = {};
 var clipNameObserver = {};
 var clipContentsObserver = {};
-var nameCallback = new ObservableCallback(-1);
-var notesCallback = new ObservableCallback(-1);
+//var nameCallback = new ObservableCallback(-1);
+//var notesCallback = new ObservableCallback(-1);
 var watchedClips = [];
 var messageQueue = [];
 
@@ -48,7 +48,7 @@ function asciiStringToArray(input) {
 function replaceAt(string, index, replace) {
   return string.substring(0, index) + replace + string.substring(index + 1);
 }
-
+/*
 function ObservableCallback(id) {
     this.id = id;
     this.name = "<not set>";
@@ -90,7 +90,7 @@ ObservableCallback.prototype.getCallback = function() {
              typically called twice with this data from ableton:
              onNotesChanged [id, 112]
              onNotesChanged [notes, bang]
-             */
+             *//*
             if (arg.indexOf("notes") >= 0) {
                 if (!self.skipFirstNotesCallback) {
                     outlet(2, ["onSelectedClipRenamedOrChanged", parseInt(self.id, 10)]);
@@ -104,14 +104,14 @@ ObservableCallback.prototype.getCallback = function() {
 ObservableCallback.prototype.setLiveApi = function(api) {
     this.api = api;
 };
-
+*/
 function onInit() {
-    selectedClipObserver = new LiveAPI(onSelectedClipChanged, "live_set view");
-    selectedClipObserver.property = "detail_clip";
-    processAllClips();
+//    selectedClipObserver = new LiveAPI(onSelectedClipChanged, "live_set view");
+//    selectedClipObserver.property = "detail_clip";
+    //processAllClips();
     sendAllClipData();
 }
-
+/*
 function onSelectedClipWithoutName(clipId, maybeName) {
     //debuglog("onSelectedClipWithoutName", maybeName);
     var name = maybeName || "";
@@ -210,7 +210,7 @@ function onSelectedClipChanged(args) {
     // update watchers
     outlet(1, ["updateObserversOnClipChange", id]); // Max does not support creating LiveAPI objects in custom callbacks, so this is handled by piping data back into itself (see updateObserversOnClipChange function above)
 }
-
+*/
 function getClipName(liveObject) {
     var clipName = liveObject.get("name");
     if (!clipName.length || clipName.length === 0) return "";
@@ -272,6 +272,28 @@ function getLiveObjectAtClip(trackNo, clipNo) {
         debuglogExt("No clip present at track: " + trackNo + 1 + " clip: " + clipNo + 1);
         return;
     }
+    liveObject.goto("live_set tracks " + trackNo + " clip_slots " + clipNo + " clip");
+
+    return liveObject;
+}
+
+function getOrCreateClipAtPosition(trackNo, clipNo) {
+    var liveObject = new LiveAPI("live_set tracks " + trackNo);
+
+    if (!liveObject) {
+        debuglogExt('Invalid liveObject at [' + trackNo + ', ' + clipNo + '], exiting...');
+        return;
+    }
+    if (!isMidiTrack(liveObject)) {
+        debuglogExt('Clip at [' + trackNo + ', ' + clipNo + '] is not a midi track :(');
+        return;
+    }
+    liveObject.goto("live_set tracks " + trackNo + " clip_slots " + clipNo);
+
+    if (!hasClip(liveObject)) {
+        liveObject.call('create_clip', 4);
+    }
+
     liveObject.goto("live_set tracks " + trackNo + " clip_slots " + clipNo + " clip");
 
     return liveObject;
@@ -398,6 +420,49 @@ function setClipFromBytes(/* ... arguments */) {
         var start = getNormalizedFloatValue(getFloat32FromByteArray(arguments, startOffset + 1));
         var duration = getNormalizedFloatValue(getFloat32FromByteArray(arguments, startOffset + 5));
         var velocity = arguments[startOffset + 9];
+        liveObject.call('note', pitch, start, duration, velocity, 0 /* not muted */);
+        startOffset += 10;
+    }
+    liveObject.call('done');
+}
+
+function handleIncomingData(/* ... arguments */) {
+    var args = [].slice.call(arguments);
+    if (args.length < 13) {
+        post("Error - expected bigger payload");
+    }
+    if (args[0] === typedDataFirstByte &&
+        args[1] === typedDataSecondByte &&
+        args[2] === typedDataThirdByte) {
+
+        if (args[3] === setClipDataSignifier) {
+            onClipDataFromServer(args.slice(4));
+        }
+    }
+}
+
+function onClipDataFromServer(args) {
+    var trackNo = args[0];
+    var clipNo = args[1];
+    var clipLength = getFloat32FromByteArray(args, 2);
+    var isLooping = args[6];
+    var numNotes = getUint16FromByteArray(args, 7);
+    var startOffset = 9;
+
+    var liveObject = getOrCreateClipAtPosition(trackNo, clipNo);
+
+    liveObject.set('loop_start', '0');
+    liveObject.set('loop_end', clipLength);
+    liveObject.set('end_marker', clipLength);
+    liveObject.set('looping', isLooping);
+    liveObject.call('select_all_notes');
+    liveObject.call('replace_selected_notes');
+    liveObject.call('notes', numNotes);
+    for (var c = 0; c < numNotes; c++) {
+        var pitch = args[startOffset];
+        var start = getNormalizedFloatValue(getFloat32FromByteArray(args, startOffset + 1));
+        var duration = getNormalizedFloatValue(getFloat32FromByteArray(args, startOffset + 5));
+        var velocity = args[startOffset + 9];
         liveObject.call('note', pitch, start, duration, velocity, 0 /* not muted */);
         startOffset += 10;
     }
@@ -567,20 +632,12 @@ function getNumberOfTracks(liveObject) {
     return liveObject.get("tracks").length / 2;
 }
 
-function toRegularArray(arrayToConvert) {
-    var result = [];
-    for (var i = 0; i < arrayToConvert.length; i++) {
-        result[i] = arrayToConvert[i];
-    }
-    return result;
-}
-
 function getMetadataBytes(liveObject, numberOfInlineClips) {
     var metaDataBytes = new Uint8Array(4 /* id - 2 bytes, track no - 1 byte, number of inline clips - 1 byte */);
     int16ToBufferAtPos(liveObject.id, metaDataBytes, 0);
     metaDataBytes[2] = getTrackNumber(liveObject);
     metaDataBytes[3] = numberOfInlineClips;
-    return toRegularArray(metaDataBytes);
+    return [].slice.call(metaDataBytes);
 }
 
 function extractFormula(clipName) {
@@ -619,13 +676,19 @@ function sendAllClipData() {
                     clipName = getClipName(liveObject);
                     if (containsFormula(clipName)) {
                         var formula = extractFormula(clipName);
+                        var trackNo = getTrackNumber(liveObject);
+                        var clipNo = getClipNumber(liveObject);
+                        if (trackNo === false || clipNo === false) {
+                            post("Unable to get trackNo or clipNo");
+                            continue;
+                        }
                         if (formula.length == 0) continue;
-                        payload = setFormulaHeader;
-                        payload = payload.concat([getTrackNumber(liveObject) & 0xFF, getClipNumber(liveObject) & 0xFF]);
-                        payload = payload.concat(asciiStringToArray(formula));
+                        payload = setFormulaHeader.concat(
+                            [trackNo, clipNo],
+                            asciiStringToArray(formula));
                     } else {
-                        payload = setClipDataHeader;
-                        payload = payload.concat(toRegularArray(getClipDataAsBytes(liveObject, i, s)));
+                        payload = setClipDataHeader.concat(
+                            [].slice.call(getClipDataAsBytes(liveObject, i, s)));
                     }
                     messageQueue[messageQueue.length] = payload;
                 }
