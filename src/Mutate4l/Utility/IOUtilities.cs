@@ -105,7 +105,7 @@ namespace Mutate4l.Utility
                 Above block repeated N times
         */
         
-        private static List<byte> SetClipDataHeader = new() {Decoder.TypedDataFirstByte, Decoder.TypedDataSecondByte, Decoder.TypedDataThirdByte, Decoder.SetClipDataSignifier};
+        private static List<byte> SetClipDataHeader = new() {Decoder.TypedDataFirstByte, Decoder.TypedDataSecondByte, Decoder.TypedDataThirdByte, Decoder.SetClipDataOnServerSignifier};
         
         public static List<byte> GetClipAsBytesV2(Clip clip)
         {

@@ -17,9 +17,11 @@ namespace Mutate4l.IO
         public const byte TypedDataThirdByte = 125;
 
         public const byte StringDataSignifier = 124;
-        public const byte SetClipDataSignifier = 255;
-        public const byte SetFormulaSignifier = 254;
+        public const byte SetClipDataOnServerSignifier = 255;
+        public const byte SetFormulaOnServerSignifier = 254;
         public const byte EvaluateFormulasSignifier = 253;
+        public const byte SetAndEvaluateClipDataOnServerSignifier = 252;
+        public const byte SetAndEvaluateFormulaOnServerSignifier = 251;
 
         public static bool IsStringData(byte[] result)
         {
@@ -35,10 +37,12 @@ namespace Mutate4l.IO
         {
             return dataSignifier switch
             {
-                StringDataSignifier => ServerOutputString,
-                SetClipDataSignifier => ServerSetClipData,
-                SetFormulaSignifier => ServerSetFormula,
+                StringDataSignifier => OutputString,
+                SetClipDataOnServerSignifier => SetClipDataOnServer,
+                SetFormulaOnServerSignifier => SetFormulaOnServer,
                 EvaluateFormulasSignifier => EvaluateFormulas,
+                SetAndEvaluateFormulaOnServerSignifier => SetAndEvaluateFormulaOnServer,
+                SetAndEvaluateClipDataOnServerSignifier => SetAndEvaluateClipDataOnServer,
                 _ => UnknownCommand
             };
         }
@@ -61,11 +65,11 @@ namespace Mutate4l.IO
         {
             switch (GetCommandType(data[3]))
             {
-                case ServerOutputString:
+                case OutputString:
                     var text = Decoder.GetText(data);
                     Console.WriteLine(text);
                     break;
-                case ServerSetFormula:
+                case SetFormulaOnServer:
                     var (trackNo, clipNo, formula) = GetFormula(data[4..]);
                     
                     var parsedFormula = Parser.ParseFormula(formula);
@@ -77,7 +81,7 @@ namespace Mutate4l.IO
                         clipSet[clipSlot.ClipReference] = clipSlot;
                     }
                     break;
-                case ServerSetClipData:
+                case SetClipDataOnServer:
                     var clip = Decoder.GetSingleClip(data[4..]);
                     Console.WriteLine($"{clip.ClipReference.Track}, {clip.ClipReference.Clip} Incoming clip data");
                     if (clip != Clip.Empty)
@@ -100,9 +104,17 @@ namespace Mutate4l.IO
                     }
                     foreach (var clipRef in successfulClips)
                     {
-                        writer.WriteAsync(new InternalCommand(ClientSetClipData, clipSet[clipRef]));
+                        writer.WriteAsync(new InternalCommand(SetClipDataOnClient, clipSet[clipRef]));
                     }
                     // - note: maybe use different id's for outgoing and incoming commands
+                    break;
+                case SetAndEvaluateClipDataOnServer:
+                    // need a function that finds all formulas with a reference, either direct or indirect, to the changed clip.
+                    // These formulas must then be sorted and processed in order.
+                    // proably need "local" versions of GetClipReferencesInProcessableOrder and GetDependentClipsByClipRef
+                    break;
+                case SetAndEvaluateFormulaOnServer:
+                    // When we have solved the one above, this one should be the same but with the current cell processed first.
                     break;
                 case UnknownCommand:
                     break;

@@ -5,13 +5,15 @@ namespace Mutate4l.State
     public enum InternalCommandType
     {
         UnknownCommand,
-        ServerOutputString,
+        OutputString,
         LegacyProcessClips,
-        ServerSetFormula, // set a single clip slot without triggering evaluation
-        ServerSetClipData, // set and trigger evaluation of a single clip slot
+        SetFormulaOnServer, // set a single clip slot without triggering evaluation
+        SetClipDataOnServer, // set and trigger evaluation of a single clip slot
+        SetAndEvaluateFormulaOnServer,
+        SetAndEvaluateClipDataOnServer,
         EvaluateFormulas, // trigger evaluation of one or more clipslots - arguments are a list of clipslot coordinates
-        ClientSetFormula,
-        ClientSetClipData,
+        SetFormulaOnClient,
+        SetClipDataOnClient,
     }
     
     public class InternalCommand
