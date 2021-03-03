@@ -108,7 +108,7 @@ namespace Mutate4l.State
             }
         }
 
-        private Dictionary<ClipReference, List<ClipReference>> GetReferencedClipsByClipRef()
+        public Dictionary<ClipReference, List<ClipReference>> GetAllReferencedClipsByClipRef()
         {
             var result = new Dictionary<ClipReference, List<ClipReference>>();
             foreach (var clipRef in ClipSlots.Keys)
@@ -125,12 +125,17 @@ namespace Mutate4l.State
                 .Select(x => x).ToList();
         }
 
-        public List<ClipReference> GetAllDependentClipsForClipRef(ClipReference initialClipReference)
+        public List<ClipReference> GetAllDependentClipRefsFromClipRef(ClipReference initialClipReference)
         {
-            var referencedClipsByClipRef = GetReferencedClipsByClipRef();
+            var referencedClipsByClipRef = GetAllReferencedClipsByClipRef();
             var allDependentClips = new List<ClipReference>();
             var clipsToCheck = new List<ClipReference> {initialClipReference};
             var dependentClips = new List<ClipReference>();
+            // Start with initial clip
+            // 1. Find all clips (if any) that depend on this clip
+            // 2. If any are found, add them to a list, then repeat from step 1
+            // 3. Once no more clips are produced from this process, we have identified all dependencies from our starting clip and we return them.
+            // Note that this list might not be correct sorted yet, therefore we call GetClipReferencesInProcessableOrder afterwards to sort them properly.
             do {
                 if (dependentClips.Count > 0)
                 {
@@ -140,16 +145,17 @@ namespace Mutate4l.State
                 }
                 foreach (var clipReference in clipsToCheck)
                 {
-                    dependentClips.AddRange(GetDependentClipsForClipRef(referencedClipsByClipRef, clipReference));
+                    var depClips = GetDependentClipsForClipRef(referencedClipsByClipRef, clipReference);
+                    dependentClips.AddRange(depClips);
                 }
                 allDependentClips.AddRange(dependentClips);
             } while (dependentClips.Count > 0);
             return allDependentClips;
         }
         
-        public ProcessResult<List<ClipReference>> GetClipReferencesInProcessableOrder()
+        public ProcessResult<List<ClipReference>> GetClipReferencesInProcessableOrder(Dictionary<ClipReference, List<ClipReference>> dependentClipsByClipRef = null)
         {
-            var dependentClipsByClipRef = GetReferencedClipsByClipRef();
+            dependentClipsByClipRef ??= GetAllReferencedClipsByClipRef();
             var sortedList = new List<ClipReference>();
             var collectionChanged = true;
             while (sortedList.Count < dependentClipsByClipRef.Keys.Count && collectionChanged)

@@ -109,6 +109,20 @@ namespace Mutate4l.IO
                     // - note: maybe use different id's for outgoing and incoming commands
                     break;
                 case SetAndEvaluateClipDataOnServer:
+                    var clipToEvaluate = Decoder.GetSingleClip(data[4..]);
+                    Console.WriteLine($"{clipToEvaluate.ClipReference.Track}, {clipToEvaluate.ClipReference.Clip} Incoming clip data to evaluate");
+                    if (clipToEvaluate != Clip.Empty)
+                    {
+                        var clipSlot = new ClipSlot("", clipToEvaluate, Formula.Empty);
+                        clipSet[clipSlot.ClipReference] = clipSlot;
+                        var clipReferences = clipSet.GetAllDependentClipRefsFromClipRef(clipSlot.ClipReference);
+                        var allClipsByClipRef = clipSet.GetAllReferencedClipsByClipRef();
+                        var orderedClipReferences = clipSet.GetClipReferencesInProcessableOrder(
+                            clipReferences.Distinct().ToDictionary(
+                                key => key, key => allClipsByClipRef[key].Where(x => clipReferences.Contains(x)).ToList()));
+                        Console.WriteLine($"Found dependencies: {string.Join(' ', clipReferences.Select(x => x.ToString()))}");
+                        Console.WriteLine($"Found sorted: {string.Join(' ', orderedClipReferences.Result.Select(x => x.ToString()))}");
+                    }
                     // need a function that finds all formulas with a reference, either direct or indirect, to the changed clip.
                     // These formulas must then be sorted and processed in order.
                     // proably need "local" versions of GetClipReferencesInProcessableOrder and GetDependentClipsByClipRef
