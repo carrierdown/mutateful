@@ -66,129 +66,28 @@ namespace Mutate4l.IO
             switch (GetCommandType(data[3]))
             {
                 case OutputString:
-                    var text = Decoder.GetText(data);
-                    Console.WriteLine(text);
+                    CommandHandler.OutputString(data);
                     break;
                 case SetFormulaOnServer:
-                    var (trackNo, clipNo, formula) = GetFormula(data[4..]);
-                    
-                    var parsedFormula = Parser.ParseFormula(formula);
-                    if (parsedFormula.Success)
-                    {
-                        Console.WriteLine($"{trackNo}, {clipNo}: Incoming formula {formula}");
-                        var clipRef = new ClipReference(trackNo, clipNo);
-                        var clipSlot = new ClipSlot(formula, new Clip(clipRef), parsedFormula.Result);
-                        clipSet[clipSlot.ClipReference] = clipSlot;
-                    }
+                    CommandHandler.SetFormulaOnServer(data, clipSet);
                     break;
                 case SetClipDataOnServer:
-                    var clip = Decoder.GetSingleClip(data[4..]);
-                    Console.WriteLine($"{clip.ClipReference.Track}, {clip.ClipReference.Clip} Incoming clip data");
-                    if (clip != Clip.Empty)
-                    {
-                        var clipSlot = new ClipSlot("", clip, Formula.Empty);
-                        clipSet[clipSlot.ClipReference] = clipSlot;
-                    }
+                    CommandHandler.SetClipDataOnServer(data, clipSet);
                     break;
                 case EvaluateFormulas:
-                    // - check that all ClipReferences resolve to a ClipSlot containing either formula or clipdata
-                    // - check for circular dependencies by visiting each clipslot referenced by each formula and making sure the starting clipslot is never visited again
-                    // - create dependency graph for formulas by maintaining a list of each clipslot and the clips they depend on
-                    // - walk dependency graph, processing each formula and populating referenced clips first.
-                    // - after each formula has finished processing, send resulting clip as InternalCommand of type SetClipData to ChannelWriter
-                    var (successfulClips, failedClips) = DoEvaluateFormulas(clipSet);
-                    var warningMessage = "";
-                    if (failedClips.Count > 0)
-                    {
-                        warningMessage = $"Errors encountered while processing formulas at locations {string.Join(", ", failedClips)}";
-                    }
-                    foreach (var clipRef in successfulClips)
-                    {
-                        writer.WriteAsync(new InternalCommand(SetClipDataOnClient, clipSet[clipRef]));
-                    }
-                    // - note: maybe use different id's for outgoing and incoming commands
+                    CommandHandler.EvaluateFormulas(clipSet, writer);
                     break;
                 case SetAndEvaluateClipDataOnServer:
-                    var clipToEvaluate = Decoder.GetSingleClip(data[4..]);
-                    Console.WriteLine($"{clipToEvaluate.ClipReference.Track}, {clipToEvaluate.ClipReference.Clip} Incoming clip data to evaluate");
-                    if (clipToEvaluate != Clip.Empty)
-                    {
-                        var clipSlot = new ClipSlot("", clipToEvaluate, Formula.Empty);
-                        clipSet[clipSlot.ClipReference] = clipSlot;
-                        var clipReferences = clipSet.GetAllDependentClipRefsFromClipRef(clipSlot.ClipReference);
-                        var allClipsByClipRef = clipSet.GetAllReferencedClipsByClipRef();
-                        var orderedClipReferences = clipSet.GetClipReferencesInProcessableOrder(
-                            clipReferences.Distinct().ToDictionary(
-                                key => key, key => allClipsByClipRef[key].Where(x => clipReferences.Contains(x)).ToList()));
-                        Console.WriteLine($"Found dependencies: {string.Join(' ', clipReferences.Select(x => x.ToString()))}");
-                        Console.WriteLine($"Found sorted: {string.Join(' ', orderedClipReferences.Result.Select(x => x.ToString()))}");
-                    }
-                    // need a function that finds all formulas with a reference, either direct or indirect, to the changed clip.
-                    // These formulas must then be sorted and processed in order.
-                    // proably need "local" versions of GetClipReferencesInProcessableOrder and GetDependentClipsByClipRef
+                    CommandHandler.SetAndEvaluateClipDataOnServer(data, clipSet, writer);
                     break;
                 case SetAndEvaluateFormulaOnServer:
-                    // When we have solved the one above, this one should be the same but with the current cell processed first.
+                    CommandHandler.SetAndEvaluateFormulaOnServer(data, clipSet, writer);
                     break;
                 case UnknownCommand:
                     break;
             }
         }
         
-        // todo: refactor - move somewhere else
-        public static (List<ClipReference> successfulClips, List<ClipReference> failedClips) DoEvaluateFormulas(ClipSet clipSet)
-        {
-            var successfulClips = new List<ClipReference>();
-            var failedClips = new List<ClipReference>();
-
-            if (clipSet.AllReferencedClipsValid()/* && !clipSet.HasCircularDependencies()*/)
-            {
-                var orderedClipRefs = clipSet.GetClipReferencesInProcessableOrder();
-                if (orderedClipRefs.Success)
-                {
-                    Console.WriteLine($"Clips to process: {string.Join(", ", orderedClipRefs.Result.Select(x => x.ToString()))}");
-                    var clipsToProcess = orderedClipRefs.Result.Select(x => clipSet[x]);
-
-                    foreach (var clip in clipsToProcess)
-                    {
-                        foreach (var referencedClip in clip.Formula.AllReferencedClips)
-                        {
-                            clip.Formula.ClipSlotsByClipReference.Add(referencedClip, clipSet[referencedClip]);
-                        }
-
-                        var formula = clip.Formula;
-                        var flattenedTokenList = formula.Commands.SelectMany(c => c.Options.Values.SelectMany(o => o))
-                            .Concat(formula.Commands.SelectMany(x => x.DefaultOptionValues));
-                        
-                        // todo: error handling
-                        
-                        foreach (var token in flattenedTokenList.Where(t => t.IsClipReference))
-                        {
-                            token.Clip = clip.Formula.ClipSlotsByClipReference[ClipReference.FromString(token.Value)].Clip;
-                        }
-                        
-                        var processedCommand = ClipProcessor.ProcessChainedCommand(new ChainedCommand(
-                            formula.Commands, 
-                            formula.SourceClipReferences.Select(x => formula.ClipSlotsByClipReference[x].Clip).ToArray(), 
-                            new ClipMetaData(0, (byte) clip.ClipReference.Track))
-                        );
-                        if (processedCommand.Success)
-                        {
-                            successfulClips.Add(clip.ClipReference);
-                            var processedClip = processedCommand.Result[0];
-                            processedClip.ClipReference = clip.ClipReference;
-                            clipSet[clip.ClipReference].Clip = processedClip;
-                        }
-                        else
-                        {
-                            failedClips.Add(clip.ClipReference);
-                        } 
-                    }
-                }
-            }
-            return (successfulClips, failedClips);
-        }
-
         public static Clip GetSingleClip(byte[] data)
         {
             var offset = 0;

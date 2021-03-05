@@ -59,7 +59,51 @@ namespace Mutate4l.State
             }
         }*/
         
-        public List<ClipReference> GetAllReferencedClips()
+        public (List<ClipReference> successfulClips, List<ClipReference> failedClips) ProcessClips(IEnumerable<ClipSlot> clipsToProcess)
+        {
+            var successfulClips = new List<ClipReference>();
+            var failedClips = new List<ClipReference>();
+
+            foreach (var clip in clipsToProcess)
+            {
+                foreach (var referencedClip in clip.Formula.AllReferencedClips)
+                {
+                    clip.Formula.ClipSlotsByClipReference.Add(referencedClip, this[referencedClip]);
+                }
+
+                var formula = clip.Formula;
+                var flattenedTokenList = formula.Commands
+                    .SelectMany(c => c.Options.Values.SelectMany(o => o))
+                    .Concat(formula.Commands.SelectMany(x => x.DefaultOptionValues));
+                        
+                // todo: error handling
+                        
+                foreach (var token in flattenedTokenList.Where(t => t.IsClipReference))
+                {
+                    token.Clip = clip.Formula.ClipSlotsByClipReference[ClipReference.FromString(token.Value)].Clip;
+                }
+                        
+                var processedCommand = ClipProcessor.ProcessChainedCommand(new ChainedCommand(
+                    formula.Commands, 
+                    formula.SourceClipReferences.Select(x => formula.ClipSlotsByClipReference[x].Clip).ToArray(), 
+                    new ClipMetaData(0, (byte) clip.ClipReference.Track))
+                );
+                if (processedCommand.Success)
+                {
+                    successfulClips.Add(clip.ClipReference);
+                    var processedClip = processedCommand.Result[0];
+                    processedClip.ClipReference = clip.ClipReference;
+                    this[clip.ClipReference].Clip = processedClip;
+                }
+                else
+                {
+                    failedClips.Add(clip.ClipReference);
+                } 
+            }
+            return (successfulClips, failedClips);
+        }
+
+        private IEnumerable<ClipReference> GetAllReferencedClips()
         {
             var result = new List<ClipReference>();
             foreach (var clipSlot in ClipSlots.Values.Where(clipSlot => clipSlot.Formula != Formula.Empty))
@@ -118,6 +162,11 @@ namespace Mutate4l.State
             return result;
         }
 
+        public IEnumerable<ClipSlot> GetClipSlotsFromClipReferences(IEnumerable<ClipReference> clipReferences)
+        {
+            return clipReferences.Select(x => this[x]);
+        }
+        
         private List<ClipReference> GetDependentClipsForClipRef(Dictionary<ClipReference, List<ClipReference>> referencedClipsByClipRef, ClipReference clipRef)
         {
             return referencedClipsByClipRef.Keys
