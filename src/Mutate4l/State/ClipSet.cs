@@ -58,6 +58,29 @@ namespace Mutate4l.State
                     break;
             }
         }*/
+
+        private void PopulateClipReferences(ClipSlot clip)
+        {
+            foreach (var referencedClip in clip.Formula.AllReferencedClips)
+            {
+                if (clip.Formula.ClipSlotsByClipReference.ContainsKey(referencedClip))
+                    clip.Formula.ClipSlotsByClipReference[referencedClip] = this[referencedClip];
+                else
+                    clip.Formula.ClipSlotsByClipReference.Add(referencedClip, this[referencedClip]);
+            }
+
+            var formula = clip.Formula;
+            var flattenedTokenList = formula.Commands
+                .SelectMany(c => c.Options.Values.SelectMany(o => o))
+                .Concat(formula.Commands.SelectMany(x => x.DefaultOptionValues));
+                        
+            // todo: error handling
+                        
+            foreach (var token in flattenedTokenList.Where(t => t.IsClipReference))
+            {
+                token.Clip = clip.Formula.ClipSlotsByClipReference[ClipReference.FromString(token.Value)].Clip;
+            }
+        }
         
         public (List<ClipReference> successfulClips, List<ClipReference> failedClips) ProcessClips(IEnumerable<ClipSlot> clipsToProcess)
         {
@@ -66,26 +89,11 @@ namespace Mutate4l.State
 
             foreach (var clip in clipsToProcess)
             {
-                foreach (var referencedClip in clip.Formula.AllReferencedClips)
-                {
-                    clip.Formula.ClipSlotsByClipReference.Add(referencedClip, this[referencedClip]);
-                }
-
-                var formula = clip.Formula;
-                var flattenedTokenList = formula.Commands
-                    .SelectMany(c => c.Options.Values.SelectMany(o => o))
-                    .Concat(formula.Commands.SelectMany(x => x.DefaultOptionValues));
-                        
-                // todo: error handling
-                        
-                foreach (var token in flattenedTokenList.Where(t => t.IsClipReference))
-                {
-                    token.Clip = clip.Formula.ClipSlotsByClipReference[ClipReference.FromString(token.Value)].Clip;
-                }
+                PopulateClipReferences(clip);
                         
                 var processedCommand = ClipProcessor.ProcessChainedCommand(new ChainedCommand(
-                    formula.Commands, 
-                    formula.SourceClipReferences.Select(x => formula.ClipSlotsByClipReference[x].Clip).ToArray(), 
+                    clip.Formula.Commands, 
+                    clip.Formula.SourceClipReferences.Select(x => clip.Formula.ClipSlotsByClipReference[x].Clip).ToArray(), 
                     new ClipMetaData(0, (byte) clip.ClipReference.Track))
                 );
                 if (processedCommand.Success)

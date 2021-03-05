@@ -103,12 +103,17 @@ namespace Mutate4l.Utility
                 1 byte  (velocity)
 
                 Above block repeated N times
+            
+            For MPE support: Add another chunk of MPE data for each note. Laying out the data this way
+            will make it possible to support Live 10 as well, since the Live 10 connector can skip/disregard this data.
+            
         */
         
         private static List<byte> SetClipDataHeader = new() {Decoder.TypedDataFirstByte, Decoder.TypedDataSecondByte, Decoder.TypedDataThirdByte, Decoder.SetClipDataOnServerSignifier};
         
         public static List<byte> GetClipAsBytesV2(Clip clip)
         {
+            // todo: If supporting multiple clients, we need to also send formula (if specified) when sending clip data
             var result = new List<byte>(4 + 1 + 1 + 4 + 1 + 2 + (10 * clip.Notes.Count));
             result.AddRange(SetClipDataHeader);
             result.Add((byte)clip.ClipReference.Track);

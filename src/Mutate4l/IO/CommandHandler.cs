@@ -110,6 +110,11 @@ namespace Mutate4l.IO
                 var clipRef = new ClipReference(trackNo, clipNo);
                 var clipSlot = new ClipSlot(formula, new Clip(clipRef), parsedFormula.Result);
                 clipSet[clipSlot.ClipReference] = clipSlot;
+                var (successfulClips, failedClips) = clipSet.ProcessClips(new [] {clipSlot});
+                foreach (var clip in successfulClips)
+                {
+                    writer.WriteAsync(new InternalCommand(SetClipDataOnClient, clipSet[clip]));
+                }
             }
         }
     }
