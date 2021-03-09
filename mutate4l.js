@@ -85,6 +85,7 @@ function processQueue() {
 // The following handlers are called indirectly, i.e. via deferlow-object in patcher to get around bug in M4L API
 
 function onSelectedClipWithoutName(clipId, maybeName) {
+    debuglogExt("onSelectedClipWithoutName");
     var name = maybeName || "";
     if (name.indexOf("[") === -1 && name.indexOf("]") === -1) {
         var clipSlot = new LiveAPI("id " + clipId);
@@ -93,25 +94,35 @@ function onSelectedClipWithoutName(clipId, maybeName) {
 }
 
 function onSelectedClipWasCopied(clipId, maybeName) {
-    // todo: redo
-    //debuglog("onSelectedClipWasCopied", maybeName);
+    debuglogExt("onSelectedClipWasCopied", maybeName);
     var name = maybeName || "";
     var clipSlot = new LiveAPI("id " + clipId);
     enumerateClip(getTrackNumber(clipSlot), getClipNumber(clipSlot) + 1, clipSlot);
     setAndEvaluateClipDataOrFormula(clipSlot);
 }
 
-function onSelectedClipRenamedOrChanged(arg1) {
-    debuglogExt("hello from onSelectedClipRenamedOrChanged");
+function onSelectedClipRenamed(arg1) {
+    debuglogExt("hello from onSelectedClipRenamed");
+    var selectedClipSlot = new LiveAPI("id " + arg1);
+    setAndEvaluateClipDataOrFormula(selectedClipSlot);
+}
+
+function onSelectedClipNotesChanged(arg1) {
+    debuglogExt("hello from onSelectedClipNotesChanged");
     var selectedClipSlot = new LiveAPI("id " + arg1);
     setAndEvaluateClipDataOrFormula(selectedClipSlot);
 }
 
 function onSelectedClipChanged(args) {
+    debuglogExt("hello from onSelectedClipChanged", args[args.length - 1]);
     var id = args[args.length - 1];
     if (id === 0) return; // return on empty clip
     // update watchers
-    outlet(1, ["updateObserversOnClipChange", id]); // Max does not support creating LiveAPI objects in custom callbacks, so this is handled by piping data back into itself (see updateObserversOnClipChange function above)
+    outlet(1, ["updateObserversOnClipChange", id]); // Max does not support creating LiveAPI objects in custom callbacks, so this is handled by piping data back into itself via a deferlow object
+}
+
+function resetInternalUpdateState() {
+    notesCallback.updatedInternally = false;
 }
 
 function updateObserversOnClipChange(rawId) {
@@ -120,19 +131,20 @@ function updateObserversOnClipChange(rawId) {
     clipNameObserver = null;
     nameCallback.name = getClipNameFromId(rawId);
     nameCallback.id = rawId;
-    nameCallback.skipFirstNameCallback = true; // quirk: see below
     clipNameObserver = new LiveAPI(nameCallback.getCallback().onNameChanged, id);
+    nameCallback.skipFirstNameCallback = true; // quirk: see below
     clipNameObserver.property = "name";
-    nameCallback.setLiveApi(clipNameObserver);
+    // nameCallback.setLiveApi(clipNameObserver);
 
     clipContentsObserver.property = "";
     clipContentsObserver = null;
     notesCallback.name = getClipNameFromId(rawId);
     notesCallback.id = rawId;
-    notesCallback.skipFirstNotesCallback = true; // quirk: When a new observer is hooked up, the callback fires immediately even though no change occurred. We work around this with this variable.
     clipContentsObserver = new LiveAPI(notesCallback.getCallback().onNotesChanged, id);
+    notesCallback.skipFirstNotesCallback = true; // quirk: When a new observer is hooked up, the callback fires immediately even though no change occurred. We work around this with this variable.
+    notesCallback.updatedInternally = false;
     clipContentsObserver.property = "notes";
-    notesCallback.setLiveApi(clipContentsObserver);
+    // notesCallback.setLiveApi(clipContentsObserver);
 }
 
 // -* ObservableCallback class *- 
@@ -142,13 +154,13 @@ function ObservableCallback(id) {
     this.name = "<not set>";
     this.skipFirstNotesCallback = true;
     this.skipFirstNameCallback = true;
+    this.updatedInternally = false;
 }
 
 ObservableCallback.prototype.getCallback = function() {
     var self = this;
     return {
         onNameChanged: function(arg) {
-            //debuglogExt("Name changed");
             var name = "";
             if (arg.indexOf("name") < 0) {
                 return;
@@ -158,47 +170,60 @@ ObservableCallback.prototype.getCallback = function() {
             if (name.indexOf("\"") === 0) {
                 name = name.substr(1, name.length - 2);
             }
+            if (self.skipFirstNameCallback === true) {
+                debuglogExt("onNameChanged skipped");
+                self.skipFirstNameCallback = false;
+                return;
+            }
+            debuglogExt("Name changed");
             if (name.length > 0) {
-
                 if (self.name === name) {
                     // clip was probably copied
                     outlet(2, ["onSelectedClipWasCopied", parseInt(self.id, 10), name]);
                 } else {
                     // name of selected clip changed
                     self.name = name;
-                    outlet(2, ["onSelectedClipRenamedOrChanged", parseInt(self.id, 10), name]);
+                    outlet(2, ["onSelectedClipRenamed", parseInt(self.id, 10), name]);
                 }
             }
-            self.skipFirstNameCallback = false;
             if (name.length === 0) {
                 outlet(2, ["onSelectedClipWithoutName", parseInt(self.id, 10), name]);
             }
         },
         onNotesChanged: function(arg) {
-            //debuglogExt("onNotesChanged");
+            if (self.updatedInternally === true) {
+                debuglogExt("onNotesChanged terminated");
+                self.updatedInternally = false;
+                return;
+            }
+            // debuglogExt("onNotesChanged");
             /*
-             typically called twice with this data from ableton:
+             typically called twice with self data from ableton:
              onNotesChanged [id, 112]
              onNotesChanged [notes, bang]
              */
+            if (self.skipFirstNotesCallback === true) {
+                self.skipFirstNotesCallback = false;
+                debuglogExt("onNotesChanged skipped");
+                return;
+            }
             if (arg.indexOf("notes") >= 0) {
-                if (!self.skipFirstNotesCallback) {
-                    outlet(2, ["onSelectedClipRenamedOrChanged", parseInt(self.id, 10)]);
-                }
+                debuglogExt("onNotesChanged actually");
+                outlet(2, ["onSelectedClipNotesChanged", parseInt(self.id, 10)]);
                 self.skipFirstNotesCallback = false;
             }
         }
     };
 };
 
-ObservableCallback.prototype.setLiveApi = function(api) {
+/*ObservableCallback.prototype.setLiveApi = function(api) {
     this.api = api;
-};
+};*/
 
 // -* Internal handlers and M4L API helpers *-
 
 function onClipDataFromServer(args) {
-    debuglog("onClipDataFromServer");
+    debuglogExt("incoming clip data");
     var trackNo = args[0];
     var clipNo = args[1];
     var clipLength = getFloat32FromByteArray(args, 2);
@@ -223,7 +248,9 @@ function onClipDataFromServer(args) {
         liveObject.call('note', pitch, start, duration, velocity, 0 /* not muted */);
         startOffset += 10;
     }
+    notesCallback.updatedInternally = true; // avoid firing on internal updates
     liveObject.call('done');
+    outlet(1, ["resetInternalUpdateState"]);
 }
 
 function getOrCreateClipAtPosition(trackNo, clipNo) {
@@ -307,11 +334,11 @@ function setAndEvaluateClipDataOrFormula(liveObject) {
     var payload = [];
     var trackNo = getTrackNumber(liveObject);
     var clipNo = getClipNumber(liveObject);
-    debuglogExt("clipname", clipName);
+    // debuglogExt("clipname", clipName);
 
     if (containsFormula(clipName)) {
         var formula = extractFormula(clipName);
-        debuglogExt("clipNo", clipNo);
+        // debuglogExt("clipNo", clipNo);
         if (trackNo === false || clipNo === false) {
             post("Unable to get trackNo or clipNo");
             return;
@@ -362,7 +389,7 @@ function getClipDataAsBytes(liveObject, trackNo, clipNo) {
         resultBuffer[currentNoteOffset + 9] = note.velocity;
         currentNoteOffset += SIZE_OF_ONE_NOTE_IN_BYTES;
     }
-    debuglogExt("got clip with id: ", liveObject.id);
+    // debuglogExt("got clip with id: ", liveObject.id);
     return resultBuffer;
 }
 
@@ -580,450 +607,6 @@ function debugPost(val, res) {
     }
     return res;
 }
-
-/*function clipRefToId(clipRef) {
-    var target = resolveClipReference(clipRef);
-    var liveObjectAtClip = getLiveObjectAtClip(target.x, target.y);
-    if (!liveObjectAtClip) return;
-    return liveObjectAtClip.id;
-}*/
-
-/*function getLiveObjectAtClip(trackNo, clipNo) {
-    //debuglog("getting track " + trackNo + " clip " + clipNo);
-    var liveObject = new LiveAPI("live_set tracks " + trackNo);
-
-    if (!liveObject) {
-        debuglogExt('Invalid liveObject, exiting...');
-        return;
-    }
-    if (!isMidiTrack(liveObject)) {
-        debuglogExt('Not a midi track!');
-        return;
-    }
-    liveObject.goto("live_set tracks " + trackNo + " clip_slots " + clipNo);
-
-    if (!hasClip(liveObject)) {
-        debuglogExt("No clip present at track: " + trackNo + 1 + " clip: " + clipNo + 1);
-        return;
-    }
-    liveObject.goto("live_set tracks " + trackNo + " clip_slots " + clipNo + " clip");
-
-    return liveObject;
-}*/
-
-/*
-function setClip(trackNo, clipNo, dataString) {
-    //debuglog("setClip: " + dataString);
-    var data = dataString.split(' ');
-    if (data.length < 3)
-        return;
-    var pathCurrentTrack = "live_set tracks " + trackNo;
-    var pathCurrentClipHolder = pathCurrentTrack + " clip_slots " + clipNo;
-    var pathCurrentClip = pathCurrentClipHolder + " clip";
-    var liveObject = new LiveAPI(pathCurrentTrack);
-    if (!isMidiTrack(liveObject)) {
-        debuglogExt('Not a midi track!');
-    }
-    var clipLength = data[0];
-    var looping = data[1];
-    liveObject.goto(pathCurrentClipHolder);
-    if (!hasClip(liveObject)) {
-        liveObject.call('create_clip', clipLength);
-    }
-    liveObject.goto(pathCurrentClip);
-    liveObject.set('loop_start', '0');
-    liveObject.set('loop_end', clipLength);
-    liveObject.call('select_all_notes');
-    liveObject.call('replace_selected_notes');
-    liveObject.call('notes', (data.length - 2) / 4);
-    for (var c = 2; c < data.length; c += 4) {
-        liveObject.call('note', data[c], data[c + 1], data[c + 2], data[c + 3], 0);
-    }
-    liveObject.call('done');
-    liveObject.set('looping', looping);
-}*/
-
-/*function setClipFromBytes(/!* ... arguments *!/) {
-    //debuglog("setClipFromBytes called");
-    if (arguments.length < 9) {
-        post("Error - expected bigger payload");
-    }
-    var id = getUint16FromByteArray(arguments, 0);
-    var clipLength = getFloat32FromByteArray(arguments, 2);
-    var isLooping = arguments[6];
-    var numNotes = getUint16FromByteArray(arguments, 7);
-    var startOffset = 9;
-
-    var liveObject = new LiveAPI("id " + id);
-    liveObject.set('loop_start', '0');
-    liveObject.set('loop_end', clipLength);
-    liveObject.set('end_marker', clipLength);
-    liveObject.set('looping', isLooping);
-    liveObject.call('select_all_notes');
-    liveObject.call('replace_selected_notes');
-    liveObject.call('notes', numNotes);
-    for (var c = 0; c < numNotes; c++) {
-        var pitch = arguments[startOffset];
-        var start = getNormalizedFloatValue(getFloat32FromByteArray(arguments, startOffset + 1));
-        var duration = getNormalizedFloatValue(getFloat32FromByteArray(arguments, startOffset + 5));
-        var velocity = arguments[startOffset + 9];
-        liveObject.call('note', pitch, start, duration, velocity, 0 /!* not muted *!/);
-        startOffset += 10;
-    }
-    liveObject.call('done');
-}*/
-
-/*function setClipById(id, dummy, dataString) {
-    //debuglog("hello from setClipById");
-    var data = dataString.split(' ');
-    if (data.length < 3)
-        return;
-    var liveObject = new LiveAPI("id " + id);
-    var clipLength = data[0];
-    var looping = data[1];
-    liveObject.set('loop_start', '0');
-    liveObject.set('loop_end', clipLength);
-    liveObject.call('select_all_notes');
-    liveObject.call('replace_selected_notes');
-    liveObject.call('notes', (data.length - 2) / 4);
-    for (var c = 2; c < data.length; c += 4) {
-        liveObject.call('note', data[c], data[c + 1], data[c + 2], data[c + 3], 0);
-    }
-    liveObject.call('done');
-    liveObject.set('looping', looping);
-}*/
-
-/*function setSelectedClip(dummyTrackNo, dummyClipNo, dataString) {
-    //debuglog("setSelectedClip: " + dataString);
-    var data = dataString.split(' ');
-    if (data.length < 3)
-        return;
-    var pathCurrentClipHolder = "live_set view highlighted_clip_slot";
-    var pathCurrentClip = pathCurrentClipHolder + " clip";
-    var liveObject = new LiveAPI("live_set view selected_track");
-    if (!isMidiTrack(liveObject)) {
-        debuglog('Not a midi track!');
-        return;
-    }
-    var clipLength = data[0];
-    var looping = data[1];
-    liveObject.goto(pathCurrentClipHolder);
-    if (!hasClip(liveObject)) {
-        liveObject.call('create_clip', clipLength);
-    }
-    liveObject.goto(pathCurrentClip);
-    liveObject.set('loop_start', '0');
-    liveObject.set('loop_end', clipLength);
-    liveObject.call('select_all_notes');
-    liveObject.call('replace_selected_notes');
-    liveObject.call('notes', (data.length - 2) / 4);
-    for (var c = 2; c < data.length; c += 4) {
-        liveObject.call('note', data[c], data[c + 1], data[c + 2], data[c + 3], 0);
-    }
-    liveObject.call('done');
-    liveObject.set('looping', looping);
-}*/
-
-/*
-function getSelectedClip() {
-    var liveObject = new LiveAPI("live_set view selected_track");
-    var result = "";
-    if (!liveObject) {
-        debuglog('Invalid liveObject, exiting...');
-        return;
-    }
-    //debuglog("has_audio_input", liveObject.get('has_audio_input'));
-    post(liveObject.get('has_audio_input')[0]);
-    if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0) {
-        liveObject.goto("live_set view highlighted_clip_slot");
-        if (hasClip(liveObject)) {
-            liveObject.goto("live_set view highlighted_clip_slot clip");
-            var loopStart = liveObject.get('loop_start');
-            //debuglog("loopstart", loopStart);
-            post(loopStart[0]);
-            var clipLength = getClipLength(liveObject);
-            var looping = liveObject.get('looping');
-            //debuglog("looping", looping);
-            var data = liveObject.call("get_notes", loopStart, 0, clipLength, 128);
-            result += clipLength + " " + looping + " ";
-            for (var i = 2, len = data.length - 1; i < len; i += 6) {
-                if (data[i + 5 /* muted *//*] === 1) {
-                    continue;
-                }
-                result += data[i + 1 /* pitch *//*] + " " + data[i + 2 /* start *//*] + " " + data[i + 3 /* duration *//*] + " " + data[i + 4 /* velocity *//*] + " ";
-            }
-        }
-        outlet(0, ['/mu4l/selectedclip/get', result.slice(0, result.length - 1 /* remove last space *//*)]);
-        return;
-    }
-    outlet(0, ['/mu4l/selectedclip/get', ["!"]]);
-}*/
-
-
-/*
-function processAllClips() {
-    var liveObject = new LiveAPI("live_set"),
-        numScenes = liveObject.get('scenes').length / 2,
-        numTracks = liveObject.get("tracks").length / 2,
-        formulaStartIndex,
-        clipName = "",
-        formulaStopIndex;
-
-    for (var i = 0; i < numTracks; i++) {
-        liveObject.goto("live_set tracks " + i);
-        if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0) {
-            for (var s = 0; s < numScenes; s++) {
-                liveObject.goto("live_set tracks " + i + " clip_slots " + s);
-                if (hasClip(liveObject)) { // todo: ...and if name of clip corresponds to a mutate4l command
-                    liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
-                    clipName = getClipName(liveObject);
-                    if (containsFormula(clipName)) {
-                        var expandedFormula = expandFormulaAsBytes(clipName, liveObject.id);
-                        if (expandedFormula) {
-                            addFormulaToQueue(liveObject.id, clipName, expandedFormula);
-                        } else {
-                            debuglogExt("Unable to expand formula for track " + (i + 1) + " clip " + (s + 1) + " - check syntax");
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-*/
-
-
-
-/*function getMetadataBytes(liveObject, numberOfInlineClips) {
-    var metaDataBytes = new Uint8Array(4 /!* id - 2 bytes, track no - 1 byte, number of inline clips - 1 byte *!/);
-    int16ToBufferAtPos(liveObject.id, metaDataBytes, 0);
-    metaDataBytes[2] = getTrackNumber(liveObject);
-    metaDataBytes[3] = numberOfInlineClips;
-    return [].slice.call(metaDataBytes);
-}*/
-
-
-
-/*
-function formulaToReferredIds(formula) {
-    var clipRefTester = /^([a-z]+\d+)$|^(\*)$/,
-        clipRefsFound = false,
-        clipRefs = [],
-        referredIds = [];
-
-    if (formula.length < 5) return;
-
-    var formulaStartIndex = formula.indexOf("=");
-    var formulaStopIndex = formula.indexOf(";");
-    if (formulaStartIndex == -1) return; // no valid formula
-
-    if (formulaStopIndex >= 0) {
-        formula = formula.substring(formulaStartIndex + 1, formulaStopIndex).toLowerCase();
-    } else {
-        formula = formula.substring(formulaStartIndex + 1).toLowerCase();
-    }
-    
-    var parts = formula.split(" ");
-    for (var i = 0; i < parts.length; i++) { 
-        var result = clipRefTester.test(parts[i]); 
-        if (result) {
-            clipRefsFound = true;
-            clipRefs.push(parts[i]);
-        }
-    }
-
-    for (i = 0; i < clipRefs.length; i++) {
-        var target = resolveClipReference(clipRefs[i]);
-        var liveObjectAtClip = getLiveObjectAtClip(target.x, target.y);
-        referredIds.push(parseInt(liveObjectAtClip.id, 10));
-    }
-    return referredIds;
-}
-
-function expandFormula(formula, ownId) {
-    var clipRefTester = /^([a-z]+\d+)$|^(\*)$/,
-        expandedFormulaParts = [];
-
-    if (formula.length < 5) return;
-
-    var formulaStartIndex = formula.indexOf("=");
-    var formulaStopIndex = formula.indexOf(";");
-    if (formulaStartIndex == -1) return; // no valid formula
-
-    if (formulaStopIndex >= 0) {
-        formula = formula.substring(formulaStartIndex + 1, formulaStopIndex).toLowerCase();
-    } else {
-        formula = formula.substring(formulaStartIndex + 1).toLowerCase();
-    }
-    var parts = formula.split(" ");
-
-    for (var i = 0; i < parts.length; i++) {
-        var part = parts[i];
-        var result = clipRefTester.test(part); 
-        if (result) {
-            var target = resolveClipReference(part);
-            var liveObjectAtClip = getLiveObjectAtClip(target.x, target.y);
-            if (!liveObjectAtClip) {
-                debuglogExt("liveobjectatclip undefined: " + target.x + "," + target.y);
-                return;
-            }
-
-            //debuglog("Getting clipRef " + part);
-            var clipData = getClipData(liveObjectAtClip);
-
-            if (watchedClips[liveObjectAtClip.id] === undefined) {
-//                debuglog("watchedclips at " + liveObjectAtClip.id + " set to " + ownId);
-                watchedClips[liveObjectAtClip.id] = [ownId];
-            } else if (watchedClips[liveObjectAtClip.id].indexOf(ownId) < 0) {
-                watchedClips[liveObjectAtClip.id].push(ownId);
-            }
-            //debuglog("updated watchedClips for id " + liveObjectAtClip.id + ": " + watchedClips[liveObjectAtClip.id]);
-            //debuglog("watchedClips now looks like", watchedClips);
-            var transformedPart = "[" + target.x + "," + target.y + ":" + clipData + "]";
-        } else {
-            transformedPart = part;
-        }
-        expandedFormulaParts.push(transformedPart);
-    }
-    return "{id:" + ownId + ",trackIx:" + getTrackNumber(new LiveAPI("id " + ownId)) + "} " + expandedFormulaParts.join(" ");
-}
-
-function expandFormulaAsBytes(formula, ownId) {
-    var clipRefTester = /^([a-z]+\d+)$|^(\*)$/,
-        i;
-
-    if (formula.length < 5) return;
-
-    var formulaStartIndex = formula.indexOf("=");
-    var formulaStopIndex = formula.indexOf(";");
-    if (formulaStartIndex == -1) return; // no valid formula
-
-    if (formulaStopIndex >= 0) {
-        formula = formula.substring(formulaStartIndex + 1, formulaStopIndex).toLowerCase();
-    } else {
-        formula = formula.substring(formulaStartIndex + 1).toLowerCase();
-    }
-    var parts = formula.split(" "),
-        clipDataBuffer = [],
-        transformedPart,
-        numberOfClips = 0, 
-        y,
-        byteBuffer = [];
-
-    for (i = 0; i < parts.length; i++) {
-        var part = parts[i];
-        var result = clipRefTester.test(part); 
-        if (result) {
-            var target = resolveClipReference(part);
-            var liveObjectAtClip = getLiveObjectAtClip(target.x, target.y);
-            if (!liveObjectAtClip) {
-                debuglog("liveobjectatclip undefined: " + target.x + "," + target.y);
-                return;
-            }
-            if (liveObjectAtClip.id == ownId) {
-                debuglogExt("Recursive reference detected: A formula cannot reference itself.");
-                return;
-            }
-            if (watchedClips[liveObjectAtClip.id] === undefined) {
-                debuglogExt("watchedclips at " + liveObjectAtClip.id + " set to " + ownId);
-                watchedClips[liveObjectAtClip.id] = [ownId];
-            } else if (watchedClips[liveObjectAtClip.id].indexOf(ownId) < 0) {
-                watchedClips[liveObjectAtClip.id].push(ownId);
-            }
-            //debuglog("updated watchedClips for id " + liveObjectAtClip.id + ": " + watchedClips[liveObjectAtClip.id]);
-            //debuglog("Getting clipRef " + part);
-            //debuglog(watchedClips, "watchedClips");
-            var clipData = getClipDataAsBytes(liveObjectAtClip, target.x, target.y);
-            for (var z = 0; z < clipData.length; z++) {
-                clipDataBuffer[clipDataBuffer.length] = clipData[z];
-            }
-            transformedPart = "[<" + part + ">" + numberOfClips + "]" + (i < parts.length - 1 ? " " : "");
-            numberOfClips++;
-        } else {
-            transformedPart = part + (i < parts.length - 1 ? " " : "");
-        }
-        for (y = 0; y < transformedPart.length; y++) {
-//            debuglog("Adding to bytebuffer " + transformedPart[y]);
-            byteBuffer[byteBuffer.length] = transformedPart.charCodeAt(y);
-        }
-    }
-    var currentClipLiveObject = new LiveAPI("id " + ownId);
-    var metaDataBytes = new Uint8Array(4 /* id - 2 bytes, track no - 1 byte, number of inline clips - 1 byte *//*);
-    int16ToBufferAtPos(ownId, metaDataBytes, 0);
-    metaDataBytes[2] = getTrackNumber(currentClipLiveObject);
-//    debuglogExt("getTrackNumber returned " + metaDataBytes[2]);
-//    debuglogExt("get clip number " + getClipNumber(currentClipLiveObject));
-    metaDataBytes[3] = numberOfClips;
-    var metaData = [];
-    for (i = 0; i < metaDataBytes.length; i++) {
-        metaData[i] = metaDataBytes[i];
-    }
-    return metaData.concat(clipDataBuffer).concat(byteBuffer);
-}*/
-
-
-/*function getSelectedClipAsBytes() {
-    var liveObject = new LiveAPI("live_set view selected_track");
-    var result = "";
-    if (!liveObject) {
-        debuglogExt('Invalid liveObject, exiting...');
-        return;
-    }
-    if (liveObject.get('has_audio_input') < 1 && liveObject.get('has_midi_input') > 0) {
-        liveObject.goto("live_set view highlighted_clip_slot");
-        if (hasClip(liveObject)) {
-            liveObject.goto("live_set view highlighted_clip_slot clip");
-            var buffer = getClipDataAsBytes(liveObject);
-        }
-    }
-}
-
-function getStringAsUint8Array(value) {
-    if (value.length === 0) return;
-    var result = new Uint8ClampedArray(value.length);
-    for (var i = 0; i < value.length; i++) {
-        result[i] = value.charCodeAt(i);
-    }
-    return value;
-}*/
-
-
-/*function int32ToBufferAtPos(value, byteBuffer, pos) {
-    var temp = new Uint32Array(1);
-    temp[0] = value;
-    var buffer = new Uint8Array(temp.buffer);
-    for (var i = 0; i < buffer.length; i++) {
-        byteBuffer[pos + i] = buffer[i];
-    }
-}*/
-
-/*
-function resolveClipReference(reference) {
-    var channel = "", clip = "", c = 0;
-
-    channel = reference[c++].toLowerCase();
-    while (c < reference.length && isNumeric(reference[c]))
-        clip += reference[c++];
-
-    return {
-        x: channel.charCodeAt(0) - "a".charCodeAt(0),
-        y: parseInt(clip) - 1
-    };
-}
-*/
-
-/*function isNumeric(c) {
-    return c.length == 1 && c >= '0' && c <= '9';
-}
-
-function isAlpha(c) {
-    return c.length == 1 && (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-}*/
-
-/*function replaceAt(string, index, replace) {
-  return string.substring(0, index) + replace + string.substring(index + 1);
-}*/
-
 
 /*
 
