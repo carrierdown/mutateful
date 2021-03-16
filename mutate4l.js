@@ -85,7 +85,7 @@ function processQueue() {
 // The following handlers are called indirectly, i.e. via deferlow-object in patcher to get around bug in M4L API
 
 function onSelectedClipWithoutName(clipId, maybeName) {
-    debuglogExt("onSelectedClipWithoutName");
+    // debuglogExt("onSelectedClipWithoutName");
     var name = maybeName || "";
     if (name.indexOf("[") === -1 && name.indexOf("]") === -1) {
         var clipSlot = new LiveAPI("id " + clipId);
@@ -102,19 +102,19 @@ function onSelectedClipWasCopied(clipId, maybeName) {
 }
 
 function onSelectedClipRenamed(arg1) {
-    debuglogExt("hello from onSelectedClipRenamed");
+    debuglogExt("onSelectedClipRenamed");
     var selectedClipSlot = new LiveAPI("id " + arg1);
     setAndEvaluateClipDataOrFormula(selectedClipSlot);
 }
 
 function onSelectedClipNotesChanged(arg1) {
-    debuglogExt("hello from onSelectedClipNotesChanged");
+    // debuglogExt("onSelectedClipNotesChanged");
     var selectedClipSlot = new LiveAPI("id " + arg1);
     setAndEvaluateClipDataOrFormula(selectedClipSlot);
 }
 
 function onSelectedClipChanged(args) {
-    debuglogExt("hello from onSelectedClipChanged", args[args.length - 1]);
+    // debuglogExt("onSelectedClipChanged", args[args.length - 1]);
     var id = args[args.length - 1];
     if (id === 0) return; // return on empty clip
     // update watchers
@@ -171,11 +171,11 @@ ObservableCallback.prototype.getCallback = function() {
                 name = name.substr(1, name.length - 2);
             }
             if (self.skipFirstNameCallback === true) {
-                debuglogExt("onNameChanged skipped");
+                // debuglogExt("onNameChanged skipped");
                 self.skipFirstNameCallback = false;
                 return;
             }
-            debuglogExt("Name changed");
+            // debuglogExt("Name changed");
             if (name.length > 0) {
                 if (self.name === name) {
                     // clip was probably copied
@@ -192,7 +192,7 @@ ObservableCallback.prototype.getCallback = function() {
         },
         onNotesChanged: function(arg) {
             if (self.updatedInternally === true) {
-                debuglogExt("onNotesChanged terminated");
+                // debuglogExt("onNotesChanged terminated");
                 self.updatedInternally = false;
                 return;
             }
@@ -204,11 +204,10 @@ ObservableCallback.prototype.getCallback = function() {
              */
             if (self.skipFirstNotesCallback === true) {
                 self.skipFirstNotesCallback = false;
-                debuglogExt("onNotesChanged skipped");
+                // debuglogExt("onNotesChanged skipped");
                 return;
             }
             if (arg.indexOf("notes") >= 0) {
-                debuglogExt("onNotesChanged actually");
                 outlet(2, ["onSelectedClipNotesChanged", parseInt(self.id, 10)]);
                 self.skipFirstNotesCallback = false;
             }
@@ -223,7 +222,7 @@ ObservableCallback.prototype.getCallback = function() {
 // -* Internal handlers and M4L API helpers *-
 
 function onClipDataFromServer(args) {
-    debuglogExt("incoming clip data");
+    // debuglogExt("incoming clip data");
     var trackNo = args[0];
     var clipNo = args[1];
     var clipLength = getFloat32FromByteArray(args, 2);

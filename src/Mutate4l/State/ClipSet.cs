@@ -60,7 +60,7 @@ namespace Mutate4l.State
             }
         }*/
 
-        private void TransformClipReferencesToInlineClips(ClipSlot clip)
+        private void PopulateClipReferences(ClipSlot clip)
         {
             foreach (var referencedClip in clip.Formula.AllReferencedClips)
             {
@@ -77,7 +77,7 @@ namespace Mutate4l.State
                         
             // todo: error handling
                         
-            foreach (var token in flattenedTokenList.Where(t => t.IsClipReference))
+            foreach (var token in flattenedTokenList.Where(t => t.IsClipReference || t.Type == TokenType.InlineClip))
             {
                 token.Clip = clip.Formula.ClipSlotsByClipReference[ClipReference.FromString(token.Value)].Clip;
                 token.Type = TokenType.InlineClip;
@@ -91,7 +91,7 @@ namespace Mutate4l.State
 
             foreach (var clip in clipsToProcess)
             {
-                TransformClipReferencesToInlineClips(clip);
+                PopulateClipReferences(clip);
                         
                 var processedCommand = ClipProcessor.ProcessChainedCommand(new ChainedCommand(
                     clip.Formula.Commands, 
