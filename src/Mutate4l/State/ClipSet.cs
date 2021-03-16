@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Mutate4l.Cli;
 using Mutate4l.Core;
 
 namespace Mutate4l.State
@@ -59,7 +60,7 @@ namespace Mutate4l.State
             }
         }*/
 
-        private void PopulateClipReferences(ClipSlot clip)
+        private void TransformClipReferencesToInlineClips(ClipSlot clip)
         {
             foreach (var referencedClip in clip.Formula.AllReferencedClips)
             {
@@ -79,17 +80,18 @@ namespace Mutate4l.State
             foreach (var token in flattenedTokenList.Where(t => t.IsClipReference))
             {
                 token.Clip = clip.Formula.ClipSlotsByClipReference[ClipReference.FromString(token.Value)].Clip;
+                token.Type = TokenType.InlineClip;
             }
         }
         
-        public (List<ClipReference> successfulClips, List<ClipReference> failedClips) ProcessClips(IEnumerable<ClipSlot> clipsToProcess)
+        public (List<ClipReference> successfulClips, List<string> errorMessages) ProcessClips(IEnumerable<ClipSlot> clipsToProcess)
         {
             var successfulClips = new List<ClipReference>();
-            var failedClips = new List<ClipReference>();
+            var errorMessages = new List<string>();
 
             foreach (var clip in clipsToProcess)
             {
-                PopulateClipReferences(clip);
+                TransformClipReferencesToInlineClips(clip);
                         
                 var processedCommand = ClipProcessor.ProcessChainedCommand(new ChainedCommand(
                     clip.Formula.Commands, 
@@ -105,10 +107,10 @@ namespace Mutate4l.State
                 }
                 else
                 {
-                    failedClips.Add(clip.ClipReference);
+                    errorMessages.Add($"Error while processing clip at {clip.ClipReference}: {processedCommand.ErrorMessage}");
                 } 
             }
-            return (successfulClips, failedClips);
+            return (successfulClips, errorMessages);
         }
 
         private IEnumerable<ClipReference> GetAllReferencedClips()
@@ -192,7 +194,7 @@ namespace Mutate4l.State
             // 1. Find all clips (if any) that depend on this clip
             // 2. If any are found, add them to a list, then repeat from step 1
             // 3. Once no more clips are produced from this process, we have identified all dependencies from our starting clip and we return them.
-            // Note that this list might not be correct sorted yet, therefore we call GetClipReferencesInProcessableOrder afterwards to sort them properly.
+            // Note that this list might not be correctly sorted yet, therefore we call GetClipReferencesInProcessableOrder afterwards to sort them properly.
             do {
                 if (dependentClips.Count > 0)
                 {

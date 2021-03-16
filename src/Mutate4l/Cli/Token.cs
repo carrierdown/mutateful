@@ -6,7 +6,7 @@ namespace Mutate4l.Cli
 {
     public class Token
     {
-        public TokenType Type { get; }
+        public TokenType Type { get; set; }
         public string Value { get; }
         public int Position { get; }
         public Clip Clip { get; set; }

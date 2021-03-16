@@ -51,15 +51,20 @@ namespace Mutate4l.IO
             Console.WriteLine($"Clips to process: {string.Join(", ", orderedClipRefs.Result.Select(x => x.ToString()))}");
 
             var clipsToProcess = clipSet.GetClipSlotsFromClipReferences(orderedClipRefs.Result);
-            var (successfulClips, failedClips) = clipSet.ProcessClips(clipsToProcess);
-                    
-            if (failedClips.Count > 0)
-            {
-                Console.WriteLine($"Errors encountered while processing formulas at locations {string.Join(", ", failedClips)}");
-            }
+            var (successfulClips, errors) = clipSet.ProcessClips(clipsToProcess);
+            PrintErrors(errors);        
+            
             foreach (var clipRef in successfulClips)
             {
                 writer.WriteAsync(new InternalCommand(SetClipDataOnClient, clipSet[clipRef]));
+            }
+        }
+
+        private static void PrintErrors(List<string> errorMessages)
+        {
+            foreach (var errorMessage in errorMessages)
+            {
+                Console.WriteLine(errorMessage);
             }
         }
 
@@ -85,12 +90,9 @@ namespace Mutate4l.IO
                 Console.WriteLine($"Found sorted: {string.Join(' ', orderedClipReferences.Result.Select(x => x.ToString()))}");
                 
                 var clipsToProcess = clipSet.GetClipSlotsFromClipReferences(orderedClipReferences.Result);
-                var (successfulClips, failedClips) = clipSet.ProcessClips(clipsToProcess);
-                    
-                if (failedClips.Count > 0)
-                {
-                    Console.WriteLine($"Errors encountered while processing formulas at locations {string.Join(", ", failedClips)}");
-                }
+                var (successfulClips, errors) = clipSet.ProcessClips(clipsToProcess);
+                PrintErrors(errors);
+
                 foreach (var clipRef in successfulClips)
                 {
                     writer.WriteAsync(new InternalCommand(SetClipDataOnClient, clipSet[clipRef]));
@@ -110,7 +112,9 @@ namespace Mutate4l.IO
                 var clipRef = new ClipReference(trackNo, clipNo);
                 var clipSlot = new ClipSlot(formula, new Clip(clipRef), parsedFormula.Result);
                 clipSet[clipSlot.ClipReference] = clipSlot;
-                var (successfulClips, failedClips) = clipSet.ProcessClips(new [] {clipSlot});
+                var (successfulClips, errors) = clipSet.ProcessClips(new [] {clipSlot});
+                PrintErrors(errors);
+                
                 foreach (var clip in successfulClips)
                 {
                     writer.WriteAsync(new InternalCommand(SetClipDataOnClient, clipSet[clip]));
