@@ -42,7 +42,7 @@ namespace Mutate4l.Commands
 
                 foreach (var item in processedClip.Notes)
                 {
-                    item.Velocity = System.Math.Min(FullMidiVelocityRange, System.Math.Abs((int)System.Math.Floor(item.Velocity * options.Strength)));
+                    item.Velocity = System.Math.Min(FullMidiVelocityRange, System.Math.Abs((int)System.Math.Floor(item.Velocity * (float)options.Strength)));
                 }
                 processedClips[i++] = processedClip;
             }

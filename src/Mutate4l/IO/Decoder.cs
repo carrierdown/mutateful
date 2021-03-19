@@ -15,6 +15,8 @@ namespace Mutate4l.IO
         public const byte TypedDataFirstByte = 127;
         public const byte TypedDataSecondByte = 126;
         public const byte TypedDataThirdByte = 125;
+        public const byte TypedDataThirdByteLive11Mode = 128;
+        public const int SizeOfOneNoteInBytes = 25;
 
         public const byte StringDataSignifier = 124;
         public const byte SetClipDataOnServerSignifier = 255;
@@ -30,7 +32,7 @@ namespace Mutate4l.IO
 
         public static bool IsTypedCommand(byte[] result)
         {
-            return result.Length >= 4 && result[0] == TypedDataFirstByte && result[1] == TypedDataSecondByte && result[2] == TypedDataThirdByte;
+            return result.Length >= 4 && result[0] == TypedDataFirstByte && result[1] == TypedDataSecondByte && (result[2] == TypedDataThirdByte || result[2] == TypedDataThirdByteLive11Mode);
         }
 
         public static InternalCommandType GetCommandType(byte dataSignifier)
@@ -109,6 +111,35 @@ namespace Mutate4l.IO
                     data[offset += 4])
                 );
                 offset++;
+            }
+            return clip;
+        }
+        
+        public static Clip GetSingleLive11Clip(byte[] data)
+        {
+            var offset = 0;
+            var clipReference = new ClipReference(data[offset], data[offset += 1]);
+            decimal length = (decimal)BitConverter.ToSingle(data, offset += 1);
+            bool isLooping = data[offset += 4] == 1;
+            var clip = new Clip(length, isLooping)
+            {
+                ClipReference = clipReference
+            };
+            ushort numNotes = BitConverter.ToUInt16(data, offset += 1);
+            offset += 2;
+            
+            for (var i = 0; i < numNotes; i++)
+            {
+                clip.Notes.Add(new NoteEvent(
+                    pitch: data[offset],
+                    start: (decimal)BitConverter.ToSingle(data, offset + 1),
+                    duration: (decimal)BitConverter.ToSingle(data, offset + 5), 
+                    velocity: BitConverter.ToSingle(data, offset + 9), 
+                    probability: BitConverter.ToSingle(data, offset + 13), 
+                    velocityDeviation: BitConverter.ToSingle(data, offset + 17),
+                    releaseVelocity: BitConverter.ToSingle(data, offset + 21)
+                ));
+                offset += SizeOfOneNoteInBytes;
             }
             return clip;
         }

@@ -71,7 +71,7 @@ namespace Mutate4l.Utility
         {
             var result = new List<byte>(2 + 4 + 1 + 2 + (10 * clip.Notes.Count));
             result.AddRange(BitConverter.GetBytes(id));
-            result.AddRange(BitConverter.GetBytes((Single)clip.Length));
+            result.AddRange(BitConverter.GetBytes((float)clip.Length));
             result.Add((byte)(clip.IsLooping ? 1 : 0));
             result.AddRange(BitConverter.GetBytes((ushort)clip.Notes.Count));
 
@@ -79,8 +79,8 @@ namespace Mutate4l.Utility
             {
                 if (note.Velocity == 0) continue;
                 result.Add((byte)note.Pitch);
-                result.AddRange(BitConverter.GetBytes((Single)note.Start));
-                result.AddRange(BitConverter.GetBytes((Single)note.Duration));
+                result.AddRange(BitConverter.GetBytes((float)note.Start));
+                result.AddRange(BitConverter.GetBytes((float)note.Duration));
                 result.Add((byte)note.Velocity);
             }
             return result;

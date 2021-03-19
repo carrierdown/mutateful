@@ -34,7 +34,12 @@ namespace Mutate4l.IO
 
         public static void SetClipDataOnServer(byte[] data, ClipSet clipSet)
         {
-            var clip = Decoder.GetSingleClip(data[4..]);
+            Clip clip;
+            if (data[2] == Decoder.TypedDataThirdByteLive11Mode)
+                clip = Decoder.GetSingleLive11Clip(data[4..]);
+            else
+                clip = Decoder.GetSingleClip(data[4..]);
+
             Console.WriteLine($"{clip.ClipReference.Track}, {clip.ClipReference.Clip} Incoming clip data");
             if (clip != Clip.Empty)
             {
@@ -70,9 +75,14 @@ namespace Mutate4l.IO
 
         public static void SetAndEvaluateClipDataOnServer(byte[] data, ClipSet clipSet, ChannelWriter<InternalCommand> writer)
         {
-            var clipToEvaluate = Decoder.GetSingleClip(data[4..]);
-            Console.WriteLine(
-                $"{clipToEvaluate.ClipReference.Track}, {clipToEvaluate.ClipReference.Clip} Incoming clip data to evaluate");
+            Clip clipToEvaluate;
+            if (data[2] == Decoder.TypedDataThirdByteLive11Mode)
+                clipToEvaluate = Decoder.GetSingleLive11Clip(data[4..]);
+            else
+                clipToEvaluate = Decoder.GetSingleClip(data[4..]);
+
+            Console.WriteLine($"{clipToEvaluate.ClipReference.Track}, {clipToEvaluate.ClipReference.Clip} Incoming clip data to evaluate");
+
             if (clipToEvaluate != Clip.Empty)
             {
                 var clipSlot = new ClipSlot("", clipToEvaluate, Formula.Empty);

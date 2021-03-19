@@ -112,11 +112,11 @@ namespace Mutate4l.Commands
             return new ProcessResultArray<Clip>(resultSequences);
         }
 
-        private static (int controlMin, int controlMax, int targetRange) GetControlValuesFromVelocity(RatchetOptions options, Clip controlSequence)
+        private static (float controlMin, float controlMax, float targetRange) GetControlValuesFromVelocity(RatchetOptions options, Clip controlSequence)
         {
-            int controlMin;
-            int controlMax;
-            int targetRange;
+            float controlMin;
+            float controlMax;
+            float targetRange;
             if (options.AutoScale)
             {
                 controlMin = controlSequence.Notes.Select(x => x.Velocity).Min();
@@ -183,10 +183,10 @@ namespace Mutate4l.Commands
 //                }
                 targetNotes.ForEach(note =>
                 {
-                    var ratchetCount = mode == RatchetMode.Pitch ? 
+                    int ratchetCount = mode == RatchetMode.Pitch ? 
                         controlNote.Pitch : 
-                        controlNote.Velocity;
-                    AddRatchets(result, note, ratchetCount, scaleWithVelocity, curvePoints, note.Velocity / 127m);
+                        (int)controlNote.Velocity;
+                    AddRatchets(result, note, ratchetCount, scaleWithVelocity, curvePoints, (decimal)note.Velocity / 127m);
                 });
             }
 

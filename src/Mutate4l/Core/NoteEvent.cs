@@ -6,7 +6,7 @@ namespace Mutate4l.Core
     public class NoteEvent : IComparable<NoteEvent>, IEquatable<NoteEvent>
     {
         private int PitchField;
-        private int VelocityField;
+        private float VelocityField;
         private decimal StartField;
 
         public int Pitch
@@ -23,9 +23,13 @@ namespace Mutate4l.Core
         }
 
         public decimal Duration { get; set; }
+        public float Probability { get; set; } = 1;
+        public float VelocityDeviation { get; set; }
+        public float ReleaseVelocity { get; set; } = 64;
 
-        public int Velocity { 
-            get => VelocityField & 0x7F;
+        public float Velocity
+        {
+            get => Math.Clamp(VelocityField, 0f, 127f);
             set => VelocityField = value;
         }
 
@@ -52,13 +56,19 @@ namespace Mutate4l.Core
 
         public NoteEvent Parent { get; set; }
 
-        public NoteEvent(int pitch, decimal start, decimal duration, int velocity)
+        public NoteEvent(int pitch, decimal start, decimal duration, float velocity, float probability,
+            float velocityDeviation, float releaseVelocity)
         {
             Pitch = pitch;
             Start = start;
             Duration = duration;
             Velocity = velocity;
+            Probability = probability;
+            VelocityDeviation = velocityDeviation;
+            ReleaseVelocity = releaseVelocity;
         }
+
+        public NoteEvent(int pitch, decimal start, decimal duration, float velocity) : this(pitch, start, duration, velocity, 1, 0, 64) {}
 
         public NoteEvent(NoteEvent note)
         {
@@ -66,15 +76,13 @@ namespace Mutate4l.Core
             Start = note.Start;
             Duration = note.Duration;
             Velocity = note.Velocity;
-            if (note.Children != null)
+            if (note.Children == null) return;
+            var children = new List<NoteEvent>(note.Children.Count);
+            foreach (var childNote in note.Children)
             {
-                var children = new List<NoteEvent>(note.Children.Count);
-                foreach (var childNote in note.Children)
-                {
-                    children.Add(new NoteEvent(childNote));
-                }
-                Children = children;
+                children.Add(new NoteEvent(childNote));
             }
+            Children = children;
         }
 
         public int CompareTo(NoteEvent b)
