@@ -12,7 +12,8 @@ var messageQueue = [];
 
 var typedDataFirstByte = 127;
 var typedDataSecondByte = 126;
-var typedDataThirdByte = 128; // 128 instead of 125 signifies that the data sent is in Live 11 format
+var typedDataThirdByte = 125;
+var typedDataThirdByteL11 = 128;
 var stringDataSignifier = 124;
 var setClipDataSignifier = 255;
 var setFormulaSignifier = 254;
@@ -22,11 +23,11 @@ var setAndEvaluateFormulaSignifier = 251;
 
 var stringMessageHeader = [0 /* dummy id which is removed prior to sending, only used for duplicate removal with clip ids for formulas and clip data */, 
                             typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, stringDataSignifier];
-var setClipDataHeader = [0, typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, setClipDataSignifier];
+var setClipDataHeader = [0, typedDataFirstByte, typedDataSecondByte, typedDataThirdByteL11, setClipDataSignifier];
 var setFormulaHeader = [0, typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, setFormulaSignifier];
-var evaluateFormulasHeader = [0, typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, evaluateFormulasSignifier];
-var setAndEvaluateClipDataHeader = [0, typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, setAndEvaluateClipDataSignifier];
-var setAndEvaluateFormulaHeader = [0, typedDataFirstByte, typedDataSecondByte, typedDataThirdByte, setAndEvaluateFormulaSignifier];
+var evaluateFormulasHeader = [0, typedDataFirstByte, typedDataSecondByte, typedDataThirdByteL11, evaluateFormulasSignifier];
+var setAndEvaluateClipDataHeader = [0, typedDataFirstByte, typedDataSecondByte, typedDataThirdByteL11, setAndEvaluateClipDataSignifier];
+var setAndEvaluateFormulaHeader = [0, typedDataFirstByte, typedDataSecondByte, typedDataThirdByteL11, setAndEvaluateFormulaSignifier];
 
 var SIZE_OF_ONE_NOTE_IN_BYTES = 1 /* pitch */ + 4 /* start */ + 4 /* duration */ + 4 /* velocity */ + 4 /* probability */ + 4 /* velocity_deviation */ + 4 /* release velocity */;
 var SIZE_OF_HEADER_IN_BYTES = 1 /* track number */ + 1 /* clip number */ + 4 /* clipLength */ + 1 /* looping */ + 2 /* numNotes */;
@@ -40,7 +41,7 @@ function onInit() {
 }
 
 function handleIncomingData(/* ... arguments */) {
-    debuglog("incoming data");
+    // debuglogExt("incoming data");
     var args = [].slice.call(arguments);
     if (args.length < 13) {
         post("Error - expected bigger payload");
@@ -221,15 +222,14 @@ ObservableCallback.prototype.getCallback = function() {
 
 // -* Internal handlers and M4L API helpers *-
 
-function onClipDataFromServer(args) {
+function onClipDataFromServer(data) {
     // debuglogExt("incoming clip data");
-    var trackNo = args[0];
-    var clipNo = args[1];
-    var clipLength = getFloat32FromByteArray(args, 2);
-    var isLooping = args[6];
-    var numNotes = getUint16FromByteArray(args, 7);
+    var trackNo = data[0];
+    var clipNo = data[1];
+    var clipLength = getFloat32FromByteArray(data, 2);
+    var isLooping = data[6];
+    var numNotes = getUint16FromByteArray(data, 7);
     var startOffset = 9;
-
     var liveObject = getOrCreateClipAtPosition(trackNo, clipNo);
 
     liveObject.set('loop_start', 0);
@@ -239,18 +239,28 @@ function onClipDataFromServer(args) {
     liveObject.call('remove_notes_extended', 0, 128, 0, clipLength);
     
     // todo: fill dict with note objects - convert to json then send with add_new_notes function
+    var noteDict = {notes:[]};
     
-    liveObject.call('notes', numNotes);
+    // liveObject.call('notes', numNotes);
     for (var c = 0; c < numNotes; c++) {
-        var pitch = args[startOffset];
-        var start = getNormalizedFloatValue(getFloat32FromByteArray(args, startOffset + 1));
-        var duration = getNormalizedFloatValue(getFloat32FromByteArray(args, startOffset + 5));
-        var velocity = args[startOffset + 9];
-        liveObject.call('note', pitch, start, duration, velocity, 0 /* not muted */);
-        startOffset += 10;
+        var pitch = data[startOffset];
+        var start = getFloat32FromByteArray(data, startOffset + 1);
+        var duration = getFloat32FromByteArray(data, startOffset + 5);
+        var velocity = getFloat32FromByteArray(data, startOffset + 9);
+        var probability = getFloat32FromByteArray(data, startOffset + 13);
+        var velocityDeviation = getFloat32FromByteArray(data, startOffset + 17);
+        var releaseVelocity = getFloat32FromByteArray(data, startOffset + 21);
+        
+        // liveObject.call('note', pitch, start, duration, velocity, 0 /* not muted */);
+        var note = {
+            pitch: pitch, start_time: start, duration: duration, velocity: velocity, probability: probability, 
+            velocity_deviation: velocityDeviation, release_velocity: releaseVelocity
+        };
+        noteDict.notes.push(note);
+        startOffset += SIZE_OF_ONE_NOTE_IN_BYTES;
     }
-    notesCallback.updatedInternally = true; // avoid firing on internal updates
-    liveObject.call('done');
+    notesCallback.updatedInternally = true; // avoid firing callback on internal updates
+    liveObject.call('add_new_notes', JSON.stringify(noteDict));
     outlet(1, ["resetInternalUpdateState"]);
 }
 

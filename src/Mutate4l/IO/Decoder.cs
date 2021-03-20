@@ -16,7 +16,8 @@ namespace Mutate4l.IO
         public const byte TypedDataSecondByte = 126;
         public const byte TypedDataThirdByte = 125;
         public const byte TypedDataThirdByteLive11Mode = 128;
-        public const int SizeOfOneNoteInBytes = 25;
+        public const int SizeOfOneNoteInBytes = 10;
+        public const int SizeOfOneNoteInBytesLive11 = 25;
 
         public const byte StringDataSignifier = 124;
         public const byte SetClipDataOnServerSignifier = 255;
@@ -77,7 +78,7 @@ namespace Mutate4l.IO
                     CommandHandler.SetClipDataOnServer(data, clipSet);
                     break;
                 case EvaluateFormulas:
-                    CommandHandler.EvaluateFormulas(clipSet, writer);
+                    CommandHandler.EvaluateFormulas(data, clipSet, writer);
                     break;
                 case SetAndEvaluateClipDataOnServer:
                     CommandHandler.SetAndEvaluateClipDataOnServer(data, clipSet, writer);

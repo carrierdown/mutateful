@@ -68,9 +68,11 @@ namespace Mutate4l.IO
                 switch (internalCommand.Type)
                 {
                     case InternalCommandType.SetClipDataOnClient:
-                        // new logic for updating clip data
+                    case InternalCommandType.SetClipDataOnClientLive11:
                         Console.WriteLine($"Got clip at [{internalCommand.ClipSlot.ClipReference}] - passing along to client(s)...");
-                        var clipData = IOUtilities.GetClipAsBytesV2(internalCommand.ClipSlot.Clip).ToArray();
+                        var clipData = internalCommand.Type == InternalCommandType.SetClipDataOnClient ? 
+                            IOUtilities.GetClipAsBytesV2(internalCommand.ClipSlot.Clip).ToArray() : 
+                            IOUtilities.GetClipAsBytesLive11(internalCommand.ClipSlot.Clip).ToArray();
                         try
                         {
                             await udpClient.SendAsync(clipData, clipData.Length, "127.0.0.1", 8023);
@@ -79,7 +81,7 @@ namespace Mutate4l.IO
                         {
                             Console.WriteLine("Exception occurred while sending UDP data");
                         }
-                        break;
+                        break;                    
                 }
                 await Task.Delay(UdpSendDelay);
             }

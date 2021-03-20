@@ -48,9 +48,11 @@ namespace Mutate4l.IO
             }
         }
 
-        public static void EvaluateFormulas(ClipSet clipSet, ChannelWriter<InternalCommand> writer)
+        public static void EvaluateFormulas(byte[] data, ClipSet clipSet, ChannelWriter<InternalCommand> writer)
         {
             if (!clipSet.AllReferencedClipsValid()) return;
+            var isLive11 = data[2] == Decoder.TypedDataThirdByteLive11Mode;
+
             var orderedClipRefs = clipSet.GetClipReferencesInProcessableOrder();
             if (!orderedClipRefs.Success) return;
             Console.WriteLine($"Clips to process: {string.Join(", ", orderedClipRefs.Result.Select(x => x.ToString()))}");
@@ -61,7 +63,7 @@ namespace Mutate4l.IO
             
             foreach (var clipRef in successfulClips)
             {
-                writer.WriteAsync(new InternalCommand(SetClipDataOnClient, clipSet[clipRef]));
+                writer.WriteAsync(new InternalCommand(isLive11 ? SetClipDataOnClientLive11 : SetClipDataOnClient, clipSet[clipRef]));
             }
         }
 
@@ -76,7 +78,8 @@ namespace Mutate4l.IO
         public static void SetAndEvaluateClipDataOnServer(byte[] data, ClipSet clipSet, ChannelWriter<InternalCommand> writer)
         {
             Clip clipToEvaluate;
-            if (data[2] == Decoder.TypedDataThirdByteLive11Mode)
+            var isLive11 = data[2] == Decoder.TypedDataThirdByteLive11Mode;
+            if (isLive11)
                 clipToEvaluate = Decoder.GetSingleLive11Clip(data[4..]);
             else
                 clipToEvaluate = Decoder.GetSingleClip(data[4..]);
@@ -105,13 +108,14 @@ namespace Mutate4l.IO
 
                 foreach (var clipRef in successfulClips)
                 {
-                    writer.WriteAsync(new InternalCommand(SetClipDataOnClient, clipSet[clipRef]));
+                    writer.WriteAsync(new InternalCommand(isLive11 ? SetClipDataOnClientLive11 : SetClipDataOnClient, clipSet[clipRef]));
                 }
             }
         }        
         
         public static void SetAndEvaluateFormulaOnServer(byte[] data, ClipSet clipSet, ChannelWriter<InternalCommand> writer)
         {
+            var isLive11 = data[2] == Decoder.TypedDataThirdByteLive11Mode;
             var (trackNo, clipNo, formula) = Decoder.GetFormula(data[4..]);
             Console.WriteLine($"{trackNo}, {clipNo} Incoming formula to evaluate");
             
@@ -127,7 +131,7 @@ namespace Mutate4l.IO
                 
                 foreach (var clip in successfulClips)
                 {
-                    writer.WriteAsync(new InternalCommand(SetClipDataOnClient, clipSet[clip]));
+                    writer.WriteAsync(new InternalCommand(isLive11 ? SetClipDataOnClientLive11 : SetClipDataOnClient, clipSet[clip]));
                 }
             }
         }

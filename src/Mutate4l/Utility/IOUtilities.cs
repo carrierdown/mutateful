@@ -114,11 +114,11 @@ namespace Mutate4l.Utility
         public static List<byte> GetClipAsBytesV2(Clip clip)
         {
             // todo: If supporting multiple clients, we need to also send formula (if specified) when sending clip data
-            var result = new List<byte>(4 + 1 + 1 + 4 + 1 + 2 + (10 * clip.Notes.Count));
+            var result = new List<byte>(4 + 1 + 1 + 4 + 1 + 2 + (Decoder.SizeOfOneNoteInBytes * clip.Notes.Count));
             result.AddRange(SetClipDataHeader);
             result.Add((byte)clip.ClipReference.Track);
             result.Add((byte)clip.ClipReference.Clip);
-            result.AddRange(BitConverter.GetBytes((Single)clip.Length));
+            result.AddRange(BitConverter.GetBytes((float)clip.Length));
             result.Add(clip.IsLooping ? 1 : 0);
             result.AddRange(BitConverter.GetBytes((ushort)clip.Notes.Count));
 
@@ -126,9 +126,33 @@ namespace Mutate4l.Utility
             {
                 if (note.Velocity == 0) continue;
                 result.Add((byte)note.Pitch);
-                result.AddRange(BitConverter.GetBytes((Single)note.Start));
-                result.AddRange(BitConverter.GetBytes((Single)note.Duration));
+                result.AddRange(BitConverter.GetBytes((float)note.Start));
+                result.AddRange(BitConverter.GetBytes((float)note.Duration));
                 result.Add((byte)note.Velocity);
+            }
+            return result;
+        }
+        
+        public static List<byte> GetClipAsBytesLive11(Clip clip)
+        {
+            var result = new List<byte>(4 + 1 + 1 + 4 + 1 + 2 + (Decoder.SizeOfOneNoteInBytesLive11 * clip.Notes.Count));
+            result.AddRange(SetClipDataHeader);
+            result.Add((byte)clip.ClipReference.Track);
+            result.Add((byte)clip.ClipReference.Clip);
+            result.AddRange(BitConverter.GetBytes((float)clip.Length));
+            result.Add(clip.IsLooping ? 1 : 0);
+            result.AddRange(BitConverter.GetBytes((ushort)clip.Notes.Count));
+
+            foreach (var note in clip.Notes)
+            {
+                if (note.Velocity == 0) continue;
+                result.Add((byte)note.Pitch);
+                result.AddRange(BitConverter.GetBytes((float)note.Start));
+                result.AddRange(BitConverter.GetBytes((float)note.Duration));
+                result.AddRange(BitConverter.GetBytes(note.Velocity));
+                result.AddRange(BitConverter.GetBytes(note.Probability));
+                result.AddRange(BitConverter.GetBytes(note.VelocityDeviation));
+                result.AddRange(BitConverter.GetBytes(note.ReleaseVelocity));
             }
             return result;
         }

@@ -14,6 +14,7 @@ namespace Mutate4l.State
         EvaluateFormulas, // trigger evaluation of one or more clipslots - arguments are a list of clipslot coordinates
         SetFormulaOnClient,
         SetClipDataOnClient,
+        SetClipDataOnClientLive11
     }
     
     public class InternalCommand
