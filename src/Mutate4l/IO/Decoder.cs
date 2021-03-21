@@ -140,7 +140,7 @@ namespace Mutate4l.IO
                     velocityDeviation: BitConverter.ToSingle(data, offset + 17),
                     releaseVelocity: BitConverter.ToSingle(data, offset + 21)
                 ));
-                offset += SizeOfOneNoteInBytes;
+                offset += SizeOfOneNoteInBytesLive11;
             }
             return clip;
         }

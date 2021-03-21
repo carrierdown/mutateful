@@ -79,14 +79,18 @@ function processQueue() {
     if (messageQueue.length === 0) return;
     var dataToSend = messageQueue[0];
     dataToSend.shift(); // remove first item of data, since this is used only for duplicate removal in addFormulaToQueue
-    outlet(0, dataToSend);
+    if (dataToSend[0] === 255 && dataToSend[1] === 255 && dataToSend[2] === 255 && dataToSend[3] === 255) {
+        notesCallback.updatedInternally = false;
+    } else {
+        outlet(0, dataToSend);
+    }
     messageQueue.shift();
 }
 
 // The following handlers are called indirectly, i.e. via deferlow-object in patcher to get around bug in M4L API
 
 function onSelectedClipWithoutName(clipId, maybeName) {
-    // debuglogExt("onSelectedClipWithoutName");
+    debuglogExt("onSelectedClipWithoutName");
     var name = maybeName || "";
     if (name.indexOf("[") === -1 && name.indexOf("]") === -1) {
         var clipSlot = new LiveAPI("id " + clipId);
@@ -109,7 +113,7 @@ function onSelectedClipRenamed(arg1) {
 }
 
 function onSelectedClipNotesChanged(arg1) {
-    // debuglogExt("onSelectedClipNotesChanged");
+    debuglogExt("onSelectedClipNotesChanged");
     var selectedClipSlot = new LiveAPI("id " + arg1);
     setAndEvaluateClipDataOrFormula(selectedClipSlot);
 }
@@ -123,7 +127,9 @@ function onSelectedClipChanged(args) {
 }
 
 function resetInternalUpdateState() {
-    notesCallback.updatedInternally = false;
+    notesCallback.skipFirstNotesCallback = true;
+    clipContentsObserver.property = "notes";
+    // notesCallback.updatedInternally = false;
 }
 
 function updateObserversOnClipChange(rawId) {
@@ -156,12 +162,14 @@ function ObservableCallback(id) {
     this.skipFirstNotesCallback = true;
     this.skipFirstNameCallback = true;
     this.updatedInternally = false;
+    this.nameUpdatedInternally = false;
 }
 
 ObservableCallback.prototype.getCallback = function() {
     var self = this;
     return {
         onNameChanged: function(arg) {
+            debuglogExt("onNameChanged");
             var name = "";
             if (arg.indexOf("name") < 0) {
                 return;
@@ -172,11 +180,18 @@ ObservableCallback.prototype.getCallback = function() {
                 name = name.substr(1, name.length - 2);
             }
             if (self.skipFirstNameCallback === true) {
+                if (name.length === 0) {
+                    outlet(2, ["onSelectedClipWithoutName", parseInt(self.id, 10), name]);
+                }
                 // debuglogExt("onNameChanged skipped");
                 self.skipFirstNameCallback = false;
                 return;
             }
             // debuglogExt("Name changed");
+            if (self.nameUpdatedInternally) {
+                self.nameUpdatedInternally = false;
+                return;
+            }
             if (name.length > 0) {
                 if (self.name === name) {
                     // clip was probably copied
@@ -187,14 +202,12 @@ ObservableCallback.prototype.getCallback = function() {
                     outlet(2, ["onSelectedClipRenamed", parseInt(self.id, 10), name]);
                 }
             }
-            if (name.length === 0) {
-                outlet(2, ["onSelectedClipWithoutName", parseInt(self.id, 10), name]);
-            }
+
         },
         onNotesChanged: function(arg) {
             if (self.updatedInternally === true) {
-                // debuglogExt("onNotesChanged terminated");
-                self.updatedInternally = false;
+                debuglogExt("onNotesChanged terminated");
+                // self.updatedInternally = false;
                 return;
             }
             // debuglogExt("onNotesChanged");
@@ -205,12 +218,11 @@ ObservableCallback.prototype.getCallback = function() {
              */
             if (self.skipFirstNotesCallback === true) {
                 self.skipFirstNotesCallback = false;
-                // debuglogExt("onNotesChanged skipped");
+                debuglogExt("onNotesChanged skipped");
                 return;
             }
             if (arg.indexOf("notes") >= 0) {
                 outlet(2, ["onSelectedClipNotesChanged", parseInt(self.id, 10)]);
-                self.skipFirstNotesCallback = false;
             }
         }
     };
@@ -261,7 +273,10 @@ function onClipDataFromServer(data) {
     }
     notesCallback.updatedInternally = true; // avoid firing callback on internal updates
     liveObject.call('add_new_notes', JSON.stringify(noteDict));
-    outlet(1, ["resetInternalUpdateState"]);
+    messageQueue.push([255,255,255,255,255]); // since L11 is even more trigger happy with our callbacks, it's no longer 
+    // sufficient to set a flag which is then reset afterwards. Instead we need to wait a certain amount of time (a message cycle 
+    // in this case), before clearing the flag. This is handled by issuing a special message to the top of our messageQueue, which 
+    // processQueue understands as "reset updatedInternally flag".
 }
 
 function getOrCreateClipAtPosition(trackNo, clipNo) {
@@ -298,6 +313,7 @@ function enumerateClip(trackNo, clipNo, liveObject) {
     } else {
         newName = "[" + clipRefString + "] " + existingName;
     }
+    nameCallback.nameUpdatedInternally = true;
     liveObject.set("name",  newName);
 }
 

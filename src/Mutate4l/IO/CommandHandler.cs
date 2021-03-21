@@ -129,6 +129,7 @@ namespace Mutate4l.IO
                 var (successfulClips, errors) = clipSet.ProcessClips(new [] {clipSlot});
                 PrintErrors(errors);
                 
+                // velocity = 0 her... finn ut hvorfor
                 foreach (var clip in successfulClips)
                 {
                     writer.WriteAsync(new InternalCommand(isLive11 ? SetClipDataOnClientLive11 : SetClipDataOnClient, clipSet[clip]));

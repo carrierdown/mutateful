@@ -30,7 +30,14 @@ namespace Mutate4l.Core
         public float Velocity
         {
             get => Math.Clamp(VelocityField, 0f, 127f);
-            set => VelocityField = value;
+            set
+            {
+                if (value == 0)
+                {
+                    Console.WriteLine($"I was set to {value}");
+                }
+                VelocityField = value;
+            }
         }
 
         public decimal End => Start + Duration;
