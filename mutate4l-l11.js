@@ -90,7 +90,7 @@ function processQueue() {
 // The following handlers are called indirectly, i.e. via deferlow-object in patcher to get around bug in M4L API
 
 function onSelectedClipWithoutName(clipId, maybeName) {
-    debuglogExt("onSelectedClipWithoutName");
+    // debuglogExt("onSelectedClipWithoutName");
     var name = maybeName || "";
     if (name.indexOf("[") === -1 && name.indexOf("]") === -1) {
         var clipSlot = new LiveAPI("id " + clipId);
@@ -99,7 +99,7 @@ function onSelectedClipWithoutName(clipId, maybeName) {
 }
 
 function onSelectedClipWasCopied(clipId, maybeName) {
-    debuglogExt("onSelectedClipWasCopied", maybeName);
+    // debuglogExt("onSelectedClipWasCopied", maybeName);
     var name = maybeName || "";
     var clipSlot = new LiveAPI("id " + clipId);
     enumerateClip(getTrackNumber(clipSlot), getClipNumber(clipSlot) + 1, clipSlot);
@@ -162,14 +162,13 @@ function ObservableCallback(id) {
     this.skipFirstNotesCallback = true;
     this.skipFirstNameCallback = true;
     this.updatedInternally = false;
-    this.nameUpdatedInternally = false;
 }
 
 ObservableCallback.prototype.getCallback = function() {
     var self = this;
     return {
         onNameChanged: function(arg) {
-            debuglogExt("onNameChanged");
+            // debuglogExt("onNameChanged");
             var name = "";
             if (arg.indexOf("name") < 0) {
                 return;
@@ -188,10 +187,6 @@ ObservableCallback.prototype.getCallback = function() {
                 return;
             }
             // debuglogExt("Name changed");
-            if (self.nameUpdatedInternally) {
-                self.nameUpdatedInternally = false;
-                return;
-            }
             if (name.length > 0) {
                 if (self.name === name) {
                     // clip was probably copied
@@ -206,7 +201,7 @@ ObservableCallback.prototype.getCallback = function() {
         },
         onNotesChanged: function(arg) {
             if (self.updatedInternally === true) {
-                debuglogExt("onNotesChanged terminated");
+                // debuglogExt("onNotesChanged terminated");
                 // self.updatedInternally = false;
                 return;
             }
@@ -218,7 +213,7 @@ ObservableCallback.prototype.getCallback = function() {
              */
             if (self.skipFirstNotesCallback === true) {
                 self.skipFirstNotesCallback = false;
-                debuglogExt("onNotesChanged skipped");
+                // debuglogExt("onNotesChanged skipped");
                 return;
             }
             if (arg.indexOf("notes") >= 0) {
@@ -248,7 +243,6 @@ function onClipDataFromServer(data) {
     liveObject.set('loop_end', clipLength);
     liveObject.set('end_marker', clipLength);
     liveObject.set('looping', isLooping);
-    liveObject.call('remove_notes_extended', 0, 128, 0, clipLength);
     
     // todo: fill dict with note objects - convert to json then send with add_new_notes function
     var noteDict = {notes:[]};
@@ -272,6 +266,7 @@ function onClipDataFromServer(data) {
         startOffset += SIZE_OF_ONE_NOTE_IN_BYTES;
     }
     notesCallback.updatedInternally = true; // avoid firing callback on internal updates
+    liveObject.call('remove_notes_extended', 0, 128, 0, clipLength);
     liveObject.call('add_new_notes', JSON.stringify(noteDict));
     messageQueue.push([255,255,255,255,255]); // since L11 is even more trigger happy with our callbacks, it's no longer 
     // sufficient to set a flag which is then reset afterwards. Instead we need to wait a certain amount of time (a message cycle 
@@ -313,7 +308,6 @@ function enumerateClip(trackNo, clipNo, liveObject) {
     } else {
         newName = "[" + clipRefString + "] " + existingName;
     }
-    nameCallback.nameUpdatedInternally = true;
     liveObject.set("name",  newName);
 }
 
@@ -555,7 +549,7 @@ function getNumberOfTracks(liveObject) {
 }
 
 function extractFormula(clipName) {
-    if (clipName.length < 5) return;
+    if (clipName.length < 3) return;
 
     var formulaStartIndex = clipName.indexOf("=");
     var formulaStopIndex = clipName.indexOf(";");
