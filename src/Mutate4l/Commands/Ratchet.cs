@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Mutate4l.Cli;
+using Mutate4l.Compiler;
 
 namespace Mutate4l.Commands
 {

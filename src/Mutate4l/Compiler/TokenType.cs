@@ -1,4 +1,4 @@
-﻿namespace Mutate4l.Cli
+﻿namespace Mutate4l.Compiler
 {
     public enum TokenType
     {

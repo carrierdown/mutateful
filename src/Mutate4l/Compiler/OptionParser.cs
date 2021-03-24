@@ -5,9 +5,9 @@ using System.Linq;
 using System.Reflection;
 using Mutate4l.Core;
 using Mutate4l.Utility;
-using static Mutate4l.Cli.TokenType;
+using static Mutate4l.Compiler.TokenType;
 
-namespace Mutate4l.Cli
+namespace Mutate4l.Compiler
 {
     public static class OptionParser
     {

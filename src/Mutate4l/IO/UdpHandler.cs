@@ -4,7 +4,6 @@ using System.Net.Sockets;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Mutate4l.Cli;
-using Mutate4l.Core;
 using Mutate4l.State;
 using Mutate4l.Utility;
 

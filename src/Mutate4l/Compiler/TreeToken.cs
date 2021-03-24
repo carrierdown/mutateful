@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Mutate4l.Core;
-using static Mutate4l.Cli.TokenType;
+using static Mutate4l.Compiler.TokenType;
 
-namespace Mutate4l.Cli
+namespace Mutate4l.Compiler
 {
     public class TreeToken
     {
@@ -78,7 +76,6 @@ namespace Mutate4l.Cli
         public bool IsValue => Type > _ValuesBegin && Type < _ValuesEnd;
         public bool IsPureValue => Type > _ValuesBegin && Type < _PureValuesEnd;
 
-        // todo: extract as extension methods
         private ProcessResultArray<Token> ResolveChildren(List<Token> tokens)
         {
             if (Children.Count == 0)

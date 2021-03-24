@@ -1,14 +1,15 @@
-﻿using Mutate4l.IO;
-using Mutate4l.Utility;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Mutate4l.Compiler;
 using Mutate4l.Core;
+using Mutate4l.IO;
 using Mutate4l.State;
+using Mutate4l.Utility;
 
 namespace Mutate4l.Cli
 {
-    internal static class CliHandler
+    public static class CliHandler
     {
         public const string UnitTestDirective = " test";
         public const string SvgDocDirective = " doc";
@@ -64,7 +65,7 @@ namespace Mutate4l.Cli
 
             if (processedClipWrapper.WarningMessage.Length > 0)
             {
-                Console.WriteLine($"Warnings were generated:{System.Environment.NewLine}" +
+                Console.WriteLine($"Warnings were generated:{Environment.NewLine}" +
                                   $"{processedClipWrapper.WarningMessage}");
             }
 

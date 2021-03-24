@@ -1,8 +1,7 @@
-﻿using System;
-using Mutate4l.Core;
-using static Mutate4l.Cli.TokenType;
+﻿using Mutate4l.Core;
+using static Mutate4l.Compiler.TokenType;
 
-namespace Mutate4l.Cli
+namespace Mutate4l.Compiler
 {
     public class Token
     {

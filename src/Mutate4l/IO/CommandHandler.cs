@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Channels;
-using Mutate4l.Cli;
+using Mutate4l.Compiler;
 using Mutate4l.Core;
 using Mutate4l.State;
 using static Mutate4l.State.InternalCommandType;

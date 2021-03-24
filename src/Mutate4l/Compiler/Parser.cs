@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
+using System.Text;
 using Mutate4l.Core;
 using Mutate4l.State;
 
-namespace Mutate4l.Cli
+namespace Mutate4l.Compiler
 {
     public static class Parser
     {
