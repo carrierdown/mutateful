@@ -11,17 +11,19 @@ namespace Mutate4l.Compiler
         private readonly string Buffer;
         private readonly List<Clip> Clips;
         private int Position = 0;
-        private readonly Token NonToken = new Token(NoToken, "", -1);
+        private readonly Token NonToken = new(NoToken, "", -1);
 
-        private Dictionary<char, TokenType> SingleOperators = new Dictionary<char, TokenType>
+        private readonly Dictionary<char, TokenType> SingleOperators = new()
         {
             { ':', RangeOperator },
             { '|', AlternationOperator },
             { '_', EmptyOperator },
-            { '*', FillOperator }
+            { '*', FillOperator },
+            { '(', LeftParen },
+            { ')', RightParen }
         };
 
-        private Dictionary<string, TokenType> Commands = new Dictionary<string, TokenType>
+        private readonly Dictionary<string, TokenType> Commands = new()
         {
             { "arpeggiate", Arpeggiate }, { "arp", Arpeggiate },
             { "concat", Concat }, { "cat", Concat },
@@ -53,7 +55,7 @@ namespace Mutate4l.Compiler
             { "velocityscale", VelocityScale },  { "vel", VelocityScale }, { "vs", VelocityScale }, { "v", VelocityScale }
         };
 
-        private Dictionary<string, TokenType> Options = new Dictionary<string, TokenType>
+        private readonly Dictionary<string, TokenType> Options = new()
         {
             { "-amount", Amount }, { "amt", Amount },
             { "-autoscale", AutoScale }, { "-auto", AutoScale },
@@ -103,7 +105,7 @@ namespace Mutate4l.Compiler
             { "-with", With }
         };
 
-        private Dictionary<string, TokenType> EnumValues = new Dictionary<string, TokenType>
+        private readonly Dictionary<string, TokenType> EnumValues = new()
         {
             { "absolute", Absolute },
             { "both", Both },

@@ -104,6 +104,16 @@ namespace Mutate4lTests
         }
 
         [Test]
+        public void ShowGeneratedSyntaxTree()
+        {
+            var lexer = new Lexer("[0] tp 2 remap -to [0] shuffle 1 2|3|9x6|5|4 tp 12", new List<Clip> {Clip.Empty, Clip.Empty});
+            var result = lexer.GetTokens();
+            Assert.IsTrue(result.Success);
+            var sTokens = Parser.CreateSyntaxTree(result.Result);
+            TestUtilities.PrintSyntaxTree(sTokens.Result.Children);
+        }
+        
+        [Test]
         public void TestParseNestedOperators()
         {
             var command = Parser.ParseFormulaToChainedCommand("[0] shuffle 1 2|3|9x6 1 2 4x3 5|6|7 8", new List<Clip> { Clip1 }, new ClipMetaData(100, 0));
@@ -113,6 +123,29 @@ namespace Mutate4lTests
             var flattenedValues = command.Result.Commands[0].DefaultOptionValues.Select(x => int.Parse(x.Value)).ToList();
             var expectedValues = new List<int> { 1, 2, 1, 2, 4, 4, 4, 5, 8, 1, 3, 1, 2, 4, 4, 4, 6, 8, 1, 9, 9, 9, 9, 9, 9, 1, 2, 4, 4, 4, 7, 8 };
             Assert.IsTrue(flattenedValues.SequenceEqual(expectedValues));
+
+            command = Parser.ParseFormulaToChainedCommand("[0] loop 4 rat 2 3|4|5x2 6", new List<Clip> {Clip1}, new ClipMetaData(100, 0));
+            Assert.IsTrue(command.Success);
+        }
+
+        [Test]
+        public void TestParseNestedCommands()
+        {
+            var lexer = new Lexer("[0] ([0] transpose 12) il", new List<Clip> {Clip.Empty});
+            var result = lexer.GetTokens();
+            Assert.IsTrue(result.Success);
+            var sTokens = Parser.CreateSyntaxTree(result.Result);
+            TestUtilities.PrintSyntaxTree(sTokens.Result.Children);
+            /*var clip1 = new Clip(4, true)
+            {
+                Notes = new SortedList<NoteEvent>
+                {
+                    new (60, 0, .5m, 100)
+                }
+            };
+            
+            var command = Parser.ParseFormulaToChainedCommand("[0] ([0] transpose 12) il", new List<Clip> { Clip1 }, new ClipMetaData(100, 0));
+            Assert.IsTrue(command.Success);*/
         }
     }
 }

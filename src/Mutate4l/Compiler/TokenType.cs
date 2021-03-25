@@ -117,7 +117,7 @@
         ClipReference,
         InlineClip,
         _ValuesEnd,
-
+        
         _OperatorsBegin,
         RangeOperator,
         AlternationOperator,
@@ -138,6 +138,9 @@
         _TestEnumValuesBegin,
         EnumValue1,
         EnumValue2,
-        _TestEnumValuesEnd
+        _TestEnumValuesEnd,
+        
+        LeftParen, 
+        RightParen
     }
 }

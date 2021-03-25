@@ -1,10 +1,13 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Mutate4l;
 using Mutate4l.Compiler;
 using Mutate4l.Core;
-using Mutate4l.IO;
 using Mutate4l.Utility;
 using NUnit.Framework;
+using Decoder = Mutate4l.IO.Decoder;
 
 namespace Mutate4lTests
 {
@@ -25,6 +28,25 @@ namespace Mutate4lTests
             
             Assert.IsTrue(output.Length == clipData.Length);
             Assert.IsTrue(output.SequenceEqual(clipData));
+        }
+        
+        public static void PrintSyntaxTree(List<TreeToken> treeTokens, int indent = 0)
+        {
+            foreach (var treeToken in treeTokens)
+            {
+                Console.WriteLine($"{GetIndent(indent)}{treeToken.Value}");
+                if (treeToken.HasChildren) PrintSyntaxTree(treeToken.Children, indent + 1);
+            }
+        }
+
+        public static string GetIndent(int indent)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (var i = 0; i < indent; i++)
+            {
+                sb.Append("  ");
+            }
+            return sb.ToString();
         }
     }
 }

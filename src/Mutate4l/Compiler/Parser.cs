@@ -166,23 +166,34 @@ namespace Mutate4l.Compiler
         public static ProcessResult<TreeToken> CreateSyntaxTree(Token[] tokens)
         {
             // todo: support for nested statements need to be added here as well
-            // todo: Parameters for commands need to be nested under their respective commands, otherwise the unpacking logic won't work properly...
-            // e.g. loop 4 rat 2 3|4|5x2 6 currently leads to the 4 bleeding into the ratchet parameter list
             var rootToken = new TreeToken(TokenType.Root, "", 0);
             var insertionPoint = rootToken;
             
             for (var i = 0; i < tokens.Length; i++)
             {
-                var token = tokens[i];
-                if (token.IsCommand && insertionPoint.Type != TokenType.Root)
+                if (tokens[i].Type == TokenType.LeftParen)
+                {
+                    var treeToken = new TreeToken(tokens[i]);
+                    insertionPoint.Children.Add(treeToken.SetParent(insertionPoint));
+                    insertionPoint = treeToken;
+                    continue;
+                }
+                if (tokens[i].Type == TokenType.RightParen)
+                {
+                    while (insertionPoint.Type != TokenType.LeftParen && insertionPoint.Type != TokenType.Root)
+                        insertionPoint = insertionPoint.Parent;
+                    insertionPoint = insertionPoint.Parent;
+                    continue;
+                }
+                if (tokens[i].IsCommand && insertionPoint.Type != TokenType.Root && insertionPoint.Type != TokenType.LeftParen)
                 {
                     insertionPoint = insertionPoint.Parent;
                 }
-                if (i > 0 && tokens[i - 1].IsCommand && !token.IsCommand)
+                if (i > 0 && tokens[i - 1].IsCommand && !tokens[i].IsCommand)
                 {
                     insertionPoint = insertionPoint.Children[^1];
                 }
-                if (i + 1 < tokens.Length && token.IsValue && tokens[i + 1].IsOperatorToken)
+                if (i + 1 < tokens.Length && tokens[i].IsValue && tokens[i + 1].IsOperatorToken)
                 {
                     if (insertionPoint.IsOperatorToken && 
                         insertionPoint.Type == tokens[i + 1].Type)
@@ -204,7 +215,7 @@ namespace Mutate4l.Compiler
                 }
                 else
                 {
-                    insertionPoint.Children.Add(new TreeToken(token).SetParent(insertionPoint));
+                    insertionPoint.Children.Add(new TreeToken(tokens[i]).SetParent(insertionPoint));
                 }
 
                 if (insertionPoint.Children.Count > 2 && insertionPoint.Type == TokenType.RepeatOperator)
