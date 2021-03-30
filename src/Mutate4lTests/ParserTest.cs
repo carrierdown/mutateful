@@ -131,9 +131,12 @@ namespace Mutate4lTests
         [Test]
         public void TestParseNestedCommands()
         {
-            var lexer = new Lexer("[0] ([0] transpose 12) il", new List<Clip> {Clip.Empty});
+            var lexer = new Lexer("[0] (([0] transpose 12)([0] transpose 24) il) il", new List<Clip> {Clip.Empty});
             var result = lexer.GetTokens();
             Assert.IsTrue(result.Success);
+            var (success, errorMessage) = Parser.AreTokensValid(result.Result);
+            if (!success) Console.WriteLine($"Failed with: {errorMessage}");
+            Assert.IsTrue(success);
             var sTokens = Parser.CreateSyntaxTree(result.Result);
             TestUtilities.PrintSyntaxTree(sTokens.Result.Children);
             /*var clip1 = new Clip(4, true)

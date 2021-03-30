@@ -32,6 +32,9 @@ namespace Mutate4l.Compiler
             var (success, tokens, errorMessage) = lexer.GetTokens();
             if (!success) return new ProcessResult<Formula>(errorMessage);
 
+            (success, errorMessage) = AreTokensValid(tokens);
+            if (!success)
+                return new ProcessResult<Formula>($"Parsing of formula ${formula} was aborted: {errorMessage}");
             TreeToken syntaxTree;
             (success, syntaxTree, errorMessage) = CreateSyntaxTree(tokens);
             if (!success) return new ProcessResult<Formula>(errorMessage);
@@ -163,56 +166,94 @@ namespace Mutate4l.Compiler
             return command;
         }
 
+        public static (bool success, string error) AreTokensValid(Token[] tokens)
+        {
+            var parenLevel = 0;
+            for (var i = 0; i < tokens.Length; i++)
+            {
+                var token = tokens[i];
+                if (token.Type == TokenType.LeftParen)
+                {
+                    parenLevel++;
+                }
+                else if (token.Type == TokenType.RightParen)
+                {
+                    parenLevel--;
+                }
+                if (parenLevel < 0)
+                {
+                    return (false, $"Encountered invalid parenthesis at position {token.Position}");
+                }
+                if (token.IsOperatorToken)
+                {
+                    if (i > 0 && i + 1 < tokens.Length && !(tokens[i - 1].IsPureValue && !tokens[i + 1].IsPureValue))
+                    {
+                        var ops = new List<string>();
+                        if (!tokens[i - 1].IsPureValue) ops.Add(tokens[i - 1].Value);
+                        if (!tokens[i + 1].IsPureValue) ops.Add(tokens[i + 1].Value);
+                        var pluralizedValue = "value" + (ops.Count > 1 ? "s" : "");
+                        return (false, $"Operator {token.Value} at position {token.Position} can not be used in conjunction with {pluralizedValue} {string.Join(" and ", ops)}");
+                    }
+                }
+            }
+            if (parenLevel == 0) return (true, "");
+            return (false, "Parentheses do not match up.");
+        }
+        
         public static ProcessResult<TreeToken> CreateSyntaxTree(Token[] tokens)
         {
-            // todo: support for nested statements need to be added here as well
             var rootToken = new TreeToken(TokenType.Root, "", 0);
             var insertionPoint = rootToken;
             
             for (var i = 0; i < tokens.Length; i++)
             {
+                // if a left parenthesis is encountered, we create a new nested token and move the insertion point inside it
                 if (tokens[i].Type == TokenType.LeftParen)
                 {
-                    var treeToken = new TreeToken(tokens[i]);
-                    insertionPoint.Children.Add(treeToken.SetParent(insertionPoint));
+                    var treeToken = new TreeToken(TokenType.Nested, "()", tokens[i].Position).SetParent(insertionPoint);
+                    insertionPoint.Children.Add(treeToken);
                     insertionPoint = treeToken;
                     continue;
                 }
+                // if we encounter a right parenthesis...
                 if (tokens[i].Type == TokenType.RightParen)
                 {
-                    while (insertionPoint.Type != TokenType.LeftParen && insertionPoint.Type != TokenType.Root)
+                    // ...we move up to the nearest left paren (or root as a sanity check) 
+                    while (insertionPoint.Type != TokenType.Nested && insertionPoint.Type != TokenType.Root)
                         insertionPoint = insertionPoint.Parent;
+                    // ...and then out of it
                     insertionPoint = insertionPoint.Parent;
                     continue;
                 }
-                if (tokens[i].IsCommand && insertionPoint.Type != TokenType.Root && insertionPoint.Type != TokenType.LeftParen)
+                if (tokens[i].IsCommand && insertionPoint.Type != TokenType.Root && insertionPoint.Type != TokenType.Nested)
                 {
                     insertionPoint = insertionPoint.Parent;
                 }
+                // if the token following a command is not another command, we assume command params and move insertion pointer accordingly
                 if (i > 0 && tokens[i - 1].IsCommand && !tokens[i].IsCommand)
                 {
                     insertionPoint = insertionPoint.Children[^1];
                 }
+                // if we're on a value and an operator is coming up...
                 if (i + 1 < tokens.Length && tokens[i].IsValue && tokens[i + 1].IsOperatorToken)
                 {
-                    if (insertionPoint.IsOperatorToken && 
-                        insertionPoint.Type == tokens[i + 1].Type)
+                    // check if we've already encountered an operator, and if the upcoming operator matches, continue adding values to it
+                    if (insertionPoint.IsOperatorToken && insertionPoint.Type == tokens[i + 1].Type)
                     {
                         insertionPoint.Children.Add(new TreeToken(tokens[i]).SetParent(insertionPoint));
-                        if (i + 1 < tokens.Length && tokens[i + 1].IsOperatorToken)
-                        {
-                            i++;
-                        }
+                        i++; // we discard the next operator since it's the same as we're already on
                     }
+                    // otherwise, we add the new operator and set our current token as a child of it
                     else
                     {
                         var treeToken = new TreeToken(tokens[i + 1]);
                         treeToken.Children.Add(new TreeToken(tokens[i]).SetParent(treeToken));
-                        i++;
+                        i++; // discard next token since it's the operator we just added
                         insertionPoint.Children.Add(treeToken.SetParent(insertionPoint));
                         insertionPoint = treeToken;
                     }
                 }
+                // no upcoming operator, so we simply add the token to the currently active insertion point
                 else
                 {
                     insertionPoint.Children.Add(new TreeToken(tokens[i]).SetParent(insertionPoint));
@@ -224,7 +265,8 @@ namespace Mutate4l.Compiler
                         $"Too many operands specified for operator {insertionPoint.Type} near {insertionPoint.Children[^1]?.Value ?? insertionPoint.Value}, col {insertionPoint.Children[^1]?.Position ?? insertionPoint.Position}");
                 }
 
-                // Once we have an operator behind us we can move the insertion point up to root level again. This will not affect nested operators as tokens[i - 1] won't give us an operator token in these cases.
+                // Once we have an operator behind us we can move the insertion point up to root level again. This will not affect nested operators as tokens[i - 1] won't give us an operator token in these cases
+                // (recall that we discard the upcoming operator token when dealing with them above, thus i-1 will give us a value type in this situation).
                 if (i > 0 && tokens[i - 1].IsOperatorToken)
                 {
                     while (insertionPoint.IsOperatorToken)

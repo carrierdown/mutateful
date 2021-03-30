@@ -141,6 +141,7 @@
         _TestEnumValuesEnd,
         
         LeftParen, 
-        RightParen
+        RightParen,
+        Nested
     }
 }

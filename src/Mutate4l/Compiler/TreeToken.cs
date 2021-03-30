@@ -39,7 +39,7 @@ namespace Mutate4l.Compiler
             }
         }
 
-        public readonly List<TreeToken> Children = new List<TreeToken>();
+        public readonly List<TreeToken> Children = new();
         private int CurrentIndex;
 
         public TreeToken() { }
