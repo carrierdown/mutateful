@@ -1,0 +1,17 @@
+{
+  "name": "LiveConnector",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sockets.js",
+  "dependencies": {
+    "@microsoft/signalr": "^5.0.6",
+    "@microsoft/signalr-protocol-msgpack": "^5.0.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

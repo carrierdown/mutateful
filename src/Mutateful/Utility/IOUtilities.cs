@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Mutate4l.Core;
 using System.Globalization;
-using Mutate4l.IO;
+using Mutateful.Core;
+using Mutateful.IO;
 
-namespace Mutate4l.Utility
+namespace Mutateful.Utility
 {
     public static class IOUtilities
     {

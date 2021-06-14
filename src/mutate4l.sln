@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\mutate4l-l11.js = ..\mutate4l-l11.js
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mutateful", "Mutateful\Mutateful.csproj", "{E98B8F1F-44F0-4460-961B-9A160538307D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{5D1EB757-1464-4295-BB08-8900AACB550A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D1EB757-1464-4295-BB08-8900AACB550A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D1EB757-1464-4295-BB08-8900AACB550A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E98B8F1F-44F0-4460-961B-9A160538307D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E98B8F1F-44F0-4460-961B-9A160538307D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E98B8F1F-44F0-4460-961B-9A160538307D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E98B8F1F-44F0-4460-961B-9A160538307D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
