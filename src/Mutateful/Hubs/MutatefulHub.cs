@@ -15,7 +15,7 @@ namespace Mutateful.Hubs
         {
             CommandHandler = commandHandler;
         }
-
+        
         public Task SetClipData(bool isLive11, byte[] data)
         {
             var clip = isLive11 ? Decoder.GetSingleLive11Clip(data) : Decoder.GetSingleClip(data);

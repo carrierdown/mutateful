@@ -61,7 +61,7 @@ namespace Mutateful.IO
             return Encoding.UTF8.GetString(data);
         }
         
-        public static void HandleTypedCommand(byte[] data, ClipSet clipSet, ChannelWriter<InternalCommand> writer)
+        /*public static void HandleTypedCommand(byte[] data, ClipSet clipSet, ChannelWriter<InternalCommand> writer)
         {
             switch (GetCommandType(data[3]))
             {
@@ -86,7 +86,7 @@ namespace Mutateful.IO
                 case UnknownCommand:
                     break;
             }
-        }
+        }*/
         
         public static Clip GetSingleClip(byte[] data)
         {

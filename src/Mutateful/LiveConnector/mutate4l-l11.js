@@ -327,15 +327,15 @@ function sendAllClipData() {
                             continue;
                         }
                         if (formula.length === 0) continue;
-                        sendDataToServer(setFormulaOnServerSignifier, [trackNo, clipNo].concat(asciiStringToArray(formula)));
+                        sendDataToServer(commandSignifiers.setFormula | live11Flag, [trackNo, clipNo].concat(asciiStringToArray(formula)));
                     } else {
-                        sendDataToServer(setLive11ClipDataOnServerSignifier, getClipDataAsBytes(liveObject, i, s));
+                        sendDataToServer(commandSignifiers.setClipData | live11Flag, getClipDataAsBytes(liveObject, i, s));
                     }
                 }
             }
         }
     }
-    sendDataToServer(evaluateL11FormulasSignifier, []);
+    sendDataToServer(commandSignifiers.evaluateFormulas | live11Flag, [0]); // quirk: data is not sent as list unless it contains at least two items
 }
 
 function setAndEvaluateClipDataOrFormula(liveObject) {
@@ -353,9 +353,9 @@ function setAndEvaluateClipDataOrFormula(liveObject) {
             return;
         }
         if (formula.length === 0) return;
-        sendDataToServer(setAndEvaluateL11FormulaSignifier, [trackNo, clipNo].concat(asciiStringToArray(formula)));
+        sendDataToServer(commandSignifiers.setAndEvaluateFormula | live11Flag, [trackNo, clipNo].concat(asciiStringToArray(formula)));
     } else {
-        sendDataToServer(setAndEvaluateL11ClipDataSignifier, getClipDataAsBytes(liveObject, trackNo, clipNo));
+        sendDataToServer(commandSignifiers.setAndEvaluateClipData | live11Flag, getClipDataAsBytes(liveObject, trackNo, clipNo));
     }
 }
 
@@ -590,7 +590,7 @@ function debuglogExt(/* ... args */) {
     for (i = 0; i < result.length; i++) {
         bytesToSend[i] = result.charCodeAt(i);
     }
-    sendDataToServer(stringDataSignifier, bytesToSend);
+    sendDataToServer(commandSignifiers.logMessage, bytesToSend);
 }
 
 function debuglog(/* ... args */) {
