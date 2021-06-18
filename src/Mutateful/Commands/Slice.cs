@@ -8,7 +8,7 @@ namespace Mutateful.Commands
     public class SliceOptions
     {
         [OptionInfo(type: OptionType.Default, 1/128f)]
-        public decimal[] Lengths { get; set; } = { 1/16m };
+        public decimal[] Lengths { get; set; } = { 4/16m };
     }
 
     // # desc: Slices a clip (i.e. cutting any notes) at a regular or irregular set of fractions.

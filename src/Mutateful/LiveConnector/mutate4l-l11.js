@@ -35,7 +35,12 @@ function onInit() {
 
 function handleIncomingData(/* ... arguments */) {
     // debuglogExt("incoming data");
+    // debuglog("handleIncomingData");
     var args = [].slice.call(arguments);
+    // debuglog(args);
+    onClipDataFromServer(args);
+
+/*
     if (args.length < 13) {
         post("Error - expected bigger payload");
     }
@@ -44,9 +49,9 @@ function handleIncomingData(/* ... arguments */) {
         args[2] === typedDataThirdByte) {
 
         if (args[3] === setClipDataSignifier) {
-            onClipDataFromServer(args.slice(4));
         }
     }
+*/
 }
 
 function enumerate() {

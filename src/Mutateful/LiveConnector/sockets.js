@@ -15,7 +15,7 @@ const commandSignifiers = {
 
 const live11Flag = 128; // 0x80
 
-maxApi.post("Heisannn!");
+//maxApi.post("Heisannn!");
 
 let connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:5000/mutatefulHub")
@@ -23,8 +23,37 @@ let connection = new signalR.HubConnectionBuilder()
     .build();
 
 connection.on("SetClipDataOnClient", (isLive11, data) => {
-    maxApi.post("SetClipDataOnClient: Received data, Live 11: ", isLive11);
+    isLive11 = isLive11 > 0;
+    debuglog("SetClipDataOnClient: Received data, Live 11: ", isLive11);
+    maxApi.outlet(["handleIncomingData", ...data]);
     // maxApi.outlet(isLive11, data);
+});
+
+maxApi.addHandler(MESSAGE_TYPES.LIST, async (...args) => {
+    maxApi.post(`received list: ${args.join(", ")}`);
+    if (args.length === 0) return;
+    let commandSignifier = args[0];
+    let isLive11 = (commandSignifier & live11Flag) > 0;
+    switch (commandSignifier & 0x0f) {
+        case commandSignifiers.setClipData:
+            await connection.invoke("SetClipData", isLive11, new Uint8Array(args.slice(1)));
+            break;
+        case commandSignifiers.setFormula:
+            await connection.invoke("SetFormula", new Uint8Array(args.slice(1)));
+            break;
+        case commandSignifiers.setAndEvaluateClipData:
+            await connection.invoke("SetAndEvaluateClipData", isLive11, new Uint8Array(args.slice(1)));
+            break;
+        case commandSignifiers.setAndEvaluateFormula:
+            await connection.invoke("SetAndEvaluateFormula", isLive11, new Uint8Array(args.slice(1)));
+            break;
+        case commandSignifiers.evaluateFormulas:
+            await connection.invoke("EvaluateFormulas", isLive11);
+            break;
+        case commandSignifiers.logMessage:
+            await connection.invoke("LogMessage", new Uint8Array(args.slice(1)));
+            break;
+    }
 });
 
 connection.start()
@@ -32,33 +61,9 @@ connection.start()
         maxApi.post("Connection active.");
         // connection.invoke("GetMessageFromClient", "Hello server this is max4l");
         // connection.invoke("LogMessage", new Uint8Array([60,61,62,63,64,65]));
+    }, () => {
+        maxApi.post("Failed to connect. Make sure mutateful app is running.");
     });
-
-maxApi.addHandler(MESSAGE_TYPES.LIST, async (...args) => {
-    maxApi.post(`received list: ${args.join(", ")}`);
-    if (args.length === 0) return;
-    let commandSignifier = args[0];
-    switch (commandSignifier & 0x0f) {
-        case commandSignifiers.setClipData:
-            await connection.invoke("SetClipData", commandSignifier & live11Flag > 0 ? true : false, new Uint8Array(args.slice(1)));
-            break;        
-        case commandSignifiers.setFormula:
-            await connection.invoke("SetFormula", new Uint8Array(args.slice(1)));
-            break;
-        case commandSignifiers.setAndEvaluateClipData:
-            await connection.invoke("SetAndEvaluateClipData", commandSignifier & live11Flag > 0 ? true : false, new Uint8Array(args.slice(1)));
-            break;
-        case commandSignifiers.setAndEvaluateFormula:
-            await connection.invoke("SetAndEvaluateFormula", commandSignifier & live11Flag > 0 ? true : false, new Uint8Array(args.slice(1)));
-            break;
-        case commandSignifiers.evaluateFormulas:
-            await connection.invoke("EvaluateFormulas", commandSignifier & live11Flag > 0 ? true : false);
-            break;
-        case commandSignifiers.logMessage:
-            await connection.invoke("LogMessage", new Uint8Array(args.slice(1)));
-            break;
-    }
-});
 
 function debuglog(/* ... args */) {
     let result = "";

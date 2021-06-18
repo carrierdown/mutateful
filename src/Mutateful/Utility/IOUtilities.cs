@@ -114,8 +114,8 @@ namespace Mutateful.Utility
         public static List<byte> GetClipAsBytesV2(Clip clip)
         {
             // todo: If supporting multiple clients, we need to also send formula (if specified) when sending clip data
-            var result = new List<byte>(4 + 1 + 1 + 4 + 1 + 2 + (Decoder.SizeOfOneNoteInBytes * clip.Notes.Count));
-            result.AddRange(SetClipDataHeader);
+            var result = new List<byte>(1 + 1 + 4 + 1 + 2 + (Decoder.SizeOfOneNoteInBytes * clip.Notes.Count));
+            // result.AddRange(SetClipDataHeader);
             result.Add((byte)clip.ClipReference.Track);
             result.Add((byte)clip.ClipReference.Clip);
             result.AddRange(BitConverter.GetBytes((float)clip.Length));
@@ -135,8 +135,8 @@ namespace Mutateful.Utility
         
         public static List<byte> GetClipAsBytesLive11(Clip clip)
         {
-            var result = new List<byte>(4 + 1 + 1 + 4 + 1 + 2 + (Decoder.SizeOfOneNoteInBytesLive11 * clip.Notes.Count));
-            result.AddRange(SetClipDataHeader);
+            var result = new List<byte>(1 + 1 + 4 + 1 + 2 + (Decoder.SizeOfOneNoteInBytesLive11 * clip.Notes.Count));
+            // result.AddRange(SetClipDataHeader);
             result.Add((byte)clip.ClipReference.Track);
             result.Add((byte)clip.ClipReference.Clip);
             result.AddRange(BitConverter.GetBytes((float)clip.Length));
