@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace Mutateful.Core
 {
     public struct ClipReference
@@ -13,21 +16,73 @@ namespace Mutateful.Core
 
         public static ClipReference FromString(string clipRef)
         {
-            var track = 0;
-            var clip = 0;
-            
-            var trackIdent = clipRef[0..1].ToLowerInvariant();
-            var clipIdent = clipRef[1..];
+            if (TryParse(clipRef, out var result))
+            {
+                return result;
+            }
+            throw new ArgumentException($"Unable to parse given ClipReference: {clipRef}");
+        }
 
-            track = (byte) trackIdent[0] - 0x61;
-            int.TryParse(clipIdent, out clip);
-            
-            return new ClipReference(track, clip - 1);
+        public static bool TryParse(string clipRef, out ClipReference clipReference)
+        {
+            clipReference = new ClipReference(0, 0);
+            var val = clipRef.ToUpperInvariant();
+            int i = 0,
+                lastAlphaIx = 0;
+
+            while (i < val.Length && val[i] >= 'A' && val[i] <= 'Z')
+            {
+                lastAlphaIx++;
+            }
+
+            if (lastAlphaIx == 0) return false;
+            clipReference.Track = FromSpreadshimal(val[..lastAlphaIx]);
+            var clipParsedSuccessfully = int.TryParse(val[lastAlphaIx..], out var clip);
+            clipReference.Clip = clip;
+            return clipParsedSuccessfully;
+        }
+
+        public static string ToSpreadshimal(int val)
+        {
+            if (val <= 0) return "";
+            List<char> digits = new List<char>();
+
+            while (val-- > 0)
+            {
+                var remainder = val % 26;
+                val /= 26;
+                digits.Add(ToSpreadshimalDigit(remainder));
+            }
+            digits.Reverse();
+            return new string(digits.ToArray());
+        }
+
+        public static int FromSpreadshimal(string val)
+        {
+            if (val.Length == 0) return 0;
+            var digits = val.ToCharArray();
+            var decimalVal = 0;
+
+            for (var i = 1; i <= digits.Length; i++)
+            {
+                decimalVal += FromSpreadshimalDigit(digits[^i]) * (int) Math.Pow(26, i - 1);
+            }
+            return decimalVal;
+        }
+        
+        public static char ToSpreadshimalDigit(int val)
+        {
+            return (char)(65 + val);
+        }
+
+        public static int FromSpreadshimalDigit(char val)
+        {
+            return val - 64;
         }
 
         public override string ToString()
         {
-            return $"{Track},{Clip}";
+            return $"{ToSpreadshimal(Track)}{Clip}";
         }
 
         public static readonly ClipReference Empty = new ClipReference(0, 0);

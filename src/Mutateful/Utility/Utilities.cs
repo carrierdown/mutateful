@@ -24,6 +24,7 @@ namespace Mutateful.Utility
 
         public static decimal MusicalDivisionToDecimal(string value)
         {
+            // TODO - refinement: support triplet or dotted divisions like 1/16t or 1/8d as well. For triplets, the denominator is divided by two and multiplied with 3.
             if (value.IndexOf('/') >= 0)
             {
                 return 4m / int.Parse(value.Substring(value.IndexOf('/') + 1)) * int.Parse(value.Substring(0, value.IndexOf('/')));

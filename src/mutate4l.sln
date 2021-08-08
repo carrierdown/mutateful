@@ -16,6 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mutateful", "Mutateful\Mutateful.csproj", "{E98B8F1F-44F0-4460-961B-9A160538307D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutatefulTests", "MutatefulTests\MutatefulTests.csproj", "{DF1AB469-2B43-4490-A87F-6946356BA528}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{E98B8F1F-44F0-4460-961B-9A160538307D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E98B8F1F-44F0-4460-961B-9A160538307D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E98B8F1F-44F0-4460-961B-9A160538307D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF1AB469-2B43-4490-A87F-6946356BA528}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF1AB469-2B43-4490-A87F-6946356BA528}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF1AB469-2B43-4490-A87F-6946356BA528}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF1AB469-2B43-4490-A87F-6946356BA528}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

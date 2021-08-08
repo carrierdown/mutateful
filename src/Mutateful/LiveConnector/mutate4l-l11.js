@@ -89,7 +89,7 @@ function processQueue() {
 // The following handlers are called indirectly, i.e. via deferlow-object in patcher to get around bug in M4L API
 
 function onSelectedClipWithoutName(clipId, maybeName) {
-    // debuglogExt("onSelectedClipWithoutName");
+    debuglogExt("onSelectedClipWithoutName");
     var name = maybeName || "";
     if (name.indexOf("[") === -1 && name.indexOf("]") === -1) {
         var clipSlot = new LiveAPI("id " + clipId);
@@ -179,16 +179,21 @@ ObservableCallback.prototype.getCallback = function() {
                 if (name.length === 0) {
                     outlet(2, ["onSelectedClipWithoutName", parseInt(self.id, 10), name]);
                 }
-                // debuglogExt("onNameChanged skipped");
+                if (name.indexOf("[") < 0) {
+                    outlet(2, ["onSelectedClipWithoutName", parseInt(self.id, 10), name]);
+                }
+                debuglogExt("onNameChanged skipped");
                 self.skipFirstNameCallback = false;
                 return;
             }
             // debuglogExt("Name changed");
             if (name.length > 0) {
                 if (self.name === name) {
+                    debuglogExt("clip probably copied");
                     // clip was probably copied
                     outlet(2, ["onSelectedClipWasCopied", parseInt(self.id, 10), name]);
                 } else {
+                    debuglogExt("clipname probably changed");
                     // name of selected clip changed
                     self.name = name;
                     outlet(2, ["onSelectedClipRenamed", parseInt(self.id, 10), name]);
