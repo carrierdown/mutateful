@@ -302,7 +302,7 @@ function getOrCreateClipAtPosition(trackNo, clipNo) {
 function enumerateClip(trackNo, clipNo, liveObject) {
     var existingName = getClipName(liveObject);
     var newName = "";
-    var clipRefString = String.fromCharCode(65 + trackNo) + clipNo;
+    var clipRefString = toSpreadshimal(trackNo + 1) + clipNo;
     if (existingName.indexOf("[" + clipRefString + "]") >= 0) return;
     var startBracketIx = existingName.indexOf("[");
     var endBracketIx = existingName.indexOf("]", startBracketIx);
@@ -577,6 +577,26 @@ function int16ToBufferAtPos(value, byteBuffer, pos) {
     for (var i = 0; i < buffer.length; i++) {
         byteBuffer[pos + i] = buffer[i];
     }
+}
+
+function toSpreadshimal(val)
+{
+    if (val <= 0) return "";
+    var digits = [];
+
+    while (val-- > 0)
+    {
+        var remainder = val % 26;
+        val = Math.floor(val / 26);
+        digits.push(toSpreadshimalDigit(remainder));
+    }
+    digits.reverse();
+    return digits.join("");
+}
+
+function toSpreadshimalDigit(val)
+{
+    return String.fromCharCode(65 + val);
 }
 
 function int32ToBufferAtPos(value, byteBuffer, pos) {

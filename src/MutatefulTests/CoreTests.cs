@@ -37,6 +37,9 @@ namespace MutatefulTests
             Assert.AreEqual(702, ClipReference.FromSpreadshimal("ZZ"));
             Assert.AreEqual(703, ClipReference.FromSpreadshimal("AAA"));
             Assert.AreEqual(704, ClipReference.FromSpreadshimal("AAB"));
+            Assert.AreEqual(702, ClipReference.FromSpreadshimal("zz"));
+            Assert.AreEqual(703, ClipReference.FromSpreadshimal("aaa"));
+            Assert.AreEqual(704, ClipReference.FromSpreadshimal("aab"));
         }
     }
 }

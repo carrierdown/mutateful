@@ -77,7 +77,9 @@ namespace Mutateful.Core
 
         public static int FromSpreadshimalDigit(char val)
         {
-            return val - 64;
+            if (val >= 'A' && val <= 'Z') return val - 64;
+            if (val >= 'a' && val <= 'z') return val - 96;
+            return 0;
         }
 
         public override string ToString()
