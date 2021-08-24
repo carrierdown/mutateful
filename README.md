@@ -112,7 +112,7 @@ Be sure to star this repo and/or follow me at [twitter.com/KnUpland](https://twi
 ### Pre-requisites
 
 - Git
-- .NET Core 3 SDK
+- .NET 5 SDK
 
 ### Building
 
