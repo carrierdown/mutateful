@@ -66,7 +66,7 @@ function enumerate() {
                 liveObject.goto("live_set tracks " + i + " clip_slots " + s);
                 if (hasClip(liveObject)) {
                     liveObject.goto("live_set tracks " + i + " clip_slots " + s + " clip");
-                    enumerateClip(i, s + 1, liveObject);
+                    enumerateClip(i, s, liveObject);
                 }
             }
         }
@@ -93,7 +93,7 @@ function onSelectedClipWithoutName(clipId, maybeName) {
     var name = maybeName || "";
     if (name.indexOf("[") === -1 && name.indexOf("]") === -1) {
         var clipSlot = new LiveAPI("id " + clipId);
-        enumerateClip(getTrackNumber(clipSlot), getClipNumber(clipSlot) + 1, clipSlot);
+        enumerateClip(getTrackNumber(clipSlot), getClipNumber(clipSlot), clipSlot);
     }
 }
 
@@ -101,7 +101,7 @@ function onSelectedClipWasCopied(clipId, maybeName) {
     // debuglogExt("onSelectedClipWasCopied", maybeName);
     var name = maybeName || "";
     var clipSlot = new LiveAPI("id " + clipId);
-    enumerateClip(getTrackNumber(clipSlot), getClipNumber(clipSlot) + 1, clipSlot);
+    enumerateClip(getTrackNumber(clipSlot), getClipNumber(clipSlot), clipSlot);
     setAndEvaluateClipDataOrFormula(clipSlot);
 }
 
@@ -302,7 +302,7 @@ function getOrCreateClipAtPosition(trackNo, clipNo) {
 function enumerateClip(trackNo, clipNo, liveObject) {
     var existingName = getClipName(liveObject);
     var newName = "";
-    var clipRefString = toSpreadshimal(trackNo + 1) + clipNo;
+    var clipRefString = toSpreadshimal(trackNo + 1) + (clipNo + 1);
     if (existingName.indexOf("[" + clipRefString + "]") >= 0) return;
     var startBracketIx = existingName.indexOf("[");
     var endBracketIx = existingName.indexOf("]", startBracketIx);

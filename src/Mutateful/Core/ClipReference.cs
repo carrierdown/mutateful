@@ -27,13 +27,9 @@ namespace Mutateful.Core
         {
             clipReference = new ClipReference(0, 0);
             var val = clipRef.ToUpperInvariant();
-            int i = 0,
-                lastAlphaIx = 0;
+            int lastAlphaIx = 0;
 
-            while (i < val.Length && val[i] >= 'A' && val[i] <= 'Z')
-            {
-                lastAlphaIx++;
-            }
+            while (lastAlphaIx < val.Length && val[lastAlphaIx] >= 'A' && val[lastAlphaIx] <= 'Z') lastAlphaIx++;
 
             if (lastAlphaIx == 0) return false;
             clipReference.Track = FromSpreadshimal(val[..lastAlphaIx]);

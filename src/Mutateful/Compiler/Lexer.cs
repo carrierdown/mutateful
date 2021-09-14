@@ -29,6 +29,7 @@ namespace Mutateful.Compiler
             { "concat", Concat }, { "cat", Concat },
             { "crop", Crop },
             { "echo", Echo },
+            { "extract", Extract },
             { "filter", Filter }, { "flt", Filter },
             { "invert", Invert}, { "inv", Invert },
             { "interleave", Interleave }, { "il", Interleave },
@@ -70,10 +71,14 @@ namespace Mutateful.Compiler
             { "-echoes", Echoes },
             { "-enablemask", EnableMask },
             { "-factor", Factor },
+            { "-highpitch", HighPitch }, { "-hp", HighPitch },
+            { "-highvelocity", HighVelocity }, { "-hv", HighVelocity },
             { "-invert", Invert },
             { "-inv", Invert },
             { "-length", Length }, { "-len", Length },
             { "-lengths", Lengths }, { "-lens", Lengths },
+            { "-lowpitch", HighPitch }, { "-lp", HighPitch },
+            { "-lowvelocity", HighVelocity }, { "-lv", HighVelocity },
             { "-magnetic", Magnetic }, { "-mag", Magnetic },
             { "-max", Max },
             { "-min", Min },
@@ -151,9 +156,25 @@ namespace Mutateful.Compiler
             return pos + 1 < Buffer.Length && !IsAlpha(pos + 1) && (Buffer[pos] == 'x' || Buffer[pos] == 'X');
         }
 
-        private bool IsClipReference(int pos)
+        private bool IsClipReference(int pos, out int length)
         {
-            return (Buffer.Length > pos + 1 && IsAlpha(pos) && IsNumeric(pos + 1)) || Buffer[pos] == '*';
+            var alphaCount = 0;
+            var numCount = 0;
+            var ix = pos;
+            while (ix < Buffer.Length && IsAlpha(ix))
+            {
+                alphaCount++;
+                ix++;
+            }
+
+            while (ix < Buffer.Length && IsNumeric(ix))
+            {
+                numCount++;
+                ix++;
+            }
+            length = ix - pos;
+            
+            return alphaCount > 0 && numCount > 0;
         }
 
         private bool IsInlineClip(int pos)
@@ -315,12 +336,9 @@ namespace Mutateful.Compiler
                         token = new Token(RepeatOperator, "x", Position);
                     }
                 }
-                else if (IsClipReference(Position))
+                else if (IsClipReference(Position, out var length))
                 {
-                    if (Buffer[Position] == '*')
-                        token = new Token(TokenType.ClipReference, "*", Position);
-                    else
-                        token = new Token(TokenType.ClipReference, GetRemainingNumericToken(Position, 2), Position);
+                    token = new Token(TokenType.ClipReference, Buffer.Substring(Position, length), Position);
                 }
                 else if (IsInlineClip(Position))
                 {

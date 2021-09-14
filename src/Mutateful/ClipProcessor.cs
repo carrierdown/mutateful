@@ -23,6 +23,7 @@ namespace Mutate4l
                 TokenType.Concat => Concat.Apply(clips),
                 TokenType.Crop => Crop.Apply(command, clips),
                 TokenType.Echo => Echo.Apply(command, clips),
+                TokenType.Extract => Take.Apply(command, clips, true),
                 TokenType.Filter => Filter.Apply(command, clips),
                 TokenType.Invert => Invert.Apply(command, clips),
                 TokenType.Interleave => Interleave.Apply(command, targetMetadata, clips, InterleaveMode.NotSpecified),

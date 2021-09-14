@@ -46,14 +46,22 @@ namespace Mutateful.Compiler
             (success, commandTokens, errorMessage) = ResolveAndFlattenSyntaxTree(syntaxTree);
             if (!success) return new ProcessResult<Formula>(errorMessage);
 
-            var allReferencedClips = commandTokens.Where(x => x.IsClipReference)
-                .Select(x => ClipReference.FromString(x.Value)).ToList();
-            var sourceClipReferences = commandTokens.TakeWhile(x => x.IsClipReference).Select(x => ClipReference.FromString(x.Value)).ToList();
-            var commandTokensLists = ExtractCommandTokensLists(commandTokens.Skip(sourceClipReferences.Count).ToArray());
-            var commands = commandTokensLists.Select(ParseTokensToCommand).ToList();
+            try
+            {
+                var allReferencedClips = commandTokens.Where(x => x.IsClipReference)
+                    .Select(x => ClipReference.FromString(x.Value)).ToList();
+                
+                var sourceClipReferences = commandTokens.TakeWhile(x => x.IsClipReference).Select(x => ClipReference.FromString(x.Value)).ToList();
+                var commandTokensLists = ExtractCommandTokensLists(commandTokens.Skip(sourceClipReferences.Count).ToArray());
+                var commands = commandTokensLists.Select(ParseTokensToCommand).ToList();
 
-            var parsedFormula = new Formula(commands, sourceClipReferences, allReferencedClips, new Dictionary<ClipReference, ClipSlot>());
-            return new ProcessResult<Formula>(parsedFormula);
+                var parsedFormula = new Formula(commands, sourceClipReferences, allReferencedClips, new Dictionary<ClipReference, ClipSlot>());
+                return new ProcessResult<Formula>(parsedFormula);
+            }
+            catch (ArgumentException ae)
+            {
+                return new ProcessResult<Formula>($"ParseFormula threw exception: {ae.Message}");
+            } 
         }
         
         public static ProcessResult<ChainedCommand> ParseFormulaToChainedCommand(string formula, List<Clip> clips, ClipMetaData metadata)
