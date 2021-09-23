@@ -18,4 +18,8 @@
       <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.6" />
     </ItemGroup>
 
+    <Target Name="Rollup" BeforeTargets="Build">
+        <Exec Command="npm run build" WorkingDirectory="WebUI" />
+    </Target>
+
 </Project>

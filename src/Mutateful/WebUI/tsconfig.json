@@ -1,0 +1,9 @@
+{
+  "extends": "@tsconfig/svelte/tsconfig.json",
+
+  "include": ["src/**/*"],
+  "exclude": ["node_modules/*", "__sapper__/*"],
+  "compilerOptions": {
+    "types": ["@microsoft/signalr", "@microsoft/signalr-protocol-msgpack"]
+  }
+}
