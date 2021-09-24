@@ -1,6 +1,8 @@
 using System;
+using System.Text;
 using NUnit.Framework;
 using Mutateful.Core;
+using Mutateful.Utility;
 
 namespace MutatefulTests
 {
@@ -40,6 +42,26 @@ namespace MutatefulTests
             Assert.AreEqual(702, ClipReference.FromSpreadshimal("zz"));
             Assert.AreEqual(703, ClipReference.FromSpreadshimal("aaa"));
             Assert.AreEqual(704, ClipReference.FromSpreadshimal("aab"));
+        }
+
+        [Test]
+        public void GetClipDataForTest()
+        {
+            var clip = new Clip(4m, true)
+            {
+                Notes = new SortedList<NoteEvent>
+                {
+                    new (36, 0, .25m, 100),
+                    new (48, .5m, .15m, 100),
+                    new (60, 1, .3m, 100),
+                    new (65, 2, 2, 90)
+                }
+            };
+            var data = IOUtilities.GetClipAsBytesLive11(clip);
+            Console.WriteLine(string.Join(',', data));
+            var clip2 = Mutateful.IO.Decoder.GetSingleLive11Clip(data.ToArray());
+            Assert.AreEqual(clip.Notes.Count, clip2.Notes.Count);
+            Assert.AreEqual(clip.Notes[3].Start, clip2.Notes[3].Start);
         }
     }
 }

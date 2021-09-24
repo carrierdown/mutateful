@@ -32,7 +32,10 @@ namespace Mutateful
         private void SendTestMessage(object state)
         {
             Console.WriteLine("Sending test message...");
-            MutatefulHub.Clients.All.SendAsync("DebugMessage", "A1", 10);
+            MutatefulHub.Clients.All.SendAsync("SetClipDataOnClient", "A1", new byte[]
+            {
+                0,0,0,0,128,64,1,4,0,36,0,0,0,0,0,0,128,62,0,0,200,66,0,0,128,63,0,0,0,0,0,0,128,66,48,0,0,0,63,154,153,25,62,0,0,200,66,0,0,128,63,0,0,0,0,0,0,128,66,60,0,0,128,63,154,153,153,62,0,0,200,66,0,0,128,63,0,0,0,0,0,0,128,66,65,0,0,0,64,0,0,0,64,0,0,180,66,0,0,128,63,0,0,0,0,0,0,128,66
+            });
         }
 
         public void Dispose()
