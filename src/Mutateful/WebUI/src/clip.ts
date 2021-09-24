@@ -14,6 +14,9 @@ export class NoteEvent {
     velocity: number;
     
     constructor(pitch: number, start: number, duration: number, velocity: number) {
-        
+        this.pitch = pitch;
+        this.start = start;
+        this.duration = duration;
+        this.velocity = velocity;
     }
 }
