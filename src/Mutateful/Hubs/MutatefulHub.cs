@@ -34,6 +34,7 @@ namespace Mutateful.Hubs
 
         public async Task SetAndEvaluateClipData(bool isLive11, byte[] data)
         {
+            // todo: add check for whether clipdata has actually changed - might also help alleviate feedback loops
             var clip = isLive11 ? Decoder.GetSingleLive11Clip(data) : Decoder.GetSingleClip(data);
             Console.WriteLine($"{clip.ClipReference.Track}, {clip.ClipReference.Clip} Incoming clip data to evaluate");
             var (successfulClips, errors) = CommandHandler.SetAndEvaluateClipData(clip);
@@ -50,6 +51,7 @@ namespace Mutateful.Hubs
 
         public async Task SetAndEvaluateFormula(bool isLive11, byte[] data)
         {
+            // todo: add check for whether formula has actually changed - might also help alleviate feedback loops
             var (trackNo, clipNo, formula) = Decoder.GetFormula(data);
             Console.WriteLine($"{trackNo}, {clipNo}: Incoming formula {formula}");
             var (successfulClips, errors) = CommandHandler.SetAndEvaluateFormula(formula, trackNo, clipNo);

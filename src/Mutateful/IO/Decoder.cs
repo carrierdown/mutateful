@@ -49,8 +49,8 @@ namespace Mutateful.IO
 
         public static (int trackNo, int clipNo, string formula) GetFormula(byte[] data)
         {
-            int trackNo = data[0];
-            int clipNo = data[1];
+            int trackNo = data[0] + 1;
+            int clipNo = data[1] + 1;
             var formula = Encoding.UTF8.GetString(data[2..]);
             return (trackNo, clipNo, formula);
         }
@@ -90,7 +90,7 @@ namespace Mutateful.IO
         public static Clip GetSingleClip(byte[] data)
         {
             var offset = 0;
-            var clipReference = new ClipReference(data[offset], data[offset += 1]);
+            var clipReference = new ClipReference(data[offset] + 1, data[offset += 1] + 1);
             decimal length = (decimal)BitConverter.ToSingle(data, offset += 1);
             bool isLooping = data[offset += 4] == 1;
             var clip = new Clip(length, isLooping)
@@ -115,7 +115,7 @@ namespace Mutateful.IO
         public static Clip GetSingleLive11Clip(byte[] data)
         {
             var offset = 0;
-            var clipReference = new ClipReference(data[offset], data[offset += 1]);
+            var clipReference = new ClipReference(data[offset] + 1, data[offset += 1] + 1);
             decimal length = (decimal)BitConverter.ToSingle(data, offset += 1);
             bool isLooping = data[offset += 4] == 1;
             var clip = new Clip(length, isLooping)
