@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mutate4l", "Mutate4l\Mutate4l.csproj", "{F2C13618-616B-4906-8843-2C9342C49C3A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mutate4lTests", "Mutate4lTests\Mutate4lTests.csproj", "{785E75EA-FECA-42E4-83FF-271A2F84E181}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocGeneration", "DocGeneration\DocGeneration.csproj", "{5D1EB757-1464-4295-BB08-8900AACB550A}"
@@ -9,9 +7,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9FE9B675-A765-4FCA-94C9-D4C2E8D2257E}"
 	ProjectSection(SolutionItems) = preProject
 		..\README.md = ..\README.md
-		..\mutate4l.js = ..\mutate4l.js
-		..\assets\mu4l-walkthrough.gif = ..\assets\mu4l-walkthrough.gif
-		..\mutate4l-l11.js = ..\mutate4l-l11.js
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mutateful", "Mutateful\Mutateful.csproj", "{E98B8F1F-44F0-4460-961B-9A160538307D}"
@@ -24,10 +19,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F2C13618-616B-4906-8843-2C9342C49C3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F2C13618-616B-4906-8843-2C9342C49C3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F2C13618-616B-4906-8843-2C9342C49C3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F2C13618-616B-4906-8843-2C9342C49C3A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{785E75EA-FECA-42E4-83FF-271A2F84E181}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{785E75EA-FECA-42E4-83FF-271A2F84E181}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{785E75EA-FECA-42E4-83FF-271A2F84E181}.Release|Any CPU.ActiveCfg = Release|Any CPU
