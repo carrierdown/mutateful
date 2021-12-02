@@ -11,12 +11,12 @@ public class ScanOptions
 // rename to stretch -grainsize 1/16 -factor 2.0
 public class Scan
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         (var success, var msg) = OptionParser.TryParseOptions(command, out ScanOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         var processedClips = new Clip[clips.Length];
 
@@ -35,6 +35,6 @@ public class Scan
             processedClips[c] = processedClip;
         }
 
-        return new ProcessResultArray<Clip>(processedClips);
+        return new ProcessResult<Clip[]>(processedClips);
     }
 }

@@ -45,7 +45,7 @@ public static class CliHandler
             return LegacyClipSlot.Empty;
         }
 
-        ProcessResultArray<Clip> processedClipWrapper;
+        ProcessResult<Clip[]> processedClipWrapper;
         try
         {
             processedClipWrapper = ClipProcessor.ProcessChainedCommand(chainedCommandWrapper.Result);
@@ -53,7 +53,7 @@ public static class CliHandler
         catch (Exception e)
         {
             processedClipWrapper =
-                new ProcessResultArray<Clip>($"{formula}. Please check your syntax. Exception: {e.Message}");
+                new ProcessResult<Clip[]>($"{formula}. Please check your syntax. Exception: {e.Message}");
         }
 
         if (processedClipWrapper.WarningMessage.Length > 0)

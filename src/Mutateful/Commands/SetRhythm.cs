@@ -8,17 +8,17 @@ public class SetRhythmOptions
 // # desc: Retains pitch and velocity from the current clip while changing the timing and duration to match the clip specified in the -by parameter.
 public static class SetRhythm
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out SetRhythmOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(SetRhythmOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(SetRhythmOptions options, params Clip[] clips)
     {
         if (options.By != null)
         {
@@ -27,7 +27,7 @@ public static class SetRhythm
 
         if (clips.Length < 2)
         {
-            return new ProcessResultArray<Clip>(clips, $"SetRhythm: Skipped command because it needs 2 clips, and {clips.Length} were passed in.");
+            return new ProcessResult<Clip[]>(clips, $"SetRhythm: Skipped command because it needs 2 clips, and {clips.Length} were passed in.");
         }
         ClipUtilities.NormalizeClipLengths(clips);
         
@@ -67,6 +67,6 @@ public static class SetRhythm
             resultClips[resultClipIx++] = resultClip;
         }
 
-        return new ProcessResultArray<Clip>(resultClips);
+        return new ProcessResult<Clip[]>(resultClips);
     }
 }

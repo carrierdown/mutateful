@@ -10,18 +10,18 @@ public class MaskOptions
 // # desc: Creates a masking clip which is used to remove or shorten notes not overlapping with the mask clip. If no -by clip is specified, a sustained note is used instead, effectively inversing the clip rhythmically.  
 public static class Mask
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out MaskOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
 
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(MaskOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(MaskOptions options, params Clip[] clips)
     {
         var processedClips = new List<Clip>(clips.Length);
         var byClip = options.By != null && options.By.Count > 0;
@@ -45,7 +45,7 @@ public static class Mask
             }
         }
 
-        return new ProcessResultArray<Clip>(processedClips.ToArray());
+        return new ProcessResult<Clip[]>(processedClips.ToArray());
     }
 
     private static void MaskNotesByClip(Clip clipToMask, Clip maskClip)

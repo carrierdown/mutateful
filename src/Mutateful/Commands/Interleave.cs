@@ -31,12 +31,12 @@ public enum InterleaveMode
 // # desc: Combines notes from two or more clips in an interleaved fashion.
 public static class Interleave
 {
-    public static ProcessResultArray<Clip> Apply(Command command, ClipMetaData metadata, Clip[] clips, InterleaveMode mode)
+    public static ProcessResult<Clip[]> Apply(Command command, ClipMetaData metadata, Clip[] clips, InterleaveMode mode)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out InterleaveOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         if (mode != NotSpecified)
         {
@@ -45,7 +45,7 @@ public static class Interleave
         return Apply(options, metadata, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(InterleaveOptions options, ClipMetaData metadata, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(InterleaveOptions options, ClipMetaData metadata, params Clip[] clips)
     {
         if (clips.Length < 2)
         {
@@ -142,6 +142,6 @@ public static class Interleave
                 break;
         }
         resultClip.Length = position;
-        return new ProcessResultArray<Clip>(new[] { resultClip });
+        return new ProcessResult<Clip[]>(new[] { resultClip });
     }
 }

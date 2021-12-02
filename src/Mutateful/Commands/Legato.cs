@@ -3,7 +3,7 @@ namespace Mutateful.Commands;
 public static class Legato
 {
     // # desc: Removes silence between notes. Basically the same as the built-in legato function in Live, but often useful in the context of a mutateful formula as well.
-    public static ProcessResultArray<Clip> Apply(params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(params Clip[] clips)
     {
         var resultClips = new Clip[clips.Length];
         const decimal smallestGap = 4m / 64m;
@@ -31,6 +31,6 @@ public static class Legato
             }
             resultClips[x] = resultClip;
         }
-        return new ProcessResultArray<Clip>(resultClips);
+        return new ProcessResult<Clip[]>(resultClips);
     }
 }

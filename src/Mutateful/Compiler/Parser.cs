@@ -118,7 +118,7 @@ public static class Parser
         return commandTokensLists;
     }
 
-    private static ProcessResultArray<Token> ResolveAndFlattenSyntaxTree(TreeToken syntaxTree)
+    private static ProcessResult<Token[]> ResolveAndFlattenSyntaxTree(TreeToken syntaxTree)
     {
         var flattenedTokens = new List<Token>();
         while (!syntaxTree.Children.All(x => x.AllValuesFetched))
@@ -130,7 +130,7 @@ public static class Parser
                 else return res;
             }
         }
-        return new ProcessResultArray<Token>(flattenedTokens.ToArray());
+        return new ProcessResult<Token[]>(flattenedTokens.ToArray());
     }
 
     private static Command ParseTokensToCommand(IEnumerable<Token> tokens)

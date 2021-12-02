@@ -9,17 +9,17 @@ public class SetLengthOptions
 // # desc: Sets the length of all notes to the specified value(s). When more values are specified, they are cycled through.
 public static class SetLength
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out SetLengthOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(SetLengthOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(SetLengthOptions options, params Clip[] clips)
     {
         var resultClips = ClipUtilities.CreateEmptyPlaceholderClips(clips);
         for (var index = 0; index < clips.Length; index++)
@@ -35,6 +35,6 @@ public static class SetLength
                 });
             }
         }
-        return new ProcessResultArray<Clip>(resultClips);
+        return new ProcessResult<Clip[]>(resultClips);
     }
 }

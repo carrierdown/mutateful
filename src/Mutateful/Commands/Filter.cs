@@ -11,17 +11,17 @@ public class FilterOptions
 // # desc: Filters out notes shorter than the length specified (default 1/64). If -invert is specified, notes longer than the specified length are removed.
 public static class Filter
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out FilterOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(FilterOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(FilterOptions options, params Clip[] clips)
     {
         var processedClips = new Clip[clips.Length];
 
@@ -38,6 +38,6 @@ public static class Filter
             processedClips[c] = processedClip;
         }
 
-        return new ProcessResultArray<Clip>(processedClips);
+        return new ProcessResult<Clip[]>(processedClips);
     }
 }

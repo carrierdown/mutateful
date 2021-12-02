@@ -10,17 +10,17 @@ public class EchoOptions
 // # desc: Adds echoes to all notes in a clip, cycling through multiple delay times if more than one delay time is specified.
 public static class Echo
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out EchoOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(EchoOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(EchoOptions options, params Clip[] clips)
     {
         var processedClips = new Clip[clips.Length];
 
@@ -31,7 +31,7 @@ public static class Echo
         {
             processedClips[i++] = AddEchoes(clip, options.Lengths, options.Echoes);
         }
-        return new ProcessResultArray<Clip>(processedClips);
+        return new ProcessResult<Clip[]>(processedClips);
     }
 
     public static Clip AddEchoes(Clip clip, decimal[] lengths, int[] echoes)

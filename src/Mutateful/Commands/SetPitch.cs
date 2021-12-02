@@ -11,17 +11,17 @@ public class SetPitchOptions
 // # desc: Sets the pitch of all notes to the specified value(s). When more values are specified, they are cycled through.
 public static class SetPitch
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out SetPitchOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
     
-    public static ProcessResultArray<Clip> Apply(SetPitchOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(SetPitchOptions options, params Clip[] clips)
     {
         var resultClips = ClipUtilities.CreateEmptyPlaceholderClips(clips);
 
@@ -33,7 +33,7 @@ public static class SetPitch
         {
             pitches = options.By.Notes.Select(x => x.Pitch).ToArray();
         }
-        if (pitches.Length == 0) return new ProcessResultArray<Clip>(clips, "SetPitch did nothing, since neither pitches or -by clip was specified.");
+        if (pitches.Length == 0) return new ProcessResult<Clip[]>(clips, "SetPitch did nothing, since neither pitches or -by clip was specified.");
 
         for (var i = 0; i < clips.Length; i++)
         {
@@ -50,6 +50,6 @@ public static class SetPitch
             }
         }
 
-        return new ProcessResultArray<Clip>(resultClips);
+        return new ProcessResult<Clip[]>(resultClips);
     }
 }

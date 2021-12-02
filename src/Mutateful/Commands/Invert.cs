@@ -9,13 +9,13 @@ public class InvertOptions
 // # desc: Inverts the contents of the current clip the specified number of times. For each inversion, all notes with the currently lowest pitch value are moved one octave up.
 public static class Invert
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out InvertOptions options);
-        return !success ? new ProcessResultArray<Clip>(msg) : Apply(options, clips);
+        return !success ? new ProcessResult<Clip[]>(msg) : Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(InvertOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(InvertOptions options, params Clip[] clips)
     {
         foreach (var clip in clips)
         {
@@ -25,7 +25,7 @@ public static class Invert
             }
         }
 
-        return new ProcessResultArray<Clip>(clips);
+        return new ProcessResult<Clip[]>(clips);
     }
 
     public static void DoInvert(Clip clip)

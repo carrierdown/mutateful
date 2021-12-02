@@ -13,18 +13,18 @@ public static class VelocityScale
 {
     const int FullMidiVelocityRange = 127;
 
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         (var success, var msg) = OptionParser.TryParseOptions(command, out VelocityScaleOptions options);
 
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(VelocityScaleOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(VelocityScaleOptions options, params Clip[] clips)
     {
         var processedClips = new Clip[clips.Length];         
 
@@ -42,6 +42,6 @@ public static class VelocityScale
             }
             processedClips[i++] = processedClip;
         }
-        return new ProcessResultArray<Clip>(processedClips);
+        return new ProcessResult<Clip[]>(processedClips);
     }
 }

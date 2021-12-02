@@ -292,7 +292,7 @@ public class Lexer
         return (false, $"Unknown token encountered at position {initialPos}: {identifier}", NonToken);
     }
 
-    public ProcessResultArray<Token> GetTokens()
+    public ProcessResult<Token[]> GetTokens()
     {
         bool success, empty;
         string msg = "";
@@ -310,9 +310,9 @@ public class Lexer
 
         if (!success && !empty)
         {
-            return new ProcessResultArray<Token>(msg);
+            return new ProcessResult<Token[]>(msg);
         }
-        return new ProcessResultArray<Token>(tokens.ToArray());
+        return new ProcessResult<Token[]>(tokens.ToArray());
     }
 
     public (bool Success, bool Empty, string ErrorMessage) TryGetToken(out Token token)

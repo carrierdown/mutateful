@@ -40,13 +40,13 @@ public class RatchetOptions
 // # desc: Creates retriggers/ratchets in the current clip, based on a sequence of passed in values or another clip. The ratchets produced can be scaled and shaped in various ways.
 public static class Ratchet
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out RatchetOptions options);
-        return !success ? new ProcessResultArray<Clip>(msg) : Apply(options, clips);
+        return !success ? new ProcessResult<Clip[]>(msg) : Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(RatchetOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(RatchetOptions options, params Clip[] clips)
     {
         options.Strength = Math.Clamp(options.Strength, 0, 1);
         if (options.By != null)
@@ -103,7 +103,7 @@ public static class Ratchet
         }
 
 
-        return new ProcessResultArray<Clip>(resultSequences);
+        return new ProcessResult<Clip[]>(resultSequences);
     }
 
     private static (float controlMin, float controlMax, float targetRange) GetControlValuesFromVelocity(RatchetOptions options, Clip controlSequence)

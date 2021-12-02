@@ -8,17 +8,17 @@ public class RemapOptions
 // # desc: Remaps a set of pitches to another set of pitches
 public static class Remap
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out RemapOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(RemapOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(RemapOptions options, params Clip[] clips)
     {
         var resultClips = ClipUtilities.CreateEmptyPlaceholderClips(clips);
 
@@ -51,6 +51,6 @@ public static class Remap
                 ClipUtilities.AddNoteCutting(resultClip, remappedNote);
             }
         }
-        return new ProcessResultArray<Clip>(resultClips);
+        return new ProcessResult<Clip[]>(resultClips);
     }
 }

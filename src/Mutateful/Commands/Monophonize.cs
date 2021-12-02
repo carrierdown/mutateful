@@ -5,7 +5,7 @@ public static class Monophonize
 {
     // TODO: Add option to cut overlapping events, so that more of the original clip is preserved
     
-    public static ProcessResultArray<Clip> Apply(params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(params Clip[] clips)
     {
         var resultClips = ClipUtilities.CreateEmptyPlaceholderClips(clips);
 

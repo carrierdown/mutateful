@@ -18,17 +18,17 @@ public class QuantizeOptions
 // # desc: Quantizes a clip by the specified amount against a regular or irregular set of divisions, or even against the timings of another clip. 
 public static class Quantize
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out QuantizeOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(QuantizeOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(QuantizeOptions options, params Clip[] clips)
     {
         var maxLen = clips.Max(x => x.Length);
         if (options.By != null)
@@ -69,6 +69,6 @@ public static class Quantize
             }
             resultClips[i] = resultClip;
         }
-        return new ProcessResultArray<Clip>(resultClips);
+        return new ProcessResult<Clip[]>(resultClips);
     }
 }

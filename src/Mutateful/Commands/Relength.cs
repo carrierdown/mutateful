@@ -9,17 +9,17 @@ public class RelengthOptions
 // # desc: Changes the length of all notes in a clip by multiplying their lengths with the specified factor.
 public static class Relength
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         (var success, var msg) = OptionParser.TryParseOptions(command, out RelengthOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(RelengthOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(RelengthOptions options, params Clip[] clips)
     {
         foreach (var clip in clips)
         {
@@ -29,6 +29,6 @@ public static class Relength
             }
         }
 
-        return new ProcessResultArray<Clip>(clips);
+        return new ProcessResult<Clip[]>(clips);
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Mutateful.Core;
 
-public class ProcessResult<T> where T:new()
+public class ProcessResult<T>
 {
     public bool Success { get; }
     public T Result { get; }
@@ -16,9 +16,9 @@ public class ProcessResult<T> where T:new()
         WarningMessage = warningMessage;
     }
 
-    public ProcessResult(string errorMessage) : this(false, new T(), $"Error: {errorMessage}") { }
+    public ProcessResult(string errorMessage) : this(false, default, $"Error: {errorMessage}") { }
 
-    public ProcessResult(string errorMessage, string header) : this(false, new T(), $"{header}: {errorMessage}") { }
+    public ProcessResult(string errorMessage, string header) : this(false, default, $"{header}: {errorMessage}") { }
 
     public ProcessResult(T result) : this(true, result, "") { }
     

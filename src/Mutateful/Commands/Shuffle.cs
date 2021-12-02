@@ -11,18 +11,18 @@ public class ShuffleOptions
 // # desc: Shuffles the order of notes by a list of numbers of arbitrary length, or by another clip. When another clip is specified, the relative pitch of each note is used to determine the shuffle order.
 public static class Shuffle
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out ShuffleOptions options);
-        return !success ? new ProcessResultArray<Clip>(msg) : Apply(options, clips);
+        return !success ? new ProcessResult<Clip[]>(msg) : Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(ShuffleOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(ShuffleOptions options, params Clip[] clips)
     {
         if (options.By.Notes.Count == 0) options.By = clips[0];
         if (options.By.Count == 0 && options.ShuffleValues.Length == 0)
         {
-            return new ProcessResultArray<Clip>("No -by clip or shuffle values specified.");
+            return new ProcessResult<Clip[]>("No -by clip or shuffle values specified.");
         }
 
         ClipUtilities.Monophonize(options.By);
@@ -87,6 +87,6 @@ public static class Shuffle
             c++;
         }
 
-        return new ProcessResultArray<Clip>(targetClips);
+        return new ProcessResult<Clip[]>(targetClips);
     }
 }

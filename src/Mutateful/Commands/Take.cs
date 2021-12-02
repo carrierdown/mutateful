@@ -18,12 +18,12 @@ public class TakeOptions
 // # desc: Creates a new clip by taking every # note from another clip. If more than one skip value is specified, they are cycled through.
 public static class Take
 {
-    public static ProcessResultArray<Clip> Apply(Command command, Clip[] clips, bool doExtract = false)
+    public static ProcessResult<Clip[]> Apply(Command command, Clip[] clips, bool doExtract = false)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out TakeOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         if (doExtract)
         {
@@ -33,7 +33,7 @@ public static class Take
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(TakeOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(TakeOptions options, params Clip[] clips)
     {
         var resultClips = new Clip[clips.Length];
 
@@ -81,6 +81,6 @@ public static class Take
             resultClips[i] = resultClip;
             i++;
         }
-        return new ProcessResultArray<Clip>(resultClips);
+        return new ProcessResult<Clip[]>(resultClips);
     }
 }

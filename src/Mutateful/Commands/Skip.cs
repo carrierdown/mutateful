@@ -9,17 +9,17 @@ public class SkipOptions
 // # desc: Creates a new clip by skipping every # note from another clip. If more than one skip value is specified, they are cycled through.
 public static class Skip
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out SkipOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(SkipOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(SkipOptions options, params Clip[] clips)
     {
         var resultClips = new Clip[clips.Length];
 
@@ -31,7 +31,7 @@ public static class Skip
 
         if (options.SkipCounts.All(x => x == 0))
         {
-            return new ProcessResultArray<Clip>("The given input to skip would produce an empty clip. Aborting...");
+            return new ProcessResult<Clip[]>("The given input to skip would produce an empty clip. Aborting...");
         }
         
         var i = 0;
@@ -63,6 +63,6 @@ public static class Skip
             resultClips[i] = resultClip;
             i++;
         }
-        return new ProcessResultArray<Clip>(resultClips);
+        return new ProcessResult<Clip[]>(resultClips);
     }
 }

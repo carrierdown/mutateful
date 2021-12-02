@@ -20,18 +20,18 @@ public class TransposeOptions
 // # desc: Transposes the notes in a clip based on either a set of passed-in values, or another clip.
 public static class Transpose
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out TransposeOptions options);
-        return !success ? new ProcessResultArray<Clip>(msg) : Apply(options, clips);
+        return !success ? new ProcessResult<Clip[]>(msg) : Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(TransposeOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(TransposeOptions options, params Clip[] clips)
     {
         if (options.By == null) options.By = new Clip(4, true);
         if (options.By.Count == 0 && options.TransposeValues.Length == 0)
         {
-            return new ProcessResultArray<Clip>("No -by clip or transpose values specified.");
+            return new ProcessResult<Clip[]>("No -by clip or transpose values specified.");
         }
         int basePitch = 60;
         if (options.By.Count > 0)
@@ -66,6 +66,6 @@ public static class Transpose
             }
             clip.Flatten();
         }
-        return new ProcessResultArray<Clip>(clips);
+        return new ProcessResult<Clip[]>(clips);
     }
 }

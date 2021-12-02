@@ -12,7 +12,7 @@ public class TreeToken
 
     public bool AllValuesFetched => CurrentIndex > 0 && CurrentIndex >= Children.Count && Children.All(x => x.AllValuesFetched);
 
-    public ProcessResultArray<Token> FlattenedValues
+    public ProcessResult<Token[]> FlattenedValues
     {
         // todo: test how this behaves with invalid input like e.g. 60|62 61 shuffle 1 2
         get {
@@ -32,7 +32,7 @@ public class TreeToken
             }
             
             CurrentIndex++;
-            return new ProcessResultArray<Token>(new [] { new Token(this) });
+            return new ProcessResult<Token[]>(new [] { new Token(this) });
         }
     }
 
@@ -73,12 +73,12 @@ public class TreeToken
     public bool IsValue => Type > _ValuesBegin && Type < _ValuesEnd;
     public bool IsPureValue => Type > _ValuesBegin && Type < _PureValuesEnd;
 
-    private ProcessResultArray<Token> ResolveChildren(List<Token> tokens)
+    private ProcessResult<Token[]> ResolveChildren(List<Token> tokens)
     {
         if (Children.Count == 0)
         {
             CurrentIndex++;
-            return new ProcessResultArray<Token>(tokens.ToArray());
+            return new ProcessResult<Token[]>(tokens.ToArray());
         }
         while (!AllValuesFetched)
         {
@@ -93,15 +93,15 @@ public class TreeToken
                 else return res;
             }
         }
-        return new ProcessResultArray<Token>(tokens.ToArray());
+        return new ProcessResult<Token[]>(tokens.ToArray());
     }
 
-    private ProcessResultArray<Token> ResolveRepeat()
+    private ProcessResult<Token[]> ResolveRepeat()
     {
         var result = new List<Token>();
         if (!Children[0].IsPureValue || Children[1].Type != Number)
         {
-            return new ProcessResultArray<Token>($"Unable to resolve REPEAT expression with values {Children[0].Value} and {Children[1].Value}");
+            return new ProcessResult<Token[]>($"Unable to resolve REPEAT expression with values {Children[0].Value} and {Children[1].Value}");
         }
         var valueToRepeat = Children[0];
         var repCountStatus = Children[1].FlattenedValues;
@@ -116,17 +116,17 @@ public class TreeToken
             }
             CurrentIndex = Children.Count; // mark this node as completed
         }
-        return new ProcessResultArray<Token>(result.ToArray());
+        return new ProcessResult<Token[]>(result.ToArray());
     }
 
-    private ProcessResultArray<Token> ResolveAlternate()
+    private ProcessResult<Token[]> ResolveAlternate()
     {
-        if (Children.Count < 2) return new ProcessResultArray<Token>("Unable to resolve ALTERNATE expression: At least two values are needed.");
+        if (Children.Count < 2) return new ProcessResult<Token[]>("Unable to resolve ALTERNATE expression: At least two values are needed.");
         return Children[CurrentIndex++ % Children.Count].FlattenedValues;
     }
 
-    private ProcessResultArray<Token> ResolveUnsupportedOperator()
+    private ProcessResult<Token[]> ResolveUnsupportedOperator()
     {
-        return new ProcessResultArray<Token>($"Unsupported operator (value is {Value})");
+        return new ProcessResult<Token[]>($"Unsupported operator (value is {Value})");
     }
 }

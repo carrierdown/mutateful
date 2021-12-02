@@ -15,18 +15,18 @@ public class ArpeggiateOptions
 // # desc: Arpeggiates the given clip using another clip, or itself.
 public static class Arpeggiate
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out ArpeggiateOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
 
     // Add option to dynamically set # of events that should be rescaled to another note, probably via velocity.
-    public static ProcessResultArray<Clip> Apply(ArpeggiateOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(ArpeggiateOptions options, params Clip[] clips)
     {
         Clip arpSequence = options.By ?? clips[0];
 
@@ -77,6 +77,6 @@ public static class Arpeggiate
             }
             processedClips.Add(resultClip);
         }
-        return new ProcessResultArray<Clip>(processedClips.ToArray());
+        return new ProcessResult<Clip[]>(processedClips.ToArray());
     }
 }

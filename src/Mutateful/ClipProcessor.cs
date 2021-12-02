@@ -9,7 +9,7 @@ namespace Mutate4l
 {
     public static class ClipProcessor
     {
-        public static ProcessResultArray<Clip> ProcessCommand(Command command, Clip[] incomingClips, ClipMetaData targetMetadata)
+        public static ProcessResult<Clip[]> ProcessCommand(Command command, Clip[] incomingClips, ClipMetaData targetMetadata)
         {
             var clips = new Clip[incomingClips.Length];
             for (var i = 0; i < incomingClips.Length; i++)
@@ -49,20 +49,20 @@ namespace Mutate4l
                 TokenType.Take => Take.Apply(command, clips),
                 TokenType.Transpose => Transpose.Apply(command, clips),
                 TokenType.VelocityScale => VelocityScale.Apply(command, clips),
-                _ => new ProcessResultArray<Clip>($"Unsupported command {command.Id}")
+                _ => new ProcessResult<Clip[]>($"Unsupported command {command.Id}")
             };
         }
 
-        public static ProcessResultArray<Clip> ProcessChainedCommand(ChainedCommand chainedCommand)
+        public static ProcessResult<Clip[]> ProcessChainedCommand(ChainedCommand chainedCommand)
         {
             Clip[] sourceClips = chainedCommand.SourceClips.Where(c => c.Notes.Count > 0).ToArray();
             if (sourceClips.Length < 1)
             {
-                return new ProcessResultArray<Clip>("No clips or empty clips specified. Aborting.");
+                return new ProcessResult<Clip[]>("No clips or empty clips specified. Aborting.");
             }
 
             var currentSourceClips = sourceClips;
-            var resultContainer = new ProcessResultArray<Clip>("No commands specified");
+            var resultContainer = new ProcessResult<Clip[]>("No commands specified");
             var warnings = new List<string>();
             foreach (var command in chainedCommand.Commands)
             {
@@ -83,7 +83,7 @@ namespace Mutate4l
 
             if (warnings.Count > 0)
             {
-                resultContainer = new ProcessResultArray<Clip>(resultContainer.Success, resultContainer.Result, resultContainer.ErrorMessage, string.Join(System.Environment.NewLine, warnings));
+                resultContainer = new ProcessResult<Clip[]>(resultContainer.Success, resultContainer.Result, resultContainer.ErrorMessage, string.Join(System.Environment.NewLine, warnings));
             }
             return resultContainer;
         }

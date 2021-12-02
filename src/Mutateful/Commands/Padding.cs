@@ -13,17 +13,17 @@ public class PaddingOptions
 // # desc: Adds silence (i.e. padding) at the start of a clip, or at the end of a clip if -post is specified. If -length is specified, padding is calculated so that the total length of the clip matches this. If length is shorter than the current clip length, the clip is cropped instead.
 public static class Padding
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out PaddingOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(PaddingOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(PaddingOptions options, params Clip[] clips)
     {
         var processedClips = new Clip[clips.Length];
 
@@ -56,6 +56,6 @@ public static class Padding
             processedClips[i] = clip;
         }
 
-        return new ProcessResultArray<Clip>(processedClips);
+        return new ProcessResult<Clip[]>(processedClips);
     }
 }

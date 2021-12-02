@@ -9,13 +9,13 @@ public class ResizeOptions
 // # desc: Resizes the current clip based on the specified factor (i.e. 0.5 halves the size of the clip, effectively doubling its tempo)
 public static class Resize
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         var (success, msg) = OptionParser.TryParseOptions(command, out ResizeOptions options);
-        return !success ? new ProcessResultArray<Clip>(msg) : Apply(options, clips);
+        return !success ? new ProcessResult<Clip[]>(msg) : Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(ResizeOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(ResizeOptions options, params Clip[] clips)
     {
         foreach (var clip in clips)
         {
@@ -27,6 +27,6 @@ public static class Resize
             clip.Length *= options.Factor;
         }
 
-        return new ProcessResultArray<Clip>(clips);
+        return new ProcessResult<Clip[]>(clips);
     }
 }

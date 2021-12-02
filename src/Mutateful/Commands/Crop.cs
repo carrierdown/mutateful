@@ -10,17 +10,17 @@ public class CropOptions
 // # desc: Crops a clip to the desired length, or within the desired region.
 public static class Crop
 {
-    public static ProcessResultArray<Clip> Apply(Command command, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(Command command, params Clip[] clips)
     {
         (var success, var msg) = OptionParser.TryParseOptions(command, out CropOptions options);
         if (!success)
         {
-            return new ProcessResultArray<Clip>(msg);
+            return new ProcessResult<Clip[]>(msg);
         }
         return Apply(options, clips);
     }
 
-    public static ProcessResultArray<Clip> Apply(CropOptions options, params Clip[] clips)
+    public static ProcessResult<Clip[]> Apply(CropOptions options, params Clip[] clips)
     {
         var processedClips = new Clip[clips.Length];
         var start = options.Lengths.Length > 1 ? options.Lengths[0] : 0;
@@ -31,7 +31,7 @@ public static class Crop
         {
             processedClips[i++] = CropClip(clip, start, duration);
         }
-        return new ProcessResultArray<Clip>(processedClips);
+        return new ProcessResult<Clip[]>(processedClips);
     }
 
     public static Clip CropClip(Clip clip, decimal start, decimal duration)
