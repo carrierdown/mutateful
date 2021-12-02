@@ -1,97 +1,91 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿namespace Mutateful.Core;
 
-namespace Mutateful.Core
+public class SortedList<T> : IEnumerable<T>
 {
-    public class SortedList<T> : IEnumerable<T>
+    private readonly List<T> _list;
+    private readonly IComparer<T> _comparer;
+
+    public int Count => _list.Count;
+
+    public bool IsReadOnly => ((IList<T>)_list).IsReadOnly;
+
+    public T this[int index] { get => _list[index]; }
+    
+    public static SortedList<T> Empty = new SortedList<T>();
+
+    public SortedList(IComparer<T> comparer = null)
     {
-        private readonly List<T> _list;
-        private readonly IComparer<T> _comparer;
+        _comparer = comparer ?? Comparer<T>.Default;
+        _list = new List<T>();
+    }
 
-        public int Count => _list.Count;
+    public SortedList(List<T> items) : this(comparer: null)
+    {
+        AddRange(items);
+    }
 
-        public bool IsReadOnly => ((IList<T>)_list).IsReadOnly;
+    public SortedList(IEnumerable<T> items) : this(comparer: null)
+    {
+        AddRange(items);
+    }
 
-        public T this[int index] { get => _list[index]; }
-        
-        public static SortedList<T> Empty = new SortedList<T>();
+    public void Add(T item)
+    {
+        if (_list.Contains(item)) return;
+        var index = _list.BinarySearch(item);
+        _list.Insert(index < 0 ? ~index : index, item);
+    }
 
-        public SortedList(IComparer<T> comparer = null)
+    public void AddRange(List<T> items)
+    {
+        items.ForEach(x => Add(x));
+    }
+
+    public void AddRange(IEnumerable<T> items)
+    {
+        foreach (var item in items)
         {
-            _comparer = comparer ?? Comparer<T>.Default;
-            _list = new List<T>();
+            Add(item);
         }
+    }
 
-        public SortedList(List<T> items) : this(comparer: null)
-        {
-            AddRange(items);
-        }
+    public int IndexOf(T item)
+    {
+        return _list.IndexOf(item);
+    }
 
-        public SortedList(IEnumerable<T> items) : this(comparer: null)
-        {
-            AddRange(items);
-        }
+    public void RemoveAt(int index)
+    {
+        _list.RemoveAt(index);
+    }
 
-        public void Add(T item)
-        {
-            if (_list.Contains(item)) return;
-            var index = _list.BinarySearch(item);
-            _list.Insert(index < 0 ? ~index : index, item);
-        }
+    public void Clear()
+    {
+        _list.Clear();
+    }
 
-        public void AddRange(List<T> items)
-        {
-            items.ForEach(x => Add(x));
-        }
+    public bool Contains(T item)
+    {
+        return _list.Contains(item);
+    }
 
-        public void AddRange(IEnumerable<T> items)
-        {
-            foreach (var item in items)
-            {
-                Add(item);
-            }
-        }
+    public void CopyTo(T[] array, int arrayIndex)
+    {
+        _list.CopyTo(array, arrayIndex);
+    }
 
-        public int IndexOf(T item)
-        {
-            return _list.IndexOf(item);
-        }
+    public bool Remove(T item)
+    {
+        return _list.Remove(item);
+    }
 
-        public void RemoveAt(int index)
-        {
-            _list.RemoveAt(index);
-        }
+    public IEnumerator<T> GetEnumerator()
+    {
+        return ((IList<T>)_list).GetEnumerator();
+    }
 
-        public void Clear()
-        {
-            _list.Clear();
-        }
-
-        public bool Contains(T item)
-        {
-            return _list.Contains(item);
-        }
-
-        public void CopyTo(T[] array, int arrayIndex)
-        {
-            _list.CopyTo(array, arrayIndex);
-        }
-
-        public bool Remove(T item)
-        {
-            return _list.Remove(item);
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            return ((IList<T>)_list).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable<T>)_list).GetEnumerator();
-        }
-
-
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return ((IEnumerable<T>)_list).GetEnumerator();
     }
 }

@@ -1,23 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+var builder = WebApplication.CreateBuilder(args);
 
-namespace Mutateful
+builder.Services.AddConnections();
+builder.Services.AddSignalR().AddMessagePackProtocol();
+builder.Services.AddSingleton<ClipSet>();
+builder.Services.AddSingleton<CommandHandler>();
+builder.Services.AddHostedService<TestService>();
+
+var app = builder.Build();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.UseEndpoints(endpoints =>
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
+    endpoints.MapHub<MutatefulHub>("/mutatefulHub");
+});
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
-    }
-}
+app.Run();

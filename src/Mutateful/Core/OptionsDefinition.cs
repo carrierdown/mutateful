@@ -1,14 +1,11 @@
-﻿using Mutateful.Compiler;
+﻿namespace Mutateful.Core;
 
-namespace Mutateful.Core
+public class OptionsDefinition
 {
-    public class OptionsDefinition
-    {
-        public OptionGroup[] OptionGroups;
-    }
+    public OptionGroup[] OptionGroups;
+}
 
-    public class OptionGroup
-    {
-        public TokenType[] Options;
-    }
+public class OptionGroup
+{
+    public TokenType[] Options;
 }

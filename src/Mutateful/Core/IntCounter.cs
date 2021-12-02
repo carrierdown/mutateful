@@ -1,31 +1,30 @@
-﻿namespace Mutateful.Core
+﻿namespace Mutateful.Core;
+
+public class IntCounter
 {
-    public class IntCounter
+    public int Value { get; private set; }
+
+    private int Max { get; }
+
+    public bool Overflow { get; private set; }
+
+    public IntCounter(int max)
     {
-        public int Value { get; private set; }
+        Max = max;
+    }
 
-        private int Max { get; }
+    public void Inc()
+    {
+        Inc(1);
+    }
 
-        public bool Overflow { get; private set; }
-
-        public IntCounter(int max)
+    public void Inc(int amount)
+    {
+        Value += amount;
+        if (Value >= Max)
         {
-            Max = max;
-        }
-
-        public void Inc()
-        {
-            Inc(1);
-        }
-
-        public void Inc(int amount)
-        {
-            Value += amount;
-            if (Value >= Max)
-            {
-                Value = 0;
-                Overflow = true;
-            }
+            Value = 0;
+            Overflow = true;
         }
     }
 }

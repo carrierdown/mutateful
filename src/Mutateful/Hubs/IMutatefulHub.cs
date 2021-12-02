@@ -1,9 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿namespace Mutateful.Hubs;
 
-namespace Mutateful.Hubs
+public interface IMutatefulHub
 {
-    public interface IMutatefulHub
-    {
-        Task SetClipDataOnClient(bool isLive11, byte[] data);
-    }
+    Task SetClipDataOnClient(bool isLive11, byte[] data);
 }
