@@ -46,7 +46,7 @@ public static class Scale
                 }
                 if (masterNotes.Count == 0) masterNotes = masterClip.Notes;
                 
-                var constrainedNote = new NoteEvent(note);
+                var constrainedNote = note with {};
                 constrainedNote.Pitch = options.Strict ? 
                     ClipUtilities.FindNearestNotePitchInSet(note, masterNotes) : 
                     ClipUtilities.FindNearestNotePitchInSetMusical(note, masterNotes);

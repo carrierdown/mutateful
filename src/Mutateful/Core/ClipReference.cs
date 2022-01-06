@@ -1,16 +1,7 @@
 namespace Mutateful.Core;
 
-public struct ClipReference
+public record struct ClipReference(int Track, int Clip)
 {
-    public int Track { get; set; }
-    public int Clip { get; set; }
-
-    public ClipReference(int track, int clip)
-    {
-        Track = track;
-        Clip = clip;
-    }
-
     public static ClipReference FromString(string clipRef)
     {
         if (TryParse(clipRef, out var result))
@@ -20,7 +11,7 @@ public struct ClipReference
         throw new ArgumentException($"Unable to parse given ClipReference: {clipRef}");
     }
 
-    public static bool TryParse(string clipRef, out ClipReference clipReference)
+    private static bool TryParse(string clipRef, out ClipReference clipReference)
     {
         clipReference = new ClipReference(0, 0);
         var val = clipRef.ToUpperInvariant();
@@ -62,13 +53,13 @@ public struct ClipReference
         }
         return decimalVal;
     }
-    
-    public static char ToSpreadshimalDigit(int val)
+
+    private static char ToSpreadshimalDigit(int val)
     {
         return (char)(65 + val);
     }
 
-    public static int FromSpreadshimalDigit(char val)
+    private static int FromSpreadshimalDigit(char val)
     {
         if (val >= 'A' && val <= 'Z') return val - 64;
         if (val >= 'a' && val <= 'z') return val - 96;

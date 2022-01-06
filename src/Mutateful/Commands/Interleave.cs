@@ -81,7 +81,7 @@ public static class Interleave
 
                             if (!options.Solo || clip.ClipReference.Track == metadata.TrackNumber)
                             {
-                                var newNote = new NoteEvent(note);
+                                var newNote = note with { };
                                 newNote.Start = position;
                                 resultClip.Notes.Add(newNote);
                             }

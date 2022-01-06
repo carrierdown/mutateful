@@ -60,7 +60,7 @@ public static class Mask
             while (i < clipToMask.Notes.Count)
             {
                 var note = clipToMask.Notes[i];
-                var clonedNote = new NoteEvent(note);
+                var clonedNote = note with { };
                 if (maskNote.CrossesStartOfIntervalInclusive(clonedNote.Start, clonedNote.End))
                 {
                     note.Duration = maskNote.End - note.Start;

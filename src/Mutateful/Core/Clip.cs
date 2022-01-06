@@ -1,6 +1,6 @@
 ﻿namespace Mutateful.Core;
 
-public class Clip : IComparable<Clip>
+public class Clip : IComparable<Clip>, IEquatable<Clip>
 {
     public SortedList<NoteEvent> Notes { get; set; }
     public int Count => Notes.Count;
@@ -27,8 +27,7 @@ public class Clip : IComparable<Clip>
     {
         foreach (var note in clip.Notes)
         {
-            var clonedNote = new NoteEvent(note);
-            Notes.Add(clonedNote);
+            Notes.Add(note with {});
         }
     }
 
@@ -93,5 +92,30 @@ public class Clip : IComparable<Clip>
     {
         if (Notes.Count == 0) return 0;
         return Notes[Math.Clamp(index, 0, Count)].Pitch - Notes[0].Pitch;
+    }
+
+    public override bool Equals(object obj)
+    {
+        return Equals(obj as Clip);
+    }
+    
+    public bool Equals(Clip other)
+    {
+        if (other == null) return false;
+        if (!(Length == other.Length && IsLooping == other.IsLooping && ClipReference == other.ClipReference &&
+              RawClipReference == other.RawClipReference && Count == other.Count)) return false;
+        for (var i = 0; i < Notes?.Count; i++)
+        {
+            if (Notes[i] != other.Notes[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Length, IsLooping, ClipReference, Count, Notes.GetHashCode());
     }
 }

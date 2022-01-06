@@ -62,7 +62,7 @@ public static class Quantize
 
             foreach (var note in clip.Notes)
             {
-                var constrainedNote = new NoteEvent(note);
+                var constrainedNote = note with { };
                 var newStart = ClipUtilities.FindNearestNoteStartInDecimalSet(note, options.Divisions);
                 constrainedNote.Start += (newStart - constrainedNote.Start) * options.Amount;
                 resultClip.Add(constrainedNote);

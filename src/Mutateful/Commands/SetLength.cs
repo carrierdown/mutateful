@@ -29,7 +29,7 @@ public static class SetLength
             var lengthCounter = 0;
             foreach (var note in clip.Notes)
             {
-                ClipUtilities.AddNoteCutting(resultClip, new NoteEvent(note)
+                ClipUtilities.AddNoteCutting(resultClip, note with
                 {
                     Duration = options.Lengths[lengthCounter++ % options.Lengths.Length]
                 });

@@ -35,14 +35,14 @@ public static class ClipExtensions
         do
         {
             var note = clip.Notes[i];
-            var simultaneousNotes = clip.Notes.Skip(i).Where(x => x.Start == note.Start && x.Pitch != note.Pitch);
-            if (simultaneousNotes.Count() > 0)
+            var simultaneousNotes = clip.Notes.Skip(i).Where(x => x.Start == note.Start && x.Pitch != note.Pitch).ToList();
+            if (simultaneousNotes.Count > 0)
             {
                 foreach (var simultaneousNote in simultaneousNotes)
                 {
                     simultaneousNote.Parent = note;
                 }
-                note.Children = simultaneousNotes.ToList();
+                note.Children = simultaneousNotes;
                 i += note.Children.Count;
             }
             groupedNotes.Add(note);

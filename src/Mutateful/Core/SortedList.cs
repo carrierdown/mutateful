@@ -1,27 +1,22 @@
 ﻿namespace Mutateful.Core;
 
-public class SortedList<T> : IEnumerable<T>
+public class SortedList<T> : IEnumerable<T>, IEquatable<T>
 {
-    private readonly List<T> _list;
-    private readonly IComparer<T> _comparer;
+    private readonly List<T> ListField;
+    private readonly IComparer<T> ComparerField;
 
-    public int Count => _list.Count;
+    public int Count => ListField.Count;
 
-    public bool IsReadOnly => ((IList<T>)_list).IsReadOnly;
+    public bool IsReadOnly => ((IList<T>)ListField).IsReadOnly;
 
-    public T this[int index] { get => _list[index]; }
-    
-    public static SortedList<T> Empty = new SortedList<T>();
+    public T this[int index] => ListField[index];
+
+    public static readonly SortedList<T> Empty = new();
 
     public SortedList(IComparer<T> comparer = null)
     {
-        _comparer = comparer ?? Comparer<T>.Default;
-        _list = new List<T>();
-    }
-
-    public SortedList(List<T> items) : this(comparer: null)
-    {
-        AddRange(items);
+        ComparerField = comparer ?? Comparer<T>.Default;
+        ListField = new List<T>();
     }
 
     public SortedList(IEnumerable<T> items) : this(comparer: null)
@@ -31,9 +26,9 @@ public class SortedList<T> : IEnumerable<T>
 
     public void Add(T item)
     {
-        if (_list.Contains(item)) return;
-        var index = _list.BinarySearch(item);
-        _list.Insert(index < 0 ? ~index : index, item);
+        if (ListField.Contains(item)) return;
+        var index = ListField.BinarySearch(item);
+        ListField.Insert(index < 0 ? ~index : index, item);
     }
 
     public void AddRange(List<T> items)
@@ -51,41 +46,72 @@ public class SortedList<T> : IEnumerable<T>
 
     public int IndexOf(T item)
     {
-        return _list.IndexOf(item);
+        return ListField.IndexOf(item);
     }
 
     public void RemoveAt(int index)
     {
-        _list.RemoveAt(index);
+        ListField.RemoveAt(index);
     }
 
     public void Clear()
     {
-        _list.Clear();
+        ListField.Clear();
     }
 
     public bool Contains(T item)
     {
-        return _list.Contains(item);
+        return ListField.Contains(item);
     }
 
     public void CopyTo(T[] array, int arrayIndex)
     {
-        _list.CopyTo(array, arrayIndex);
+        ListField.CopyTo(array, arrayIndex);
     }
 
     public bool Remove(T item)
     {
-        return _list.Remove(item);
+        return ListField.Remove(item);
     }
 
     public IEnumerator<T> GetEnumerator()
     {
-        return ((IList<T>)_list).GetEnumerator();
+        return ((IList<T>)ListField).GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return ((IEnumerable<T>)_list).GetEnumerator();
+        return ((IEnumerable<T>)ListField).GetEnumerator();
+    }
+
+    protected bool Equals(SortedList<T> other)
+    {
+        if (ListField.Count != other.Count) return false;
+        for (var i = 0; i < ListField.Count; i++)
+        {
+            if (!ListField[i].Equals(other[i]))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public bool Equals(T other)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((SortedList<T>)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return (ListField != null ? ListField.GetHashCode() : 0);
     }
 }

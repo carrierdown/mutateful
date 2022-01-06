@@ -50,7 +50,7 @@ public static class Echo
             }
             for (var i = 0; i < echoCount; i++)
             {
-                var echoedNote = new NoteEvent(noteEvent);
+                var echoedNote = noteEvent with { };
                 echoedNote.Start += delayTime * i;
                 echoedNote.Velocity -= velocityFalloff * i;
                 newNotes.Add(echoedNote);

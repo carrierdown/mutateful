@@ -2,7 +2,6 @@ global using Mutateful;
 global using Mutateful.Hubs;
 global using Mutateful.IO;
 global using Mutateful.State;
-global using Mutate4l;
 global using Mutateful.Compiler;
 global using Mutateful.Core;
 global using Mutateful.Utility;

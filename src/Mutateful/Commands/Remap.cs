@@ -47,7 +47,7 @@ public static class Remap
 
             foreach (var note in clip.Notes)
             {
-                var remappedNote = new NoteEvent(note) { Pitch = map[note.Pitch] };
+                var remappedNote = note with { Pitch = map[note.Pitch] };
                 ClipUtilities.AddNoteCutting(resultClip, remappedNote);
             }
         }

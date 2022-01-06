@@ -13,11 +13,7 @@ public static class Monophonize
         {
             var clip = clips[i];
             var resultClip = resultClips[i];
-            foreach (var note in clip.Notes)
-            {
-                var newNote = new NoteEvent(note);
-                AddNoteCutting(resultClip, newNote);
-            }
+            foreach (var note in clip.Notes) AddNoteCutting(resultClip, note with {});
         }
 
         return Filter.Apply(new FilterOptions(), resultClips);

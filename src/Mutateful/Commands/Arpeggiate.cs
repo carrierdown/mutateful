@@ -63,10 +63,10 @@ public static class Arpeggiate
                 var note = clip.Notes[i];
                 var processedNotes = new List<NoteEvent>(count);
 
-                int ix = 0;
+                var ix = 0;
                 foreach (var currentArpNote in arpNotes)
                 {
-                    NoteEvent processedNote = new NoteEvent(currentArpNote);
+                    var processedNote = currentArpNote with {};
                     processedNote.Start = note.Start + (processedNote.Start * note.Duration);
                     processedNote.Duration *= note.Duration;
                     processedNote.Pitch = note.Pitch + arpSequence.RelativePitch(ix);

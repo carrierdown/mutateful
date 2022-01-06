@@ -257,7 +257,7 @@ public static class ClipUtilities
             {
                 if (note.Start + currentLength < newLength)
                 {
-                    var noteToAdd = new NoteEvent(note)
+                    var noteToAdd = note with
                     {
                         Start = note.Start + currentLength
                     };

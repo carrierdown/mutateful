@@ -75,7 +75,7 @@ public static class Shuffle
             {
                 int currentIx = indexes[j++] % clip.Notes.Count;
                 targetClips[c].Notes.Add(
-                    new NoteEvent(clip.Notes[currentIx]) {
+                    clip.Notes[currentIx] with {
                         Start = pos
                     }
                 );

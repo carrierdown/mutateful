@@ -66,7 +66,7 @@ public static class Take
                 if (currentTake == 0)
                 {
                     if (noteIx >= clip.Count) noteIx %= clip.Count;
-                    var note = new NoteEvent(filteredNotes[noteIx]) {Start = currentPos};
+                    var note = filteredNotes[noteIx] with {Start = currentPos};
                     currentPos += clip.DurationUntilNextNote(noteIx);
                     resultClip.Add(note);
                     currentTake = options.TakeCounts[++takeIx % options.TakeCounts.Length];

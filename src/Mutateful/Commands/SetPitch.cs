@@ -42,7 +42,7 @@ public static class SetPitch
             var pitchIx = 0;
             foreach (var note in clip.Notes)
             {
-                var repitchedNote = new NoteEvent(note)
+                var repitchedNote = note with
                 {
                     Pitch = pitches[pitchIx++ % pitches.Length]
                 };
