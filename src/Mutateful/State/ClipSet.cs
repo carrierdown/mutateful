@@ -8,10 +8,12 @@ public class ClipSet
     private ClipReference InternalClipRef = new(1, 1);
     public ClipSlot this[ClipReference clipRef]
     {
-        get => ClipSlots[clipRef] ?? ClipSlot.Empty;
+        get => HasClip(clipRef) ? ClipSlots[clipRef] : ClipSlot.Empty;
         set => ClipSlots[clipRef] = value;
     }
 
+    public bool HasClip(ClipReference clipReference) => ClipSlots.ContainsKey(clipReference);
+    
     public ClipSlot this[int track, int clip]
     {
         get

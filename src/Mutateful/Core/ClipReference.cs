@@ -29,7 +29,7 @@ public record struct ClipReference(int Track, int Clip)
     public static string ToSpreadshimal(int val)
     {
         if (val <= 0) return "";
-        List<char> digits = new List<char>();
+        var digits = new List<char>();
 
         while (val-- > 0)
         {
@@ -61,9 +61,12 @@ public record struct ClipReference(int Track, int Clip)
 
     private static int FromSpreadshimalDigit(char val)
     {
-        if (val >= 'A' && val <= 'Z') return val - 64;
-        if (val >= 'a' && val <= 'z') return val - 96;
-        return 0;
+        return val switch
+        {
+            >= 'A' and <= 'Z' => val - 64,
+            >= 'a' and <= 'z' => val - 96,
+            _ => 0
+        };
     }
 
     public override string ToString()

@@ -29,13 +29,14 @@ public class MutatefulHub : Hub<IMutatefulHub>
 
     public async Task SetAndEvaluateClipData(bool isLive11, byte[] data)
     {
-        // todo: add check for whether clipdata has actually changed - might also help alleviate feedback loops
         var clip = isLive11 ? Decoder.GetSingleLive11Clip(data) : Decoder.GetSingleClip(data);
         Console.WriteLine($"{clip.ClipReference.Track}, {clip.ClipReference.Clip} Incoming clip data to evaluate");
-        var (successfulClips, errors) = CommandHandler.SetAndEvaluateClipData(clip);
-        PrintErrors(errors);
+        var result = CommandHandler.SetAndEvaluateClipData(clip);
+        if (result.RanToCompletion == false) return;
 
-        foreach (var successfulClip in successfulClips)
+        PrintErrors(result.Errors);
+
+        foreach (var successfulClip in result.SuccessfulClips)
         {
             await Clients.All.SetClipDataOnClient(isLive11,
                 isLive11
@@ -46,13 +47,14 @@ public class MutatefulHub : Hub<IMutatefulHub>
 
     public async Task SetAndEvaluateFormula(bool isLive11, byte[] data)
     {
-        // todo: add check for whether formula has actually changed - might also help alleviate feedback loops
         var (trackNo, clipNo, formula) = Decoder.GetFormula(data);
         Console.WriteLine($"{trackNo}, {clipNo}: Incoming formula {formula}");
-        var (successfulClips, errors) = CommandHandler.SetAndEvaluateFormula(formula, trackNo, clipNo);
-        PrintErrors(errors);
+        var result = CommandHandler.SetAndEvaluateFormula(formula, trackNo, clipNo);
+        if (result.RanToCompletion == false) return;
 
-        foreach (var clip in successfulClips)
+        PrintErrors(result.Errors);
+
+        foreach (var clip in result.SuccessfulClips)
         {
             await Clients.All.SetClipDataOnClient(isLive11,
                 isLive11
@@ -63,10 +65,10 @@ public class MutatefulHub : Hub<IMutatefulHub>
 
     public async Task EvaluateFormulas(bool isLive11)
     {
-        var (successfulClips, errors) = CommandHandler.EvaluateFormulas();
-        PrintErrors(errors);
+        var result = CommandHandler.EvaluateFormulas();
+        PrintErrors(result.Errors);
 
-        foreach (var clip in successfulClips)
+        foreach (var clip in result.SuccessfulClips)
         {
             await Clients.All.SetClipDataOnClient(isLive11,
                 isLive11

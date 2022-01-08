@@ -31,23 +31,23 @@ public class CommandHandler
         }
     }
 
-    public (List<Clip> successfulClips, List<string> errors) EvaluateFormulas()
+    public CommandHandlerResult EvaluateFormulas()
     {
-        if (!ClipSet.AllReferencedClipsValid()) return (new List<Clip>(), new List<string>());
+        if (!ClipSet.AllReferencedClipsValid()) return CommandHandlerResult.AbortedResult with {Errors = new List<string> {"Not all referenced clips are valid - aborting evaluation of formulas."}};
 
         var orderedClipRefs = ClipSet.GetClipReferencesInProcessableOrder();
-        if (!orderedClipRefs.Success) return (new List<Clip>(), new List<string>());
+        if (!orderedClipRefs.Success) return CommandHandlerResult.AbortedResult with {Errors = new List<string> {"Unable to fetch clip references in processable order - aborting evaluation of formulas."}};
         Console.WriteLine($"Clips to process: {string.Join(", ", orderedClipRefs.Result.Select(x => x.ToString()))}");
 
         var clipsToProcess = ClipSet.GetClipSlotsFromClipReferences(orderedClipRefs.Result);
         var (successfulClips, errors) = ClipSet.ProcessClips(clipsToProcess);
-        return (ClipSet.GetClipsFromClipReferences(successfulClips).ToList(), errors);
+        return CommandHandlerResult.CompletedResult with { SuccessfulClips = ClipSet.GetClipsFromClipReferences(successfulClips).ToList(), Errors = errors };
     }
 
-    public (List<Clip> successfulClips, List<string> errors) SetAndEvaluateClipData(Clip clipToEvaluate)
+    public CommandHandlerResult SetAndEvaluateClipData(Clip clipToEvaluate)
     {
-        if (clipToEvaluate == Clip.Empty) return (new List<Clip>(), new List<string> {"Nothing to evaluate"});
-
+        if (ClipSet[clipToEvaluate.ClipReference] != ClipSlot.Empty && clipToEvaluate.Equals(ClipSet[clipToEvaluate.ClipReference].Clip)) 
+            return CommandHandlerResult.AbortedResult with {Warnings = new List<string> {$"Aborted evaluation of clip at {clipToEvaluate.ClipReference.ToString()} since it was unchanged."}};
         var clipSlot = new ClipSlot("", clipToEvaluate, Formula.Empty);
         ClipSet[clipSlot.ClipReference] = clipSlot;
         var clipReferences = ClipSet.GetAllDependentClipRefsFromClipRef(clipSlot.ClipReference);
@@ -65,18 +65,19 @@ public class CommandHandler
         var clipsToProcess = ClipSet.GetClipSlotsFromClipReferences(orderedClipReferences.Result);
         var (successfulClips, errors) = ClipSet.ProcessClips(clipsToProcess);
 
-        return (ClipSet.GetClipsFromClipReferences(successfulClips).ToList(), errors);
+        return CommandHandlerResult.CompletedResult with { SuccessfulClips = ClipSet.GetClipsFromClipReferences(successfulClips).ToList(), Errors = errors };
     }        
     
-    public (List<Clip> successfulClips, List<string> errors) SetAndEvaluateFormula(string formula, int trackNo, int clipNo)
+    public CommandHandlerResult SetAndEvaluateFormula(string formula, int trackNo, int clipNo)
     {
-        var parsedFormula = Parser.ParseFormula(formula);
-        if (!parsedFormula.Success) return (new List<Clip>(), new List<string>());
-
         var clipRef = new ClipReference(trackNo, clipNo);
-        var clipSlot = new ClipSlot(formula, new Clip(clipRef), parsedFormula.Result);
+        if (ClipSet[clipRef] != ClipSlot.Empty && ClipSet[clipRef].Name == formula) return CommandHandlerResult.AbortedResult with {Warnings = new List<string> {$"Aborted evaluation of formula at {clipRef.ToString()} since it was unchanged."}};
+        var (success, result, errorMessage) = Parser.ParseFormula(formula);
+        if (!success) return CommandHandlerResult.AbortedResult with { Errors = new List<string> { errorMessage } };
+
+        var clipSlot = new ClipSlot(formula, new Clip(clipRef), result);
         ClipSet[clipSlot.ClipReference] = clipSlot;
         var (successfulClipRefs, errors) = ClipSet.ProcessClips(new [] {clipSlot});
-        return (ClipSet.GetClipsFromClipReferences(successfulClipRefs).ToList(), errors);
+        return CommandHandlerResult.CompletedResult with { SuccessfulClips = ClipSet.GetClipsFromClipReferences(successfulClipRefs).ToList(), Errors = errors };
     }
 }
