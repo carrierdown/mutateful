@@ -1,9 +1,11 @@
 ﻿namespace Mutateful.Commands;
 
-public class FilterOptions
+namespace Mutateful.Commands
 {
-    [OptionInfo(OptionType.Default, 1/512f)]
-    public decimal Duration { get; set; } = 4/64m;
+    public class FilterOptions
+    {
+        [OptionInfo(OptionType.Default, 1/512f)]
+        public decimal Duration { get; set; } = 4/64m;
 
     public bool Invert { get; set; }
 }

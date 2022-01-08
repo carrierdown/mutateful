@@ -12,6 +12,11 @@
     <ClipSlot clipRef="A7"/>
     <ClipSlot clipRef="A8"/>
     <ClipSlot clipRef="A9"/>
+    <ClipSlot clipRef="A10"/>
+    <ClipSlot clipRef="A11"/>
+    <ClipSlot clipRef="A12"/>
+    <ClipSlot clipRef="A13"/>
+    <ClipSlot clipRef="A14"/>
 </div>
 
 <style>
@@ -20,11 +25,12 @@
         display: grid;
         grid-template-columns: repeat(11, calc(100% / 11));
         grid-template-rows: repeat(21, 25px);
-        grid-gap: 1px;
-        background: #cdcdcd;
+        grid-gap: 2px;
+        background-color: #6c3f3f;
         grid-auto-flow: dense;
         max-width: 100%;
         overflow: hidden;
+        padding: 2px;
     }
 
 /*    &__input {

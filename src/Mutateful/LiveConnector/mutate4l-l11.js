@@ -6,8 +6,10 @@ var debuglogging = true;
 var selectedClipObserver = {};
 var clipNameObserver = {};
 var clipContentsObserver = {};
+var clipSlotObserver = {};
 var nameCallback = new ObservableCallback(-1);
 var notesCallback = new ObservableCallback(-1);
+var slotCallback = new ObservableCallback(-1);
 var messageQueue = [];
 
 var commandSignifiers = {
@@ -98,7 +100,7 @@ function onSelectedClipWithoutName(clipId, maybeName) {
 }
 
 function onSelectedClipWasCopied(clipId, maybeName) {
-    // debuglogExt("onSelectedClipWasCopied", maybeName);
+    debuglogExt("onSelectedClipWasCopied", maybeName);
     var name = maybeName || "";
     var clipSlot = new LiveAPI("id " + clipId);
     enumerateClip(getTrackNumber(clipSlot), getClipNumber(clipSlot), clipSlot);
@@ -118,9 +120,9 @@ function onSelectedClipNotesChanged(arg1) {
 }
 
 function onSelectedClipChanged(args) {
-    // debuglogExt("onSelectedClipChanged", args[args.length - 1]);
+    debuglogExt("onSelectedClipSlotChanged", args);
     var id = args[args.length - 1];
-    if (id === 0) return; // return on empty clip
+    if (id === 0) return;
     // update watchers
     outlet(1, ["updateObserversOnClipChange", id]); // Max does not support creating LiveAPI objects in custom callbacks, so this is handled by piping data back into itself via a deferlow object
 }
@@ -149,6 +151,17 @@ function updateObserversOnClipChange(rawId) {
     notesCallback.updatedInternally = false;
     clipContentsObserver.property = "notes";
     // notesCallback.setLiveApi(clipContentsObserver);
+
+    var currentClip = new LiveAPI(id);
+    var clipSlotElements = ["live_set", "tracks", getTrackNumber(currentClip), "clip_slots", getClipNumber(currentClip)];
+    clipSlotObserver.property = "";
+    clipSlotObserver = null;
+    slotCallback.name = getClipNameFromId(id);
+    slotCallback.id = rawId;
+    clipSlotObserver = new LiveAPI(slotCallback.getCallback().onHasClipChanged, clipSlotElements.join(" "));
+    // slotCallback.skipFirstNotesCallback = true;
+    clipSlotObserver.property = "has_clip";
+    // debuglogExt("clipSlotPath", clipSlotElements.join(" "));
 }
 
 // -* ObservableCallback class *- 
@@ -158,6 +171,7 @@ function ObservableCallback(id) {
     this.name = "<not set>";
     this.skipFirstNotesCallback = true;
     this.skipFirstNameCallback = true;
+    this.skipFirstHasClipCallback = true;
     this.updatedInternally = false;
 }
 
@@ -165,7 +179,7 @@ ObservableCallback.prototype.getCallback = function() {
     var self = this;
     return {
         onNameChanged: function(arg) {
-            // debuglogExt("onNameChanged");
+            // debuglogExt("onNameChanged", arg);
             var name = "";
             if (arg.indexOf("name") < 0) {
                 return;
@@ -182,7 +196,7 @@ ObservableCallback.prototype.getCallback = function() {
                 if (name.indexOf("[") < 0) {
                     outlet(2, ["onSelectedClipWithoutName", parseInt(self.id, 10), name]);
                 }
-                debuglogExt("onNameChanged skipped");
+                // debuglogExt("onNameChanged skipped");
                 self.skipFirstNameCallback = false;
                 return;
             }
@@ -193,7 +207,7 @@ ObservableCallback.prototype.getCallback = function() {
                     // clip was probably copied
                     outlet(2, ["onSelectedClipWasCopied", parseInt(self.id, 10), name]);
                 } else {
-                    debuglogExt("clipname probably changed");
+                    // debuglogExt("clipname probably changed");
                     // name of selected clip changed
                     self.name = name;
                     outlet(2, ["onSelectedClipRenamed", parseInt(self.id, 10), name]);
@@ -202,6 +216,7 @@ ObservableCallback.prototype.getCallback = function() {
 
         },
         onNotesChanged: function(arg) {
+            debuglogExt("onNotesChanged", arg);
             if (self.updatedInternally === true) {
                 // debuglogExt("onNotesChanged terminated");
                 // self.updatedInternally = false;
@@ -221,6 +236,18 @@ ObservableCallback.prototype.getCallback = function() {
             if (arg.indexOf("notes") >= 0) {
                 outlet(2, ["onSelectedClipNotesChanged", parseInt(self.id, 10)]);
             }
+        },
+        onHasClipChanged: function(args) {
+            if (self.skipFirstHasClipCallback === true) {
+                self.skipFirstHasClipCallback = false;
+                return;
+            }
+            if (args.length > 1 && args[1] === 0) {
+                debuglogExt("xxx clip was deleted");
+            }
+            if (args.length > 1 && args[1] === 1) {
+                debuglogExt("clip created?");
+            }
         }
     };
 };
@@ -233,8 +260,8 @@ ObservableCallback.prototype.getCallback = function() {
 
 function onClipDataFromServer(data) {
     // debuglogExt("incoming clip data");
-    var trackNo = data[0];
-    var clipNo = data[1];
+    var trackNo = data[0] - 1;
+    var clipNo = data[1] - 1;
     var clipLength = getFloat32FromByteArray(data, 2);
     var isLooping = data[6];
     var numNotes = getUint16FromByteArray(data, 7);
@@ -246,7 +273,6 @@ function onClipDataFromServer(data) {
     liveObject.set('end_marker', clipLength);
     liveObject.set('looping', isLooping);
     
-    // todo: fill dict with note objects - convert to json then send with add_new_notes function
     var noteDict = {notes:[]};
     
     // liveObject.call('notes', numNotes);
@@ -259,7 +285,6 @@ function onClipDataFromServer(data) {
         var velocityDeviation = getFloat32FromByteArray(data, startOffset + 17);
         var releaseVelocity = getFloat32FromByteArray(data, startOffset + 21);
         
-        // liveObject.call('note', pitch, start, duration, velocity, 0 /* not muted */);
         var note = {
             pitch: pitch, start_time: start, duration: duration, velocity: velocity, probability: probability, 
             velocity_deviation: velocityDeviation, release_velocity: releaseVelocity

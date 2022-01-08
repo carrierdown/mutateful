@@ -42,107 +42,107 @@ public static class Decoder
         };
     }
 
-    public static (int trackNo, int clipNo, string formula) GetFormula(byte[] data)
-    {
-        int trackNo = data[0];
-        int clipNo = data[1];
-        var formula = Encoding.UTF8.GetString(data[2..]);
-        return (trackNo, clipNo, formula);
-    }
-    
-    public static string GetText(byte[] data)
-    {
-        return Encoding.UTF8.GetString(data);
-    }
-    
-    /*public static void HandleTypedCommand(byte[] data, ClipSet clipSet, ChannelWriter<InternalCommand> writer)
-    {
-        switch (GetCommandType(data[3]))
+        public static (int trackNo, int clipNo, string formula) GetFormula(byte[] data)
         {
-            case OutputString:
-                CommandHandler.OutputString(data);
-                break;
-            case SetFormulaOnServer:
-                CommandHandler.SetFormula(data, clipSet);
-                break;
-            case SetClipDataOnServer:
-                CommandHandler.SetClipData(data, clipSet);
-                break;
-            case EvaluateFormulas:
-                CommandHandler.EvaluateFormulas(data, clipSet, writer);
-                break;
-            case SetAndEvaluateClipDataOnServer:
-                CommandHandler.SetAndEvaluateClipData(data, clipSet, writer);
-                break;
-            case SetAndEvaluateFormulaOnServer:
-                CommandHandler.SetAndEvaluateFormula(data, clipSet, writer);
-                break;
-            case UnknownCommand:
-                break;
+            int trackNo = data[0] + 1;
+            int clipNo = data[1] + 1;
+            var formula = Encoding.UTF8.GetString(data[2..]);
+            return (trackNo, clipNo, formula);
         }
-    }*/
-    
-    public static Clip GetSingleClip(byte[] data)
-    {
-        var offset = 0;
-        var clipReference = new ClipReference(data[offset], data[offset += 1]);
-        decimal length = (decimal)BitConverter.ToSingle(data, offset += 1);
-        bool isLooping = data[offset += 4] == 1;
-        var clip = new Clip(length, isLooping)
-        {
-            ClipReference = clipReference
-        };
-        ushort numNotes = BitConverter.ToUInt16(data, offset += 1);
-        offset += 2;
-        for (var i = 0; i < numNotes; i++)
-        {
-            clip.Notes.Add(new NoteEvent(
-                data[offset], 
-                (decimal)BitConverter.ToSingle(data, offset += 1), 
-                (decimal)BitConverter.ToSingle(data, offset += 4), 
-                data[offset += 4])
-            );
-            offset++;
-        }
-        return clip;
-    }
-    
-    public static Clip GetSingleLive11Clip(byte[] data)
-    {
-        var offset = 0;
-        var clipReference = new ClipReference(data[offset], data[offset += 1]);
-        decimal length = (decimal)BitConverter.ToSingle(data, offset += 1);
-        bool isLooping = data[offset += 4] == 1;
-        var clip = new Clip(length, isLooping)
-        {
-            ClipReference = clipReference
-        };
-        ushort numNotes = BitConverter.ToUInt16(data, offset += 1);
-        offset += 2;
         
-        for (var i = 0; i < numNotes; i++)
+        public static string GetText(byte[] data)
         {
-            clip.Notes.Add(new NoteEvent(
-                pitch: data[offset],
-                start: (decimal)BitConverter.ToSingle(data, offset + 1),
-                duration: (decimal)BitConverter.ToSingle(data, offset + 5), 
-                velocity: BitConverter.ToSingle(data, offset + 9), 
-                probability: BitConverter.ToSingle(data, offset + 13), 
-                velocityDeviation: BitConverter.ToSingle(data, offset + 17),
-                releaseVelocity: BitConverter.ToSingle(data, offset + 21)
-            ));
-            offset += SizeOfOneNoteInBytesLive11;
+            return Encoding.UTF8.GetString(data);
         }
-        return clip;
-    }
-    
-    public static (List<Clip> Clips, string Formula, ushort Id, byte TrackNo) DecodeData(byte[] data)
-    {
-        var clips = new List<Clip>();
-        ushort id = BitConverter.ToUInt16(data, 0);
-        byte trackNo = data[2];
-        byte numClips = data[3];
-        int dataOffset = 4;
+        
+        /*public static void HandleTypedCommand(byte[] data, ClipSet clipSet, ChannelWriter<InternalCommand> writer)
+        {
+            switch (GetCommandType(data[3]))
+            {
+                case OutputString:
+                    CommandHandler.OutputString(data);
+                    break;
+                case SetFormulaOnServer:
+                    CommandHandler.SetFormula(data, clipSet);
+                    break;
+                case SetClipDataOnServer:
+                    CommandHandler.SetClipData(data, clipSet);
+                    break;
+                case EvaluateFormulas:
+                    CommandHandler.EvaluateFormulas(data, clipSet, writer);
+                    break;
+                case SetAndEvaluateClipDataOnServer:
+                    CommandHandler.SetAndEvaluateClipData(data, clipSet, writer);
+                    break;
+                case SetAndEvaluateFormulaOnServer:
+                    CommandHandler.SetAndEvaluateFormula(data, clipSet, writer);
+                    break;
+                case UnknownCommand:
+                    break;
+            }
+        }*/
+        
+        public static Clip GetSingleClip(byte[] data)
+        {
+            var offset = 0;
+            var clipReference = new ClipReference(data[offset] + 1, data[offset += 1] + 1);
+            decimal length = (decimal)BitConverter.ToSingle(data, offset += 1);
+            bool isLooping = data[offset += 4] == 1;
+            var clip = new Clip(length, isLooping)
+            {
+                ClipReference = clipReference
+            };
+            ushort numNotes = BitConverter.ToUInt16(data, offset += 1);
+            offset += 2;
+            for (var i = 0; i < numNotes; i++)
+            {
+                clip.Notes.Add(new NoteEvent(
+                    data[offset], 
+                    (decimal)BitConverter.ToSingle(data, offset += 1), 
+                    (decimal)BitConverter.ToSingle(data, offset += 4), 
+                    data[offset += 4])
+                );
+                offset++;
+            }
+            return clip;
+        }
+        
+        public static Clip GetSingleLive11Clip(byte[] data)
+        {
+            var offset = 0;
+            var clipReference = new ClipReference(data[offset] + 1, data[offset += 1] + 1);
+            decimal length = (decimal)BitConverter.ToSingle(data, offset += 1);
+            bool isLooping = data[offset += 4] == 1;
+            var clip = new Clip(length, isLooping)
+            {
+                ClipReference = clipReference
+            };
+            ushort numNotes = BitConverter.ToUInt16(data, offset += 1);
+            offset += 2;
+            
+            for (var i = 0; i < numNotes; i++)
+            {
+                clip.Notes.Add(new NoteEvent(
+                    pitch: data[offset],
+                    start: (decimal)BitConverter.ToSingle(data, offset + 1),
+                    duration: (decimal)BitConverter.ToSingle(data, offset + 5), 
+                    velocity: BitConverter.ToSingle(data, offset + 9), 
+                    probability: BitConverter.ToSingle(data, offset + 13), 
+                    velocityDeviation: BitConverter.ToSingle(data, offset + 17),
+                    releaseVelocity: BitConverter.ToSingle(data, offset + 21)
+                ));
+                offset += SizeOfOneNoteInBytesLive11;
+            }
+            return clip;
+        }
+        
+        public static (List<Clip> Clips, string Formula, ushort Id, byte TrackNo) DecodeData(byte[] data)
+        {
+            var clips = new List<Clip>();
+            ushort id = BitConverter.ToUInt16(data, 0);
+            byte trackNo = data[2];
+            byte numClips = data[3];
+            int dataOffset = 4;
 
         // Decode clipdata
         while (clips.Count < numClips)

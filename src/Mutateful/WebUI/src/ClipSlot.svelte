@@ -51,7 +51,9 @@
 </script>
 
 <div class="clip-slot">
-    <div class="clip-slot--title"><span class="clip-slot--ref">{clipRef.toUpperCase()}</span>Clip title goes here</div>
+    <div class="clip-slot--header">
+        <span class="clip-slot--ref">{clipRef.toUpperCase()}</span><span class="clip-slot--title">Clip title goes here</span>
+    </div>
     <canvas class="clip-slot--preview" width="{canvasWidth}" height="{canvasHeight}" bind:this={canvas}>{getClip($readableClip)}</canvas>
 </div>
 
@@ -59,7 +61,25 @@
     .clip-slot {
         border: none;
         background: #fff;
-        padding: 0 6px;
+    }
+    
+    .clip-slot--header {
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    
+    .clip-slot--ref {
+        background-color: #444d6aff;
+        color: #cefefeff;
+    }
+    
+    .clip-slot--title {
+        background-color: #aee1d9ff;
+        color: #1d324fff;
+    }
+    
+    .clip-slot--ref, .clip-slot--title {
+        padding: .1rem .2rem;
     }
     
     canvas {
