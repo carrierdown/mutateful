@@ -185,8 +185,8 @@ public class Tests
         clip3.Notes[0].Pitch = 40;
         Assert.AreEqual(clip2.Notes[0].Pitch, 36);
         
-        var note1 = new NewNoteEvent(36, 0, .25m, 100);
-        var note2 = new NewNoteEvent(36, 0, .25m, 100);
+        var note1 = new NoteEvent(36, 0, .25m, 100);
+        var note2 = new NoteEvent(36, 0, .25m, 100);
         // var note2 = note1 with { Pitch = 40 };
         Assert.AreEqual(note1, note2);
     }

@@ -1,11 +1,9 @@
 ﻿namespace Mutateful.Commands;
 
-namespace Mutateful.Commands
+public class FilterOptions
 {
-    public class FilterOptions
-    {
-        [OptionInfo(OptionType.Default, 1/512f)]
-        public decimal Duration { get; set; } = 4/64m;
+    [OptionInfo(OptionType.Default, 1 / 512f)]
+    public decimal Duration { get; set; } = 4 / 64m;
 
     public bool Invert { get; set; }
 }
@@ -20,6 +18,7 @@ public static class Filter
         {
             return new ProcessResult<Clip[]>(msg);
         }
+
         return Apply(options, clips);
     }
 
@@ -32,10 +31,9 @@ public static class Filter
             var clip = clips[c];
             var processedClip = new Clip(clip.Length, clip.IsLooping);
 
-            processedClip.Notes = (options.Invert) ?
-
-                clip.Notes.Where(x => x.Duration < options.Duration).ToSortedList() :
-                clip.Notes.Where(x => x.Duration > options.Duration).ToSortedList();
+            processedClip.Notes = (options.Invert)
+                ? clip.Notes.Where(x => x.Duration < options.Duration).ToSortedList()
+                : clip.Notes.Where(x => x.Duration > options.Duration).ToSortedList();
 
             processedClips[c] = processedClip;
         }
