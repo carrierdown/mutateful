@@ -15,8 +15,6 @@ const commandSignifiers = {
 
 const live11Flag = 128; // 0x80
 
-//maxApi.post("Heisannn!");
-
 let connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:5000/mutatefulHub")
     .withHubProtocol(new signalRMsgPack.MessagePackHubProtocol())
@@ -30,29 +28,33 @@ connection.on("SetClipDataOnClient", (isLive11, data) => {
 });
 
 maxApi.addHandler(MESSAGE_TYPES.LIST, async (...args) => {
-    maxApi.post(`received list: ${args.join(", ")}`);
+    //maxApi.post(`received list: ${args.join(", ")}`);
     if (args.length === 0) return;
     let commandSignifier = args[0];
     let isLive11 = (commandSignifier & live11Flag) > 0;
-    switch (commandSignifier & 0x0f) {
-        case commandSignifiers.setClipData:
-            await connection.invoke("SetClipData", isLive11, new Uint8Array(args.slice(1)));
-            break;
-        case commandSignifiers.setFormula:
-            await connection.invoke("SetFormula", new Uint8Array(args.slice(1)));
-            break;
-        case commandSignifiers.setAndEvaluateClipData:
-            await connection.invoke("SetAndEvaluateClipData", isLive11, new Uint8Array(args.slice(1)));
-            break;
-        case commandSignifiers.setAndEvaluateFormula:
-            await connection.invoke("SetAndEvaluateFormula", isLive11, new Uint8Array(args.slice(1)));
-            break;
-        case commandSignifiers.evaluateFormulas:
-            await connection.invoke("EvaluateFormulas", isLive11);
-            break;
-        case commandSignifiers.logMessage:
-            await connection.invoke("LogMessage", new Uint8Array(args.slice(1)));
-            break;
+    try {
+        switch (commandSignifier & 0x0f) {
+            case commandSignifiers.setClipData:
+                await connection.invoke("SetClipData", isLive11, new Uint8Array(args.slice(1)));
+                break;
+            case commandSignifiers.setFormula:
+                await connection.invoke("SetFormula", new Uint8Array(args.slice(1)));
+                break;
+            case commandSignifiers.setAndEvaluateClipData:
+                await connection.invoke("SetAndEvaluateClipData", isLive11, new Uint8Array(args.slice(1)));
+                break;
+            case commandSignifiers.setAndEvaluateFormula:
+                await connection.invoke("SetAndEvaluateFormula", isLive11, new Uint8Array(args.slice(1)));
+                break;
+            case commandSignifiers.evaluateFormulas:
+                await connection.invoke("EvaluateFormulas", isLive11);
+                break;
+            case commandSignifiers.logMessage:
+                await connection.invoke("LogMessage", new Uint8Array(args.slice(1)));
+                break;
+        }
+    } catch (err) {
+        maxApi.post(`Error occurred when invoking command with id ${commandSignifier & 0x0f}`);
     }
 });
 

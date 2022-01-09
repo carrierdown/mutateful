@@ -296,10 +296,6 @@ function onClipDataFromServer(data) {
     liveObject.call('remove_notes_extended', 0, 128, 0, clipLength);
     liveObject.call('add_new_notes', JSON.stringify(noteDict));
     outlet(1, ["resetInternalUpdateState"]);
-    // messageQueue.push([resetUpdatedInternallyIdentifier]); // since L11 is even more trigger happy with our callbacks, it's no longer 
-    // sufficient to set a flag which is then reset afterwards. Instead we need to wait a certain amount of time (a message cycle 
-    // in this case), before clearing the flag. This is handled by issuing a special message to the top of our messageQueue, which 
-    // processQueue understands as "reset updatedInternally flag".
 }
 
 function getOrCreateClipAtPosition(trackNo, clipNo) {

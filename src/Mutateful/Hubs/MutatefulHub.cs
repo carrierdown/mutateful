@@ -32,9 +32,9 @@ public class MutatefulHub : Hub<IMutatefulHub>
         var clip = isLive11 ? Decoder.GetSingleLive11Clip(data) : Decoder.GetSingleClip(data);
         Console.WriteLine($"{clip.ClipReference.Track}, {clip.ClipReference.Clip} Incoming clip data to evaluate");
         var result = CommandHandler.SetAndEvaluateClipData(clip);
-        if (result.RanToCompletion == false) return;
 
-        PrintErrors(result.Errors);
+        PrintErrorsAndWarnings(result);
+        if (result.RanToCompletion == false) return;
 
         foreach (var successfulClip in result.SuccessfulClips)
         {
@@ -50,9 +50,9 @@ public class MutatefulHub : Hub<IMutatefulHub>
         var (trackNo, clipNo, formula) = Decoder.GetFormula(data);
         Console.WriteLine($"{trackNo}, {clipNo}: Incoming formula {formula}");
         var result = CommandHandler.SetAndEvaluateFormula(formula, trackNo, clipNo);
-        if (result.RanToCompletion == false) return;
 
-        PrintErrors(result.Errors);
+        PrintErrorsAndWarnings(result);
+        if (result.RanToCompletion == false) return;
 
         foreach (var clip in result.SuccessfulClips)
         {
@@ -66,7 +66,7 @@ public class MutatefulHub : Hub<IMutatefulHub>
     public async Task EvaluateFormulas(bool isLive11)
     {
         var result = CommandHandler.EvaluateFormulas();
-        PrintErrors(result.Errors);
+        PrintErrorsAndWarnings(result);
 
         foreach (var clip in result.SuccessfulClips)
         {
@@ -84,11 +84,17 @@ public class MutatefulHub : Hub<IMutatefulHub>
         return Task.CompletedTask;
     }
 
-    private void PrintErrors(List<string> errorMessages)
+    private void PrintErrorsAndWarnings(CommandHandlerResult result)
     {
-        foreach (var errorMessage in errorMessages)
+        if (result.Errors.Count > 0) Console.WriteLine("Evaluation produced errors:");
+        foreach (var message in result.Errors)
         {
-            Console.WriteLine(errorMessage);
+            Console.WriteLine(message);
+        }
+        if (result.Warnings.Count > 0) Console.WriteLine("Evaluation produced warnings:");
+        foreach (var message in result.Warnings)
+        {
+            Console.WriteLine(message);
         }
     }
 }

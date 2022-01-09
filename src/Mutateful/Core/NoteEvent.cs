@@ -51,7 +51,7 @@ public record NoteEvent(float VelocityDeviation = 0, float ReleaseVelocity = 64,
     public NoteEvent Parent { get; set; }
 
     public NoteEvent(int pitch, decimal start, decimal duration, float velocity, float probability = 1,
-        float velocityDeviation = 0, float releaseVelocity = 64) : this(probability, velocityDeviation, releaseVelocity)
+        float velocityDeviation = 0, float releaseVelocity = 64) : this(velocityDeviation, releaseVelocity, probability)
     {
         Pitch = pitch;
         Start = start;
