@@ -15,10 +15,7 @@
 
 ## Installing
 
-Go to the [latest release](https://github.com/carrierdown/mutateful/releases/latest) for installation instructions and download links for Windows and OS X.
-
-<!--[![Join the chat at https://gitter.im/mutateful/community](https://badges.gitter.im/mutateful/community.svg)](https://gitter.im/mutateful/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)-->
-
+Go to the [latest release](https://github.com/carrierdown/mutateful/releases/latest) for installation instructions and download links for Windows and macOS.
 
 ## See it in action
 
@@ -61,6 +58,12 @@ Ratchet accepts a number of other parameters to scale the resulting retriggers i
 `=a4 ratchet 1 2 3 6 1 2 5 -shape easein -strength 0.5`
 
 ![Adding retriggering with shaping](./assets/Generated637069235238519840-clip.svg)
+
+## Support
+
+If you're having trouble getting Mutateful to work, you can start a new discussion in the [Q&A section](https://github.com/carrierdown/mutateful/discussions/categories/q-a) here on Github. If you think you have encountered a bug or something that needs additional work to resolve, feel free to file a [new issue](https://github.com/carrierdown/mutateful/issues).
+
+If you're looking for ways to support this project, you can support me by checking out/supporting my music on [Bandcamp](https://upland.bandcamp.com/).
 
 ## Quick command reference
 
@@ -112,7 +115,7 @@ Be sure to star this repo and/or follow me at [twitter.com/KnUpland](https://twi
 ### Pre-requisites
 
 - Git
-- .NET 5 SDK
+- .NET 6 SDK
 
 ### Building
 
