@@ -118,5 +118,5 @@ Be sure to star this repo and/or follow me at [twitter.com/KnUpland](https://twi
 
 Using the command line/terminal, navigate to the src folder inside the mutateful repository and run:
 
-Windows: `dotnet publish -c Release`<br>
+Windows: `dotnet publish -c Release /p:RuntimeIdentifier=win-x64 /p:PublishSingleFile=true /p:UseAppHost=true`<br>
 MacOS / OS X: `dotnet publish -c Release /p:RuntimeIdentifier=osx-x64 /p:PublishTrimmed=false`
