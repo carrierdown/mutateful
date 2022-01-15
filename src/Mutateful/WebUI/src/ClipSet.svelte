@@ -1,46 +1,32 @@
 ﻿<script lang="ts">
     import ClipSlot from "./ClipSlot.svelte";
+    let clips = [
+        [{formula:"", clipRef:"A1"}, {formula:"", clipRef:"B1"}, {formula:"", clipRef:"C1"}, {formula:"", clipRef:"D1"}, {formula:"", clipRef:"E1"}, {formula:"", clipRef:"F1"}, {formula:"", clipRef:"G1"}, {formula:"", clipRef:"H1"}, {formula:"", clipRef:"I1"}, {formula:"", clipRef:"J1"}],
+        [{formula:"", clipRef:"A2"}, {formula:"", clipRef:"B2"}, {formula:"", clipRef:"C2"}, {formula:"", clipRef:"D2"}, {formula:"", clipRef:"E2"}, {formula:"", clipRef:"F1"}, {formula:"", clipRef:"G1"}, {formula:"", clipRef:"H1"}, {formula:"", clipRef:"I1"}, {formula:"", clipRef:"J1"}],
+        [{formula:"", clipRef:"A3"}, {formula:"", clipRef:"B3"}, {formula:"", clipRef:"C3"}, {formula:"", clipRef:"D3"}, {formula:"", clipRef:"E3"}, {formula:"", clipRef:"F1"}, {formula:"", clipRef:"G1"}, {formula:"", clipRef:"H1"}, {formula:"", clipRef:"I1"}, {formula:"", clipRef:"J1"}],
+        [{formula:"", clipRef:"A4"}, {formula:"", clipRef:"B4"}, {formula:"", clipRef:"C4"}, {formula:"", clipRef:"D4"}, {formula:"", clipRef:"E4"}, {formula:"", clipRef:"F1"}, {formula:"", clipRef:"G1"}, {formula:"", clipRef:"H1"}, {formula:"", clipRef:"I1"}, {formula:"", clipRef:"J1"}]
+    ];
 </script>
 
-<div class="cells">
-    <ClipSlot clipRef="A1"/>
-    <ClipSlot clipRef="A2"/>
-    <ClipSlot clipRef="A3"/>
-    <ClipSlot clipRef="A4"/>
-    <ClipSlot clipRef="A5"/>
-    <ClipSlot clipRef="A6"/>
-    <ClipSlot clipRef="A7"/>
-    <ClipSlot clipRef="A8"/>
-    <ClipSlot clipRef="A9"/>
-    <ClipSlot clipRef="A10"/>
-    <ClipSlot clipRef="A11"/>
-    <ClipSlot clipRef="A12"/>
-    <ClipSlot clipRef="A13"/>
-    <ClipSlot clipRef="A14"/>
-</div>
+<table class="main-cell-table">
+    {#each clips as clipRow}
+        <tr>
+        {#each clipRow as clip}
+            <td><ClipSlot clipRef="{clip.clipRef}" formula="{clip.formula}"/></td>
+        {/each}
+        </tr>
+    {/each}
+</table>
 
 <style>
-    .cells {
-        position: relative;
-        display: grid;
-        grid-template-columns: repeat(11, calc(100% / 11));
-        grid-template-rows: repeat(21, 25px);
-        grid-gap: 2px;
-        background-color: #6c3f3f;
-        grid-auto-flow: dense;
-        max-width: 100%;
-        overflow: hidden;
-        padding: 2px;
+    table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: 100%;
     }
-
-/*    &__input {
-         border: none;
-         padding: 0 6px;
-     }
-    input, button {
-        border: none;
-        background: #fff;
-        padding: 0 6px;
-        font-family: 'Noto Sans', sans-serif;
-    }*/
+    th, td {
+        width: 150px;
+        overflow: hidden;
+        white-space: nowrap;
+    }
 </style>

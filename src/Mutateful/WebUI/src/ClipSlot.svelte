@@ -4,12 +4,14 @@
     import {decodeClip} from "./dataHelpers";
     import {Clip} from "./clip";
     export let clipRef;
+    export let formula = "";
     const readableClip = clipDataStore(clipRef || "A1");
     
     let canvas;
     let mounted: boolean = false;
     let canvasWidth = 300;
     let canvasHeight = 150;
+    let empty = true;
     
     onMount(() => {
         mounted = true;
@@ -19,6 +21,7 @@
     });
     
     const updateClip = (clip: Clip) => {
+        empty = false;
         const ctx = canvas.getContext('2d');
         console.log(canvasWidth, canvasHeight);
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -52,18 +55,23 @@
 
 <div class="clip-slot">
     <div class="clip-slot--header">
-        <span class="clip-slot--ref">{clipRef.toUpperCase()}</span><span class="clip-slot--title">Clip title goes here</span>
+        <span class="clip-slot--ref">{clipRef.toUpperCase()}</span><span class="clip-slot--title">{formula}</span>
     </div>
-    <canvas class="clip-slot--preview" width="{canvasWidth}" height="{canvasHeight}" bind:this={canvas}>{getClip($readableClip)}</canvas>
+    <canvas class="clip-slot--preview" class:empty width="{canvasWidth}" height="{canvasHeight}" bind:this={canvas}>{getClip($readableClip)}</canvas>
 </div>
 
 <style>
     .clip-slot {
         border: none;
-        background: #fff;
+        background-color: #ceceb4;
+    }
+    
+    .empty {
+        transform: scale(0);
     }
     
     .clip-slot--header {
+        display: flex;
         white-space: nowrap;
         overflow: hidden;
     }
@@ -72,8 +80,11 @@
         background-color: #444d6aff;
         color: #cefefeff;
     }
-    
+    .clip {
+        background: 10px;
+    }
     .clip-slot--title {
+        flex-grow: 1;
         background-color: #aee1d9ff;
         color: #1d324fff;
     }
