@@ -11,11 +11,11 @@
 > &mdash; Matt Black, co-founder of Ninja Tune & Coldcut.
 
 ## Concept
-`mutateful` reimagines Ableton Live's session view as a spreadsheet-like live coding setup. You add formulas to dynamically shuffle, arpeggiate, constrain, scale, retrigger, and otherwise transform clips in myriad ways. Formulas operate on other clips and/or textual inputs to produce new clips. Unlike most experimental sequencers, `mutateful` leverages Live's built-in sequencing functionality, allowing you to use any existing MIDI clip as a source of fresh inspiration.
+`mutateful` transforms Ableton Live's session view into a live coding environment similar to a spreadsheet. It allows you to create formulas for shuffling, arpeggiating, constraining, scaling, retriggering, and transforming clips in various ways. These formulas use other clips and/or textual inputs to generate new clips. By utilizing Live's built-in sequencing functionality, mutateful allows you to use any existing MIDI clip as a starting point for new creative ideas.
 
 ## Installing
 
-Go to the [latest release](https://github.com/carrierdown/mutateful/releases/latest) for installation instructions and download links for Windows and macOS.
+Visit the [latest release](https://github.com/carrierdown/mutateful/releases/latest) for installation instructions and download links for Windows and macOS.
 
 ## See it in action
 
