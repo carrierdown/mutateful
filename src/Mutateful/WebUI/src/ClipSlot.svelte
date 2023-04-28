@@ -1,31 +1,21 @@
 ﻿<script lang="ts">
     import {clipDataStore} from "./stores";
-    import {onDestroy, onMount} from "svelte";
+    import {onMount} from "svelte";
     import {decodeClip} from "./dataHelpers";
     import {Clip} from "./clip";
     export let clipRef;
     export let formula = "";
-    const unsubscribe = clipDataStore.subscribe(({ref, data}) => {
-        console.log("Hello")
-        if (clipRef === ref) {
-            console.log("Hello we have a match")
-        }
-    });
     
     let canvas;
-    let mounted: boolean = false;
     let canvasWidth = 300;
     let canvasHeight = 150;
     let empty = true;
     
     onMount(() => {
-        mounted = true;
         let cs = getComputedStyle(canvas);
         canvasWidth = parseInt(cs.getPropertyValue('width'), 10);
         canvasHeight = parseInt(cs.getPropertyValue('height'), 10);
     });
-    
-    onDestroy(unsubscribe);
     
     const updateClip = (clip: Clip) => {
         empty = false;
@@ -40,23 +30,22 @@
         let pitches = clip.notes.map(x => x.pitch);
         let highestNote = Math.max(...pitches);
         let lowestNote = Math.min(...pitches);
-        let noteRange = (highestNote + 1) - lowestNote;
+        let noteRange = Math.max((highestNote) - lowestNote, 5);
         let xDelta = canvasWidth / length;
-        let yDelta = canvasHeight / noteRange;
+        let yDelta = canvasHeight / (noteRange + 1);
         
         for (let note of clip.notes)
         {
-            if (note.start >= length) return;
-            // console.log(Math.floor(xDelta * note.start), Math.floor(yDelta * (note.pitch - lowestNote)), Math.floor(xDelta), Math.floor(yDelta));
-            ctx.fillRect(Math.floor(xDelta * note.start), Math.floor(yDelta * (note.pitch - lowestNote)), Math.floor(xDelta), Math.floor(yDelta));
+            if (note.start >= length) {
+                console.log("skipping")
+                return;
+            }
+            ctx.fillRect(Math.floor(xDelta * note.start), Math.floor(yDelta * (noteRange - (note.pitch - lowestNote))), Math.floor(xDelta * note.duration), Math.floor(yDelta));
         }
     };
 
     const getClip = (data: Uint8Array) => {
-        if (mounted) {
-            console.log("Updating clip")
-            updateClip(decodeClip(data));
-        }
+        updateClip(decodeClip(data));
         return "";
     }
 </script>
@@ -87,9 +76,6 @@
     .clip-slot--ref {
         background-color: #444d6aff;
         color: #cefefeff;
-    }
-    .clip {
-        background: 10px;
     }
     .clip-slot--title {
         flex-grow: 1;
