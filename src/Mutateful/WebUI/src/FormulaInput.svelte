@@ -16,7 +16,7 @@
 
 <code class="char-width-reference">M</code>
 <input class="formula-editor" type="text" on:keyup={handleKeyup}>
-<div class="autocomplete-list" style="left: {offset}px;"></div>
+<div class="autocomplete-list" style="left: {offset}px; display: none;"></div>
 
 <style>
     .char-width-reference {
@@ -34,6 +34,7 @@
         font-family: Consolas, "Lucida Console", monospace;
     }
     .autocomplete-list {
+        display: block;
         position: absolute;
         width: 150px;
         height: 4rem;

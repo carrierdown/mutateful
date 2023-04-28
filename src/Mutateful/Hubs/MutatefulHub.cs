@@ -1,20 +1,49 @@
-﻿using Decoder = Mutateful.IO.Decoder;
+﻿using System.Collections.Concurrent;
+using Decoder = Mutateful.IO.Decoder;
 
 namespace Mutateful.Hubs;
 
 public class MutatefulHub : Hub<IMutatefulHub>
 {
     private readonly CommandHandler CommandHandler;
-
+    private static readonly ConcurrentDictionary<string, string> Connections = new ();
+    
     public MutatefulHub(CommandHandler commandHandler)
     {
         CommandHandler = commandHandler;
     }
 
+    public override async Task OnConnectedAsync()
+    {
+        string username = Context.User?.Identity?.Name ?? "unknown";
+        string connectionId = Context.ConnectionId;
+
+        Connections.TryAdd(username, connectionId);
+
+        Console.WriteLine($"Client {username} hooked up: {connectionId}");
+        await base.OnConnectedAsync();
+    }
+    
+    public override async Task OnDisconnectedAsync(Exception exception)
+    {
+        string username = Context.User?.Identity?.Name ?? "unknown";
+
+        Connections.TryRemove(username, out _);
+        Console.WriteLine($"Client {username} disconnected");
+
+        await base.OnDisconnectedAsync(exception);
+    }
+
+    public Task<string> DoHandshake()
+    {
+        return Task.FromResult(Context.ConnectionId);
+    }
+    
     public Task SetClipData(bool isLive11, byte[] data)
     {
         var clip = isLive11 ? Decoder.GetSingleLive11Clip(data) : Decoder.GetSingleClip(data);
         Console.WriteLine($"{clip.ClipReference.Track}, {clip.ClipReference.Clip} Incoming clip data");
+        Clients.All.SetClipDataOnWebUI(clip.ClipReference.ToString(), data);
         CommandHandler.SetClipData(clip);
         return Task.CompletedTask;
     }
@@ -23,6 +52,7 @@ public class MutatefulHub : Hub<IMutatefulHub>
     {
         var (trackNo, clipNo, formula) = Decoder.GetFormula(data);
         Console.WriteLine($"{trackNo}, {clipNo}: Incoming formula {formula}");
+        Clients.All.SetFormulaOnWebUI(trackNo, clipNo, formula);
         CommandHandler.SetFormula(trackNo, clipNo, formula);
         return Task.CompletedTask;
     }
@@ -31,6 +61,7 @@ public class MutatefulHub : Hub<IMutatefulHub>
     {
         var clip = isLive11 ? Decoder.GetSingleLive11Clip(data) : Decoder.GetSingleClip(data);
         Console.WriteLine($"{clip.ClipReference.Track}, {clip.ClipReference.Clip} Incoming clip data to evaluate");
+        await Clients.All.SetClipDataOnWebUI(clip.ClipReference.ToString(), data);
         var result = CommandHandler.SetAndEvaluateClipData(clip);
 
         PrintErrorsAndWarnings(result);
@@ -49,8 +80,9 @@ public class MutatefulHub : Hub<IMutatefulHub>
     {
         var (trackNo, clipNo, formula) = Decoder.GetFormula(data);
         Console.WriteLine($"{trackNo}, {clipNo}: Incoming formula {formula}");
+        await Clients.All.SetFormulaOnWebUI(trackNo, clipNo, formula);
         var result = CommandHandler.SetAndEvaluateFormula(formula, trackNo, clipNo);
-
+        
         PrintErrorsAndWarnings(result);
         if (result.RanToCompletion == false) return;
 

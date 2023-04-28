@@ -2,7 +2,7 @@ outlets = 3;
 inlets = 3;
 
 // global vars
-var debuglogging = true;
+var debuglogging = false;
 var selectedClipObserver = {};
 var clipNameObserver = {};
 var clipContentsObserver = {};

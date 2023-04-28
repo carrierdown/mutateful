@@ -24,11 +24,10 @@ public class CommandHandler
 
     public void SetClipData(Clip clip)
     {
-        if (clip != Clip.Empty)
-        {
-            var clipSlot = new ClipSlot("", clip, Formula.Empty);
-            ClipSet[clipSlot.ClipReference] = clipSlot;
-        }
+        Console.WriteLine();
+        if (clip.Equals(Clip.Empty)) return;
+        var clipSlot = new ClipSlot("", clip, Formula.Empty);
+        ClipSet[clipSlot.ClipReference] = clipSlot;
     }
 
     public CommandHandlerResult EvaluateFormulas()

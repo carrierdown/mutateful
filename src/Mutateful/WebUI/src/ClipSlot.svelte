@@ -1,11 +1,16 @@
 ﻿<script lang="ts">
     import {clipDataStore} from "./stores";
-    import {onMount} from "svelte";
+    import {onDestroy, onMount} from "svelte";
     import {decodeClip} from "./dataHelpers";
     import {Clip} from "./clip";
     export let clipRef;
     export let formula = "";
-    const readableClip = clipDataStore(clipRef || "A1");
+    const unsubscribe = clipDataStore.subscribe(({ref, data}) => {
+        console.log("Hello")
+        if (clipRef === ref) {
+            console.log("Hello we have a match")
+        }
+    });
     
     let canvas;
     let mounted: boolean = false;
@@ -19,6 +24,8 @@
         canvasWidth = parseInt(cs.getPropertyValue('width'), 10);
         canvasHeight = parseInt(cs.getPropertyValue('height'), 10);
     });
+    
+    onDestroy(unsubscribe);
     
     const updateClip = (clip: Clip) => {
         empty = false;
@@ -47,6 +54,7 @@
 
     const getClip = (data: Uint8Array) => {
         if (mounted) {
+            console.log("Updating clip")
             updateClip(decodeClip(data));
         }
         return "";
@@ -57,7 +65,7 @@
     <div class="clip-slot--header">
         <span class="clip-slot--ref">{clipRef.toUpperCase()}</span><span class="clip-slot--title">{formula}</span>
     </div>
-    <canvas class="clip-slot--preview" class:empty width="{canvasWidth}" height="{canvasHeight}" bind:this={canvas}>{getClip($readableClip)}</canvas>
+    <canvas class="clip-slot--preview" class:empty width="{canvasWidth}" height="{canvasHeight}" bind:this={canvas}>{#if $clipDataStore.clipRef === clipRef}{getClip($clipDataStore.data)}{/if}</canvas>
 </div>
 
 <style>
