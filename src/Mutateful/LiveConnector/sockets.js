@@ -16,7 +16,7 @@ const commandSignifiers = {
 const live11Flag = 128; // 0x80
 
 let connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5000/mutatefulHub")
+    .withUrl("http://localhost:5000/mutatefulHub?username=live")
     .withHubProtocol(new signalRMsgPack.MessagePackHubProtocol())
     .build();
 

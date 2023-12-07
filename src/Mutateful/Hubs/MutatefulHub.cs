@@ -7,7 +7,7 @@ public class MutatefulHub : Hub<IMutatefulHub>
 {
     private readonly CommandHandler CommandHandler;
     private static readonly ConcurrentDictionary<string, string> Connections = new ();
-    
+
     public MutatefulHub(CommandHandler commandHandler)
     {
         CommandHandler = commandHandler;
@@ -15,15 +15,16 @@ public class MutatefulHub : Hub<IMutatefulHub>
 
     public override async Task OnConnectedAsync()
     {
-        string username = Context.User?.Identity?.Name ?? "unknown";
-        string connectionId = Context.ConnectionId;
+        var httpContext = Context.GetHttpContext();
+        var username = httpContext?.Request.Query["username"].ToString() ?? "unknown";
+        var connectionId = Context.ConnectionId;
 
         Connections.TryAdd(username, connectionId);
 
         Console.WriteLine($"Client {username} hooked up: {connectionId}");
         await base.OnConnectedAsync();
     }
-    
+
     public override async Task OnDisconnectedAsync(Exception exception)
     {
         string username = Context.User?.Identity?.Name ?? "unknown";
@@ -38,7 +39,7 @@ public class MutatefulHub : Hub<IMutatefulHub>
     {
         return Task.FromResult(Context.ConnectionId);
     }
-    
+
     public Task SetClipData(bool isLive11, byte[] data)
     {
         var clip = isLive11 ? Decoder.GetSingleLive11Clip(data) : Decoder.GetSingleClip(data);
@@ -82,7 +83,7 @@ public class MutatefulHub : Hub<IMutatefulHub>
         Console.WriteLine($"{trackNo}, {clipNo}: Incoming formula {formula}");
         await Clients.All.SetFormulaOnWebUI(trackNo, clipNo, formula);
         var result = CommandHandler.SetAndEvaluateFormula(formula, trackNo, clipNo);
-        
+
         PrintErrorsAndWarnings(result);
         if (result.RanToCompletion == false) return;
 

@@ -18,12 +18,16 @@
     {/each}
 </table>
 
-<style>
+<style lang="less">
+    @gridBackground: #202020;
+
     table {
         border-collapse: collapse;
         table-layout: fixed;
         width: 100%;
+        background-color: @gridBackground;
     }
+
     th, td {
         width: 150px;
         overflow: hidden;

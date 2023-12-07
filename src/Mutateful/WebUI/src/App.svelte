@@ -7,11 +7,12 @@
     <FormulaInput/>
     <ClipSet/>
 </div>
-    
+
 <style>
     :global(body) {
         font-family: sans-serif;
         margin: 0;
+        background-color: #202020;
         --scrollbar-width: calc(100vw - 100%);
     }
     .container {

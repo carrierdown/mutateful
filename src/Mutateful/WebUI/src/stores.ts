@@ -3,7 +3,7 @@
 declare const signalR: any;
 
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5000/mutatefulHub")
+    .withUrl("http://localhost:5000/mutatefulHub?username=webui")
     .withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol())
     .build();
 
@@ -25,7 +25,7 @@ const createClipDataStore = () => {
     const { subscribe, set } = writable({ clipRef: "", data: new Uint8Array() });
 
     clipDataSetter = set;
-    
+
     return {
         subscribe,
         set: (clipRef: string, data: Uint8Array) => {
